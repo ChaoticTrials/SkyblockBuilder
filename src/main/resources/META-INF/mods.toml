@@ -6,7 +6,7 @@ issueTrackerURL="http://www.github.com/MelanX/CustomSkyblockWorldGenerator/issue
 [[mods]]
 modId="skyblockworldgenerator"
 version="${file.jarVersion}"
-displayName="Mod ID"
+displayName="Custom Skyblock World Generator"
 updateJSONURL="https://raw.githubusercontent.com/MelanX/mod-updatechecker-files/master/skyblockworldgenerator.json"
 displayURL="www.curseforge.com/members/melanx/"
 #logoFile="skyblockworldgenerator.png"
@@ -19,7 +19,7 @@ description='''
 [[dependencies.skyblockworldgenerator]]
     modId="forge"
     mandatory=true
-    versionRange="[35,)"
+    versionRange="[35.1.5,)"
     ordering="NONE"
     side="BOTH"
 
