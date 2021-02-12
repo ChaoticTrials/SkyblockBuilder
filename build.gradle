@@ -1,0 +1,187 @@
+import net.minecraftforge.gradle.common.util.ModConfig
+import net.minecraftforge.gradle.common.util.RunConfig
+import org.apache.maven.artifact.versioning.ComparableVersion
+
+import java.nio.file.Files
+import java.nio.file.Paths
+
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://plugins.gradle.org/m2/' }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'org.apache.maven', name: 'maven-artifact', version: '3.6.3+'
+        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.4.0'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'com.matthewprenger.cursegradle'
+apply plugin: 'maven-publish'
+
+apply from: 'https://raw.githubusercontent.com/MinecraftModDevelopment/Gradle-Collection/master/generic/secrets.gradle'
+apply from: 'https://raw.githubusercontent.com/MinecraftModDevelopment/Gradle-Collection/master/generic/markdown-git-changelog.gradle'
+
+loadSecrets()
+group = "de.melanx.${modid}"
+archivesBaseName = "${modid}-${mc_version}"
+version = getVersion(group, archivesBaseName, mod_version)
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+minecraft {
+    mappings("snapshot", mappings_version)
+//    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    createRunConfig("client")
+    createRunConfig("server")
+    createRunConfig("data", { RunConfig run ->
+        run.args "--mod", modid, "--all", "--output", file("src/generated/resources/"), "--existing", file("src/main/resources")
+    })
+}
+
+def createRunConfig(String name, Closure extra = {}) {
+    minecraft.runs.create(name) { RunConfig run ->
+        run.workingDirectory project.file("run_" + name)
+        run.property "forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP"
+        run.property "forge.logging.console.level", "debug"
+        run.mods.create(modid) { ModConfig mod ->
+            source sourceSets.main
+        }
+    }.with(extra)
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+}
+
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : modid,
+                "Specification-Vendor"    : "MelanX",
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : "${version}",
+                "Implementation-Vendor"   : "MelanX",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+jar.finalizedBy('reobfJar')
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = project.group
+            artifactId = project.archivesBaseName
+            version = project.version
+            artifact jar
+            artifact sourcesJar
+
+            pom {
+                licenses {
+                    license {
+                        name = "Apache License"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0"
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url "/var/www/maven"
+        }
+    }
+}
+
+repositories {
+    maven {
+        name = "JEI"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+}
+
+private static String getVersion(String group, String artifact, String baseVersion) {
+    java.nio.file.Path mavenPath = Paths.get('/var/www/maven').resolve(group.replace('.', '/')).resolve(artifact)
+    if (!Files.isDirectory(mavenPath)) {
+        return "${baseVersion}.0"
+    }
+    return "${baseVersion}." + Files.walk(mavenPath)
+            .filter { path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith('.pom') }
+            .map { path ->
+                String fileName = path.getFileName().toString()
+                fileName.substring(fileName.indexOf('-', artifact.size()) + 1, fileName.length() - 4)
+            }.filter { version -> version.startsWith(baseVersion) }
+            .max { s1, s2 -> new ComparableVersion(s1).compareTo(new ComparableVersion(s2)) }
+            .map { ver -> ver.substring(ver.findLastIndexOf { str -> !"0123456789".contains(str) } + 1) }
+            .map { ver -> ver.isEmpty() ? "-1" : ver }
+            .map { ver -> (ver.toInteger() + 1).toString() }
+            .orElse("0")
+}
+
+curseforge {
+    apiKey = findProperty('curse_auth') ?: 0
+    def versions = "${curse_versions}".split(', ')
+    project {
+        if (project.hasProperty('curse_project')) {
+            id = "${curse_project}"
+            releaseType = 'alpha'
+            changelog = getGitChangelog()
+            println(changelog)
+            changelogType = 'markdown'
+
+            versions.each {
+                addGameVersion "${it}"
+            }
+
+            if (project.hasProperty('curse_requirements') || project.hasProperty('curse_optionals')) {
+
+                mainArtifact(jar) {
+
+                    relations {
+
+                        if (project.hasProperty('curse_requirements')) {
+                            def requirements = "${curse_requirements}".split(', ')
+                            requirements.each {
+
+                                requiredLibrary "${it}"
+                            }
+                        }
+
+                        if (project.hasProperty('curse_optionals')) {
+                            def optionals = "${curse_optionals}".split(', ')
+                            optionals.each {
+
+                                optionalLibrary "${it}"
+                            }
+                        }
+                    }
+                }
+            }
+
+            addArtifact(sourcesJar)
+        }
+    }
+}
