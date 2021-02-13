@@ -187,7 +187,7 @@
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright 2020 MelanX
+   Copyright 2021 MelanX
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -200,3 +200,10 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+Parts of the code were copied from botania. Copied code is marked before
+the main class starts or at the copied method if it's just a method. See
+the Botania License (https://botaniamod.net/license.php) for more information.
+The credits for this go to Vazkii and the Botania authors.
+
+    https://botaniamod.net/license.php

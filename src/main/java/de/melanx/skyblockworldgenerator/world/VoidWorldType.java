@@ -10,8 +10,6 @@ import net.minecraftforge.common.world.ForgeWorldType;
 import javax.annotation.Nonnull;
 
 public class VoidWorldType extends ForgeWorldType {
-    public static final VoidWorldType INSTANCE = new VoidWorldType();
-
     public VoidWorldType() {
         super(VoidWorldType::getChunkGenerator);
     }

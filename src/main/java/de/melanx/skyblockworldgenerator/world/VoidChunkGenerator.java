@@ -9,16 +9,19 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Blockreader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.*;
 import net.minecraft.world.gen.feature.structure.StructureManager;
+import net.minecraft.world.server.ServerChunkProvider;
 
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 public class VoidChunkGenerator extends ChunkGenerator {
+    // [VanillaCopy] overworld chunk generator codec
     public static final Codec<VoidChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
                     BiomeProvider.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeProvider),
@@ -39,6 +42,11 @@ public class VoidChunkGenerator extends ChunkGenerator {
         this.settings = settings;
     }
 
+    public static boolean isSkyblock(World world) {
+        return world.getChunkProvider() instanceof ServerChunkProvider &&
+                ((ServerChunkProvider) world.getChunkProvider()).getChunkGenerator() instanceof VoidChunkGenerator;
+    }
+
     @Nonnull
     @Override
     protected Codec<? extends ChunkGenerator> func_230347_a_() {
@@ -52,12 +60,12 @@ public class VoidChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void generateSurface(@Nonnull WorldGenRegion p_225551_1_, @Nonnull IChunk p_225551_2_) {
+    public void generateSurface(@Nonnull WorldGenRegion region, @Nonnull IChunk chunk) {
 
     }
 
     @Override
-    public void func_230352_b_(@Nonnull IWorld p_230352_1_, @Nonnull StructureManager p_230352_2_, @Nonnull IChunk p_230352_3_) {
+    public void func_230352_b_(@Nonnull IWorld world, @Nonnull StructureManager manager, @Nonnull IChunk chunk) {
 
     }
 
@@ -67,17 +75,17 @@ public class VoidChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void func_230350_a_(long p_230350_1_, @Nonnull BiomeManager p_230350_3_, @Nonnull IChunk p_230350_4_, @Nonnull GenerationStage.Carving p_230350_5_) {
+    public void func_230350_a_(long seed, @Nonnull BiomeManager manager, @Nonnull IChunk chunk, @Nonnull GenerationStage.Carving carving) {
 
     }
 
     @Override
-    public void func_230351_a_(@Nonnull WorldGenRegion p_230351_1_, @Nonnull StructureManager p_230351_2_) {
+    public void func_230351_a_(@Nonnull WorldGenRegion region, @Nonnull StructureManager manager) {
     }
 
     @Nonnull
     @Override
-    public IBlockReader func_230348_a_(int p_230348_1_, int p_230348_2_) {
+    public IBlockReader func_230348_a_(int posX, int posY) {
         return new Blockreader(new BlockState[0]);
     }
 }
