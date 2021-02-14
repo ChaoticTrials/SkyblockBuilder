@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder;
 
+import de.melanx.skyblockbuilder.util.Registration;
 import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;

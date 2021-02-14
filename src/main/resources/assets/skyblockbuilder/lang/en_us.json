@@ -1,3 +1,4 @@
 {
-  "block.skyblockbuilder.spawn": "Spawn"
+  "block.skyblockbuilder.spawn": "Spawn",
+  "block.skyblockbuilder.spawn.desc": "Used to set a spawn point for island creators"
 }

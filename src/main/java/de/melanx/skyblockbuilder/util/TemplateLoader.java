@@ -1,5 +1,6 @@
-package de.melanx.skyblockbuilder;
+package de.melanx.skyblockbuilder.util;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.resources.IResource;

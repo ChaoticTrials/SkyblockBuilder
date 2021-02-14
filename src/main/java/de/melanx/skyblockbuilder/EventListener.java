@@ -1,6 +1,8 @@
 package de.melanx.skyblockbuilder;
 
 import de.melanx.skyblockbuilder.commands.TeamCommand;
+import de.melanx.skyblockbuilder.util.Registration;
+import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;

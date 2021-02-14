@@ -1,5 +1,6 @@
-package de.melanx.skyblockbuilder;
+package de.melanx.skyblockbuilder.util;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.blocks.SpawnBlock;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
 import net.minecraft.block.Block;
