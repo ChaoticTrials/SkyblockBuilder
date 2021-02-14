@@ -1,10 +1,10 @@
 package de.melanx.skyblockbuilder.world.data;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import de.melanx.skyblockbuilder.util.Registration;
+import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.world.IslandPos;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -17,10 +17,8 @@ import net.minecraftforge.common.util.Constants;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import javax.annotation.Nullable;
+import java.util.*;
 
 /*
  * Credits go to Botania authors
@@ -34,7 +32,7 @@ public class SkyblockSavedData extends WorldSavedData {
      */
     private static final int OFFSET = 1;
 
-    public BiMap<IslandPos, Pair<Set<BlockPos>, Set<UUID>>> skyblocks = HashBiMap.create();
+    public Map<IslandPos, Team> skyblocks = new HashMap<>();
     private Spiral spiral = new Spiral();
 
     public SkyblockSavedData() {
@@ -46,9 +44,10 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public IslandPos getSpawn() {
-        for (Pair<Set<BlockPos>, Set<UUID>> value : this.skyblocks.values()) {
-            if (value.getValue().contains(Util.DUMMY_UUID)) {
-                return this.skyblocks.inverse().get(value);
+        for (Map.Entry<IslandPos, Team> entry : this.skyblocks.entrySet()) {
+            Team team = entry.getValue();
+            if (team.hasPlayer(Util.DUMMY_UUID)) {
+                return this.skyblocks.get(entry.getKey()).getIsland();
             }
         }
         IslandPos pos = new IslandPos(OFFSET, OFFSET);
@@ -56,12 +55,16 @@ public class SkyblockSavedData extends WorldSavedData {
         Set<UUID> players = new HashSet<>();
         players.add(Util.DUMMY_UUID);
 
-        this.skyblocks.put(pos, Pair.of(this.getPossibleSpawns(pos), players));
+        Team team = new Team(this, pos, Util.DUMMY_UUID);
+        team.setPossibleSpawns(this.getPossibleSpawns(pos));
+        team.setPlayers(players);
+
+        this.skyblocks.put(pos, team);
         this.markDirty();
         return pos;
     }
 
-    public IslandPos create(UUID playerId) {
+    public Pair<IslandPos, Team> create(UUID playerId) {
         int scale = 8;
         IslandPos islandPos;
         do {
@@ -73,30 +76,28 @@ public class SkyblockSavedData extends WorldSavedData {
         players.add(playerId);
 
         Set<BlockPos> positions = getPossibleSpawns(islandPos.getCenter());
-        this.skyblocks.put(islandPos, Pair.of(positions, players));
+
+        Team team = new Team(this, islandPos, playerId);
+        team.setPossibleSpawns(positions);
+        team.setPlayers(players);
+
+        this.skyblocks.put(islandPos, team);
+
         this.markDirty();
-        return islandPos;
+        return Pair.of(islandPos, team);
     }
 
     @Override
     public void read(CompoundNBT nbt) {
-        HashBiMap<IslandPos, Pair<Set<BlockPos>, Set<UUID>>> map = HashBiMap.create();
+        Map<IslandPos, Team> map = new HashMap<>();
         for (INBT inbt : nbt.getList("Islands", Constants.NBT.TAG_COMPOUND)) {
             CompoundNBT tag = (CompoundNBT) inbt;
 
-            Set<BlockPos> positions = new HashSet<>();
-            for (INBT spawn : tag.getList("Spawns", Constants.NBT.TAG_COMPOUND)) {
-                CompoundNBT spawnTag = (CompoundNBT) spawn;
-                positions.add(new BlockPos(spawnTag.getDouble("posX"), spawnTag.getDouble("posY"), spawnTag.getDouble("posZ")));
-            }
+            IslandPos island = IslandPos.fromTag(tag);
+            Team team = new Team(this, island, Util.DUMMY_UUID);
+            team.deserializeNBT(tag);
 
-            Set<UUID> players = new HashSet<>();
-            for (INBT player : tag.getList("Players", Constants.NBT.TAG_COMPOUND)) {
-                CompoundNBT playerTag = (CompoundNBT) player;
-                players.add(playerTag.getUniqueId("Player"));
-            }
-
-            map.put(IslandPos.fromTag(tag), Pair.of(positions, players));
+            map.put(island, team);
         }
         this.skyblocks = map;
         this.spiral = Spiral.fromArray(nbt.getIntArray("SpiralState"));
@@ -106,30 +107,12 @@ public class SkyblockSavedData extends WorldSavedData {
     @Override
     public CompoundNBT write(@Nonnull CompoundNBT nbt) {
         ListNBT islands = new ListNBT();
-        for (Map.Entry<IslandPos, Pair<Set<BlockPos>, Set<UUID>>> entry : this.skyblocks.entrySet()) {
-            CompoundNBT entryTag = entry.getKey().toTag();
-
-            ListNBT players = new ListNBT();
-            for (UUID player : entry.getValue().getValue()) {
-                CompoundNBT playerTag = new CompoundNBT();
-                playerTag.putUniqueId("Player", player);
-
-                players.add(playerTag);
+        for (Map.Entry<IslandPos, Team> entry : this.skyblocks.entrySet()) {
+            if (entry.getValue().isEmpty()) {
+                continue;
             }
-
-            ListNBT positions = new ListNBT();
-            for (BlockPos spawn : entry.getValue().getKey()) {
-                CompoundNBT spawnTag = new CompoundNBT();
-                spawnTag.putDouble("posX", spawn.getX() + 0.5);
-                spawnTag.putDouble("posY", spawn.getY());
-                spawnTag.putDouble("posZ", spawn.getZ() + 0.5);
-
-                positions.add(spawnTag);
-            }
-
-            entryTag.put("Players", players);
-            entryTag.put("Spawns", positions);
-            islands.add(entryTag);
+            islands.add(entry.getKey().toTag());
+            islands.add(entry.getValue().serializeNBT());
         }
 
         nbt.putIntArray("SpiralState", this.spiral.toIntArray());
@@ -137,20 +120,119 @@ public class SkyblockSavedData extends WorldSavedData {
         return nbt;
     }
 
+    @Nullable
+    public IslandPos getTeamIsland(String team) {
+        for (Map.Entry<IslandPos, Team> entry : this.skyblocks.entrySet()) {
+            if (entry.getValue().getName().equals(team.toLowerCase())) {
+                return entry.getValue().getIsland();
+            }
+        }
+        return null;
+    }
+
+    public boolean hasPlayerTeam(PlayerEntity player) {
+        return this.hasPlayerTeam(player.getGameProfile().getId());
+    }
+
+    public boolean hasPlayerTeam(UUID player) {
+        return this.getTeamFromPlayer(player) != null;
+    }
+
+    public boolean addPlayerToTeam(String teamName, PlayerEntity player) {
+        return this.addPlayerToTeam(teamName.toLowerCase(), player.getGameProfile().getId());
+    }
+
+    public boolean addPlayerToTeam(String teamName, UUID player) {
+        for (Team team : this.skyblocks.values()) {
+            if (team.getName().equals(teamName)) {
+                team.addPlayer(player);
+                this.markDirty();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean createTeamAndJoin(String teamName, PlayerEntity player) {
+        return this.createTeamAndJoin(teamName.toLowerCase(), player.getGameProfile().getId());
+    }
+
+    public boolean createTeamAndJoin(String teamName, UUID player) {
+        if (this.teamExists(teamName)) {
+            return false;
+        }
+
+        Pair<IslandPos, Team> pair = this.create(player);
+        Team team = pair.getRight();
+        team.setName(teamName);
+        this.markDirty();
+        return true;
+    }
+
+    public boolean removePlayerFromTeam(PlayerEntity player) {
+        return this.removePlayerFromTeam(player.getGameProfile().getId());
+    }
+
+    public boolean removePlayerFromTeam(UUID player) {
+        Iterator<Map.Entry<IslandPos, Team>> itr = this.skyblocks.entrySet().iterator();
+        while (itr.hasNext()) {
+            Map.Entry<IslandPos, Team> entry = itr.next();
+            Team team = entry.getValue();
+            if (team.getPlayers().contains(player) && team.removePlayer(player) && team.isEmpty()) {
+                itr.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Nullable
+    public Team getTeamFromPlayer(PlayerEntity player) {
+        return this.getTeamFromPlayer(player.getGameProfile().getId());
+    }
+
+    @Nullable
+    public Team getTeamFromPlayer(UUID player) {
+        for (Team team : this.skyblocks.values()) {
+            if (team.getPlayers().contains(player)) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    public boolean teamExists(String name) {
+        name = name.toLowerCase();
+        for (Team team : this.skyblocks.values()) {
+            if (team.getName() == null) {
+                continue;
+            }
+
+            if (team.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Collection<Team> getTeams() {
+        return this.skyblocks.values();
+    }
+
     public Set<BlockPos> getPossibleSpawns(IslandPos pos) {
         if (this.skyblocks.get(pos) == null) {
             return getPossibleSpawns(pos.getCenter());
         }
 
-        return this.skyblocks.get(pos).getLeft();
+        return this.skyblocks.get(pos).getPossibleSpawns();
     }
 
-    private static Set<BlockPos> getPossibleSpawns(BlockPos center) {
+    public static Set<BlockPos> getPossibleSpawns(BlockPos center) {
         Set<BlockPos> positions = new HashSet<>();
         for (Template.Palette info : TemplateLoader.TEMPLATE.blocks) {
-            for (Template.BlockInfo shit : info.func_237157_a_()) {
-                if (shit.state == Registration.SPAWN_BLOCK.get().getDefaultState()) {
-                    positions.add(center.add(shit.pos.toImmutable()));
+            for (Template.BlockInfo blockInfo : info.func_237157_a_()) {
+                if (blockInfo.state == Registration.SPAWN_BLOCK.get().getDefaultState()) {
+                    positions.add(center.add(blockInfo.pos.toImmutable()));
                 }
             }
         }

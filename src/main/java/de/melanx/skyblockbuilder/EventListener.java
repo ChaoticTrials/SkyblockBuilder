@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder;
 
 import de.melanx.skyblockbuilder.commands.TeamCommand;
+import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
@@ -22,11 +23,12 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class EventListener {
 
@@ -64,18 +66,27 @@ public class EventListener {
         World world = event.getPlayer().world;
         if (VoidChunkGenerator.isSkyblock(world)) {
             SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
-            for (Pair<Set<BlockPos>, Set<UUID>> value : data.skyblocks.values()) {
-                if (value.getValue().contains(Util.DUMMY_UUID)) {
+            for (Team team : data.skyblocks.values()) {
+                if (team.hasPlayer(Util.DUMMY_UUID)) {
                     return;
                 }
             }
 
             IslandPos islandPos = data.getSpawn();
-            List<BlockPos> spawns = new ArrayList<>(data.getPossibleSpawns(islandPos));
             ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
-            spawnPlayer(event.getPlayer(), islandPos, spawns);
+            spawnPlayer(event.getPlayer(), islandPos);
             SkyblockBuilder.LOGGER.info("Created the spawn island");
         }
+    }
+
+    public static void spawnPlayer(PlayerEntity player, IslandPos islandPos) {
+        if (!(player instanceof ServerPlayerEntity)) {
+            throw new IllegalArgumentException("Player must be server player.");
+        }
+
+        SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) player.world);
+        List<BlockPos> spawns = new ArrayList<>(data.getPossibleSpawns(islandPos));
+        spawnPlayer(player, islandPos, spawns);
     }
 
     /*
