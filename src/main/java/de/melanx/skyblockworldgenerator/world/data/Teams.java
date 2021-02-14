@@ -1,0 +1,140 @@
+package de.melanx.skyblockworldgenerator.world.data;
+
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.common.util.Constants;
+import org.apache.commons.lang3.tuple.Pair;
+
+import javax.annotation.Nonnull;
+import java.util.*;
+
+public class Teams extends WorldSavedData {
+    private static final String NAME = "custom_skyblock_teams";
+
+    public Teams() {
+        super(NAME);
+    }
+
+    public Map<String, Pair<UUID, Set<UUID>>> teams = new HashMap<>();
+
+    public static Teams get(ServerWorld world) {
+        return world.getSavedData().getOrCreate(Teams::new, NAME);
+    }
+
+    public void add(String name, UUID player) {
+        if (!teams.containsKey(name)) {
+            Set<UUID> uuids = new HashSet<>();
+            uuids.add(player);
+            teams.put(name, Pair.of(player, uuids));
+        } else {
+            Pair<UUID, Set<UUID>> uuids = teams.get(name);
+            uuids.getValue().add(player);
+        }
+        this.markDirty();
+    }
+
+    private void add(String name, UUID player, boolean leader) {
+        if (leader) {
+            if (!teams.containsKey(name)) {
+                Set<UUID> uuids = new HashSet<>();
+                uuids.add(player);
+                teams.put(name, Pair.of(player, uuids));
+            } else {
+                Pair<UUID, Set<UUID>> uuids = teams.get(name);
+                Set<UUID> players = uuids.getValue();
+                uuids = Pair.of(player, players);
+                teams.put(name, uuids);
+            }
+            this.markDirty();
+        } else {
+            this.add(name, player);
+        }
+    }
+
+    public void addAll(String name, Collection<UUID> players) {
+        if (!teams.containsKey(name)) {
+            if (players.isEmpty()) {
+                throw new IllegalArgumentException("No players to add.");
+            }
+            teams.put(name, Pair.of(this.getLeader(players), new HashSet<>(players)));
+        } else {
+            Pair<UUID, Set<UUID>> uuids = teams.get(name);
+            uuids.getValue().addAll(players);
+        }
+        this.markDirty();
+    }
+
+    public boolean remove(UUID player) {
+        for (Map.Entry<String, Pair<UUID, Set<UUID>>> entry : this.teams.entrySet()) {
+            if (entry.getValue().getValue().contains(player)) {
+                entry.getValue().getValue().remove(player);
+                if (this.teams.get(entry.getKey()).getValue().isEmpty()) {
+                    this.deleteTeam(entry.getKey());
+                    this.markDirty();
+                    return true;
+                }
+
+                if (entry.getValue().getKey() == player) {
+                    Set<UUID> values = entry.getValue().getValue();
+                    entry.setValue(Pair.of(this.getLeader(values), values));
+                }
+                this.markDirty();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void deleteTeam(String name) {
+        this.teams.remove(name);
+        this.markDirty();
+    }
+
+    public boolean exists(String name) {
+        return this.teams.containsKey(name);
+    }
+
+    public boolean hasTeam(PlayerEntity player) {
+        for (Map.Entry<String, Pair<UUID, Set<UUID>>> entry : this.teams.entrySet()) {
+            if (entry.getValue().getValue().contains(player.getUniqueID())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private UUID getLeader(Collection<UUID> players) {
+        return players.stream().findFirst().orElseThrow(() -> new IllegalArgumentException("No possible leader available."));
+    }
+
+    @Override
+    public void read(@Nonnull CompoundNBT nbt) {
+        if (nbt.contains("players", Constants.NBT.TAG_LIST)) {
+            ListNBT players = nbt.getList("players", Constants.NBT.TAG_COMPOUND);
+            for (int i = 0; i < players.size(); i++) {
+                CompoundNBT playerTag = players.getCompound(i);
+                this.add(playerTag.getString("team"), playerTag.getUniqueId("uuid"), playerTag.getBoolean("leader"));
+            }
+        }
+    }
+
+    @Nonnull
+    @Override
+    public CompoundNBT write(@Nonnull CompoundNBT nbt) {
+        ListNBT players = new ListNBT();
+        for (Map.Entry<String, Pair<UUID, Set<UUID>>> entry : this.teams.entrySet()) {
+            for (UUID id : entry.getValue().getValue()) {
+                CompoundNBT playerTag = new CompoundNBT();
+                playerTag.putUniqueId("uuid", id);
+                playerTag.putString("team", entry.getKey());
+                playerTag.putBoolean("leader", entry.getValue().getKey() == id);
+                players.add(playerTag);
+            }
+        }
+        nbt.put("players", players);
+        return nbt;
+    }
+}

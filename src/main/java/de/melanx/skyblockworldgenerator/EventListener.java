@@ -1,10 +1,12 @@
 package de.melanx.skyblockworldgenerator;
 
+import de.melanx.skyblockworldgenerator.commands.TeamCommand;
 import de.melanx.skyblockworldgenerator.world.IslandPos;
-import de.melanx.skyblockworldgenerator.world.SkyblockSavedData;
 import de.melanx.skyblockworldgenerator.world.VoidChunkGenerator;
+import de.melanx.skyblockworldgenerator.world.data.SkyblockSavedData;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.ReloadListener;
+import net.minecraft.command.Commands;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.profiler.IProfiler;
@@ -17,6 +19,7 @@ import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -46,6 +49,12 @@ public class EventListener {
                 }
             }
         });
+    }
+
+    @SubscribeEvent
+    public void onRegisterCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("skyblock")
+                .then(TeamCommand.register()));
     }
 
     /*
