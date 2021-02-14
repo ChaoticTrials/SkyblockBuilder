@@ -29,9 +29,9 @@ public class Teams extends WorldSavedData {
         if (!this.exists(name)) {
             Set<UUID> uuids = new HashSet<>();
             uuids.add(player);
-            teams.put(name, Pair.of(player, uuids));
+            this.teams.put(name, Pair.of(player, uuids));
         } else {
-            Pair<UUID, Set<UUID>> uuids = teams.get(name);
+            Pair<UUID, Set<UUID>> uuids = this.teams.get(name);
             uuids.getValue().add(player);
         }
         this.markDirty();
@@ -40,15 +40,15 @@ public class Teams extends WorldSavedData {
     private void add(String name, UUID player, boolean leader) {
         name = name.toLowerCase();
         if (leader) {
-            if (!teams.containsKey(name)) {
+            if (!this.teams.containsKey(name)) {
                 Set<UUID> uuids = new HashSet<>();
                 uuids.add(player);
-                teams.put(name, Pair.of(player, uuids));
+                this.teams.put(name, Pair.of(player, uuids));
             } else {
-                Pair<UUID, Set<UUID>> uuids = teams.get(name);
+                Pair<UUID, Set<UUID>> uuids = this.teams.get(name);
                 Set<UUID> players = uuids.getValue();
                 uuids = Pair.of(player, players);
-                teams.put(name, uuids);
+                this.teams.put(name, uuids);
             }
             this.markDirty();
         } else {
@@ -62,13 +62,13 @@ public class Teams extends WorldSavedData {
 
     public void addAll(String name, Collection<UUID> players) {
         name = name.toLowerCase();
-        if (!teams.containsKey(name)) {
+        if (!this.teams.containsKey(name)) {
             if (players.isEmpty()) {
                 throw new IllegalArgumentException("No players to add.");
             }
-            teams.put(name, Pair.of(this.getLeader(players), new HashSet<>(players)));
+            this.teams.put(name, Pair.of(this.getLeader(players), new HashSet<>(players)));
         } else {
-            Pair<UUID, Set<UUID>> uuids = teams.get(name);
+            Pair<UUID, Set<UUID>> uuids = this.teams.get(name);
             uuids.getValue().addAll(players);
         }
         this.markDirty();

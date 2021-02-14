@@ -16,7 +16,7 @@ public final class IslandPos {
     }
 
     public BlockPos getCenter() {
-        return new BlockPos(x << 8, 64, z << 8);
+        return new BlockPos(this.x << 8, 64, this.z << 8);
     }
 
     public static IslandPos fromTag(CompoundNBT tag) {
@@ -25,8 +25,8 @@ public final class IslandPos {
 
     public CompoundNBT toTag() {
         CompoundNBT tag = new CompoundNBT();
-        tag.putInt("IslandX", x);
-        tag.putInt("IslandZ", z);
+        tag.putInt("IslandX", this.x);
+        tag.putInt("IslandZ", this.z);
         return tag;
     }
 
@@ -43,8 +43,8 @@ public final class IslandPos {
 
     @Override
     public int hashCode() {
-        int result = x;
-        result = 31 * result + z;
+        int result = this.x;
+        result = 31 * result + this.z;
         return result;
     }
 }

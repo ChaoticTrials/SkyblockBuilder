@@ -56,8 +56,8 @@ public class SkyblockSavedData extends WorldSavedData {
         Set<UUID> players = new HashSet<>();
         players.add(Util.DUMMY_UUID);
 
-        skyblocks.put(pos, Pair.of(this.getPossibleSpawns(pos), players));
-        markDirty();
+        this.skyblocks.put(pos, Pair.of(this.getPossibleSpawns(pos), players));
+        this.markDirty();
         return pos;
     }
 
@@ -65,16 +65,16 @@ public class SkyblockSavedData extends WorldSavedData {
         int scale = 8;
         IslandPos islandPos;
         do {
-            int[] pos = spiral.next();
+            int[] pos = this.spiral.next();
             islandPos = new IslandPos(pos[0] * scale + OFFSET, pos[1] * scale + OFFSET);
-        } while (skyblocks.containsKey(islandPos));
+        } while (this.skyblocks.containsKey(islandPos));
 
         Set<UUID> players = new HashSet<>();
         players.add(playerId);
 
         Set<BlockPos> positions = getPossibleSpawns(islandPos.getCenter());
-        skyblocks.put(islandPos, Pair.of(positions, players));
-        markDirty();
+        this.skyblocks.put(islandPos, Pair.of(positions, players));
+        this.markDirty();
         return islandPos;
     }
 
@@ -106,7 +106,7 @@ public class SkyblockSavedData extends WorldSavedData {
     @Override
     public CompoundNBT write(@Nonnull CompoundNBT nbt) {
         ListNBT islands = new ListNBT();
-        for (Map.Entry<IslandPos, Pair<Set<BlockPos>, Set<UUID>>> entry : skyblocks.entrySet()) {
+        for (Map.Entry<IslandPos, Pair<Set<BlockPos>, Set<UUID>>> entry : this.skyblocks.entrySet()) {
             CompoundNBT entryTag = entry.getKey().toTag();
 
             ListNBT players = new ListNBT();
@@ -132,7 +132,7 @@ public class SkyblockSavedData extends WorldSavedData {
             islands.add(entryTag);
         }
 
-        nbt.putIntArray("SpiralState", spiral.toIntArray());
+        nbt.putIntArray("SpiralState", this.spiral.toIntArray());
         nbt.put("Islands", islands);
         return nbt;
     }
@@ -175,18 +175,18 @@ public class SkyblockSavedData extends WorldSavedData {
         }
 
         int[] next() {
-            if (x == y || x < 0 && x == -y || x > 0 && x == 1 - y) {
-                int t = dx;
-                dx = -dy;
-                dy = t;
+            if (this.x == this.y || this.x < 0 && this.x == -this.y || this.x > 0 && this.x == 1 - this.y) {
+                int t = this.dx;
+                this.dx = -this.dy;
+                this.dy = t;
             }
-            x += dx;
-            y += dy;
-            return new int[]{x, y};
+            this.x += this.dx;
+            this.y += this.dy;
+            return new int[]{this.x, this.y};
         }
 
         int[] toIntArray() {
-            return new int[]{x, y, dx, dy};
+            return new int[]{this.x, this.y, this.dx, this.dy};
         }
 
         static Spiral fromArray(int[] ints) {

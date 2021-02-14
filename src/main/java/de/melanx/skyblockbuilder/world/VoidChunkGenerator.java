@@ -56,7 +56,7 @@ public class VoidChunkGenerator extends ChunkGenerator {
     @Nonnull
     @Override
     public ChunkGenerator func_230349_a_(long newSeed) {
-        return new VoidChunkGenerator(this.biomeProvider.getBiomeProvider(newSeed), newSeed, settings);
+        return new VoidChunkGenerator(this.biomeProvider.getBiomeProvider(newSeed), newSeed, this.settings);
     }
 
     @Override
