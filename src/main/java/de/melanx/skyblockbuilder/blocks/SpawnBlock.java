@@ -1,4 +1,4 @@
-package de.melanx.skyblockworldgenerator.blocks;
+package de.melanx.skyblockbuilder.blocks;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;

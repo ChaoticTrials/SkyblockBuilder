@@ -3,8 +3,8 @@
 	"parent": "block/cube_all",
 	"texture_size": [8, 8],
 	"textures": {
-		"0": "skyblockworldgenerator:block/spawn",
-		"particle": "skyblockworldgenerator:block/spawn"
+		"0": "skyblockbuilder:block/spawn",
+		"particle": "skyblockbuilder:block/spawn"
 	},
 	"elements": [
 		{

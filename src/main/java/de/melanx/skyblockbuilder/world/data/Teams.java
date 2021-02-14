@@ -1,4 +1,4 @@
-package de.melanx.skyblockworldgenerator.world.data;
+package de.melanx.skyblockbuilder.world.data;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;

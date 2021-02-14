@@ -1,8 +1,8 @@
-package de.melanx.skyblockworldgenerator.world.data;
+package de.melanx.skyblockbuilder.world.data;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import de.melanx.skyblockworldgenerator.world.IslandPos;
+import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;

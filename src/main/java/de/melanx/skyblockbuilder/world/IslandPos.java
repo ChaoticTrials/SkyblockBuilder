@@ -1,4 +1,4 @@
-package de.melanx.skyblockworldgenerator.world;
+package de.melanx.skyblockbuilder.world;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;

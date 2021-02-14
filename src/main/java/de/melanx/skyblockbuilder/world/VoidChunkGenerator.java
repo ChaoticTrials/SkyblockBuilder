@@ -1,8 +1,8 @@
-package de.melanx.skyblockworldgenerator.world;
+package de.melanx.skyblockbuilder.world;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockworldgenerator.CustomSkyblockWorldGenerator;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -30,7 +30,7 @@ public class VoidChunkGenerator extends ChunkGenerator {
             ).apply(instance, instance.stable(VoidChunkGenerator::new)));
 
     public static void init() {
-        Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(CustomSkyblockWorldGenerator.MODID, "skyblock"), VoidChunkGenerator.CODEC);
+        Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock"), VoidChunkGenerator.CODEC);
     }
 
     private final long seed;

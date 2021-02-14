@@ -1,7 +1,7 @@
-package de.melanx.skyblockworldgenerator;
+package de.melanx.skyblockbuilder;
 
-import de.melanx.skyblockworldgenerator.blocks.SpawnBlock;
-import de.melanx.skyblockworldgenerator.world.VoidWorldType;
+import de.melanx.skyblockbuilder.blocks.SpawnBlock;
+import de.melanx.skyblockbuilder.world.VoidWorldType;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -13,9 +13,9 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class Registration {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, CustomSkyblockWorldGenerator.MODID);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, CustomSkyblockWorldGenerator.MODID);
-    public static final DeferredRegister<ForgeWorldType> WORLD_TYPES = DeferredRegister.create(ForgeRegistries.WORLD_TYPES, CustomSkyblockWorldGenerator.MODID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, SkyblockBuilder.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, SkyblockBuilder.MODID);
+    public static final DeferredRegister<ForgeWorldType> WORLD_TYPES = DeferredRegister.create(ForgeRegistries.WORLD_TYPES, SkyblockBuilder.MODID);
     public static final RegistryObject<Block> SPAWN_BLOCK = BLOCKS.register("spawn", SpawnBlock::new);
     public static final RegistryObject<Item> SPAWN_BLOCK_ITEM = ITEMS.register("spawn", () -> new BlockItem(SPAWN_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<VoidWorldType> CUSTOM_SKYBLOCK = WORLD_TYPES.register("custom_skyblock", VoidWorldType::new);

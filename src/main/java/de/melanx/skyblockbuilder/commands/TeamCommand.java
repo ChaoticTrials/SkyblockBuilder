@@ -1,9 +1,9 @@
-package de.melanx.skyblockworldgenerator.commands;
+package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockworldgenerator.world.data.Teams;
+import de.melanx.skyblockbuilder.world.data.Teams;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.ServerPlayerEntity;

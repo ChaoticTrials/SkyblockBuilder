@@ -1,9 +1,9 @@
-package de.melanx.skyblockworldgenerator;
+package de.melanx.skyblockbuilder;
 
-import de.melanx.skyblockworldgenerator.commands.TeamCommand;
-import de.melanx.skyblockworldgenerator.world.IslandPos;
-import de.melanx.skyblockworldgenerator.world.VoidChunkGenerator;
-import de.melanx.skyblockworldgenerator.world.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.commands.TeamCommand;
+import de.melanx.skyblockbuilder.world.IslandPos;
+import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
+import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
@@ -69,7 +69,7 @@ public class EventListener {
                 IslandPos islandPos = data.getSpawn();
                 ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
                 spawnPlayer(event.getPlayer(), islandPos);
-                CustomSkyblockWorldGenerator.LOGGER.info("Created the spawn island");
+                SkyblockBuilder.LOGGER.info("Created the spawn island");
             }
         }
     }

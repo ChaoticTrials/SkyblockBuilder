@@ -1,29 +1,29 @@
 modLoader="javafml"
 loaderVersion="[35,)"
 license="Apache License"
-issueTrackerURL="http://www.github.com/MelanX/CustomSkyblockWorldGenerator/issues/"
+issueTrackerURL="http://www.github.com/MelanX/SkyblockBuilder/issues/"
 
 [[mods]]
-modId="skyblockworldgenerator"
+modId="skyblockbuilder"
 version="${file.jarVersion}"
-displayName="Custom Skyblock World Generator"
-updateJSONURL="https://raw.githubusercontent.com/MelanX/mod-updatechecker-files/master/skyblockworldgenerator.json"
+displayName="Skyblock Builder"
+updateJSONURL="https://raw.githubusercontent.com/MelanX/mod-updatechecker-files/master/skyblockbuilder.json"
 displayURL="www.curseforge.com/members/melanx/"
-#logoFile="skyblockworldgenerator.png"
+#logoFile="skyblockbuilder.png"
 credits=""
 authors="MelanX"
 description='''
-
+Let you create a custom skyblock island via datapack
 '''
 
-[[dependencies.skyblockworldgenerator]]
+[[dependencies.skyblockbuilder]]
     modId="forge"
     mandatory=true
     versionRange="[35.1.5,)"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.skyblockworldgenerator]]
+[[dependencies.skyblockbuilder]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.16.4, 1.17)"

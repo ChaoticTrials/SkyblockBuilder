@@ -1,4 +1,4 @@
-package de.melanx.skyblockworldgenerator.world;
+package de.melanx.skyblockbuilder.world;
 
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
