@@ -2,17 +2,24 @@ package de.melanx.skyblockbuilder.world.data;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import de.melanx.skyblockbuilder.util.Registration;
+import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.gen.feature.template.Template;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /*
@@ -20,14 +27,14 @@ import java.util.UUID;
  * https://github.com/Vazkii/Botania/blob/master/src/main/java/vazkii/botania/common/world/SkyblockSavedData.java
  */
 public class SkyblockSavedData extends WorldSavedData {
-    private static final String NAME = "custom_skyblock_islands";
+    private static final String NAME = "skyblock_builder";
 
     /**
      * The offset is chosen to put islands under default settings in the center of a chunk region.
      */
     private static final int OFFSET = 1;
 
-    public BiMap<IslandPos, UUID> skyblocks = HashBiMap.create();
+    public BiMap<IslandPos, Pair<Set<BlockPos>, Set<UUID>>> skyblocks = HashBiMap.create();
     private Spiral spiral = new Spiral();
 
     public SkyblockSavedData() {
@@ -39,11 +46,17 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public IslandPos getSpawn() {
-        if (skyblocks.containsValue(Util.DUMMY_UUID)) {
-            return skyblocks.inverse().get(Util.DUMMY_UUID);
+        for (Pair<Set<BlockPos>, Set<UUID>> value : this.skyblocks.values()) {
+            if (value.getValue().contains(Util.DUMMY_UUID)) {
+                return this.skyblocks.inverse().get(value);
+            }
         }
         IslandPos pos = new IslandPos(OFFSET, OFFSET);
-        skyblocks.put(pos, Util.DUMMY_UUID);
+
+        Set<UUID> players = new HashSet<>();
+        players.add(Util.DUMMY_UUID);
+
+        skyblocks.put(pos, Pair.of(this.getPossibleSpawns(pos), players));
         markDirty();
         return pos;
     }
@@ -56,17 +69,34 @@ public class SkyblockSavedData extends WorldSavedData {
             islandPos = new IslandPos(pos[0] * scale + OFFSET, pos[1] * scale + OFFSET);
         } while (skyblocks.containsKey(islandPos));
 
-        skyblocks.put(islandPos, playerId);
+        Set<UUID> players = new HashSet<>();
+        players.add(playerId);
+
+        Set<BlockPos> positions = getPossibleSpawns(islandPos.getCenter());
+        skyblocks.put(islandPos, Pair.of(positions, players));
         markDirty();
         return islandPos;
     }
 
     @Override
     public void read(CompoundNBT nbt) {
-        HashBiMap<IslandPos, UUID> map = HashBiMap.create();
+        HashBiMap<IslandPos, Pair<Set<BlockPos>, Set<UUID>>> map = HashBiMap.create();
         for (INBT inbt : nbt.getList("Islands", Constants.NBT.TAG_COMPOUND)) {
             CompoundNBT tag = (CompoundNBT) inbt;
-            map.put(IslandPos.fromTag(tag), tag.getUniqueId("Player"));
+
+            Set<BlockPos> positions = new HashSet<>();
+            for (INBT spawn : tag.getList("Spawns", Constants.NBT.TAG_COMPOUND)) {
+                CompoundNBT spawnTag = (CompoundNBT) spawn;
+                positions.add(new BlockPos(spawnTag.getDouble("posX"), spawnTag.getDouble("posY"), spawnTag.getDouble("posZ")));
+            }
+
+            Set<UUID> players = new HashSet<>();
+            for (INBT player : tag.getList("Players", Constants.NBT.TAG_COMPOUND)) {
+                CompoundNBT playerTag = (CompoundNBT) player;
+                players.add(playerTag.getUniqueId("Player"));
+            }
+
+            map.put(IslandPos.fromTag(tag), Pair.of(positions, players));
         }
         this.skyblocks = map;
         this.spiral = Spiral.fromArray(nbt.getIntArray("SpiralState"));
@@ -75,15 +105,56 @@ public class SkyblockSavedData extends WorldSavedData {
     @Nonnull
     @Override
     public CompoundNBT write(@Nonnull CompoundNBT nbt) {
-        ListNBT list = new ListNBT();
-        for (Map.Entry<IslandPos, UUID> entry : skyblocks.entrySet()) {
+        ListNBT islands = new ListNBT();
+        for (Map.Entry<IslandPos, Pair<Set<BlockPos>, Set<UUID>>> entry : skyblocks.entrySet()) {
             CompoundNBT entryTag = entry.getKey().toTag();
-            entryTag.putUniqueId("Player", entry.getValue());
-            list.add(entryTag);
+
+            ListNBT players = new ListNBT();
+            for (UUID player : entry.getValue().getValue()) {
+                CompoundNBT playerTag = new CompoundNBT();
+                playerTag.putUniqueId("Player", player);
+
+                players.add(playerTag);
+            }
+
+            ListNBT positions = new ListNBT();
+            for (BlockPos spawn : entry.getValue().getKey()) {
+                CompoundNBT spawnTag = new CompoundNBT();
+                spawnTag.putDouble("posX", spawn.getX() + 0.5);
+                spawnTag.putDouble("posY", spawn.getY());
+                spawnTag.putDouble("posZ", spawn.getZ() + 0.5);
+
+                positions.add(spawnTag);
+            }
+
+            entryTag.put("Players", players);
+            entryTag.put("Spawns", positions);
+            islands.add(entryTag);
         }
+
         nbt.putIntArray("SpiralState", spiral.toIntArray());
-        nbt.put("Islands", list);
+        nbt.put("Islands", islands);
         return nbt;
+    }
+
+    public Set<BlockPos> getPossibleSpawns(IslandPos pos) {
+        if (this.skyblocks.get(pos) == null) {
+            return getPossibleSpawns(pos.getCenter());
+        }
+
+        return this.skyblocks.get(pos).getLeft();
+    }
+
+    private static Set<BlockPos> getPossibleSpawns(BlockPos center) {
+        Set<BlockPos> positions = new HashSet<>();
+        for (Template.Palette info : TemplateLoader.TEMPLATE.blocks) {
+            for (Template.BlockInfo shit : info.func_237157_a_()) {
+                if (shit.state == Registration.SPAWN_BLOCK.get().getDefaultState()) {
+                    positions.add(center.add(shit.pos.toImmutable()));
+                }
+            }
+        }
+        return positions;
     }
 
     // Adapted from https://stackoverflow.com/questions/398299/looping-in-a-spiral

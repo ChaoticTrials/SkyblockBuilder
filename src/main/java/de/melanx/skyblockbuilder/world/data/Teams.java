@@ -25,7 +25,8 @@ public class Teams extends WorldSavedData {
     }
 
     public void add(String name, UUID player) {
-        if (!teams.containsKey(name)) {
+        name = name.toLowerCase();
+        if (!this.exists(name)) {
             Set<UUID> uuids = new HashSet<>();
             uuids.add(player);
             teams.put(name, Pair.of(player, uuids));
@@ -37,6 +38,7 @@ public class Teams extends WorldSavedData {
     }
 
     private void add(String name, UUID player, boolean leader) {
+        name = name.toLowerCase();
         if (leader) {
             if (!teams.containsKey(name)) {
                 Set<UUID> uuids = new HashSet<>();
@@ -54,7 +56,12 @@ public class Teams extends WorldSavedData {
         }
     }
 
+    public Set<String> getTeams() {
+        return this.teams.keySet();
+    }
+
     public void addAll(String name, Collection<UUID> players) {
+        name = name.toLowerCase();
         if (!teams.containsKey(name)) {
             if (players.isEmpty()) {
                 throw new IllegalArgumentException("No players to add.");
@@ -89,12 +96,12 @@ public class Teams extends WorldSavedData {
     }
 
     public void deleteTeam(String name) {
-        this.teams.remove(name);
+        this.teams.remove(name.toLowerCase());
         this.markDirty();
     }
 
     public boolean exists(String name) {
-        return this.teams.containsKey(name);
+        return this.teams.containsKey(name.toLowerCase());
     }
 
     public boolean hasTeam(PlayerEntity player) {
