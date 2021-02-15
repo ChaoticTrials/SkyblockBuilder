@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder;
 
 import de.melanx.skyblockbuilder.util.Registration;
+import de.melanx.skyblockbuilder.world.SkyblockBiomeProvider;
 import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -25,6 +26,9 @@ public class SkyblockBuilder {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-        event.enqueueWork(VoidChunkGenerator::init);
+        event.enqueueWork(() -> {
+            VoidChunkGenerator.init();
+            SkyblockBiomeProvider.init();
+        });
     }
 }

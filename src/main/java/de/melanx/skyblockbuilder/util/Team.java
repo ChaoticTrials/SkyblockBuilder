@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
@@ -132,6 +133,11 @@ public class Team {
         this.owner = uuid;
         this.data.markDirty();
         return uuid;
+    }
+
+    @Nonnull
+    public ServerWorld getWorld() {
+        return this.data.getWorld();
     }
 
     @Nonnull

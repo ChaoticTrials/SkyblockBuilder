@@ -27,20 +27,19 @@ import java.util.*;
 public class SkyblockSavedData extends WorldSavedData {
     private static final String NAME = "skyblock_builder";
 
-    /**
-     * The offset is chosen to put islands under default settings in the center of a chunk region.
-     */
-    private static final int OFFSET = 1;
+    private static final int SPAWN = 0;
 
+    private final ServerWorld world;
     public Map<IslandPos, Team> skyblocks = new HashMap<>();
     private Spiral spiral = new Spiral();
 
-    public SkyblockSavedData() {
+    public SkyblockSavedData(ServerWorld world) {
         super(NAME);
+        this.world = world;
     }
 
     public static SkyblockSavedData get(ServerWorld world) {
-        return world.getSavedData().getOrCreate(SkyblockSavedData::new, NAME);
+        return world.getSavedData().getOrCreate(() -> new SkyblockSavedData(world), NAME);
     }
 
     public IslandPos getSpawn() {
@@ -50,7 +49,7 @@ public class SkyblockSavedData extends WorldSavedData {
                 return this.skyblocks.get(entry.getKey()).getIsland();
             }
         }
-        IslandPos pos = new IslandPos(OFFSET, OFFSET);
+        IslandPos pos = new IslandPos(SPAWN, SPAWN);
 
         Set<UUID> players = new HashSet<>();
         players.add(Util.DUMMY_UUID);
@@ -66,11 +65,10 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public Pair<IslandPos, Team> create(UUID playerId) {
-        int scale = 8;
         IslandPos islandPos;
         do {
             int[] pos = this.spiral.next();
-            islandPos = new IslandPos(pos[0] * scale + OFFSET, pos[1] * scale + OFFSET);
+            islandPos = new IslandPos(pos[0] + SPAWN, pos[1] + SPAWN);
         } while (this.skyblocks.containsKey(islandPos));
 
         Set<UUID> players = new HashSet<>();
@@ -239,6 +237,10 @@ public class SkyblockSavedData extends WorldSavedData {
             }
         }
         return positions;
+    }
+
+    public ServerWorld getWorld() {
+        return this.world;
     }
 
     // Adapted from https://stackoverflow.com/questions/398299/looping-in-a-spiral

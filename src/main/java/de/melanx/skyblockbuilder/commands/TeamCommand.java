@@ -38,7 +38,7 @@ public class TeamCommand {
                         .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
                                 .executes(context -> joinTeam(context.getSource(), StringArgumentType.getString(context, "team")))))
                 .then(Commands.literal("leave")
-                        .executes(context -> leaveTeam(context.getSource()))); // fixme
+                        .executes(context -> leaveTeam(context.getSource())));
     }
 
     private static int createTeam(CommandSource source, String name) throws CommandSyntaxException {

@@ -15,7 +15,7 @@ public class VoidWorldType extends ForgeWorldType {
     }
 
     private static ChunkGenerator getChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
-        return new VoidChunkGenerator(new OverworldBiomeProvider(seed, false, false, biomeRegistry), seed,
+        return new VoidChunkGenerator(new SkyblockBiomeProvider(new OverworldBiomeProvider(seed, false, false, biomeRegistry)), seed,
                 () -> dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c));
     }
 
