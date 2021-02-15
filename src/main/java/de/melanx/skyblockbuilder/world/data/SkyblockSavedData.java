@@ -94,7 +94,7 @@ public class SkyblockSavedData extends WorldSavedData {
         for (INBT inbt : nbt.getList("Islands", Constants.NBT.TAG_COMPOUND)) {
             CompoundNBT tag = (CompoundNBT) inbt;
 
-            IslandPos island = IslandPos.fromTag(tag);
+            IslandPos island = IslandPos.fromTag(tag.getCompound("Island"));
             Team team = new Team(this, island, Util.DUMMY_UUID);
             team.deserializeNBT(tag);
 
@@ -112,7 +112,6 @@ public class SkyblockSavedData extends WorldSavedData {
             if (entry.getValue().isEmpty()) {
                 continue;
             }
-            islands.add(entry.getKey().toTag());
             islands.add(entry.getValue().serializeNBT());
         }
 
