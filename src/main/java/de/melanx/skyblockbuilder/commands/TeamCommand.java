@@ -26,7 +26,7 @@ public class TeamCommand {
 
     private static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> {
         return ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
-                        .getTeams().stream().map(Team::getName).collect(Collectors.toSet()), builder);
+                        .getTeams().stream().map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
     };
 
     public static ArgumentBuilder<CommandSource, ?> register() {
