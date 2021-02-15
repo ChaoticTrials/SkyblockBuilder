@@ -58,6 +58,7 @@ public class SkyblockSavedData extends WorldSavedData {
         Team team = new Team(this, pos, Util.DUMMY_UUID);
         team.setPossibleSpawns(this.getPossibleSpawns(pos));
         team.setPlayers(players);
+        team.setName("spawn");
 
         this.skyblocks.put(pos, team);
         this.markDirty();
@@ -153,20 +154,22 @@ public class SkyblockSavedData extends WorldSavedData {
         return false;
     }
 
-    public boolean createTeamAndJoin(String teamName, PlayerEntity player) {
+    @Nullable
+    public Team createTeamAndJoin(String teamName, PlayerEntity player) {
         return this.createTeamAndJoin(teamName.toLowerCase(), player.getGameProfile().getId());
     }
 
-    public boolean createTeamAndJoin(String teamName, UUID player) {
+    @Nullable
+    public Team createTeamAndJoin(String teamName, UUID player) {
         if (this.teamExists(teamName)) {
-            return false;
+            return null;
         }
 
         Pair<IslandPos, Team> pair = this.create(player);
         Team team = pair.getRight();
         team.setName(teamName);
         this.markDirty();
-        return true;
+        return team;
     }
 
     public boolean removePlayerFromTeam(PlayerEntity player) {

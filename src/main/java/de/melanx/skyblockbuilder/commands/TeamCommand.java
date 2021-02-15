@@ -57,8 +57,9 @@ public class TeamCommand {
             return 0;
         }
 
-        data.createTeamAndJoin(name, player);
-        IslandPos islandPos = data.create(player.getUniqueID()).getLeft();
+        Team team = data.createTeamAndJoin(name, player);
+        //noinspection ConstantConditions
+        IslandPos islandPos = team.getIsland();
         EventListener.spawnPlayer(player, islandPos);
         player.sendStatusMessage(new StringTextComponent("Successfully created and joined team " + name), false);
         return 1;
