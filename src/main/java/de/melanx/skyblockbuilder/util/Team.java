@@ -11,7 +11,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 
 public class Team {
@@ -20,15 +19,12 @@ public class Team {
     private final Set<BlockPos> possibleSpawns;
     private final Random random = new Random();
     private IslandPos island;
-    private UUID owner; // todo no owner possible
     private String name;
 
-    public Team(SkyblockSavedData data, IslandPos island, UUID owner) {
+    public Team(SkyblockSavedData data, IslandPos island) {
         this.data = data;
         this.island = island;
-        this.owner = owner;
         this.players = new HashSet<>();
-        this.players.add(owner);
         this.possibleSpawns = new HashSet<>();
     }
 
@@ -70,15 +66,6 @@ public class Team {
         this.data.markDirty();
     }
 
-    public void setOwner(UUID player) {
-        this.owner = player;
-        this.data.markDirty();
-    }
-
-    public UUID getOwner() {
-        return this.owner;
-    }
-
     public boolean addPlayer(UUID player) {
         boolean added = this.players.add(player);
         this.data.markDirty();
@@ -86,9 +73,7 @@ public class Team {
     }
 
     public boolean addPlayer(PlayerEntity player) {
-        boolean added = this.players.add(player.getGameProfile().getId());
-        this.data.markDirty();
-        return added;
+        return this.addPlayer(player.getGameProfile().getId());
     }
 
     public boolean addPlayers(Collection<UUID> players) {
@@ -103,9 +88,6 @@ public class Team {
 
     public boolean removePlayer(UUID player) {
         boolean removed = this.players.remove(player);
-        if (this.owner == player) {
-            this.selectRandomOwner();
-        }
         this.data.markDirty();
         return removed;
     }
@@ -115,24 +97,11 @@ public class Team {
     }
 
     public boolean hasPlayer(PlayerEntity player) {
-        return this.players.contains(player.getGameProfile().getId());
+        return this.hasPlayer(player.getGameProfile().getId());
     }
 
     public boolean isEmpty() {
         return this.players.isEmpty();
-    }
-
-    @Nullable
-    public UUID selectRandomOwner() {
-        if (this.players.isEmpty()) {
-            return null;
-        }
-
-        List<UUID> players = new ArrayList<>(this.players);
-        UUID uuid = players.get(this.random.nextInt(players.size()));
-        this.owner = uuid;
-        this.data.markDirty();
-        return uuid;
     }
 
     @Nonnull
@@ -145,7 +114,6 @@ public class Team {
         CompoundNBT nbt = new CompoundNBT();
 
         nbt.put("Island", this.island.toTag());
-        nbt.putUniqueId("Owner", this.owner);
         nbt.putString("Name", this.name != null ? this.name : "");
 
         ListNBT players = new ListNBT();
@@ -173,7 +141,6 @@ public class Team {
 
     public void deserializeNBT(CompoundNBT nbt) {
         this.island = IslandPos.fromTag(nbt.getCompound("Island"));
-        this.owner = nbt.getUniqueId("Owner");
         this.name = nbt.getString("Name");
 
         ListNBT players = nbt.getList("Players", Constants.NBT.TAG_COMPOUND);

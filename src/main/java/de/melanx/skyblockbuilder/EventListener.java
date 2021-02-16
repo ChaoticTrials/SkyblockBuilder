@@ -9,7 +9,6 @@ import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
@@ -64,7 +63,7 @@ public class EventListener {
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         World world = event.getPlayer().world;
-        if (VoidChunkGenerator.isSkyblock(world)) {
+        if (VoidChunkGenerator.isSkyblock(world) && event.getPlayer() instanceof ServerPlayerEntity) {
             SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
             for (Team team : data.skyblocks.values()) {
                 if (team.hasPlayer(Util.DUMMY_UUID)) {
@@ -74,16 +73,12 @@ public class EventListener {
 
             IslandPos islandPos = data.getSpawn();
             ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
-            spawnPlayer(event.getPlayer(), islandPos);
+            spawnPlayer((ServerPlayerEntity) event.getPlayer(), islandPos);
             SkyblockBuilder.LOGGER.info("Created the spawn island");
         }
     }
 
-    public static void spawnPlayer(PlayerEntity player, IslandPos islandPos) {
-        if (!(player instanceof ServerPlayerEntity)) {
-            throw new IllegalArgumentException("Player must be server player.");
-        }
-
+    public static void spawnPlayer(ServerPlayerEntity player, IslandPos islandPos) {
         SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) player.world);
         List<BlockPos> spawns = new ArrayList<>(data.getPossibleSpawns(islandPos));
         spawnPlayer(player, islandPos, spawns);
@@ -92,23 +87,20 @@ public class EventListener {
     /*
      * Mainly taken from Botania
      */
-    public static void spawnPlayer(PlayerEntity player, IslandPos islandPos, List<BlockPos> possibleSpawns) {
+    public static void spawnPlayer(@Nonnull ServerPlayerEntity player, IslandPos islandPos, List<BlockPos> possibleSpawns) {
         BlockPos pos = islandPos.getCenter();
 
-        if (player instanceof ServerPlayerEntity) {
-            PlacementSettings settings = new PlacementSettings();
-            TemplateLoader.TEMPLATE.func_237152_b_((IServerWorld) player.world, pos, settings, new Random());
+        PlacementSettings settings = new PlacementSettings();
+        TemplateLoader.TEMPLATE.func_237152_b_((IServerWorld) player.world, pos, settings, new Random());
 
-            BlockPos playerPos = !possibleSpawns.isEmpty() ? possibleSpawns.get(new Random().nextInt(possibleSpawns.size())) : BlockPos.ZERO;
-            ServerPlayerEntity teleportedPlayer = (ServerPlayerEntity) player;
-            teleportedPlayer.rotationYaw = 0;
-            teleportedPlayer.rotationPitch = 0;
-            teleportedPlayer.setPositionAndUpdate(playerPos.getX() + 0.5, playerPos.getY(), playerPos.getZ() + 0.5);
-            teleportedPlayer.func_242111_a(teleportedPlayer.world.getDimensionKey(), playerPos, 0, true, false);
+        BlockPos playerPos = !possibleSpawns.isEmpty() ? possibleSpawns.get(new Random().nextInt(possibleSpawns.size())) : BlockPos.ZERO;
+        player.rotationYaw = 0;
+        player.rotationPitch = 0;
+        player.setPositionAndUpdate(playerPos.getX() + 0.5, playerPos.getY(), playerPos.getZ() + 0.5);
+        player.func_242111_a(player.world.getDimensionKey(), playerPos, 0, true, false);
 
-            for (BlockPos replace : possibleSpawns) {
-                player.world.setBlockState(replace, Blocks.AIR.getDefaultState());
-            }
+        for (BlockPos replace : possibleSpawns) {
+            player.world.setBlockState(replace, Blocks.AIR.getDefaultState());
         }
     }
 }

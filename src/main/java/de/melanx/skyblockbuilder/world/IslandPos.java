@@ -16,7 +16,7 @@ public final class IslandPos {
     }
 
     public BlockPos getCenter() {
-        return new BlockPos(this.x << 13, 64, this.z << 13);
+        return new BlockPos(this.x * 8192, 64, this.z * 8192);
     }
 
     public static IslandPos fromTag(CompoundNBT tag) {

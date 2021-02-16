@@ -54,6 +54,6 @@ public class SkyblockBiomeProvider extends BiomeProvider {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        return this.parent.getNoiseBiome((((x - 4096) % 8192) + 8192) % 8192, y, (((z - 4096) % 8192) + 8192) % 8192); // TODO it should work but it DOESN'T
+        return this.parent.getNoiseBiome((((x - 4096) % 8192) + 8192) % 8192, y, (((z - 4096) % 8192) + 8192) % 8192); // FIXME it should work but it DOESN'T
     }
 }
