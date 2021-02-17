@@ -1,4 +1,5 @@
 {
   "block.skyblockbuilder.spawn": "Spawn",
-  "block.skyblockbuilder.spawn.desc": "Used to set a spawn point for island creators"
+  "block.skyblockbuilder.spawn.desc": "Used to set a spawn point for island creators",
+  "generator.custom-skyblock": "Skyblock"
 }

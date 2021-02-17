@@ -48,9 +48,9 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public IslandPos getSpawn() {
-        for (Team team : skyblocks.values()) {
+        for (Team team : this.skyblocks.values()) {
             if (team.hasPlayer(Util.DUMMY_UUID)) {
-                return skyblockPositions.get(team.getName());
+                return this.skyblockPositions.get(team.getName());
             }
         }
         IslandPos pos = new IslandPos(SPAWN, SPAWN);
@@ -225,7 +225,7 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public boolean teamExists(String name) {
-        return skyblocks.containsKey(name);
+        return this.skyblocks.containsKey(name);
     }
 
     public Collection<Team> getTeams() {
@@ -233,7 +233,7 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public Set<BlockPos> getPossibleSpawns(IslandPos pos) {
-        if (this.skyblockPositions.containsValue(pos)) {
+        if (!this.skyblockPositions.containsValue(pos)) {
             return getPossibleSpawns(pos.getCenter());
         }
 
