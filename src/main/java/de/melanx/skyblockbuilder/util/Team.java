@@ -33,7 +33,7 @@ public class Team {
     }
 
     public void setName(String name) {
-        this.name = name.toLowerCase();
+        this.name = name;
         this.data.markDirty();
     }
 

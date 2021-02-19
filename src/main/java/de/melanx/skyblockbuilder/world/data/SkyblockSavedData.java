@@ -48,20 +48,16 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public IslandPos getSpawn() {
-        for (Team team : this.skyblocks.values()) {
-            if (team.hasPlayer(Util.DUMMY_UUID)) {
-                return this.skyblockPositions.get(team.getName());
-            }
+        if (this.skyblockPositions.get("spawn") != null) {
+            return this.skyblockPositions.get("spawn");
         }
-        IslandPos pos = new IslandPos(SPAWN, SPAWN);
 
-        Set<UUID> players = new HashSet<>();
-        players.add(Util.DUMMY_UUID);
+        IslandPos pos = new IslandPos(SPAWN, SPAWN);
 
         Team team = new Team(this, pos);
         team.setPossibleSpawns(this.getPossibleSpawns(pos));
-        team.setPlayers(players);
-        team.setName("spawn");
+        team.addPlayer(Util.DUMMY_UUID);
+        team.setName("Spawn");
 
         this.skyblocks.put(team.getName(), team);
         this.skyblockPositions.put(team.getName(), pos);
@@ -69,24 +65,21 @@ public class SkyblockSavedData extends WorldSavedData {
         return pos;
     }
 
-    public Pair<IslandPos, Team> create(UUID playerId) {
+    public Pair<IslandPos, Team> create(String teamName) {
         IslandPos islandPos;
         do {
             int[] pos = this.spiral.next();
             islandPos = new IslandPos(pos[0] + SPAWN, pos[1] + SPAWN);
         } while (this.skyblockPositions.containsValue(islandPos));
 
-        Set<UUID> players = new HashSet<>();
-        players.add(playerId);
-
         Set<BlockPos> positions = getPossibleSpawns(islandPos.getCenter());
 
         Team team = new Team(this, islandPos);
         team.setPossibleSpawns(positions);
-        team.setPlayers(players);
+        team.setName(teamName);
 
-        this.skyblocks.put(team.getName(), team);
-        this.skyblockPositions.put(team.getName(), islandPos);
+        this.skyblocks.put(team.getName().toLowerCase(), team);
+        this.skyblockPositions.put(team.getName().toLowerCase(), islandPos);
 
         this.markDirty();
         return Pair.of(islandPos, team);
@@ -141,7 +134,7 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public boolean addPlayerToTeam(String teamName, PlayerEntity player) {
-        return this.addPlayerToTeam(teamName.toLowerCase(), player.getGameProfile().getId());
+        return this.addPlayerToTeam(teamName, player.getGameProfile().getId());
     }
 
     public boolean addPlayerToTeam(String teamName, UUID player) {
@@ -156,19 +149,29 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     @Nullable
-    public Team createTeamAndJoin(String teamName, PlayerEntity player) {
-        return this.createTeamAndJoin(teamName.toLowerCase(), player.getGameProfile().getId());
-    }
-
-    @Nullable
-    public Team createTeamAndJoin(String teamName, UUID player) {
+    public Team createTeam(String teamName) {
         if (this.teamExists(teamName)) {
             return null;
         }
 
-        Pair<IslandPos, Team> pair = this.create(player);
+        Pair<IslandPos, Team> pair = this.create(teamName);
         Team team = pair.getRight();
-        team.setName(teamName);
+        team.setPossibleSpawns(this.getPossibleSpawns(team.getIsland()));
+        this.markDirty();
+        return team;
+    }
+
+    @Nullable
+    public Team createTeamAndJoin(String teamName, PlayerEntity player) {
+        return this.createTeamAndJoin(teamName, player.getGameProfile().getId());
+    }
+
+    @Nullable
+    public Team createTeamAndJoin(String teamName, UUID player) {
+        Team team = this.createTeam(teamName);
+        if (team == null) return null;
+
+        team.addPlayer(player);
         this.markDirty();
         return team;
     }
