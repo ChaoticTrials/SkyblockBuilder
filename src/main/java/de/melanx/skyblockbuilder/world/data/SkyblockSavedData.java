@@ -6,12 +6,14 @@ import de.melanx.skyblockbuilder.util.Registration;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.world.IslandPos;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
@@ -96,8 +98,8 @@ public class SkyblockSavedData extends WorldSavedData {
             Team team = new Team(this, island);
             team.deserializeNBT(tag);
 
-            skyblocks.put(team.getName(), team);
-            skyblockPositions.put(team.getName(), island);
+            skyblocks.put(team.getName().toLowerCase(), team);
+            skyblockPositions.put(team.getName().toLowerCase(), island);
         }
         this.skyblocks = skyblocks;
         this.skyblockPositions = skyblockPositions;
@@ -109,9 +111,6 @@ public class SkyblockSavedData extends WorldSavedData {
     public CompoundNBT write(@Nonnull CompoundNBT nbt) {
         ListNBT islands = new ListNBT();
         for (Team team : this.skyblocks.values()) {
-            if (team.isEmpty()) {
-                continue;
-            }
             islands.add(team.serializeNBT());
         }
 
@@ -156,7 +155,21 @@ public class SkyblockSavedData extends WorldSavedData {
 
         Pair<IslandPos, Team> pair = this.create(teamName);
         Team team = pair.getRight();
-        team.setPossibleSpawns(this.getPossibleSpawns(team.getIsland()));
+        List<BlockPos> possibleSpawns = new ArrayList<>(this.getPossibleSpawns(team.getIsland()));
+        team.setPossibleSpawns(possibleSpawns);
+
+        PlacementSettings settings = new PlacementSettings();
+        TemplateLoader.TEMPLATE.func_237152_b_(this.world, team.getIsland().getCenter(), settings, new Random());
+
+        BlockPos playerPos = !possibleSpawns.isEmpty() ? possibleSpawns.get(new Random().nextInt(possibleSpawns.size())) : BlockPos.ZERO;
+
+        for (BlockPos replace : possibleSpawns) {
+            this.world.setBlockState(replace, Blocks.AIR.getDefaultState());
+        }
+
+        this.skyblocks.put(team.getName().toLowerCase(), team);
+        this.skyblockPositions.put(team.getName().toLowerCase(), team.getIsland());
+
         this.markDirty();
         return team;
     }
@@ -181,17 +194,18 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public boolean removePlayerFromTeam(UUID player) {
-        Iterator<Map.Entry<String, Team>> itr = this.skyblocks.entrySet().iterator();
-        while (itr.hasNext()) {
-            Map.Entry<String, Team> entry = itr.next();
+        for (Map.Entry<String, Team> entry : this.skyblocks.entrySet()) {
             Team team = entry.getValue();
-            if (team.hasPlayer(player) && team.removePlayer(player) && team.isEmpty()) {
-                this.skyblockPositions.inverse().remove(team.getIsland());
-                itr.remove();
-                return true;
+            if (team.hasPlayer(player)) {
+                return team.removePlayer(player);
             }
         }
         return false;
+    }
+
+    @Nullable
+    public Team getTeam(String name) {
+        return this.skyblocks.get(name.toLowerCase());
     }
 
     public boolean deleteTeam(String name) {
@@ -228,7 +242,7 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public boolean teamExists(String name) {
-        return this.skyblocks.containsKey(name);
+        return this.skyblocks.containsKey(name.toLowerCase());
     }
 
     public Collection<Team> getTeams() {

@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder;
 
+import de.melanx.skyblockbuilder.commands.ListCommand;
 import de.melanx.skyblockbuilder.commands.TeamCommand;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
@@ -7,17 +8,13 @@ import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -28,9 +25,6 @@ import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 public class EventListener {
 
@@ -56,8 +50,9 @@ public class EventListener {
 
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("skyblock").requires(source -> source.hasPermissionLevel(2))
-                .then(TeamCommand.register()));
+        event.getDispatcher().register(Commands.literal("skyblock")
+                .then(TeamCommand.register())
+                .then(ListCommand.register()));
     }
 
     /*
@@ -76,7 +71,7 @@ public class EventListener {
 
             IslandPos islandPos = data.getSpawn();
             ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
-            spawnPlayer((ServerPlayerEntity) event.getPlayer(), islandPos);
+            TeamCommand.teleportToIsland((ServerPlayerEntity) event.getPlayer(), islandPos);
             SkyblockBuilder.LOGGER.info("Created the spawn island");
         }
     }
@@ -92,34 +87,6 @@ public class EventListener {
     public void onServerStarted(FMLServerStartedEvent event) {
         if (VoidChunkGenerator.isSkyblock(event.getServer().func_241755_D_())) {
             SkyblockSavedData.get(event.getServer().func_241755_D_()).getSpawn();
-        }
-    }
-
-    public static void spawnPlayer(ServerPlayerEntity player, IslandPos islandPos) {
-        SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) player.world);
-        List<BlockPos> spawns = new ArrayList<>(data.getPossibleSpawns(islandPos));
-        spawnPlayer(player, islandPos, spawns);
-    }
-
-    /*
-     * Mainly taken from Botania
-     */
-    public static void spawnPlayer(@Nonnull ServerPlayerEntity player, IslandPos islandPos, List<BlockPos> possibleSpawns) {
-        BlockPos pos = islandPos.getCenter();
-
-        PlacementSettings settings = new PlacementSettings();
-        TemplateLoader.TEMPLATE.func_237152_b_((IServerWorld) player.world, pos, settings, new Random());
-
-        BlockPos playerPos = !possibleSpawns.isEmpty() ? possibleSpawns.get(new Random().nextInt(possibleSpawns.size())) : BlockPos.ZERO;
-        player.rotationYaw = 0;
-        player.rotationPitch = 0;
-        player.setPositionAndUpdate(playerPos.getX() + 0.5, playerPos.getY(), playerPos.getZ() + 0.5);
-        player.func_242111_a(player.world.getDimensionKey(), playerPos, 0, true, false);
-
-        for (BlockPos replace : possibleSpawns) {
-            if (!player.world.isAirBlock(replace)) {
-                player.world.setBlockState(replace, Blocks.AIR.getDefaultState());
-            }
         }
     }
 }
