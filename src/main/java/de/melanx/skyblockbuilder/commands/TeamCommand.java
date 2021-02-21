@@ -66,7 +66,7 @@ public class TeamCommand {
         }
         data.markDirty();
 
-        source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandKey("clear.info"), i), true);
+        source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandKey("teams.clear.info"), i), true);
         return 1;
     }
 
@@ -114,22 +114,21 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int addToTeam(CommandSource source, String team, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+    private static int addToTeam(CommandSource source, String teamName, Collection<ServerPlayerEntity> players) {
         ServerWorld world = source.getWorld();
-        ServerPlayerEntity player = source.asPlayer();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
-        if (!data.teamExists(team)) {
-            player.sendStatusMessage(new TranslationTextComponent(TranslationUtil.getCommandErrorKey("team_not_exist")).mergeStyle(TextFormatting.RED), false);
+        if (!data.teamExists(teamName)) {
+            source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandErrorKey("team_not_exist")).mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
-        IslandPos island = data.getTeamIsland(team);
+        IslandPos island = data.getTeamIsland(teamName);
         ServerPlayerEntity added = null;
         int i = 0;
         for (ServerPlayerEntity addedPlayer : players) {
             if (!data.hasPlayerTeam(addedPlayer)) {
-                data.addPlayerToTeam(team, addedPlayer);
+                data.addPlayerToTeam(teamName, addedPlayer);
                 WorldUtil.teleportToIsland(addedPlayer, island);
                 if (i == 0) added = addedPlayer;
                 i++;
@@ -141,8 +140,8 @@ public class TeamCommand {
             return 0;
         }
 
-        if (i == 1) source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandInfoKey("teams.added_player_single"), added.getDisplayName().getString(), team).mergeStyle(TextFormatting.GREEN), true);
-        else source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandInfoKey("teams.added_player_multiple"), i, team), true);
+        if (i == 1) source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandInfoKey("teams.added_player_single"), added.getDisplayName().getString(), teamName).mergeStyle(TextFormatting.GREEN), true);
+        else source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandInfoKey("teams.added_player_multiple"), i, teamName), true);
         return 1;
     }
 

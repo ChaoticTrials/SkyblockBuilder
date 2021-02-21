@@ -48,17 +48,22 @@ public class TemplateLoader {
             JsonParser parser = new JsonParser();
 
             String s = IOUtils.toString(new InputStreamReader(resource.getInputStream()));
-            JsonElement array = parser.parse(s);
-            if (!(array instanceof JsonArray)) {
-                throw new JsonSyntaxException("Spawns need to be in an json array.");
+            JsonElement obj = parser.parse(s);
+            if (!(obj instanceof JsonObject)) {
+                throw new JsonSyntaxException("Spawns need to be in an json object.");
             }
 
-            for (JsonElement element : (JsonArray) array) {
-                if (element instanceof JsonObject) {
-                    JsonObject positions = (JsonObject) element;
-                    int posX = JSONUtils.getInt(positions, "posX");
-                    int posY = JSONUtils.getInt(positions, "posY");
-                    int posZ = JSONUtils.getInt(positions, "posZ");
+            if (((JsonObject) obj).has("islandSpawns")) {
+                JsonArray array = ((JsonObject) obj).getAsJsonArray("islandSpawns");
+                for (JsonElement element : array) {
+                    if (!(element instanceof JsonArray)) {
+                        throw new JsonSyntaxException("Positions need to be written in a json array.");
+                    }
+
+                    JsonArray positions = (JsonArray) element;
+                    int posX = JSONUtils.getInt(positions.get(0), "x");
+                    int posY = JSONUtils.getInt(positions.get(1), "y");
+                    int posZ = JSONUtils.getInt(positions.get(2), "z");
 
                     SPAWNS.add(new BlockPos(posX, posY, posZ));
                 }
@@ -72,24 +77,26 @@ public class TemplateLoader {
             JsonParser parser = new JsonParser();
 
             String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
-            JsonElement array = parser.parse(s);
-            if (!(array instanceof JsonArray)) {
+            JsonElement obj = parser.parse(s);
+            if (!(obj instanceof JsonObject)) {
+                SkyblockBuilder.LOGGER.error("Spawns need to be in an json object.");
                 return false;
             }
 
-            for (JsonElement element : (JsonArray) array) {
-                if (element instanceof JsonObject) {
-                    JsonObject positions = (JsonObject) element;
-                    try {
-                        int posX = JSONUtils.getInt(positions, "posX");
-                        int posY = JSONUtils.getInt(positions, "posY");
-                        int posZ = JSONUtils.getInt(positions, "posZ");
-
-                        SPAWNS.add(new BlockPos(posX, posY, posZ));
-                    } catch (JsonSyntaxException e) {
-                        SkyblockBuilder.LOGGER.error(e);
+            if (((JsonObject) obj).has("islandSpawns")) {
+                JsonArray array = ((JsonObject) obj).getAsJsonArray("islandSpawns");
+                for (JsonElement element : array) {
+                    if (!(element instanceof JsonArray)) {
+                        SkyblockBuilder.LOGGER.error("Positions need to be written in a json array.");
                         return false;
                     }
+
+                    JsonArray positions = (JsonArray) element;
+                    int posX = JSONUtils.getInt(positions.get(0), "x");
+                    int posY = JSONUtils.getInt(positions.get(1), "y");
+                    int posZ = JSONUtils.getInt(positions.get(2), "z");
+
+                    SPAWNS.add(new BlockPos(posX, posY, posZ));
                 }
             }
 
