@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder;
 
 import de.melanx.skyblockbuilder.commands.ListCommand;
+import de.melanx.skyblockbuilder.commands.SpawnsCommand;
 import de.melanx.skyblockbuilder.commands.TeamCommand;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
@@ -51,8 +52,9 @@ public class EventListener {
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("skyblock")
+                .then(ListCommand.register())
                 .then(TeamCommand.register())
-                .then(ListCommand.register()));
+                .then(SpawnsCommand.register()));
     }
 
     /*

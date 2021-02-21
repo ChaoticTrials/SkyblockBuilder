@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ListCommand {
+
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("list")
                         .executes(context -> listTeams(context.getSource()))
