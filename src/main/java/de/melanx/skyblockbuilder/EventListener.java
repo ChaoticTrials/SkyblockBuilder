@@ -5,8 +5,8 @@ import de.melanx.skyblockbuilder.commands.TeamCommand;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
-import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
@@ -61,7 +61,7 @@ public class EventListener {
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         World world = event.getPlayer().world;
-        if (VoidChunkGenerator.isSkyblock(world) && event.getPlayer() instanceof ServerPlayerEntity) {
+        if (WorldUtil.isSkyblock(world) && event.getPlayer() instanceof ServerPlayerEntity) {
             SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
             for (Team team : data.skyblocks.values()) {
                 if (team.hasPlayer(event.getPlayer())) {
@@ -71,8 +71,7 @@ public class EventListener {
 
             IslandPos islandPos = data.getSpawn();
             ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
-            TeamCommand.teleportToIsland((ServerPlayerEntity) event.getPlayer(), islandPos);
-            SkyblockBuilder.LOGGER.info("Created the spawn island");
+            WorldUtil.teleportToIsland((ServerPlayerEntity) event.getPlayer(), islandPos);
         }
     }
 
@@ -85,7 +84,7 @@ public class EventListener {
 
     @SubscribeEvent
     public void onServerStarted(FMLServerStartedEvent event) {
-        if (VoidChunkGenerator.isSkyblock(event.getServer().func_241755_D_())) {
+        if (WorldUtil.isSkyblock(event.getServer().func_241755_D_())) {
             SkyblockSavedData.get(event.getServer().func_241755_D_()).getSpawn();
         }
     }

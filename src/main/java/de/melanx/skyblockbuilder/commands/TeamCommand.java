@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TranslationUtil;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
@@ -14,12 +15,13 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class TeamCommand {
@@ -39,7 +41,7 @@ public class TeamCommand {
                         .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
                                 .then(Commands.argument("players", EntityArgument.players())
                                         .executes(context -> addToTeam(context.getSource(), StringArgumentType.getString(context, "team"), EntityArgument.getPlayers(context, "players"))))))
-                .then(Commands.literal("leave")
+                .then(Commands.literal("remove")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(context -> removeFromTeam(context.getSource(), EntityArgument.getPlayer(context, "player")))))
                 .then(Commands.literal("delete")
@@ -128,8 +130,7 @@ public class TeamCommand {
         for (ServerPlayerEntity addedPlayer : players) {
             if (!data.hasPlayerTeam(addedPlayer)) {
                 data.addPlayerToTeam(team, addedPlayer);
-                //noinspection ConstantConditions
-                teleportToIsland(addedPlayer, island);
+                WorldUtil.teleportToIsland(addedPlayer, island);
                 if (i == 0) added = addedPlayer;
                 i++;
             }
@@ -159,19 +160,8 @@ public class TeamCommand {
         String teamName = team.getName();
         data.removePlayerFromTeam(player);
         IslandPos spawn = data.getSpawn();
-        teleportToIsland(player, spawn);
+        WorldUtil.teleportToIsland(player, spawn);
         player.sendStatusMessage(new TranslationTextComponent(TranslationUtil.getCommandInfoKey("teams.left"), teamName).mergeStyle(TextFormatting.GREEN), false);
         return 1;
-    }
-
-    public static void teleportToIsland(ServerPlayerEntity player, IslandPos island) {
-        ServerWorld world = player.getServerWorld();
-
-        Set<BlockPos> possibleSpawns = SkyblockSavedData.getPossibleSpawns(island.getCenter());
-        BlockPos spawn = new ArrayList<>(possibleSpawns).get(new Random().nextInt(possibleSpawns.size()));
-        player.rotationYaw = 0;
-        player.rotationPitch = 0;
-        player.setPositionAndUpdate(spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5);
-        player.func_242111_a(player.world.getDimensionKey(), spawn, 0, true, false);
     }
 }

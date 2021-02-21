@@ -9,13 +9,11 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Blockreader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.*;
 import net.minecraft.world.gen.feature.structure.StructureManager;
-import net.minecraft.world.server.ServerChunkProvider;
 
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
@@ -40,11 +38,6 @@ public class VoidChunkGenerator extends ChunkGenerator {
         super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
         this.settings = settings;
-    }
-
-    public static boolean isSkyblock(World world) {
-        return world.getChunkProvider() instanceof ServerChunkProvider &&
-                ((ServerChunkProvider) world.getChunkProvider()).getChunkGenerator() instanceof VoidChunkGenerator;
     }
 
     @Nonnull

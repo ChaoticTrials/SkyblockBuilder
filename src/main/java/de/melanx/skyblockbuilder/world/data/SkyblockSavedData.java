@@ -54,17 +54,12 @@ public class SkyblockSavedData extends WorldSavedData {
             return this.skyblockPositions.get("spawn");
         }
 
-        IslandPos pos = new IslandPos(SPAWN, SPAWN);
-
-        Team team = new Team(this, pos);
-        team.setPossibleSpawns(this.getPossibleSpawns(pos));
+        Team team = this.createTeam("Spawn");
+        assert team != null;
         team.addPlayer(Util.DUMMY_UUID);
-        team.setName("Spawn");
 
-        this.skyblocks.put(team.getName(), team);
-        this.skyblockPositions.put(team.getName(), pos);
         this.markDirty();
-        return pos;
+        return team.getIsland();
     }
 
     public Pair<IslandPos, Team> create(String teamName) {
@@ -74,7 +69,7 @@ public class SkyblockSavedData extends WorldSavedData {
             islandPos = new IslandPos(pos[0] + SPAWN, pos[1] + SPAWN);
         } while (this.skyblockPositions.containsValue(islandPos));
 
-        Set<BlockPos> positions = getPossibleSpawns(islandPos.getCenter());
+        Set<BlockPos> positions = initialPossibleSpawns(islandPos.getCenter());
 
         Team team = new Team(this, islandPos);
         team.setPossibleSpawns(positions);
@@ -251,13 +246,13 @@ public class SkyblockSavedData extends WorldSavedData {
 
     public Set<BlockPos> getPossibleSpawns(IslandPos pos) {
         if (!this.skyblockPositions.containsValue(pos)) {
-            return getPossibleSpawns(pos.getCenter());
+            return initialPossibleSpawns(pos.getCenter());
         }
 
         return this.skyblocks.get(this.skyblockPositions.inverse().get(pos)).getPossibleSpawns();
     }
 
-    public static Set<BlockPos> getPossibleSpawns(BlockPos center) {
+    private static Set<BlockPos> initialPossibleSpawns(BlockPos center) {
         Set<BlockPos> positions = new HashSet<>();
         for (Template.Palette info : TemplateLoader.TEMPLATE.blocks) {
             for (Template.BlockInfo blockInfo : info.func_237157_a_()) {
