@@ -2,11 +2,9 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.Team;
-import de.melanx.skyblockbuilder.util.TranslationUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
@@ -15,8 +13,8 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Collection;
@@ -66,7 +64,7 @@ public class TeamCommand {
         }
         data.markDirty();
 
-        source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandKey("teams.clear.info"), i), true);
+        source.sendFeedback(new StringTextComponent(String.format("Deleted %s empty teams.", i)).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 
@@ -84,33 +82,32 @@ public class TeamCommand {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         if (data.teamExists(name)) {
-            source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandErrorKey("team_exist"), name), false);
+            source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", name)).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         Team team = data.createTeam(name);
         //noinspection ConstantConditions
         IslandPos islandPos = team.getIsland();
-        source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandKey("teams.create.info"), name), false);
+        source.sendFeedback(new StringTextComponent(String.format(("Successfully created team %s."), name)).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 
-    private static int deleteTeam(CommandSource source, String team) throws CommandSyntaxException {
+    private static int deleteTeam(CommandSource source, String team) {
         ServerWorld world = source.getWorld();
-        ServerPlayerEntity player = source.asPlayer();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         if (!data.teamExists(team)) {
-            player.sendStatusMessage(new TranslationTextComponent(TranslationUtil.getCommandErrorKey("team_not_exist")).mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new StringTextComponent("Team does not exist!").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         if (!data.deleteTeam(team)) {
-            player.sendStatusMessage(new TranslationTextComponent("deleting_error", team).mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new StringTextComponent(String.format("Error while deleting team %s!", team)).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
-        player.sendStatusMessage(new TranslationTextComponent(TranslationUtil.getCommandInfoKey("teams.deleting"), team).mergeStyle(TextFormatting.GREEN), false);
+        source.sendFeedback(new StringTextComponent(String.format("Successfully deleted team %s.", team)).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 
@@ -119,7 +116,7 @@ public class TeamCommand {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         if (!data.teamExists(teamName)) {
-            source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandErrorKey("team_not_exist")).mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new StringTextComponent("Team does not exist!").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
@@ -136,12 +133,14 @@ public class TeamCommand {
         }
 
         if (i == 0) {
-            source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandErrorKey("no_player_added")).mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new StringTextComponent("No player added to team!").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
-        if (i == 1) source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandInfoKey("teams.added_player_single"), added.getDisplayName().getString(), teamName).mergeStyle(TextFormatting.GREEN), true);
-        else source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandInfoKey("teams.added_player_multiple"), i, teamName), true);
+        if (i == 1)
+            source.sendFeedback(new StringTextComponent(String.format("Successfully added %s to team %s.", added.getDisplayName().getString(), teamName)).mergeStyle(TextFormatting.GREEN), true);
+        else
+            source.sendFeedback(new StringTextComponent(String.format("Successfully added %s players to team %s.", i, teamName)).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 
@@ -152,7 +151,7 @@ public class TeamCommand {
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandErrorKey("player_no_team")).mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new StringTextComponent("You're currently in no team!").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
@@ -160,7 +159,7 @@ public class TeamCommand {
         data.removePlayerFromTeam(player);
         IslandPos spawn = data.getSpawn();
         WorldUtil.teleportToIsland(player, spawn);
-        player.sendStatusMessage(new TranslationTextComponent(TranslationUtil.getCommandInfoKey("teams.left"), teamName).mergeStyle(TextFormatting.GREEN), false);
+        source.sendFeedback(new StringTextComponent(String.format("Successfully left team %s.", teamName)).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 }

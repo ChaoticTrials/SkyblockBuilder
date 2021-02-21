@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.world;
 
-import de.melanx.skyblockbuilder.util.TranslationUtil;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.provider.OverworldBiomeProvider;
@@ -27,6 +27,6 @@ public class VoidWorldType extends ForgeWorldType {
 
     @Override
     public String getTranslationKey() {
-        return TranslationUtil.getTranslationKey("generator.custom_skyblock");
+        return SkyblockBuilder.MODID + "generator.custom_skyblock";
     }
 }

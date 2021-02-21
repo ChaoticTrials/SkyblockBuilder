@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import de.melanx.skyblockbuilder.util.Team;
-import de.melanx.skyblockbuilder.util.TranslationUtil;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -12,7 +11,6 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Comparator;
@@ -23,9 +21,9 @@ public class ListCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("list")
-                        .executes(context -> listTeams(context.getSource()))
+                .executes(context -> listTeams(context.getSource()))
                 .then(Commands.argument("team", StringArgumentType.word()).suggests(TeamCommand.SUGGEST_TEAMS)
-                .executes(context -> listPlayers(context.getSource(), StringArgumentType.getString(context, "team"))));
+                        .executes(context -> listPlayers(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 
     private static int listTeams(CommandSource source) {
@@ -33,9 +31,9 @@ public class ListCommand {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).collect(Collectors.toList());
-        IFormattableTextComponent info = new TranslationTextComponent(TranslationUtil.getCommandKey("list.info"),
+        IFormattableTextComponent info = new StringTextComponent(String.format("There's a total of %s teams where %s are empty.",
                 teams.size() - 1,
-                teams.stream().filter(Team::isEmpty).count());
+                teams.stream().filter(Team::isEmpty).count()));
         info.mergeStyle(TextFormatting.GOLD);
         source.sendFeedback(info, true);
 
@@ -43,8 +41,7 @@ public class ListCommand {
             if (!team.getName().equalsIgnoreCase("spawn")) {
                 IFormattableTextComponent list = (new StringTextComponent("- " + team.getName()));
                 if (team.isEmpty()) {
-                    list.append(new StringTextComponent(" "));
-                    list.append(new TranslationTextComponent(TranslationUtil.getCommandKey("list.empty")));
+                    list.append(new StringTextComponent(" (Empty)"));
                     list.mergeStyle(TextFormatting.RED);
                 } else {
                     list.mergeStyle(TextFormatting.GREEN);
@@ -63,12 +60,12 @@ public class ListCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandKey("error.team_not_exist")).mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new StringTextComponent("Team does not exist!").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         PlayerList playerList = source.getServer().getPlayerList();
-        source.sendFeedback(new TranslationTextComponent(TranslationUtil.getCommandKey("list.team.info"), team.getName(), team.getPlayers().size()).mergeStyle(TextFormatting.GOLD), false);
+        source.sendFeedback(new StringTextComponent(String.format("%s contains %s players.", team.getName(), team.getPlayers().size())).mergeStyle(TextFormatting.GOLD), false);
         team.getPlayers().forEach(id -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(id);
             if (player != null) {
