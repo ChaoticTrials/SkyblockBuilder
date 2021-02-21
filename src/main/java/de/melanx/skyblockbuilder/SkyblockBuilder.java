@@ -1,9 +1,10 @@
 package de.melanx.skyblockbuilder;
 
-import de.melanx.skyblockbuilder.util.Registration;
 import de.melanx.skyblockbuilder.world.SkyblockBiomeProvider;
 import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
+import de.melanx.skyblockbuilder.world.VoidWorldType;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.world.ForgeWorldType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -20,15 +21,15 @@ public class SkyblockBuilder {
     public SkyblockBuilder() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::commonSetup);
-        MinecraftForge.EVENT_BUS.register(new EventListener());
+        bus.addGenericListener(ForgeWorldType.class, VoidWorldType::register);
 
-        Registration.init();
+        MinecraftForge.EVENT_BUS.register(new EventListener());
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            VoidChunkGenerator.init();
             SkyblockBiomeProvider.init();
+            VoidChunkGenerator.init();
         });
     }
 }

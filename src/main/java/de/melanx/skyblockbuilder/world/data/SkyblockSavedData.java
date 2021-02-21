@@ -2,7 +2,6 @@ package de.melanx.skyblockbuilder.world.data;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import de.melanx.skyblockbuilder.util.Registration;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.world.IslandPos;
@@ -14,7 +13,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
-import net.minecraft.world.gen.feature.template.Template;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
@@ -254,12 +252,8 @@ public class SkyblockSavedData extends WorldSavedData {
 
     private static Set<BlockPos> initialPossibleSpawns(BlockPos center) {
         Set<BlockPos> positions = new HashSet<>();
-        for (Template.Palette info : TemplateLoader.TEMPLATE.blocks) {
-            for (Template.BlockInfo blockInfo : info.func_237157_a_()) {
-                if (blockInfo.state == Registration.SPAWN_BLOCK.get().getDefaultState()) {
-                    positions.add(center.add(blockInfo.pos.toImmutable()));
-                }
-            }
+        for (BlockPos pos : TemplateLoader.SPAWNS) {
+            positions.add(center.add(pos.toImmutable()));
         }
         return positions;
     }

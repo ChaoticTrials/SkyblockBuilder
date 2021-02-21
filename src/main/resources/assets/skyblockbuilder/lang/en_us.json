@@ -1,7 +1,4 @@
 {
-  "block.skyblockbuilder.spawn": "Spawn",
-  "block.skyblockbuilder.spawn.desc": "Used to set a spawn point for island creators",
-
   "skyblockbuilder.command.error.deleting_error": "Error while deleting team %s!",
   "skyblockbuilder.command.error.no_player_added": "No player added to team!",
   "skyblockbuilder.command.error.team_not_exist": "Team does not exist!",
@@ -18,5 +15,5 @@
   "skyblockbuilder.command.list.empty": "(Empty)",
   "skyblockbuilder.command.list.team.info": "%s contains %s players.",
 
-  "generator.custom-skyblock": "Skyblock"
+  "skyblockbuilder.generator.custom_skyblock": "Skyblock"
 }
