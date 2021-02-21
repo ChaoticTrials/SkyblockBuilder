@@ -41,6 +41,7 @@ public class EventListener {
             @Override
             protected void apply(@Nonnull Object unused, @Nonnull IResourceManager manager, @Nonnull IProfiler profiler) {
                 try {
+                    ConfigHandler.generateDefaultFiles();
                     TemplateLoader.loadSchematic(manager);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
