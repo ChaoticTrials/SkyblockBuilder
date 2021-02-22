@@ -25,12 +25,12 @@ pipeline {
             }
         }
 
-//        stage('Upload artifacts to CurseForge') {
-//            steps {
-//                echo 'Uploading to CurseForge'
-//                sh './gradlew curseforge'
-//            }
-//        }
+        stage('Upload artifacts to CurseForge') {
+            steps {
+                echo 'Uploading to CurseForge'
+                sh './gradlew curseforge'
+            }
+        }
 
         stage('Publish artifacts') {
             steps {

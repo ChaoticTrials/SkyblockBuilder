@@ -13,7 +13,7 @@ displayURL="www.curseforge.com/members/melanx/"
 credits=""
 authors="MelanX"
 description='''
-Let you create a custom skyblock island via datapack
+Let you create a custom skyblock island via config
 '''
 
 [[dependencies.skyblockbuilder]]
