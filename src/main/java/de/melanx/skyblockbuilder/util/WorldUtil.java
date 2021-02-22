@@ -15,14 +15,13 @@ import java.util.Set;
 
 public class WorldUtil {
     public static void teleportToIsland(ServerPlayerEntity player, IslandPos island) {
-        ServerWorld world = player.getServerWorld();
+        //noinspection ConstantConditions
+        ServerWorld world = player.getServer().func_241755_D_();
 
         Set<BlockPos> possibleSpawns = SkyblockSavedData.get(world).getPossibleSpawns(island);
         BlockPos spawn = new ArrayList<>(possibleSpawns).get(new Random().nextInt(possibleSpawns.size()));
-        player.rotationYaw = 0;
-        player.rotationPitch = 0;
-        player.setPositionAndUpdate(spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5);
-        player.func_242111_a(player.world.getDimensionKey(), spawn, 0, true, false);
+        player.teleport(world, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, 0, 0);
+        player.func_242111_a(world.getDimensionKey(), spawn, 0, true, false);
     }
 
     public static boolean isSkyblock(World world) {
