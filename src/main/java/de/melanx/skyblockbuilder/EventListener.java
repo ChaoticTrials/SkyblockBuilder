@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder;
 import de.melanx.skyblockbuilder.commands.ListCommand;
 import de.melanx.skyblockbuilder.commands.SpawnsCommand;
 import de.melanx.skyblockbuilder.commands.TeamCommand;
-import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -28,6 +27,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class EventListener {
+    private static final String SPAWNED_TAG = "alreadySpawned";
 
     @SubscribeEvent
     public void resourcesReload(AddReloadListenerEvent event) {
@@ -64,18 +64,26 @@ public class EventListener {
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         World world = event.getPlayer().world;
+        if (world instanceof ServerWorld) {
+            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+            if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
+                return;
+            }
+            player.getPersistentData().putBoolean(SPAWNED_TAG, true);
+        }
+
+        assert world instanceof ServerWorld;
         if (WorldUtil.isSkyblock(world) && event.getPlayer() instanceof ServerPlayerEntity) {
             SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
-            for (Team team : data.skyblocks.values()) {
-                if (team.hasPlayer(event.getPlayer())) {
-                    return; // todo change that players without team always be ported to spawn island
-                }
-            }
-
             IslandPos islandPos = data.getSpawn();
             ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
             WorldUtil.teleportToIsland((ServerPlayerEntity) event.getPlayer(), islandPos);
         }
+    }
+
+    @SubscribeEvent
+    public void clonePlayer(PlayerEvent.Clone event) {
+        event.getPlayer().getPersistentData().putBoolean(SPAWNED_TAG, event.getOriginal().getPersistentData().getBoolean(SPAWNED_TAG));
     }
 
     @SubscribeEvent
