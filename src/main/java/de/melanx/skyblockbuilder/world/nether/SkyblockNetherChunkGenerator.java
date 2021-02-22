@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.world.nether;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.block.BlockState;
@@ -75,7 +76,9 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
 
     @Override
     public void func_230351_a_(@Nonnull WorldGenRegion region, @Nonnull StructureManager manager) {
-        // here could be your structure
+        if (ConfigHandler.netherStructures.get()) {
+            super.func_230351_a_(region, manager);
+        }
     }
 
     @Nonnull

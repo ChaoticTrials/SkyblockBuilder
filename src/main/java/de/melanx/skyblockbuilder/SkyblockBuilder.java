@@ -36,7 +36,7 @@ public class SkyblockBuilder {
         bus.addListener(this::commonSetup);
         bus.addGenericListener(ForgeWorldType.class, VoidWorldType::register);
 
-        ConfigHandler.generateDefaultFiles();
+        ConfigHandler.setup();
 
         MinecraftForge.EVENT_BUS.register(new EventListener());
     }
