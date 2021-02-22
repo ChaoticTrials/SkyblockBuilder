@@ -2,9 +2,11 @@ package de.melanx.skyblockbuilder;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import de.melanx.skyblockbuilder.world.SkyblockBiomeProvider;
-import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
+import de.melanx.skyblockbuilder.world.nether.SkyblockNetherBiomeProvider;
+import de.melanx.skyblockbuilder.world.nether.SkyblockNetherChunkGenerator;
+import de.melanx.skyblockbuilder.world.overworld.SkyblockBiomeProvider;
+import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.util.Util;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.world.ForgeWorldType;
@@ -42,7 +44,9 @@ public class SkyblockBuilder {
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             SkyblockBiomeProvider.init();
-            VoidChunkGenerator.init();
+            SkyblockNetherBiomeProvider.init();
+            SkyblockOverworldChunkGenerator.init();
+            SkyblockNetherChunkGenerator.init();
         });
     }
 }

@@ -68,7 +68,7 @@ public class EventListener {
             SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
             for (Team team : data.skyblocks.values()) {
                 if (team.hasPlayer(event.getPlayer())) {
-                    return;
+                    return; // todo change that players without team always be ported to spawn island
                 }
             }
 

@@ -1,8 +1,8 @@
 package de.melanx.skyblockbuilder.util;
 
 import de.melanx.skyblockbuilder.world.IslandPos;
-import de.melanx.skyblockbuilder.world.VoidChunkGenerator;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -27,6 +27,6 @@ public class WorldUtil {
 
     public static boolean isSkyblock(World world) {
         return world.getChunkProvider() instanceof ServerChunkProvider &&
-                ((ServerChunkProvider) world.getChunkProvider()).getChunkGenerator() instanceof VoidChunkGenerator;
+                ((ServerChunkProvider) world.getChunkProvider()).getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
     }
 }

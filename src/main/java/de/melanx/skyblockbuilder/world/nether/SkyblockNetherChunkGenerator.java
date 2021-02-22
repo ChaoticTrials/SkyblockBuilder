@@ -1,8 +1,9 @@
-package de.melanx.skyblockbuilder.world;
+package de.melanx.skyblockbuilder.world.nether;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -18,23 +19,23 @@ import net.minecraft.world.gen.feature.structure.StructureManager;
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
-public class VoidChunkGenerator extends ChunkGenerator {
+public class SkyblockNetherChunkGenerator extends ChunkGenerator {
     // [VanillaCopy] overworld chunk generator codec
-    public static final Codec<VoidChunkGenerator> CODEC = RecordCodecBuilder.create(
+    protected static final Codec<SkyblockNetherChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
                     BiomeProvider.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeProvider),
                     Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
                     DimensionSettings.field_236098_b_.fieldOf("settings").forGetter((gen) -> gen.settings)
-            ).apply(instance, instance.stable(VoidChunkGenerator::new)));
+            ).apply(instance, instance.stable(SkyblockNetherChunkGenerator::new)));
+
+    protected final long seed;
+    protected final Supplier<DimensionSettings> settings;
 
     public static void init() {
-        Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock"), VoidChunkGenerator.CODEC);
+        Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_nether"), CODEC);
     }
 
-    private final long seed;
-    private final Supplier<DimensionSettings> settings;
-
-    public VoidChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
+    public SkyblockNetherChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
         super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
         this.settings = settings;
@@ -49,7 +50,7 @@ public class VoidChunkGenerator extends ChunkGenerator {
     @Nonnull
     @Override
     public ChunkGenerator func_230349_a_(long newSeed) {
-        return new VoidChunkGenerator(this.biomeProvider.getBiomeProvider(newSeed), newSeed, this.settings);
+        return new SkyblockOverworldChunkGenerator(this.biomeProvider.getBiomeProvider(newSeed), newSeed, this.settings);
     }
 
     @Override
@@ -74,6 +75,7 @@ public class VoidChunkGenerator extends ChunkGenerator {
 
     @Override
     public void func_230351_a_(@Nonnull WorldGenRegion region, @Nonnull StructureManager manager) {
+        // here could be your structure
     }
 
     @Nonnull

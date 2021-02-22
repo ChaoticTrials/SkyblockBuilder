@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.world;
+package de.melanx.skyblockbuilder.world.overworld;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -20,7 +20,9 @@ public class SkyblockBiomeProvider extends BiomeProvider {
             (instance) -> instance.group(
                     Codec.LONG.fieldOf("seed").stable().forGetter(provider -> provider.seed),
                     RegistryLookupCodec.getLookUpCodec(Registry.BIOME_KEY).forGetter(provider -> provider.lookupRegistry)
-            ).apply(instance, instance.stable((seed, lookupRegistry) -> new SkyblockBiomeProvider(new OverworldBiomeProvider(seed, false, false, lookupRegistry)))));
+            ).apply(instance, instance.stable((seed, lookupRegistry) -> new SkyblockBiomeProvider(
+                    new OverworldBiomeProvider(seed, false, false, lookupRegistry))
+            )));
 
     public static void init() {
         Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_provider"), SkyblockBiomeProvider.CODEC);

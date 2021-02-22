@@ -5,7 +5,6 @@ import com.google.common.collect.HashBiMap;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.world.IslandPos;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -62,10 +61,14 @@ public class SkyblockSavedData extends WorldSavedData {
 
     public Pair<IslandPos, Team> create(String teamName) {
         IslandPos islandPos;
-        do {
-            int[] pos = this.spiral.next();
-            islandPos = new IslandPos(pos[0] + SPAWN, pos[1] + SPAWN);
-        } while (this.skyblockPositions.containsValue(islandPos));
+        if (teamName.equalsIgnoreCase("spawn")) {
+            islandPos = new IslandPos(SPAWN, SPAWN);
+        } else {
+            do {
+                int[] pos = this.spiral.next();
+                islandPos = new IslandPos(pos[0] + SPAWN, pos[1] + SPAWN);
+            } while (this.skyblockPositions.containsValue(islandPos));
+        }
 
         Set<BlockPos> positions = initialPossibleSpawns(islandPos.getCenter());
 
@@ -153,12 +156,6 @@ public class SkyblockSavedData extends WorldSavedData {
 
         PlacementSettings settings = new PlacementSettings();
         TemplateLoader.TEMPLATE.func_237152_b_(this.world, team.getIsland().getCenter(), settings, new Random());
-
-        BlockPos playerPos = !possibleSpawns.isEmpty() ? possibleSpawns.get(new Random().nextInt(possibleSpawns.size())) : BlockPos.ZERO;
-
-        for (BlockPos replace : possibleSpawns) {
-            this.world.setBlockState(replace, Blocks.AIR.getDefaultState());
-        }
 
         this.skyblocks.put(team.getName().toLowerCase(), team);
         this.skyblockPositions.put(team.getName().toLowerCase(), team.getIsland());

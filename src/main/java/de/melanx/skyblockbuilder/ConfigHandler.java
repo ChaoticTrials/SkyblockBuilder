@@ -12,7 +12,7 @@ import java.nio.file.StandardOpenOption;
 
 public class ConfigHandler {
     private static final Path MOD_CONFIG = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.MODID);
-    private static final Path SCHEMATIC_FILE = MOD_CONFIG.resolve("skyblockbuilder-template.nbt");
+    private static final Path SCHEMATIC_FILE = MOD_CONFIG.resolve("template.nbt");
     private static final Path SPAWNS_FILE = MOD_CONFIG.resolve("spawns.json");
 
     public static void generateDefaultFiles() {
