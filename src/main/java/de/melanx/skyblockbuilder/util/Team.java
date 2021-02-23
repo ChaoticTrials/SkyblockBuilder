@@ -92,6 +92,18 @@ public class Team {
         return removed;
     }
 
+    public void removePlayers(Collection<UUID> players) {
+        for (UUID id : players) {
+            this.players.remove(id);
+        }
+        this.data.markDirty();
+    }
+
+    public void removeAllPlayers() {
+        this.players.clear();
+        this.data.markDirty();
+    }
+
     public boolean hasPlayer(UUID player) {
         return this.players.contains(player);
     }

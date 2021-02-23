@@ -10,7 +10,9 @@ import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -65,25 +67,34 @@ public class EventListener {
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         World world = event.getPlayer().world;
         if (world instanceof ServerWorld) {
-            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-            if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
-                return;
-            }
-            player.getPersistentData().putBoolean(SPAWNED_TAG, true);
-        }
+            if (WorldUtil.isSkyblock(world)) {
+                SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
+                ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+                if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
+                    if (!data.hasPlayerTeam(player) && data.getTeamFromPlayer(player) != data.getTeam("spawn")) {
+                        WorldUtil.teleportToIsland(player, data.getSpawn());
+                    }
 
-        assert world instanceof ServerWorld;
-        if (WorldUtil.isSkyblock(world) && event.getPlayer() instanceof ServerPlayerEntity) {
-            SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
-            IslandPos islandPos = data.getSpawn();
-            ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
-            WorldUtil.teleportToIsland((ServerPlayerEntity) event.getPlayer(), islandPos);
+                    return;
+                }
+
+                player.getPersistentData().putBoolean(SPAWNED_TAG, true);
+                IslandPos islandPos = data.getSpawn();
+                ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
+                WorldUtil.teleportToIsland(player, islandPos);
+            }
         }
     }
 
     @SubscribeEvent
     public void clonePlayer(PlayerEvent.Clone event) {
-        event.getPlayer().getPersistentData().putBoolean(SPAWNED_TAG, event.getOriginal().getPersistentData().getBoolean(SPAWNED_TAG));
+        PlayerEntity newPlayer = event.getPlayer();
+        CompoundNBT newData = newPlayer.getPersistentData();
+
+        PlayerEntity oldPlayer = event.getOriginal();
+        CompoundNBT oldData = oldPlayer.getPersistentData();
+
+        newData.putBoolean(SPAWNED_TAG, oldData.getBoolean(SPAWNED_TAG));
     }
 
     @SubscribeEvent

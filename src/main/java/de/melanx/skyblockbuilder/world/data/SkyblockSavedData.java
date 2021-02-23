@@ -29,7 +29,7 @@ import java.util.*;
 public class SkyblockSavedData extends WorldSavedData {
     private static final String NAME = "skyblock_builder";
 
-    private static final int SPAWN = 0;
+    public static final IslandPos SPAWN_ISLAND = new IslandPos(0, 0);
 
     private final ServerWorld world;
     public Map<String, Team> skyblocks = new HashMap<>();
@@ -62,11 +62,11 @@ public class SkyblockSavedData extends WorldSavedData {
     public Pair<IslandPos, Team> create(String teamName) {
         IslandPos islandPos;
         if (teamName.equalsIgnoreCase("spawn")) {
-            islandPos = new IslandPos(SPAWN, SPAWN);
+            islandPos = SPAWN_ISLAND;
         } else {
             do {
                 int[] pos = this.spiral.next();
-                islandPos = new IslandPos(pos[0] + SPAWN, pos[1] + SPAWN);
+                islandPos = new IslandPos(pos[0], pos[1]);
             } while (this.skyblockPositions.containsValue(islandPos));
         }
 
@@ -125,7 +125,8 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public boolean hasPlayerTeam(UUID player) {
-        return this.getTeamFromPlayer(player) != null;
+        Team team = this.getTeamFromPlayer(player);
+        return team != null && team != this.getTeam("spawn");
     }
 
     public boolean addPlayerToTeam(String teamName, PlayerEntity player) {
@@ -140,6 +141,7 @@ public class SkyblockSavedData extends WorldSavedData {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -187,7 +189,12 @@ public class SkyblockSavedData extends WorldSavedData {
         for (Map.Entry<String, Team> entry : this.skyblocks.entrySet()) {
             Team team = entry.getValue();
             if (team.hasPlayer(player)) {
-                return team.removePlayer(player);
+                boolean removed = team.removePlayer(player);
+                if (removed) {
+                    //noinspection ConstantConditions
+                    this.getTeam("spawn").addPlayer(player);
+                }
+                return removed;
             }
         }
         return false;
@@ -213,7 +220,10 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public boolean deleteTeam(Team team) {
-        return this.skyblocks.remove(team.getName()) != null;
+        Team removedTeam = this.skyblocks.remove(team.getName());
+
+        //noinspection ConstantConditions
+        return removedTeam != null && this.getTeam("spawn").addPlayers(removedTeam.getPlayers());
     }
 
     @Nullable

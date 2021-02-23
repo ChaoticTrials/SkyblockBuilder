@@ -1,13 +1,14 @@
 package de.melanx.skyblockbuilder.commands;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -64,12 +65,15 @@ public class ListCommand {
             return 0;
         }
 
-        PlayerList playerList = source.getServer().getPlayerList();
+        PlayerProfileCache profileCache = source.getServer().getPlayerProfileCache();
         source.sendFeedback(new StringTextComponent(String.format("%s contains %s players.", team.getName(), team.getPlayers().size())).mergeStyle(TextFormatting.GOLD), false);
         team.getPlayers().forEach(id -> {
-            ServerPlayerEntity player = playerList.getPlayerByUUID(id);
-            if (player != null) {
-                source.sendFeedback(new StringTextComponent("- ").append(player.getDisplayName()), false);
+            GameProfile profile = profileCache.getProfileByUUID(id);
+            if (profile != null) {
+                String name = profile.getName();
+                if (!StringUtils.isNullOrEmpty(name)) {
+                    source.sendFeedback(new StringTextComponent("- " + name), false);
+                }
             }
         });
         return 1;
