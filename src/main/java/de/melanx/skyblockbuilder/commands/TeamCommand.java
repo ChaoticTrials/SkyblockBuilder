@@ -45,7 +45,9 @@ public class TeamCommand {
                         .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
                                 .executes(context -> deleteTeam(context.getSource(), StringArgumentType.getString(context, "team")))))
                 .then(Commands.literal("clear")
-                        .executes(context -> deleteEmptyTeams(context.getSource())));
+                        .executes(context -> deleteEmptyTeams(context.getSource()))
+                        .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
+                                .executes(context -> clearTeam(context.getSource(), StringArgumentType.getString(context, "team")))));
     }
 
     private static int deleteEmptyTeams(CommandSource source) {
@@ -64,6 +66,23 @@ public class TeamCommand {
         data.markDirty();
 
         source.sendFeedback(new StringTextComponent(String.format("Deleted %s empty teams.", i)).mergeStyle(TextFormatting.GREEN), true);
+        return 1;
+    }
+
+    private static int clearTeam(CommandSource source, String teamName) {
+        ServerWorld world = source.getWorld();
+        SkyblockSavedData data = SkyblockSavedData.get(world);
+
+        if (!data.teamExists(teamName)) {
+            source.sendFeedback(new StringTextComponent("Team does not exist!").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
+        Team team = data.getTeam(teamName);
+        assert team != null;
+        int i = team.getPlayers().size();
+        team.removeAllPlayers();
+        source.sendFeedback(new StringTextComponent(String.format("Successfully removed all %s players.", i)), true);
         return 1;
     }
 

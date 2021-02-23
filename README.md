@@ -46,8 +46,10 @@ Use the `/skyblock teams delete <name>` to delete the team with the given name. 
 will still exist but you can't re-bind a new team to that island.
 
 ### Clearing teams
-Because teams can be empty, you can "clear" all islands. If you use `/skyblock teams clear`, all empty teams will be deleted 
+Because teams can be empty, you can "clear" all islands. If you use `/skyblock teams clear <name>`, all empty teams will be deleted 
 as in [Deleting teams](#deleting-teams).
+
+If you provide a team name, all players from this team will be removed and teleported to spawn island.
 
 ### Joining a team
 An operator need to add players to a team. For that, they need to use `/skyblock teams join <team_name> <player>`.
