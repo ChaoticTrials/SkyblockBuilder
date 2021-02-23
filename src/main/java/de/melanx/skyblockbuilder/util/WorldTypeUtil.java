@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.util;
 
+import de.melanx.skyblockbuilder.world.VoidWorldType;
 import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.registry.DynamicRegistries;
@@ -26,14 +27,14 @@ public class WorldTypeUtil {
         if (!isServerLevelSkyblock(server)) {
             return;
         }
+
         DynamicRegistries registries = server.func_244267_aX();
         ServerWorldInfo worldInfo = (ServerWorldInfo) server.getServerConfiguration().getServerWorldInfo();
         long seed = worldInfo.generatorSettings.getSeed();
         Registry<DimensionType> dimensions = registries.getRegistry(Registry.DIMENSION_TYPE_KEY);
         Registry<Biome> biomes = registries.getRegistry(Registry.BIOME_KEY);
         Registry<DimensionSettings> dimensionSettings = registries.getRegistry(Registry.NOISE_SETTINGS_KEY);
-        SimpleRegistry<Dimension> simpleregistry = DimensionType.getDefaultSimpleRegistry(dimensions, biomes, dimensionSettings, seed);
-        SimpleRegistry<Dimension> skyblock = DimensionGeneratorSettings.func_242749_a(dimensions, simpleregistry, new SkyblockOverworldChunkGenerator(new OverworldBiomeProvider(seed, false, false, biomes), seed, () -> dimensionSettings.getOrThrow(DimensionSettings.field_242734_c)));
+        SimpleRegistry<Dimension> skyblock = DimensionGeneratorSettings.func_242749_a(dimensions, VoidWorldType.voidDimensions(registries, biomes, dimensionSettings, seed), new SkyblockOverworldChunkGenerator(new OverworldBiomeProvider(seed, false, false, biomes), seed, () -> dimensionSettings.getOrThrow(DimensionSettings.field_242734_c)));
         worldInfo.generatorSettings = new DimensionGeneratorSettings(seed, worldInfo.generatorSettings.doesGenerateFeatures(), worldInfo.generatorSettings.hasBonusChest(), skyblock);
     }
 }

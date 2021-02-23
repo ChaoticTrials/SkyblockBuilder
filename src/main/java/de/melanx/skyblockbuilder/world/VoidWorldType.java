@@ -57,7 +57,7 @@ public class VoidWorldType extends ForgeWorldType {
         return new DimensionGeneratorSettings(seed, generateStructures, generateLoot, dimensions);
     }
 
-    private static SimpleRegistry<Dimension> voidDimensions(DynamicRegistries dynamicRegistries, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
+    public static SimpleRegistry<Dimension> voidDimensions(DynamicRegistries dynamicRegistries, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         SimpleRegistry<Dimension> registry = new SimpleRegistry<>(Registry.DIMENSION_KEY, Lifecycle.experimental());
         registry.register(Dimension.OVERWORLD, new Dimension(() -> DimensionType.OVERWORLD_TYPE, overworldChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         registry.register(Dimension.THE_NETHER, new Dimension(() -> DimensionType.NETHER_TYPE, netherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
