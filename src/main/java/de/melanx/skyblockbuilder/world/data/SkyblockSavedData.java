@@ -247,7 +247,7 @@ public class SkyblockSavedData extends WorldSavedData {
         return this.skyblocks.get(this.skyblockPositions.inverse().get(pos)).getPossibleSpawns();
     }
 
-    private static Set<BlockPos> initialPossibleSpawns(BlockPos center) {
+    public static Set<BlockPos> initialPossibleSpawns(BlockPos center) {
         Set<BlockPos> positions = new HashSet<>();
         for (BlockPos pos : TemplateLoader.SPAWNS) {
             positions.add(center.add(pos.toImmutable()));

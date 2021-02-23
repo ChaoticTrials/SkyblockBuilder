@@ -13,13 +13,12 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TeamCommand {
@@ -102,10 +101,21 @@ public class TeamCommand {
             return 0;
         }
 
+        //noinspection ConstantConditions
+        Set<UUID> players = new HashSet<>(data.getTeam(team).getPlayers());
         if (!data.deleteTeam(team)) {
             source.sendFeedback(new StringTextComponent(String.format("Error while deleting team %s!", team)).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
+
+        PlayerList playerList = source.getServer().getPlayerList(); // todo use usercache
+        IslandPos spawn = data.getSpawn();
+        players.forEach(id -> {
+            ServerPlayerEntity player = playerList.getPlayerByUUID(id);
+            if (player != null) {
+                WorldUtil.teleportToIsland(player, spawn);
+            }
+        });
 
         source.sendFeedback(new StringTextComponent(String.format("Successfully deleted team %s.", team)).mergeStyle(TextFormatting.GREEN), true);
         return 1;

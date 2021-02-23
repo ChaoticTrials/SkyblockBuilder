@@ -25,7 +25,7 @@ public class SpawnsCommand {
 
         for (Team team : data.getTeams()) {
             IslandPos spawn = team.getIsland();
-            for (BlockPos pos : data.getPossibleSpawns(spawn)) {
+            for (BlockPos pos : SkyblockSavedData.initialPossibleSpawns(spawn.getCenter())) {
                 if (source.getEntity() instanceof ServerPlayerEntity) {
                     world.spawnParticle(source.asPlayer(), ParticleTypes.HAPPY_VILLAGER, true, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);
                 } else {
