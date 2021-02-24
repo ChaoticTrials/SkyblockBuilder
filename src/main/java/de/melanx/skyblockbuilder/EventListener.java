@@ -79,6 +79,8 @@ public class EventListener {
                 }
 
                 player.getPersistentData().putBoolean(SPAWNED_TAG, true);
+                //noinspection ConstantConditions
+                data.getTeam("spawn").addPlayer(player);
                 IslandPos islandPos = data.getSpawn();
                 ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
                 WorldUtil.teleportToIsland(player, islandPos);
