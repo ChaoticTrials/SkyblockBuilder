@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.util;
 
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
@@ -20,12 +21,29 @@ public class WorldUtil {
 
         Set<BlockPos> possibleSpawns = SkyblockSavedData.get(world).getPossibleSpawns(island);
         BlockPos spawn = new ArrayList<>(possibleSpawns).get(new Random().nextInt(possibleSpawns.size()));
-        player.teleport(world, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, 0, 0);
+        player.teleport(world, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, ConfigHandler.direction.get().getYaw(), 0);
         player.func_242111_a(world.getDimensionKey(), spawn, 0, true, false);
     }
 
     public static boolean isSkyblock(World world) {
         return world.getChunkProvider() instanceof ServerChunkProvider &&
                 ((ServerChunkProvider) world.getChunkProvider()).getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
+    }
+
+    public enum Directions {
+        NORTH(180),
+        EAST(270),
+        SOUTH(0),
+        WEST(90);
+
+        private final int yaw;
+
+        Directions(int yaw) {
+            this.yaw = yaw;
+        }
+
+        public int getYaw() {
+            return this.yaw;
+        }
     }
 }

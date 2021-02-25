@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -27,12 +28,15 @@ public class ConfigHandler {
 
     public static ForgeConfigSpec.BooleanValue overworldStructures;
     public static ForgeConfigSpec.BooleanValue netherStructures;
+    public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
 
     public static void init(ForgeConfigSpec.Builder builder) {
         overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
                 .define("structures.overworld", false);
         netherStructures = builder.comment("Should structures like fortresses or bastions be generated in nether? [default: true]")
                 .define("structures.nether", true);
+        direction = builder.comment("Direction the player should look at initial spawn")
+                .defineEnum("direction", WorldUtil.Directions.SOUTH);
     }
 
     public static void generateDefaultFiles() {
