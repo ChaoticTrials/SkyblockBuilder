@@ -30,6 +30,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     protected final long seed;
     protected final Supplier<DimensionSettings> settings;
+    protected final NoiseChunkGenerator parent;
 
     public static void init() {
         Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock"), CODEC);
@@ -39,6 +40,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
         super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
         this.settings = settings;
+        this.parent = new NoiseChunkGenerator(provider, seed, settings);
     }
 
     @Nonnull
@@ -65,7 +67,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getHeight(int x, int z, @Nonnull Heightmap.Type heightmapType) {
-        return 0;
+        return this.parent.getHeight(x, z, heightmapType);
     }
 
     @Override
