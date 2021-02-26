@@ -29,6 +29,7 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue overworldStructures;
     public static ForgeConfigSpec.BooleanValue netherStructures;
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
+    public static ForgeConfigSpec.IntValue generationHeight;
 
     public static void init(ForgeConfigSpec.Builder builder) {
         overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
@@ -36,7 +37,10 @@ public class ConfigHandler {
         netherStructures = builder.comment("Should structures like fortresses or bastions be generated in nether? [default: true]")
                 .define("structures.nether", true);
         direction = builder.comment("Direction the player should look at initial spawn")
-                .defineEnum("direction", WorldUtil.Directions.SOUTH);
+                .defineEnum("spawn.direction", WorldUtil.Directions.SOUTH);
+        generationHeight = builder.comment("Height of the bottom layer from the structure.",
+                "This affects where exactly the island will be generated.")
+                .defineInRange("spawn.height", 64, 1, 255);
     }
 
     public static void generateDefaultFiles() {

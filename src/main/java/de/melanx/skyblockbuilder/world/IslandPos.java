@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.world;
 
+import de.melanx.skyblockbuilder.ConfigHandler;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 
@@ -16,7 +17,7 @@ public final class IslandPos {
     }
 
     public BlockPos getCenter() {
-        return new BlockPos(this.x * 8192, 64, this.z * 8192);
+        return new BlockPos(this.x * 8192, ConfigHandler.generationHeight.get(), this.z * 8192);
     }
 
     public static IslandPos fromTag(CompoundNBT tag) {

@@ -19,14 +19,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TemplateLoader {
     private static final Path SCHEMATIC_FILE = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.MODID).resolve("template.nbt");
     private static final Path SPAWNS_FILE = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.MODID).resolve("spawns.json");
     public static final Template TEMPLATE = new Template();
-    public static final Set<BlockPos> SPAWNS = new HashSet<>();
+    public static final List<BlockPos> SPAWNS = new ArrayList<>();
 
     public static void loadSchematic(IResourceManager manager) throws IOException {
         File schematic = new File(SCHEMATIC_FILE.toUri());
