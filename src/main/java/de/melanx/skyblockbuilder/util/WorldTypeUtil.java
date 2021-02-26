@@ -1,5 +1,7 @@
 package de.melanx.skyblockbuilder.util;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
 import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -11,13 +13,20 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.provider.OverworldBiomeProvider;
 import net.minecraft.world.gen.DimensionSettings;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
+import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.storage.ServerWorldInfo;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class WorldTypeUtil {
+
+    public static DimensionStructuresSettings STRONGHOLD_ONLY_STRUCTURE_SETTINGS = new DimensionStructuresSettings(Optional.of(DimensionStructuresSettings.field_236192_c_), Maps.newHashMap(ImmutableMap.of(Structure.STRONGHOLD, DimensionStructuresSettings.field_236191_b_.get(Structure.STRONGHOLD))));
+    public static DimensionStructuresSettings EMPTY_SETTINGS = new DimensionStructuresSettings(Optional.of(DimensionStructuresSettings.field_236192_c_), Maps.newHashMap());
+
     private static boolean isServerLevelSkyblock(DedicatedServer server) {
         String levelType = Optional.ofNullable((String) server.getServerProperties().serverProperties.get("level-type")).map(str -> str.toLowerCase(Locale.ROOT)).orElse("default");
         return levelType.equals("custom_skyblock");
@@ -36,5 +45,9 @@ public class WorldTypeUtil {
         Registry<DimensionSettings> dimensionSettings = registries.getRegistry(Registry.NOISE_SETTINGS_KEY);
         SimpleRegistry<Dimension> skyblock = DimensionGeneratorSettings.func_242749_a(dimensions, VoidWorldType.voidDimensions(registries, biomes, dimensionSettings, seed), new SkyblockOverworldChunkGenerator(new OverworldBiomeProvider(seed, false, false, biomes), seed, () -> dimensionSettings.getOrThrow(DimensionSettings.field_242734_c)));
         worldInfo.generatorSettings = new DimensionGeneratorSettings(seed, worldInfo.generatorSettings.doesGenerateFeatures(), worldInfo.generatorSettings.hasBonusChest(), skyblock);
+    }
+
+    public static Supplier<DimensionSettings> changeDimensionStructureSettings(DimensionStructuresSettings structuresSettings, DimensionSettings oldSettings) {
+        return () -> new DimensionSettings(structuresSettings, oldSettings.getNoise(), oldSettings.getDefaultBlock(), oldSettings.getDefaultFluid(), oldSettings.func_236117_e_(), oldSettings.func_236118_f_(), oldSettings.func_236119_g_(), oldSettings.func_236120_h_());
     }
 }

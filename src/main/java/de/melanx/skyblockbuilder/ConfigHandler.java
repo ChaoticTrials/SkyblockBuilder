@@ -27,13 +27,16 @@ public class ConfigHandler {
     }
 
     public static ForgeConfigSpec.BooleanValue overworldStructures;
+    public static ForgeConfigSpec.BooleanValue strongholdOnly;
     public static ForgeConfigSpec.BooleanValue netherStructures;
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
     public static ForgeConfigSpec.IntValue generationHeight;
 
     public static void init(ForgeConfigSpec.Builder builder) {
         overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
-                .define("structures.overworld", false);
+                .define("structures.overworld.default", false);
+        strongholdOnly = builder.comment("Should the stronghold with end portal be the only structure?", "Needs default config be 'true', otherwise it'll be ignored. [default: false]")
+                .define("structures.overworld.stronhold-only", false);
         netherStructures = builder.comment("Should structures like fortresses or bastions be generated in nether? [default: true]")
                 .define("structures.nether", true);
         direction = builder.comment("Direction the player should look at initial spawn")

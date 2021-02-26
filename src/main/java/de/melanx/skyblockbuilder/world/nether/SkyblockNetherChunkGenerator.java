@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
@@ -39,6 +40,9 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
     public SkyblockNetherChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
         super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
+        if (!ConfigHandler.netherStructures.get()) {
+            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.EMPTY_SETTINGS, settings.get());
+        }
         this.settings = settings;
     }
 

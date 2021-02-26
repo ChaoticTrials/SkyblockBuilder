@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -37,8 +38,13 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
     }
 
     public SkyblockOverworldChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
-        super(provider, provider, settings.get().getStructures(), seed);
+        super(provider, provider, WorldTypeUtil.STRONGHOLD_ONLY_STRUCTURE_SETTINGS, seed);
         this.seed = seed;
+        if (!ConfigHandler.overworldStructures.get()) {
+            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.EMPTY_SETTINGS, settings.get());
+        } else if (ConfigHandler.strongholdOnly.get()) {
+            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.STRONGHOLD_ONLY_STRUCTURE_SETTINGS, settings.get());
+        }
         this.settings = settings;
         this.parent = new NoiseChunkGenerator(provider, seed, settings);
     }
