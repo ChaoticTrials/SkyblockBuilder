@@ -29,6 +29,8 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue overworldStructures;
     public static ForgeConfigSpec.BooleanValue strongholdOnly;
     public static ForgeConfigSpec.BooleanValue netherStructures;
+    public static ForgeConfigSpec.BooleanValue disableFortress;
+    public static ForgeConfigSpec.BooleanValue disableBastion;
     public static ForgeConfigSpec.BooleanValue defaultEnd;
     public static ForgeConfigSpec.BooleanValue defaultEndIsland;
     public static ForgeConfigSpec.BooleanValue endStructures;
@@ -42,7 +44,11 @@ public class ConfigHandler {
                 .define("dimensions.overworld.stronhold-only", false);
 
         netherStructures = builder.comment("Should structures like fortresses or bastions be generated in nether? [default: true]")
-                .define("dimensions.nether.structures", true);
+                .define("dimensions.nether.structures.enabled", true);
+        disableFortress = builder.comment("Use only if 'enabled' is true!", "Should nether fortress be disabled? [default: false]")
+                .define("dimensions.nether.structures.disable-fortress", false);
+        disableBastion = builder.comment("Use only if 'enabled' is true!", "Should bastions be disabled? [default: true]")
+                .define("dimensions.nether.structures.disable-bastions", true);
 
         defaultEnd = builder.comment("Should end generate as in default world type? [default: false]")
                 .define("dimensions.end.default", false);
