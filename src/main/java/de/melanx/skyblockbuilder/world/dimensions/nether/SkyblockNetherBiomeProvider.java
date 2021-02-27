@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.world.nether;
+package de.melanx.skyblockbuilder.world.dimensions.nether;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

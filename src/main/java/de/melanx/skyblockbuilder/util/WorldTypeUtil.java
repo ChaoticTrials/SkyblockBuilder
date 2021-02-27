@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
-import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
+import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;

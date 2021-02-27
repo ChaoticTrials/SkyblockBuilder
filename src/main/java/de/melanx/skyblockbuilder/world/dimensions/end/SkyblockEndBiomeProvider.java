@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.world.end;
+package de.melanx.skyblockbuilder.world.dimensions.end;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;

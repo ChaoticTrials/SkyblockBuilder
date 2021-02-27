@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.world.overworld;
+package de.melanx.skyblockbuilder.world.dimensions.overworld;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

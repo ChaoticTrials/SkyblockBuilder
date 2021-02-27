@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.world.overworld;
+package de.melanx.skyblockbuilder.world.dimensions.overworld;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;

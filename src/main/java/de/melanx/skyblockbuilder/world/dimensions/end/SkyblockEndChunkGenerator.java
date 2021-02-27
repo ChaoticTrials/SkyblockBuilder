@@ -1,18 +1,20 @@
-package de.melanx.skyblockbuilder.world.nether;
+package de.melanx.skyblockbuilder.world.dimensions.end;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
-import de.melanx.skyblockbuilder.world.overworld.SkyblockOverworldChunkGenerator;
+import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Blockreader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.*;
@@ -21,29 +23,31 @@ import net.minecraft.world.gen.feature.structure.StructureManager;
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
-public class SkyblockNetherChunkGenerator extends ChunkGenerator {
+public class SkyblockEndChunkGenerator extends ChunkGenerator {
     // [VanillaCopy] overworld chunk generator codec
-    protected static final Codec<SkyblockNetherChunkGenerator> CODEC = RecordCodecBuilder.create(
+    protected static final Codec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
                     BiomeProvider.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeProvider),
                     Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
                     DimensionSettings.field_236098_b_.fieldOf("settings").forGetter((gen) -> gen.settings)
-            ).apply(instance, instance.stable(SkyblockNetherChunkGenerator::new)));
+            ).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
 
     protected final long seed;
     protected final Supplier<DimensionSettings> settings;
+    protected final NoiseChunkGenerator parent;
 
     public static void init() {
-        Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_nether"), CODEC);
+        Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_end"), CODEC);
     }
 
-    public SkyblockNetherChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
+    public SkyblockEndChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
         super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
-        if (!ConfigHandler.netherStructures.get()) {
+        if (!ConfigHandler.endStructures.get()) {
             settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.EMPTY_SETTINGS, settings.get());
         }
         this.settings = settings;
+        this.parent = new NoiseChunkGenerator(provider, seed, settings);
     }
 
     @Nonnull
@@ -60,7 +64,15 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
 
     @Override
     public void generateSurface(@Nonnull WorldGenRegion region, @Nonnull IChunk chunk) {
+        if (ConfigHandler.defaultEndIsland.get()) {
+            this.parent.generateSurface(region, chunk);
+            return;
+        }
 
+        ChunkPos chunkPos = chunk.getPos();
+        if (chunkPos.x == 0 && chunkPos.z == 0) {
+            chunk.setBlockState(new BlockPos(0, 64, 0), Blocks.BEDROCK.getDefaultState(), false);
+        }
     }
 
     @Override
@@ -70,20 +82,16 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getHeight(int x, int z, @Nonnull Heightmap.Type heightmapType) {
-        return 0;
+        return this.parent.getHeight(x, z, heightmapType);
     }
 
-    @Override
-    public void func_230350_a_(long seed, @Nonnull BiomeManager manager, @Nonnull IChunk chunk, @Nonnull GenerationStage.Carving carving) {
-
-    }
-
-    @Override
-    public void func_230351_a_(@Nonnull WorldGenRegion region, @Nonnull StructureManager manager) {
-        if (ConfigHandler.netherStructures.get()) {
-            super.func_230351_a_(region, manager);
-        }
-    }
+//    @Override
+//    public void func_230350_a_(long seed, @Nonnull BiomeManager manager, @Nonnull IChunk chunk, @Nonnull GenerationStage.Carving carving) {
+//        ChunkPos pos = chunk.getPos();
+//        int value = 10 * 16;
+//        if (pos.getXStart() < value && pos.getXStart() > -value && pos.getZStart() < value && pos.getZStart() > -value)
+//            super.func_230350_a_(seed, manager, chunk, carving);
+//    }
 
     @Nonnull
     @Override
