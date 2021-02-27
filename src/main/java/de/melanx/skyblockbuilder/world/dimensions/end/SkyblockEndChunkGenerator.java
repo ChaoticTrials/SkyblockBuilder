@@ -15,6 +15,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Blockreader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.*;
@@ -77,7 +78,9 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Override
     public void func_230352_b_(@Nonnull IWorld world, @Nonnull StructureManager manager, @Nonnull IChunk chunk) {
-
+        if (ConfigHandler.defaultEndIsland.get()) {
+            this.parent.func_230352_b_(world, manager, chunk);
+        }
     }
 
     @Override
@@ -85,13 +88,13 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
         return this.parent.getHeight(x, z, heightmapType);
     }
 
-//    @Override
-//    public void func_230350_a_(long seed, @Nonnull BiomeManager manager, @Nonnull IChunk chunk, @Nonnull GenerationStage.Carving carving) {
-//        ChunkPos pos = chunk.getPos();
-//        int value = 10 * 16;
-//        if (pos.getXStart() < value && pos.getXStart() > -value && pos.getZStart() < value && pos.getZStart() > -value)
-//            super.func_230350_a_(seed, manager, chunk, carving);
-//    }
+    @Override
+    public void func_230350_a_(long seed, @Nonnull BiomeManager manager, @Nonnull IChunk chunk, @Nonnull GenerationStage.Carving carving) {
+        ChunkPos pos = chunk.getPos();
+        int value = 10 * 16;
+        if (pos.getXStart() < value && pos.getXStart() > -value && pos.getZStart() < value && pos.getZStart() > -value)
+            super.func_230350_a_(seed, manager, chunk, carving);
+    }
 
     @Nonnull
     @Override
