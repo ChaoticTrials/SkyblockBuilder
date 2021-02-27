@@ -3,6 +3,8 @@ package de.melanx.skyblockbuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
+import de.melanx.skyblockbuilder.world.end.SkyblockEndBiomeProvider;
+import de.melanx.skyblockbuilder.world.end.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.nether.SkyblockNetherBiomeProvider;
 import de.melanx.skyblockbuilder.world.nether.SkyblockNetherChunkGenerator;
 import de.melanx.skyblockbuilder.world.overworld.SkyblockBiomeProvider;
@@ -45,8 +47,11 @@ public class SkyblockBuilder {
         event.enqueueWork(() -> {
             SkyblockBiomeProvider.init();
             SkyblockNetherBiomeProvider.init();
+            SkyblockEndBiomeProvider.init();
+
             SkyblockOverworldChunkGenerator.init();
             SkyblockNetherChunkGenerator.init();
+            SkyblockEndChunkGenerator.init();
         });
     }
 }

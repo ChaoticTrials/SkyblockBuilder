@@ -127,7 +127,7 @@ public class TeamCommand {
             return 0;
         }
 
-        PlayerList playerList = source.getServer().getPlayerList(); // todo use usercache
+        PlayerList playerList = source.getServer().getPlayerList();
         IslandPos spawn = data.getSpawn();
         players.forEach(id -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(id);

@@ -29,16 +29,30 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue overworldStructures;
     public static ForgeConfigSpec.BooleanValue strongholdOnly;
     public static ForgeConfigSpec.BooleanValue netherStructures;
+    public static ForgeConfigSpec.BooleanValue defaultEnd;
+    public static ForgeConfigSpec.BooleanValue defaultEndIsland;
+    public static ForgeConfigSpec.BooleanValue endStructures;
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
     public static ForgeConfigSpec.IntValue generationHeight;
 
     public static void init(ForgeConfigSpec.Builder builder) {
+        // todo improve paths like 'dimensions.overworld.structures'
         overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
                 .define("structures.overworld.default", false);
         strongholdOnly = builder.comment("Should the stronghold with end portal be the only structure?", "Needs default config be 'true', otherwise it'll be ignored. [default: false]")
                 .define("structures.overworld.stronhold-only", false);
+
         netherStructures = builder.comment("Should structures like fortresses or bastions be generated in nether? [default: true]")
                 .define("structures.nether", true);
+
+        defaultEnd = builder.comment("Should end generate as in default world type? [default: false]")
+                .define("structures.end.default", false);
+        defaultEndIsland = builder.comment("Should the main island be generated as normal? [default: true]")
+                .define("structures.end.main-island", true);
+        endStructures = builder.comment("Should structures like end cities be generated in nether? [default: false]",
+                "This also affects the large islands with chorus plants.", "Small islands will still be generated.")
+                .define("structures.end.structures", false);
+
         direction = builder.comment("Direction the player should look at initial spawn")
                 .defineEnum("spawn.direction", WorldUtil.Directions.SOUTH);
         generationHeight = builder.comment("Height of the bottom layer from the structure.",
