@@ -41,9 +41,12 @@ Only an operator with permission level 2 or higher can change anything at teams.
 Use the `/skyblock teams create <name>` command to generate a team with the given name. If no name if provided, a random
 name will be generated.
 
+Alternatively (good for servers) you can use `/skyblock teams createAndJoin <name>` to create the team and join it.
+
 ### Deleting teams
 Use the `/skyblock teams delete <name>` to delete the team with the given name. WARNING! This cannot be undone. The island
-will still exist but you can't re-bind a new team to that island.
+will still exist but you can't re-bind a new team to that island. If users are in the team, they will be teleported to spawn 
+after dropping all their items.
 
 ### Clearing teams
 Because teams can be empty, you can "clear" all islands. If you use `/skyblock teams clear <name>`, all empty teams will be deleted 
@@ -57,8 +60,16 @@ Then the player will be teleported to the teams island.
 
 ### Leaving a team
 An operator need to remove players from a team. For that, they need to use `/skyblock teams remove <player>`. The removed
-player will be teleported back to spawn.
+player will be teleported back to spawn after dropping all the items in the inventory.
 
 ### Listing teams
 Everyone can list the teams. For that, you can use `/skyblock list <name>`. That will list either all the teams if no 
 name is provided or the names of all players in a team.
+
+### Inviting users
+Everyone in a team can invite other players. For that, you can use `/skyblock invite <player>`. That will send an invitation 
+to the given player. Only players with no team can be invited.
+
+### Accepting invitations
+Everyone with an invitation can accept them. You can only accept invitations if you're in no team. For that, you use 
+the command `/skyblock accept <team>`.
