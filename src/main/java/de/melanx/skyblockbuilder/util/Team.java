@@ -168,4 +168,23 @@ public class Team {
             this.possibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (!(o instanceof Team)) {
+            return false;
+        }
+
+        Team team = (Team) o;
+        return this.name.equals(team.name) && this.island.equals(team.island);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = this.name.hashCode();
+        result = result * this.island.hashCode();
+        return result;
+    }
 }

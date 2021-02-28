@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -32,8 +33,9 @@ public class SkyblockSavedData extends WorldSavedData {
     public static final IslandPos SPAWN_ISLAND = new IslandPos(0, 0);
 
     private final ServerWorld world;
-    public Map<String, Team> skyblocks = new HashMap<>();
-    public BiMap<String, IslandPos> skyblockPositions = HashBiMap.create();
+    private Map<UUID, List<Team>> invites = new HashMap<>();
+    private Map<String, Team> skyblocks = new HashMap<>();
+    private BiMap<String, IslandPos> skyblockPositions = HashBiMap.create();
     private Spiral spiral = new Spiral();
 
     public SkyblockSavedData(ServerWorld world) {
@@ -85,6 +87,7 @@ public class SkyblockSavedData extends WorldSavedData {
 
     @Override
     public void read(CompoundNBT nbt) {
+        Map<UUID, List<Team>> invites = new HashMap<>();
         Map<String, Team> skyblocks = new HashMap<>();
         BiMap<String, IslandPos> skyblockPositions = HashBiMap.create();
         for (INBT inbt : nbt.getList("Islands", Constants.NBT.TAG_COMPOUND)) {
@@ -97,6 +100,26 @@ public class SkyblockSavedData extends WorldSavedData {
             skyblocks.put(team.getName().toLowerCase(), team);
             skyblockPositions.put(team.getName().toLowerCase(), island);
         }
+
+        for (INBT inbt : nbt.getList("Invitations", Constants.NBT.TAG_COMPOUND)) {
+            CompoundNBT tag = (CompoundNBT) inbt;
+
+            UUID player = tag.getUniqueId("Player");
+            List<Team> teams = new ArrayList<>();
+            for (INBT inbt1 : tag.getList("Teams", Constants.NBT.TAG_COMPOUND)) {
+                CompoundNBT teamTag = (CompoundNBT) inbt1;
+
+                String teamName = teamTag.getString("Team");
+                Team team = skyblocks.get(teamName.toLowerCase());
+                if (team != null) {
+                    teams.add(team);
+                }
+            }
+            if (!teams.isEmpty()) {
+                invites.put(player, teams);
+            }
+        }
+        this.invites = invites;
         this.skyblocks = skyblocks;
         this.skyblockPositions = skyblockPositions;
         this.spiral = Spiral.fromArray(nbt.getIntArray("SpiralState"));
@@ -110,8 +133,27 @@ public class SkyblockSavedData extends WorldSavedData {
             islands.add(team.serializeNBT());
         }
 
+        ListNBT invitations = new ListNBT();
+        for (Map.Entry<UUID, List<Team>> entry : this.invites.entrySet()) {
+            List<Team> teams = entry.getValue();
+            CompoundNBT entryTag = new CompoundNBT();
+            entryTag.putUniqueId("Player", entry.getKey());
+
+            ListNBT teamsTag = new ListNBT();
+            teams.forEach(team -> {
+                CompoundNBT compoundNBT = new CompoundNBT();
+                compoundNBT.putString("Team", team.getName());
+                teamsTag.add(compoundNBT);
+            });
+
+            entryTag.put("Teams", teamsTag);
+
+            invitations.add(entryTag);
+        }
+
         nbt.putIntArray("SpiralState", this.spiral.toIntArray());
         nbt.put("Islands", islands);
+        nbt.put("Invitations", invitations);
         return nbt;
     }
 
@@ -136,6 +178,8 @@ public class SkyblockSavedData extends WorldSavedData {
     public boolean addPlayerToTeam(String teamName, UUID player) {
         for (Team team : this.skyblocks.values()) {
             if (team.getName().equals(teamName)) {
+                //noinspection ConstantConditions
+                this.getTeam("spawn").removePlayer(player);
                 team.addPlayer(player);
                 this.markDirty();
                 return true;
@@ -188,6 +232,7 @@ public class SkyblockSavedData extends WorldSavedData {
     public boolean removePlayerFromTeam(UUID player) {
         for (Map.Entry<String, Team> entry : this.skyblocks.entrySet()) {
             Team team = entry.getValue();
+            if (team.getName().equalsIgnoreCase("spawn")) continue;
             if (team.hasPlayer(player)) {
                 boolean removed = team.removePlayer(player);
                 if (removed) {
@@ -233,7 +278,9 @@ public class SkyblockSavedData extends WorldSavedData {
 
     @Nullable
     public Team getTeamFromPlayer(UUID player) {
+        Team spawn = this.getTeam("spawn");
         for (Team team : this.skyblocks.values()) {
+            if (team == spawn) continue;
             if (team.getPlayers().contains(player)) {
                 return team;
             }
@@ -247,6 +294,68 @@ public class SkyblockSavedData extends WorldSavedData {
 
     public Collection<Team> getTeams() {
         return this.skyblocks.values();
+    }
+
+    public void addInvite(Team team, PlayerEntity player) {
+        this.addInvite(team, player.getGameProfile().getId());
+    }
+
+    public void addInvite(Team team, UUID player) {
+        List<Team> teams = this.invites.computeIfAbsent(player, id -> new ArrayList<>());
+
+        if (!teams.contains(team)) {
+            teams.add(team);
+        }
+
+        this.markDirty();
+    }
+
+    public boolean hasInvites(PlayerEntity player) {
+        return this.hasInvites(player.getGameProfile().getId());
+    }
+
+    public boolean hasInvites(UUID player) {
+        return this.invites.containsKey(player);
+    }
+
+    public boolean hasInviteFrom(Team team, PlayerEntity player) {
+        return this.hasInviteFrom(team, player.getGameProfile().getId());
+    }
+
+    public boolean hasInviteFrom(Team team, UUID player) {
+        return this.invites.get(player).contains(team);
+    }
+
+    public List<Team> getInvites(PlayerEntity player) {
+        return this.getInvites(player.getGameProfile().getId());
+    }
+
+    public List<Team> getInvites(UUID player) {
+        return this.invites.get(player);
+    }
+
+    public boolean acceptInvite(Team team, PlayerEntity player) {
+        return this.acceptInvite(team, player.getGameProfile().getId());
+    }
+
+    public boolean acceptInvite(Team team, UUID player) {
+        List<Team> teams = this.invites.get(player);
+
+        if (teams == null) {
+            return false;
+        }
+
+        if (teams.contains(team)) {
+            this.addPlayerToTeam(team.getName(), player);
+            this.invites.remove(player);
+            //noinspection ConstantConditions
+            WorldUtil.teleportToIsland(this.world.getServer().getPlayerList().getPlayerByUUID(player), team.getIsland());
+            this.markDirty();
+
+            return true;
+        }
+
+        return false;
     }
 
     public Set<BlockPos> getPossibleSpawns(IslandPos pos) {
