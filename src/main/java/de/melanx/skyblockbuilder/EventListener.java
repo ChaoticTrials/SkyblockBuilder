@@ -53,6 +53,7 @@ public class EventListener {
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("skyblock")
+                .requires(source -> WorldUtil.isSkyblock(source.getWorld()))
                 .then(AcceptCommand.register())
                 .then(InviteCommand.register())
                 .then(ListCommand.register())
