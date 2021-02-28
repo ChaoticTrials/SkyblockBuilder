@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.Team;
@@ -31,9 +32,13 @@ public class TeamCommand {
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("teams").requires(source -> source.hasPermissionLevel(2))
                 .then(Commands.literal("create")
-                        .executes(context -> createTeam(context.getSource()))
+                        .executes(context -> createTeam(context.getSource(), false))
                         .then(Commands.argument("name", StringArgumentType.word())
-                                .executes(context -> createTeam(context.getSource(), StringArgumentType.getString(context, "name")))))
+                                .executes(context -> createTeam(context.getSource(), StringArgumentType.getString(context, "name"), false))))
+                .then(Commands.literal("createAndJoin")
+                        .executes(context -> createTeam(context.getSource(), true))
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(context -> createTeam(context.getSource(), StringArgumentType.getString(context, "name"), true))))
                 .then(Commands.literal("join")
                         .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
                                 .then(Commands.argument("players", EntityArgument.players())
@@ -86,16 +91,16 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int createTeam(CommandSource source) {
+    private static int createTeam(CommandSource source, boolean join) {
         String team;
         Random rand = new Random();
         do {
             team = NameGenerator.randomName(rand);
         } while (SkyblockSavedData.get(source.getWorld()).teamExists(team));
-        return createTeam(source, team);
+        return createTeam(source, team, join);
     }
 
-    private static int createTeam(CommandSource source, String name) {
+    private static int createTeam(CommandSource source, String name, boolean join) {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -105,8 +110,18 @@ public class TeamCommand {
         }
 
         Team team = data.createTeam(name);
-        //noinspection ConstantConditions
-        IslandPos islandPos = team.getIsland();
+
+        if (join) {
+            try {
+                ServerPlayerEntity player = source.asPlayer();
+                //noinspection ConstantConditions
+                team.addPlayer(player);
+            } catch (CommandSyntaxException e) {
+                source.sendFeedback(new StringTextComponent("You are no player, how do you want to join?"), false);
+                return 1;
+            }
+        }
+
         source.sendFeedback(new StringTextComponent(String.format(("Successfully created team %s."), name)).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
