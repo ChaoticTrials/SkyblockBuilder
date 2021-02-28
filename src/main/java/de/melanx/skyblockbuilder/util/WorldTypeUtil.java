@@ -11,7 +11,6 @@ import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.Dimension;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.provider.OverworldBiomeProvider;
 import net.minecraft.world.gen.DimensionSettings;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
@@ -43,7 +42,9 @@ public class WorldTypeUtil {
         Registry<DimensionType> dimensions = registries.getRegistry(Registry.DIMENSION_TYPE_KEY);
         Registry<Biome> biomes = registries.getRegistry(Registry.BIOME_KEY);
         Registry<DimensionSettings> dimensionSettings = registries.getRegistry(Registry.NOISE_SETTINGS_KEY);
-        SimpleRegistry<Dimension> skyblock = DimensionGeneratorSettings.func_242749_a(dimensions, VoidWorldType.voidDimensions(registries, biomes, dimensionSettings, seed), new SkyblockOverworldChunkGenerator(new OverworldBiomeProvider(seed, false, false, biomes), seed, () -> dimensionSettings.getOrThrow(DimensionSettings.field_242734_c)));
+
+        SkyblockOverworldChunkGenerator generator = (SkyblockOverworldChunkGenerator) VoidWorldType.overworldChunkGenerator(biomes, dimensionSettings, seed);
+        SimpleRegistry<Dimension> skyblock = DimensionGeneratorSettings.func_242749_a(dimensions, VoidWorldType.voidDimensions(registries, biomes, dimensionSettings, seed), generator);
         worldInfo.generatorSettings = new DimensionGeneratorSettings(seed, worldInfo.generatorSettings.doesGenerateFeatures(), worldInfo.generatorSettings.hasBonusChest(), skyblock);
     }
 
