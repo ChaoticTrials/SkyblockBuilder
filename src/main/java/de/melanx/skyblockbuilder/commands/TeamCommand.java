@@ -132,6 +132,7 @@ public class TeamCommand {
         players.forEach(id -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(id);
             if (player != null) {
+                player.inventory.dropAllItems();
                 WorldUtil.teleportToIsland(player, spawn);
             }
         });
@@ -187,6 +188,7 @@ public class TeamCommand {
         String teamName = team.getName();
         data.removePlayerFromTeam(player);
         IslandPos spawn = data.getSpawn();
+        player.inventory.dropAllItems();
         WorldUtil.teleportToIsland(player, spawn);
         source.sendFeedback(new StringTextComponent(String.format("Successfully left team %s.", teamName)).mergeStyle(TextFormatting.GREEN), true);
         return 1;

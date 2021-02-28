@@ -72,6 +72,7 @@ public class EventListener {
                 ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
                 if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
                     if (!data.hasPlayerTeam(player) && data.getTeamFromPlayer(player) != data.getTeam("spawn")) {
+                        player.inventory.dropAllItems();
                         WorldUtil.teleportToIsland(player, data.getSpawn());
                     }
 
