@@ -62,6 +62,9 @@ Then the player will be teleported to the teams island.
 An operator need to remove players from a team. For that, they need to use `/skyblock teams remove <player>`. The removed
 player will be teleported back to spawn after dropping all the items in the inventory.
 
+If you're not op and want to leave your team, you can simply type in `/skyblock leave`. You will drop all your items and 
+be teleported to spawn.
+
 ### Listing teams
 Everyone can list the teams. For that, you can use `/skyblock list <name>`. That will list either all the teams if no 
 name is provided or the names of all players in a team.
