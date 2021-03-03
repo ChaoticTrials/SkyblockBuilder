@@ -28,6 +28,7 @@ public class ConfigHandler {
 
     public static ForgeConfigSpec.BooleanValue overworldStructures;
     public static ForgeConfigSpec.BooleanValue strongholdOnly;
+    public static ForgeConfigSpec.BooleanValue defaultNether;
     public static ForgeConfigSpec.BooleanValue netherStructures;
     public static ForgeConfigSpec.BooleanValue disableFortress;
     public static ForgeConfigSpec.BooleanValue disableBastion;
@@ -43,6 +44,8 @@ public class ConfigHandler {
         strongholdOnly = builder.comment("Should the stronghold with end portal be the only structure?", "Needs default config be 'true', otherwise it'll be ignored. [default: false]")
                 .define("dimensions.overworld.stronhold-only", false);
 
+        defaultNether = builder.comment("Should nether generate as in default world type? [default: false]")
+                .define("dimensions.nether.default", false);
         netherStructures = builder.comment("Should structures like fortresses or bastions be generated in nether? [default: true]")
                 .define("dimensions.nether.structures.enabled", true);
         disableFortress = builder.comment("Use only if 'enabled' is true!", "Should nether fortress be disabled? [default: false]")

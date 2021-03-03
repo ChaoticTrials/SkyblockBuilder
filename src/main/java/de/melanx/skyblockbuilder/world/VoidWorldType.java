@@ -64,7 +64,9 @@ public class VoidWorldType extends ForgeWorldType {
     public static SimpleRegistry<Dimension> voidDimensions(DynamicRegistries dynamicRegistries, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         SimpleRegistry<Dimension> registry = new SimpleRegistry<>(Registry.DIMENSION_KEY, Lifecycle.experimental());
         registry.register(Dimension.OVERWORLD, new Dimension(() -> DimensionType.OVERWORLD_TYPE, overworldChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
-        registry.register(Dimension.THE_NETHER, new Dimension(() -> DimensionType.NETHER_TYPE, netherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
+        registry.register(Dimension.THE_NETHER, new Dimension(() -> DimensionType.NETHER_TYPE,
+                ConfigHandler.defaultNether.get() ? DimensionType.getNetherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
+                        : netherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         registry.register(Dimension.THE_END, new Dimension(() -> DimensionType.END_TYPE,
                 ConfigHandler.defaultEnd.get() ? DimensionType.getEndChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
                         : endChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
