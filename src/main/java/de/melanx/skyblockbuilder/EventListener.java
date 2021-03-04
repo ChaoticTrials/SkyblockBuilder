@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder;
 
 import de.melanx.skyblockbuilder.commands.*;
+import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -72,9 +73,12 @@ public class EventListener {
                 SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
                 ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
                 if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
-                    if (!data.hasPlayerTeam(player) && data.getTeamFromPlayer(player) != data.getTeam("spawn")) {
+                    Team team = data.getTeamFromPlayer(player);
+                    //noinspection ConstantConditions
+                    if (!data.hasPlayerTeam(player) && !data.getTeam("spawn").hasPlayer(player)) {
                         player.inventory.dropAllItems();
                         WorldUtil.teleportToIsland(player, data.getSpawn());
+                        data.addPlayerToTeam("spawn", player);
                     }
 
                     return;
