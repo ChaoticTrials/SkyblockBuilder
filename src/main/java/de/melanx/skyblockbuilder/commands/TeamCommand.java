@@ -116,6 +116,7 @@ public class TeamCommand {
                 ServerPlayerEntity player = source.asPlayer();
                 //noinspection ConstantConditions
                 team.addPlayer(player);
+                WorldUtil.teleportToIsland(player, team.getIsland());
             } catch (CommandSyntaxException e) {
                 source.sendFeedback(new StringTextComponent("You are no player, how do you want to join?"), false);
                 return 1;
