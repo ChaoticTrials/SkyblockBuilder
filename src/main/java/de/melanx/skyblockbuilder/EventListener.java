@@ -60,6 +60,7 @@ public class EventListener {
                 .then(InviteCommand.register())
                 .then(ListCommand.register())
                 .then(TeamCommand.register())
+                .then(LeaveCommand.register())
                 .then(SpawnsCommand.register()));
     }
 
