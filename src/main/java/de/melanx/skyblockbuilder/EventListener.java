@@ -20,6 +20,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
@@ -65,7 +66,7 @@ public class EventListener {
     /*
      * Mainly taken from Botania
      */
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         World world = event.getPlayer().world;
         if (world instanceof ServerWorld) {
@@ -87,9 +88,15 @@ public class EventListener {
                 player.getPersistentData().putBoolean(SPAWNED_TAG, true);
                 //noinspection ConstantConditions
                 data.getTeam("spawn").addPlayer(player);
-                IslandPos islandPos = data.getSpawn();
-                ((ServerWorld) world).func_241124_a__(islandPos.getCenter(), 0);
-                WorldUtil.teleportToIsland(player, islandPos);
+                IslandPos spawn = data.getSpawn();
+                ((ServerWorld) world).func_241124_a__(spawn.getCenter(), ConfigHandler.direction.get().getYaw());
+                WorldUtil.teleportToIsland(player, spawn);
+
+                if (ConfigHandler.clearInv.get()) {
+                    player.inventory.clear();
+                }
+
+                ConfigHandler.STARTER_ITEMS.forEach(player.inventory::addItemStackToInventory);
             }
         }
     }

@@ -2,24 +2,32 @@ package de.melanx.skyblockbuilder;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import de.melanx.skyblockbuilder.util.WorldUtil;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.JSONUtils;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+import org.apache.commons.io.IOUtils;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigHandler {
     public static final ForgeConfigSpec COMMON_CONFIG;
+    public static final List<ItemStack> STARTER_ITEMS = new ArrayList<>();
     private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
     private static final Path MOD_CONFIG = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.MODID);
     private static final Path SCHEMATIC_FILE = MOD_CONFIG.resolve("template.nbt");
     private static final Path SPAWNS_FILE = MOD_CONFIG.resolve("spawns.json");
+    private static final Path ITEMS_FILE = MOD_CONFIG.resolve("starter_item.json");
 
     static {
         init(COMMON_BUILDER);
@@ -37,6 +45,7 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue endStructures;
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
     public static ForgeConfigSpec.IntValue generationHeight;
+    public static ForgeConfigSpec.BooleanValue clearInv;
 
     public static void init(ForgeConfigSpec.Builder builder) {
         overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
@@ -66,6 +75,10 @@ public class ConfigHandler {
         generationHeight = builder.comment("Height of the bottom layer from the structure.",
                 "This affects where exactly the island will be generated.")
                 .defineInRange("spawn.height", 64, 1, 255);
+
+        clearInv = builder.comment("Should all items be reset on first world join? [default: false]",
+                "This will delete all the items given on spawn from other mods guide books.")
+                .define("inventory.clear", false);
     }
 
     public static void generateDefaultFiles() {
@@ -76,6 +89,9 @@ public class ConfigHandler {
 
             copyTemplateFile();
             generateSpawnsFile();
+            generateStarterItemsFile();
+
+            loadStarterItems();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -108,6 +124,38 @@ public class ConfigHandler {
         BufferedWriter w = Files.newBufferedWriter(SPAWNS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
         w.write(SkyblockBuilder.PRETTY_GSON.toJson(object));
         w.close();
+    }
+
+    private static void generateStarterItemsFile() throws IOException {
+        if (Files.isRegularFile(ITEMS_FILE)) {
+            return;
+        }
+
+        JsonObject object = new JsonObject();
+        JsonArray items = new JsonArray();
+        object.add("items", items);
+
+        BufferedWriter w = Files.newBufferedWriter(ITEMS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+        w.write(SkyblockBuilder.PRETTY_GSON.toJson(object));
+        w.close();
+    }
+
+    private static void loadStarterItems() throws IOException {
+        STARTER_ITEMS.clear();
+
+        File spawns = new File(ITEMS_FILE.toUri());
+        JsonParser parser = new JsonParser();
+
+        String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
+        JsonObject json = JSONUtils.fromJson(s);
+
+        if (json.has("items")) {
+            JsonArray items = json.getAsJsonArray("items");
+            items.forEach(item -> {
+                ItemStack stack = CraftingHelper.getItemStack((JsonObject) item, true);
+                STARTER_ITEMS.add(stack);
+            });
+        }
     }
 
     public static void setup() {
