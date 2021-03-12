@@ -61,6 +61,7 @@ public class EventListener {
                 .then(ListCommand.register())
                 .then(TeamCommand.register())
                 .then(LeaveCommand.register())
+                .then(HomeCommand.register())
                 .then(SpawnsCommand.register()));
     }
 
