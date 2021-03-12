@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
-import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.ResourceLocation;
@@ -60,7 +59,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     @Nonnull
     @Override
     public ChunkGenerator func_230349_a_(long newSeed) {
-        return new SkyblockOverworldChunkGenerator(this.biomeProvider.getBiomeProvider(newSeed), newSeed, WorldTypeUtil.getOverworldSettings(this.settings));
+        return new SkyblockEndChunkGenerator(this.biomeProvider.getBiomeProvider(newSeed), newSeed, this.settings);
     }
 
     @Override
