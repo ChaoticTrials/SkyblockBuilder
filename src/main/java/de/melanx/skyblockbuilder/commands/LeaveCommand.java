@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -29,6 +30,7 @@ public class LeaveCommand {
         player.inventory.dropAllItems();
         data.removePlayerFromTeam(player);
         source.sendFeedback(new StringTextComponent("Successfully left your teammates alone.").mergeStyle(TextFormatting.GOLD), false);
+        WorldUtil.teleportToIsland(player, data.getSpawn());
         return 1;
     }
 }
