@@ -60,7 +60,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     @Nonnull
     @Override
     public ChunkGenerator func_230349_a_(long newSeed) {
-        return new SkyblockOverworldChunkGenerator(this.biomeProvider.getBiomeProvider(newSeed), newSeed, this.settings);
+        return new SkyblockOverworldChunkGenerator(this.biomeProvider.getBiomeProvider(newSeed), newSeed, WorldTypeUtil.getOverworldSettings(this.settings));
     }
 
     @Override

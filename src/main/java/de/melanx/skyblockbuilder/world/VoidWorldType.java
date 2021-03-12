@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.world;
 import com.mojang.serialization.Lifecycle;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeProvider;
@@ -26,6 +27,7 @@ import net.minecraftforge.common.world.ForgeWorldType;
 import net.minecraftforge.event.RegistryEvent;
 
 import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 public class VoidWorldType extends ForgeWorldType {
     public VoidWorldType() {
@@ -76,8 +78,9 @@ public class VoidWorldType extends ForgeWorldType {
     public static ChunkGenerator overworldChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         BiomeProvider overworld = new OverworldBiomeProvider(seed, false, false, biomeRegistry);
         BiomeProvider provider = new SkyblockBiomeProvider(overworld);
+        Supplier<DimensionSettings> settings = () -> dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c);
 
-        return new SkyblockOverworldChunkGenerator(provider, seed, () -> dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c));
+        return new SkyblockOverworldChunkGenerator(provider, seed, WorldTypeUtil.getOverworldSettings(settings));
     }
 
     private static ChunkGenerator netherChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {

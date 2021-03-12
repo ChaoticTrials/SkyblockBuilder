@@ -26,7 +26,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
             (instance) -> instance.group(
                     BiomeProvider.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeProvider),
                     Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
-                    DimensionSettings.field_236098_b_.fieldOf("settings").forGetter((gen) -> gen.settings)
+                    DimensionSettings.field_236098_b_.fieldOf("settings").forGetter((gen) -> WorldTypeUtil.getOverworldSettings(gen.settings))
             ).apply(instance, instance.stable(SkyblockOverworldChunkGenerator::new)));
 
     protected final long seed;
@@ -38,13 +38,8 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
     }
 
     public SkyblockOverworldChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
-        super(provider, provider, WorldTypeUtil.STRONGHOLD_ONLY_STRUCTURE_SETTINGS, seed);
+        super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
-        if (!ConfigHandler.overworldStructures.get()) {
-            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.EMPTY_SETTINGS, settings.get());
-        } else if (ConfigHandler.strongholdOnly.get()) {
-            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.STRONGHOLD_ONLY_STRUCTURE_SETTINGS, settings.get());
-        }
         this.settings = settings;
         this.parent = new NoiseChunkGenerator(provider, seed, settings);
     }
