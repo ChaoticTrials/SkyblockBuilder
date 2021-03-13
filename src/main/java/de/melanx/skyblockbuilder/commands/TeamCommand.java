@@ -108,6 +108,7 @@ public class TeamCommand {
             source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", name)).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
+        Team team = data.createTeam(name);
 
 
         if (join) {
@@ -117,7 +118,6 @@ public class TeamCommand {
                     source.sendFeedback(new StringTextComponent("You are already in a team, to create a new one you have to leave your team first!"), false);
                     return 1;
                 }
-                Team team = data.createTeam(name);
 
                 //noinspection ConstantConditions
                 team.addPlayer(player);
@@ -126,8 +126,6 @@ public class TeamCommand {
                 source.sendFeedback(new StringTextComponent("You are no player, how do you want to join?"), false);
                 return 1;
             }
-        } else {
-            Team team = data.createTeam(name);
         }
 
         source.sendFeedback(new StringTextComponent(String.format(("Successfully created team %s."), name)).mergeStyle(TextFormatting.GREEN), true);
