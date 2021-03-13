@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
@@ -11,26 +12,27 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 
-public class LeaveCommand {
+public class HomeCommand {
+
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("leave")
-                .executes(context -> leaveTeam(context.getSource()));
+        return Commands.literal("home")
+                .executes(context -> home(context.getSource()));
     }
 
-    private static int leaveTeam(CommandSource source) throws CommandSyntaxException {
+    private static int home(CommandSource source) throws CommandSyntaxException {
+        if (!(source.getEntity() instanceof ServerPlayerEntity)) {
+            return 0;
+        }
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
         ServerPlayerEntity player = source.asPlayer();
-
-        if (!data.hasPlayerTeam(player)) {
+        Team team = data.getTeamFromPlayer(player);
+        if (team == null) {
             source.sendFeedback(new StringTextComponent("You currently in no team!").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
-        player.inventory.dropAllItems();
-        data.removePlayerFromTeam(player);
-        source.sendFeedback(new StringTextComponent("Successfully left your teammates alone.").mergeStyle(TextFormatting.GOLD), false);
-        WorldUtil.teleportToIsland(player, data.getSpawn());
+        WorldUtil.teleportToIsland(player, data.getTeamFromPlayer(player).getIsland());
         return 1;
     }
 }

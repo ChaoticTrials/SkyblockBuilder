@@ -108,12 +108,17 @@ public class TeamCommand {
             source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", name)).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
-
         Team team = data.createTeam(name);
+
 
         if (join) {
             try {
                 ServerPlayerEntity player = source.asPlayer();
+                if (data.getTeamFromPlayer(player) != null) {
+                    source.sendFeedback(new StringTextComponent("You are already in a team, to create a new one you have to leave your team first!").mergeStyle(TextFormatting.RED), false);
+                    return 0;
+                }
+
                 //noinspection ConstantConditions
                 team.addPlayer(player);
                 WorldUtil.teleportToIsland(player, team.getIsland());
