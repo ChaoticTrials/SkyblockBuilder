@@ -23,16 +23,16 @@ public class CreateCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("create")
-                .executes(context -> create(context.getSource(), NameGenerator.randomName(new Random()), Arrays.asList(context.getSource().asPlayer())))
+                .executes(context -> create(context.getSource(), NameGenerator.randomName(new Random()), Collections.emptyList()))
                 .then(Commands.argument("name", StringArgumentType.word())
-                        .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), Arrays.asList(context.getSource().asPlayer())))
+                        .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), Collections.emptyList()))
                         .then(Commands.argument("players", EntityArgument.players())
                                 .requires(commandSource -> commandSource.hasPermissionLevel(2))
                                 .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), EntityArgument.getPlayers(context, "players")))));
     }
 
 
-    private static int create(CommandSource source, String name, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+    private static int create(CommandSource source, String name, Collection<ServerPlayerEntity> players) {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -43,15 +43,20 @@ public class CreateCommand {
 
         Team team = data.createTeam(name);
 
-        players.forEach(serverPlayerEntity -> {
-            if (data.getTeamFromPlayer(serverPlayerEntity) != null) {
-                source.sendFeedback(new StringTextComponent(String.format("%s is already in a team, it can not be added!", serverPlayerEntity.getDisplayName().getString())).mergeStyle(TextFormatting.RED), false);
-            } else {
-                team.addPlayer(serverPlayerEntity);
-                WorldUtil.teleportToIsland(serverPlayerEntity, team.getIsland());
-            }
-        });
-
+        if (players.isEmpty() && source.getEntity() instanceof ServerPlayerEntity) {
+            ServerPlayerEntity player = (ServerPlayerEntity) source.getEntity();
+            team.addPlayer(player);
+            WorldUtil.teleportToIsland(player, team.getIsland());
+        } else {
+            players.forEach(player -> {
+                if (data.getTeamFromPlayer(player) != null) {
+                    source.sendFeedback(new StringTextComponent(String.format("%s is already in a team, it can not be added!", player.getDisplayName().getString())).mergeStyle(TextFormatting.RED), false);
+                } else {
+                    team.addPlayer(player);
+                    WorldUtil.teleportToIsland(player, team.getIsland());
+                }
+            });
+        }
 
         source.sendFeedback(new StringTextComponent(String.format(("Successfully created team %s."), name)).mergeStyle(TextFormatting.GREEN), true);
         return 1;
