@@ -57,7 +57,10 @@ public class EventListener {
         event.getDispatcher().register(Commands.literal("skyblock")
                 .requires(source -> WorldUtil.isSkyblock(source.getWorld()))
                 .then(AcceptCommand.register())
+                .then(CreateCommand.register())
+                .then(HomeCommand.register())
                 .then(InviteCommand.register())
+                .then(LeaveCommand.register())
                 .then(ListCommand.register())
                 .then(TeamCommand.register())
                 .then(SpawnsCommand.register()));
