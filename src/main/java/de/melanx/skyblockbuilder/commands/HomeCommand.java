@@ -25,11 +25,13 @@ public class HomeCommand {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
         ServerPlayerEntity player = source.asPlayer();
-        if (data.getTeamFromPlayer(player) != null) {
-            WorldUtil.teleportToIsland(player, data.getTeamFromPlayer(player).getIsland());
-        } else {
+        Team team = data.getTeamFromPlayer(player);
+        if (team == null) {
             source.sendFeedback(new StringTextComponent("You currently in no team!").mergeStyle(TextFormatting.RED), false);
+            return 0;
         }
+
+        WorldUtil.teleportToIsland(player, data.getTeamFromPlayer(player).getIsland());
         return 1;
     }
 }
