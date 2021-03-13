@@ -1,8 +1,9 @@
-package de.melanx.skyblockbuilder.commands;
+package de.melanx.skyblockbuilder.commands.helper;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
@@ -21,9 +22,11 @@ import java.util.stream.Collectors;
 public class ListCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
+       // Lists all teams
         return Commands.literal("list")
                 .executes(context -> listTeams(context.getSource()))
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(TeamCommand.SUGGEST_TEAMS)
+                 // Lists all members in team
+                .then(Commands.argument("team", StringArgumentType.word()).suggests(ManageCommand.SUGGEST_TEAMS)
                         .executes(context -> listPlayers(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

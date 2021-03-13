@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -15,15 +15,16 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 
 public class CreateCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("create")
-                .executes(context -> create(context.getSource(), NameGenerator.randomName(new Random()), Collections.emptyList()))
+        // Let a player create a team if enabled in config
+        return Commands.literal("create").requires(source -> ConfigHandler.createOwnTeam.get())
+                .executes(context -> create(context.getSource(), null, Collections.emptyList()))
                 .then(Commands.argument("name", StringArgumentType.word())
                         .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), Collections.emptyList()))
                         .then(Commands.argument("players", EntityArgument.players())
@@ -31,17 +32,23 @@ public class CreateCommand {
                                 .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), EntityArgument.getPlayers(context, "players")))));
     }
 
-
     private static int create(CommandSource source, String name, Collection<ServerPlayerEntity> players) {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
-        if (data.teamExists(name)) {
-            source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", name)).mergeStyle(TextFormatting.RED), true);
-            return 0;
+        if (name == null) {
+            Random rand = new Random();
+            do {
+                name = NameGenerator.randomName(rand);
+            } while (data.teamExists(name));
         }
 
         Team team = data.createTeam(name);
+
+        if (team == null) {
+            source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", name)).mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
 
         if (players.isEmpty() && source.getEntity() instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity) source.getEntity();
@@ -50,7 +57,7 @@ public class CreateCommand {
         } else {
             players.forEach(player -> {
                 if (data.getTeamFromPlayer(player) != null) {
-                    source.sendFeedback(new StringTextComponent(String.format("%s is already in a team, it can not be added!", player.getDisplayName().getString())).mergeStyle(TextFormatting.RED), false);
+                    source.sendFeedback(new StringTextComponent(String.format("%s is already in a team, it cannot be added!", player.getDisplayName().getString())).mergeStyle(TextFormatting.RED), false);
                 } else {
                     team.addPlayer(player);
                     WorldUtil.teleportToIsland(player, team.getIsland());

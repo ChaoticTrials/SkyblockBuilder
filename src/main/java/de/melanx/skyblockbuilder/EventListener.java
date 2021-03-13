@@ -1,6 +1,13 @@
 package de.melanx.skyblockbuilder;
 
-import de.melanx.skyblockbuilder.commands.*;
+import de.melanx.skyblockbuilder.commands.CreateCommand;
+import de.melanx.skyblockbuilder.commands.HomeCommand;
+import de.melanx.skyblockbuilder.commands.LeaveCommand;
+import de.melanx.skyblockbuilder.commands.helper.ListCommand;
+import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
+import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
+import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
+import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
@@ -62,7 +69,7 @@ public class EventListener {
                 .then(InviteCommand.register())
                 .then(LeaveCommand.register())
                 .then(ListCommand.register())
-                .then(TeamCommand.register())
+                .then(ManageCommand.register())
                 .then(SpawnsCommand.register()));
     }
 
@@ -80,7 +87,9 @@ public class EventListener {
                     Team team = data.getTeamFromPlayer(player);
                     //noinspection ConstantConditions
                     if (!data.hasPlayerTeam(player) && !data.getTeam("spawn").hasPlayer(player)) {
-                        player.inventory.dropAllItems();
+                        if (ConfigHandler.dropItems.get()) {
+                            player.inventory.dropAllItems();
+                        }
                         WorldUtil.teleportToIsland(player, data.getSpawn());
                         data.addPlayerToTeam("spawn", player);
                     }

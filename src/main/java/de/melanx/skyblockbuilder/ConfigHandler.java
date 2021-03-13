@@ -46,6 +46,9 @@ public class ConfigHandler {
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
     public static ForgeConfigSpec.IntValue generationHeight;
     public static ForgeConfigSpec.BooleanValue clearInv;
+    public static ForgeConfigSpec.BooleanValue dropItems;
+    public static ForgeConfigSpec.BooleanValue homeEnabled;
+    public static ForgeConfigSpec.BooleanValue createOwnTeam;
 
     public static void init(ForgeConfigSpec.Builder builder) {
         overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
@@ -79,6 +82,13 @@ public class ConfigHandler {
         clearInv = builder.comment("Should all items be reset on first world join? [default: false]",
                 "This will delete all the items given on spawn from other mods guide books.")
                 .define("inventory.clear", false);
+        dropItems = builder.comment("Should players' items be dropped when leaving a team? [default: true]")
+                .define("inventory.drop", true);
+
+        homeEnabled = builder.comment("Should players be able to teleport to their home island? [default: true]")
+                .define("utility.home", true);
+        createOwnTeam = builder.comment("Should players be able to create their own team? [default: false]")
+                .define("utility.create-own-team", false);
     }
 
     public static void generateDefaultFiles() {

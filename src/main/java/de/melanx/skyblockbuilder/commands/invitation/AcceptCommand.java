@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.commands;
+package de.melanx.skyblockbuilder.commands.invitation;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 public class AcceptCommand {
 
+    // Lists all teams except spawn
     private static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> {
         CommandSource source = context.getSource();
         ServerWorld world = source.getWorld();
@@ -33,6 +34,7 @@ public class AcceptCommand {
     };
 
     public static ArgumentBuilder<CommandSource, ?> register() {
+        // Accepts an invitation
         return Commands.literal("accept")
                 .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
                         .executes(context -> acceptTeam(context.getSource(), StringArgumentType.getString(context, "team"))));
