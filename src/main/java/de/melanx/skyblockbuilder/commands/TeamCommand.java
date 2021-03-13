@@ -115,8 +115,8 @@ public class TeamCommand {
             try {
                 ServerPlayerEntity player = source.asPlayer();
                 if (data.getTeamFromPlayer(player) != null) {
-                    source.sendFeedback(new StringTextComponent("You are already in a team, to create a new one you have to leave your team first!"), false);
-                    return 1;
+                    source.sendFeedback(new StringTextComponent("You are already in a team, to create a new one you have to leave your team first!").mergeStyle(TextFormatting.RED), false);
+                    return 0;
                 }
 
                 //noinspection ConstantConditions
