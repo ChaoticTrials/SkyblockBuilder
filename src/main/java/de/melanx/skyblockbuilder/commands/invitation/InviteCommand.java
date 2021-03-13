@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.commands;
+package de.melanx.skyblockbuilder.commands.invitation;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -21,6 +21,7 @@ public class InviteCommand {
     public static HoverEvent COPY_TEXT = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Click to copy"));
 
     public static ArgumentBuilder<CommandSource, ?> register() {
+        // Invites the given player
         return Commands.literal("invite")
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(context -> invitePlayer(context.getSource(), EntityArgument.getPlayer(context, "player"))));

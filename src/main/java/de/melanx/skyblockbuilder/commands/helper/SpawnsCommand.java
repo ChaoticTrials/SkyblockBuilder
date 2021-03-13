@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.commands;
+package de.melanx.skyblockbuilder.commands.helper;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -15,6 +15,7 @@ import net.minecraft.world.server.ServerWorld;
 public class SpawnsCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
+        // Highlights all spawns for a few seconds
         return Commands.literal("spawns")
                 .executes(context -> showSpawns(context.getSource()));
     }

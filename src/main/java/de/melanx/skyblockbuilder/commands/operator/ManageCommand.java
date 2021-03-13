@@ -1,9 +1,10 @@
-package de.melanx.skyblockbuilder.commands;
+package de.melanx.skyblockbuilder.commands.operator;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -22,7 +23,7 @@ import net.minecraft.world.server.ServerWorld;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TeamCommand {
+public class ManageCommand {
 
     public static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> {
         return ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
@@ -30,29 +31,40 @@ public class TeamCommand {
     };
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("teams").requires(source -> source.hasPermissionLevel(2))
-                .then(Commands.literal("create")
-                        .executes(context -> createTeam(context.getSource(), false))
-                        .then(Commands.argument("name", StringArgumentType.word())
-                                .executes(context -> createTeam(context.getSource(), StringArgumentType.getString(context, "name"), false))))
-                .then(Commands.literal("createAndJoin")
-                        .executes(context -> createTeam(context.getSource(), true))
-                        .then(Commands.argument("name", StringArgumentType.word())
-                                .executes(context -> createTeam(context.getSource(), StringArgumentType.getString(context, "name"), true))))
-                .then(Commands.literal("join")
-                        .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
-                                .then(Commands.argument("players", EntityArgument.players())
+        return Commands.literal("manage").requires(source -> source.hasPermissionLevel(2))
+                .then(Commands.literal("teams")
+                        // Removes all empty teams in the world
+                        .then(Commands.literal("clear")
+                                .executes(context -> deleteEmptyTeams(context.getSource()))
+                                .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
+                                        .executes(context -> clearTeam(context.getSource(), StringArgumentType.getString(context, "team")))))
+
+                        // Creates a team
+                        .then(Commands.literal("create")
+                                .executes(context -> createTeam(context.getSource(), false))
+                                .then(Commands.argument("name", StringArgumentType.word())
+                                        .executes(context -> createTeam(context.getSource(), StringArgumentType.getString(context, "name"), false))))
+
+                        // Creates a team and the player executing the command joins
+                        .then(Commands.literal("createAndJoin")
+                                .executes(context -> createTeam(context.getSource(), true))
+                                .then(Commands.argument("name", StringArgumentType.word())
+                                        .executes(context -> createTeam(context.getSource(), StringArgumentType.getString(context, "name"), true))))
+
+                        // Deletes the team with the given name
+                        .then(Commands.literal("delete")
+                                .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
+                                        .executes(context -> deleteTeam(context.getSource(), StringArgumentType.getString(context, "team"))))))
+
+                // Adds player(s) to a given team
+                .then(Commands.literal("addPlayer")
+                        .then(Commands.argument("players", EntityArgument.players())
+                                .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
                                         .executes(context -> addToTeam(context.getSource(), StringArgumentType.getString(context, "team"), EntityArgument.getPlayers(context, "players"))))))
-                .then(Commands.literal("remove")
+                // Kicks player from its current team
+                .then(Commands.literal("kickPlayer")
                         .then(Commands.argument("player", EntityArgument.player())
-                                .executes(context -> removeFromTeam(context.getSource(), EntityArgument.getPlayer(context, "player")))))
-                .then(Commands.literal("delete")
-                        .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
-                                .executes(context -> deleteTeam(context.getSource(), StringArgumentType.getString(context, "team")))))
-                .then(Commands.literal("clear")
-                        .executes(context -> deleteEmptyTeams(context.getSource()))
-                        .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
-                                .executes(context -> clearTeam(context.getSource(), StringArgumentType.getString(context, "team")))));
+                                .executes(context -> removeFromTeam(context.getSource(), EntityArgument.getPlayer(context, "player")))));
     }
 
     private static int deleteEmptyTeams(CommandSource source) {
@@ -104,12 +116,11 @@ public class TeamCommand {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
-        if (data.teamExists(name)) {
+        Team team = data.createTeam(name);
+        if (team == null) {
             source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", name)).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
-        Team team = data.createTeam(name);
-
 
         if (join) {
             try {
@@ -119,7 +130,6 @@ public class TeamCommand {
                     return 0;
                 }
 
-                //noinspection ConstantConditions
                 team.addPlayer(player);
                 WorldUtil.teleportToIsland(player, team.getIsland());
             } catch (CommandSyntaxException e) {
@@ -153,7 +163,9 @@ public class TeamCommand {
         players.forEach(id -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(id);
             if (player != null) {
-                player.inventory.dropAllItems();
+                if (ConfigHandler.dropItems.get()) {
+                    player.inventory.dropAllItems();
+                }
                 WorldUtil.teleportToIsland(player, spawn);
             }
         });
@@ -209,7 +221,9 @@ public class TeamCommand {
         String teamName = team.getName();
         data.removePlayerFromTeam(player);
         IslandPos spawn = data.getSpawn();
-        player.inventory.dropAllItems();
+        if (ConfigHandler.dropItems.get()) {
+            player.inventory.dropAllItems();
+        }
         WorldUtil.teleportToIsland(player, spawn);
         source.sendFeedback(new StringTextComponent(String.format("Successfully left team %s.", teamName)).mergeStyle(TextFormatting.GREEN), true);
         return 1;
