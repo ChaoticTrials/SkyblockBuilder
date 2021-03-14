@@ -358,6 +358,18 @@ public class SkyblockSavedData extends WorldSavedData {
         return false;
     }
 
+    public void renameTeam(Team team, String name) {
+        String oldName = team.getName().toLowerCase();
+        this.skyblocks.remove(oldName);
+        this.skyblockPositions.remove(oldName);
+
+        team.setName(name);
+        this.skyblocks.put(name.toLowerCase(), team);
+        this.skyblockPositions.put(name.toLowerCase(), team.getIsland());
+
+        this.markDirty();
+    }
+
     public Set<BlockPos> getPossibleSpawns(IslandPos pos) {
         if (!this.skyblockPositions.containsValue(pos)) {
             return initialPossibleSpawns(pos.getCenter());

@@ -6,7 +6,7 @@ A minecraft mod which lets you generate custom skyblock islands by using config.
 
 ## How to use
 ### Setting world type on singleplayer
-You can simply set `World Type` to `Skyblock` when creating a new world on click on `More World Options...`
+You can simply set `World Type` to `Skyblock` when creating a new world on a click on `More World Options...`
 
 ### Setting world type on server
 You can simply set `level-type` in `server.properties` to `custom_skyblock`.
@@ -78,6 +78,10 @@ If home command is enabled in config, you can teleport back to your teams island
 If users can create islands with their own command, you can use `/skyblock create <name> <players>`. This will create a 
 team and the given players will be added to the new team. If no players are given, the user who executes the command will 
 be added to the team. If no name is given, a random name will be generated.
+
+### Rename team island
+You can rename a/your team by using `/skyblock team <new name> <team name>`. `<team name>` is optional. Can be used by 
+any team member. Users with permission level 2 could also edit other teams' name.
 
 
 ## Using teams
