@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.util.Team;
@@ -18,7 +19,22 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 
+import java.util.Set;
+
 public class TeamCommand {
+
+    public static final SuggestionProvider<CommandSource> SUGGEST_POSITIONS = (context, builder) -> {
+        Team team = SkyblockSavedData.get(context.getSource().getWorld()).getTeamFromPlayer(context.getSource().asPlayer());
+        if (team != null) {
+            Set<BlockPos> possibleSpawns = team.getPossibleSpawns();
+            possibleSpawns.forEach(spawn -> {
+                builder.suggest(String.format("%s %s %s", spawn.getX(), spawn.getY(), spawn.getZ()));
+            });
+        }
+
+        return BlockPosArgument.blockPos().listSuggestions(context, builder);
+    };
+
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("team")
                 // Let plays add/remove spawn points
@@ -29,7 +45,7 @@ public class TeamCommand {
                                         .executes(context -> addSpawn(context.getSource(), BlockPosArgument.getBlockPos(context, "pos")))))
                         .then(Commands.literal("remove")
                                 .executes(context -> removeSpawn(context.getSource(), new BlockPos(context.getSource().getPos())))
-                                .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                                .then(Commands.argument("pos", BlockPosArgument.blockPos()).suggests(SUGGEST_POSITIONS)
                                         .executes(context -> removeSpawn(context.getSource(), BlockPosArgument.getBlockPos(context, "pos")))))
                         .then(Commands.literal("reset")
                                 .executes(context -> resetSpawns(context.getSource(), null))
