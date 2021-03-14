@@ -19,7 +19,7 @@ Otherwise, you need to use a mod like [Create](https://www.curseforge.com/minecr
 4. Set the possible spawns in `config/skyblockbuilder/spawns.json`. There can be multiple spawns, each one is an array with `[x, y, z]`
 relative to the 0, 0, 0 from the template structure. 
 5. To view your current spawns, you need to use the `/reload` command to reload the config. After that, you need to use the 
-`/skyblock spawns` command to view all possible spawn points.
+`/skyblock spawns true` command to view all possible spawn points.
 6. Repeat step 4 and 5 until everything is correct.
 
 ### Possible spawns
@@ -72,16 +72,22 @@ Everyone with an invitation can accept them. You can only accept invitations if 
 the command `/skyblock accept <team>`.
 
 ### Teleporting back to home island
-If home command is enabled in config, you can teleport back to your teams island with `/skyblock home`.
+If home command is enabled in the config, you can teleport back to your teams island with `/skyblock home`.
 
 ### Create an own island
 If users can create islands with their own command, you can use `/skyblock create <name> <players>`. This will create a 
-team and the given players will be added to the new team. If no players are given, the user who executes the command will 
+team, and the given players will be added to the new team. If no players are given, the user who executes the command will 
 be added to the team. If no name is given, a random name will be generated.
 
 ### Rename team island
 You can rename a/your team by using `/skyblock team <new name> <team name>`. `<team name>` is optional. Can be used by 
 any team member. Users with permission level 2 could also edit other teams' name.
+
+### Modify spawns
+If enabled in the config, you can modify spawns from your team. You can add them with `/skyblock team spawns add <pos>`. If 
+no position is given, the current position will be used. Remove them with `/skyblock team spawns remove <pos>`. Same as 
+before: position is optional. For users with permission level 2: `/skyblock team spawns reset <team>` will reset the 
+spawn points to the default ones. To add the spawns, you need to be within the range specified in the config.
 
 
 ## Using teams

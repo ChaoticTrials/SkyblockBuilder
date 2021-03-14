@@ -66,6 +66,21 @@ public class Team {
         this.data.markDirty();
     }
 
+    public void addPossibleSpawn(BlockPos pos) {
+        this.possibleSpawns.add(pos);
+        this.data.markDirty();
+    }
+
+    public boolean removePossibleSpawn(BlockPos pos) {
+        if (this.possibleSpawns.size() <= 1) {
+            return false;
+        }
+
+        boolean remove = this.possibleSpawns.remove(pos);
+        this.data.markDirty();
+        return remove;
+    }
+
     public boolean addPlayer(UUID player) {
         boolean added = this.players.add(player);
         this.data.markDirty();

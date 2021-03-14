@@ -49,6 +49,8 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue dropItems;
     public static ForgeConfigSpec.BooleanValue homeEnabled;
     public static ForgeConfigSpec.BooleanValue createOwnTeam;
+    public static ForgeConfigSpec.BooleanValue modifySpawns;
+    public static ForgeConfigSpec.IntValue modifySpawnRange;
 
     public static void init(ForgeConfigSpec.Builder builder) {
         overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
@@ -89,6 +91,10 @@ public class ConfigHandler {
                 .define("utility.home", true);
         createOwnTeam = builder.comment("Should players be able to create their own team? [default: false]")
                 .define("utility.create-own-team", false);
+        modifySpawns = builder.comment("Should players be able to modify their spawn positions? [default: false]")
+                .define("utility.spawns.modify-spawns", false);
+        modifySpawnRange = builder.comment("The range from island center for possible spawns to add. [default: 50]")
+                .defineInRange("utility.spawns.range", 50, 0, Integer.MAX_VALUE);
     }
 
     public static void generateDefaultFiles() {
