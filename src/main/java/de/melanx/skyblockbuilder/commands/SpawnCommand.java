@@ -24,10 +24,9 @@ public class SpawnCommand {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         ServerPlayerEntity player = source.asPlayer();
-        Team team = data.getTeam("spawn");
+        Team team = data.getSpawn();
 
         source.sendFeedback(new StringTextComponent("Successfully teleported to spawn."), false);
-        //noinspection ConstantConditions
         WorldUtil.teleportToIsland(player, team.getIsland());
         return 1;
     }

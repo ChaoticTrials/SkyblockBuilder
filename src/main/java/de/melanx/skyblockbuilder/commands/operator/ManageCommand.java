@@ -159,7 +159,7 @@ public class ManageCommand {
         }
 
         PlayerList playerList = source.getServer().getPlayerList();
-        IslandPos spawn = data.getSpawn();
+        IslandPos spawn = data.getSpawn().getIsland();
         players.forEach(id -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(id);
             if (player != null) {
@@ -220,7 +220,7 @@ public class ManageCommand {
 
         String teamName = team.getName();
         data.removePlayerFromTeam(player);
-        IslandPos spawn = data.getSpawn();
+        IslandPos spawn = data.getSpawn().getIsland();
         if (ConfigHandler.dropItems.get()) {
             player.inventory.dropAllItems();
         }

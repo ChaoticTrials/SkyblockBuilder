@@ -48,9 +48,9 @@ public class SkyblockSavedData extends WorldSavedData {
         return storage.getOrCreate(() -> new SkyblockSavedData(world), NAME);
     }
 
-    public IslandPos getSpawn() {
-        if (this.skyblockPositions.get("spawn") != null) {
-            return this.skyblockPositions.get("spawn");
+    public Team getSpawn() {
+        if (this.skyblocks.get("spawn") != null) {
+            return this.skyblocks.get("spawn");
         }
 
         Team team = this.createTeam("Spawn");
@@ -58,7 +58,7 @@ public class SkyblockSavedData extends WorldSavedData {
         team.addPlayer(Util.DUMMY_UUID);
 
         this.markDirty();
-        return team.getIsland();
+        return team;
     }
 
     public Pair<IslandPos, Team> create(String teamName) {

@@ -34,7 +34,7 @@ public class LeaveCommand {
         }
         data.removePlayerFromTeam(player);
         source.sendFeedback(new StringTextComponent("Successfully left your teammates alone.").mergeStyle(TextFormatting.GOLD), false);
-        WorldUtil.teleportToIsland(player, data.getSpawn());
+        WorldUtil.teleportToIsland(player, data.getSpawn().getIsland());
         return 1;
     }
 }

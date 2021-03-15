@@ -10,7 +10,6 @@ import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
@@ -84,14 +83,14 @@ public class EventListener {
             if (WorldUtil.isSkyblock(world)) {
                 SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
                 ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+                Team spawn = data.getSpawn();
                 if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
                     Team team = data.getTeamFromPlayer(player);
-                    //noinspection ConstantConditions
-                    if (!data.hasPlayerTeam(player) && !data.getTeam("spawn").hasPlayer(player)) {
+                    if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
                         if (ConfigHandler.dropItems.get()) {
                             player.inventory.dropAllItems();
                         }
-                        WorldUtil.teleportToIsland(player, data.getSpawn());
+                        WorldUtil.teleportToIsland(player, spawn.getIsland());
                         data.addPlayerToTeam("spawn", player);
                     }
 
@@ -99,11 +98,9 @@ public class EventListener {
                 }
 
                 player.getPersistentData().putBoolean(SPAWNED_TAG, true);
-                //noinspection ConstantConditions
-                data.getTeam("spawn").addPlayer(player);
-                IslandPos spawn = data.getSpawn();
-                ((ServerWorld) world).func_241124_a__(spawn.getCenter(), ConfigHandler.direction.get().getYaw());
-                WorldUtil.teleportToIsland(player, spawn);
+                spawn.addPlayer(player);
+                ((ServerWorld) world).func_241124_a__(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
+                WorldUtil.teleportToIsland(player, spawn.getIsland());
 
                 if (ConfigHandler.clearInv.get()) {
                     player.inventory.clear();
