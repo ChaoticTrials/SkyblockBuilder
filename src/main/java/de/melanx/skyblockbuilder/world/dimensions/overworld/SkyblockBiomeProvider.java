@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.world.dimensions.overworld;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -41,9 +40,9 @@ public class SkyblockBiomeProvider extends BiomeProvider {
         this.seed = provider.seed;
         this.lookupRegistry = provider.lookupRegistry;
 
-        if (ConfigHandler.strongholdOnly.get()) {
-            this.lookupRegistry.getEntries().forEach(biomeEntry -> biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of());
-        }
+        this.lookupRegistry.getEntries().forEach(biomeEntry -> {
+            biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of();
+        });
     }
 
     @Nonnull
