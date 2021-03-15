@@ -36,17 +36,26 @@ public class ConfigHandler {
 
     public static ForgeConfigSpec.BooleanValue overworldStructures;
     public static ForgeConfigSpec.BooleanValue strongholdOnly;
+
     public static ForgeConfigSpec.BooleanValue defaultNether;
     public static ForgeConfigSpec.BooleanValue netherStructures;
     public static ForgeConfigSpec.BooleanValue disableFortress;
     public static ForgeConfigSpec.BooleanValue disableBastion;
+
     public static ForgeConfigSpec.BooleanValue defaultEnd;
     public static ForgeConfigSpec.BooleanValue defaultEndIsland;
     public static ForgeConfigSpec.BooleanValue endStructures;
+
+    public static ForgeConfigSpec.BooleanValue generateSurface;
+    public static ForgeConfigSpec.ConfigValue<String> generationSettings;
+    public static ForgeConfigSpec.IntValue seaHeight;
+
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
     public static ForgeConfigSpec.IntValue generationHeight;
+
     public static ForgeConfigSpec.BooleanValue clearInv;
     public static ForgeConfigSpec.BooleanValue dropItems;
+
     public static ForgeConfigSpec.BooleanValue homeEnabled;
     public static ForgeConfigSpec.BooleanValue createOwnTeam;
     public static ForgeConfigSpec.BooleanValue modifySpawns;
@@ -74,6 +83,14 @@ public class ConfigHandler {
         endStructures = builder.comment("Should structures like end cities be generated in nether? [default: false]",
                 "This also affects the large islands with chorus plants.", "Small islands will still be generated.")
                 .define("dimensions.end.structures", false);
+
+        generateSurface = builder.comment("Should a surface be generated in overworld? [default: false]")
+                .define("world.surface", false);
+        generationSettings = builder.comment("The block settings for generating the surface.",
+                "Same format as flat world generation settings (blocks only)")
+                .define("world.surface-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block", String.class::isInstance);
+        seaHeight = builder.comment("Sea level in world [default: 63]")
+                .defineInRange("world.sea-level", 63, 0, 256);
 
         direction = builder.comment("Direction the player should look at initial spawn")
                 .defineEnum("spawn.direction", WorldUtil.Directions.SOUTH);

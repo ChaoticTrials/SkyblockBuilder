@@ -51,6 +51,11 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
         return CODEC;
     }
 
+    @Override
+    public int getSeaLevel() {
+        return ConfigHandler.seaHeight.get();
+    }
+
     @Nonnull
     @Override
     public ChunkGenerator func_230349_a_(long newSeed) {
