@@ -48,6 +48,8 @@ public class ConfigHandler {
 
     public static ForgeConfigSpec.BooleanValue generateSurface;
     public static ForgeConfigSpec.ConfigValue<String> generationSettings;
+    public static ForgeConfigSpec.BooleanValue singleBiome;
+    public static ForgeConfigSpec.ConfigValue<String> biome;
     public static ForgeConfigSpec.IntValue seaHeight;
 
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
@@ -91,6 +93,10 @@ public class ConfigHandler {
                 .define("world.surface-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block", String.class::isInstance);
         seaHeight = builder.comment("Sea level in world [default: 63]")
                 .defineInRange("world.sea-level", 63, 0, 256);
+        singleBiome = builder.comment("Should only one biome be generated? [default: false]")
+                .define("world.single-biome.enabled", false);
+        biome = builder.comment("Specifies the biome for the whole world")
+                .define("world.single-biome.biome", "minecraft:plains", String.class::isInstance);
 
         direction = builder.comment("Direction the player should look at initial spawn")
                 .defineEnum("spawn.direction", WorldUtil.Directions.SOUTH);

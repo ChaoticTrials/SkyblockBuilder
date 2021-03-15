@@ -3,11 +3,13 @@ package de.melanx.skyblockbuilder.world.dimensions.overworld;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.biome.provider.OverworldBiomeProvider;
 import net.minecraftforge.api.distmarker.Dist;
@@ -24,6 +26,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
             ).apply(instance, instance.stable((seed, lookupRegistry) -> new SkyblockBiomeProvider(
                     new OverworldBiomeProvider(seed, false, false, lookupRegistry))
             )));
+    public static final ResourceLocation SINGLE_BIOME = ResourceLocation.tryCreate(ConfigHandler.biome.get());
 
     public static void init() {
         Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_provider"), SkyblockBiomeProvider.CODEC);
@@ -61,6 +64,14 @@ public class SkyblockBiomeProvider extends BiomeProvider {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        return this.parent.getNoiseBiome(((((x << 2) - 4096) % 8192) + 8192) % 8192, y, ((((z << 2) - 4096) % 8192) + 8192) % 8192);
+        if (ConfigHandler.singleBiome.get()) {
+            Biome biome = this.lookupRegistry.getOrDefault(SINGLE_BIOME);
+            if (biome == null) {
+                biome = this.lookupRegistry.getOrDefault(Biomes.PLAINS.getLocation());
+            }
+            return biome;
+        } else {
+            return this.parent.getNoiseBiome(((((x << 2) - 4096) % 8192) + 8192) % 8192, y, ((((z << 2) - 4096) % 8192) + 8192) % 8192);
+        }
     }
 }
