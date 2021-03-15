@@ -58,10 +58,12 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue clearInv;
     public static ForgeConfigSpec.BooleanValue dropItems;
 
-    public static ForgeConfigSpec.BooleanValue homeEnabled;
     public static ForgeConfigSpec.BooleanValue createOwnTeam;
     public static ForgeConfigSpec.BooleanValue modifySpawns;
     public static ForgeConfigSpec.IntValue modifySpawnRange;
+    public static ForgeConfigSpec.BooleanValue homeEnabled;
+    public static ForgeConfigSpec.BooleanValue allowVisits;
+    public static ForgeConfigSpec.BooleanValue spawnTeleport;
 
     public static void init(ForgeConfigSpec.Builder builder) {
         overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
@@ -110,14 +112,18 @@ public class ConfigHandler {
         dropItems = builder.comment("Should players' items be dropped when leaving a team? [default: true]")
                 .define("inventory.drop", true);
 
-        homeEnabled = builder.comment("Should players be able to teleport to their home island? [default: true]")
-                .define("utility.home", true);
         createOwnTeam = builder.comment("Should players be able to create their own team? [default: false]")
                 .define("utility.create-own-team", false);
         modifySpawns = builder.comment("Should players be able to modify their spawn positions? [default: false]")
                 .define("utility.spawns.modify-spawns", false);
         modifySpawnRange = builder.comment("The range from island center for possible spawns to add. [default: 50]")
                 .defineInRange("utility.spawns.range", 50, 0, Integer.MAX_VALUE);
+        homeEnabled = builder.comment("Should players be able to teleport to their home island? [default: true]")
+                .define("utility.teleports.home", true);
+        allowVisits = builder.comment("Should players be able to visit other island? [default: true]")
+                .define("utility.teleports.allow-visits", true);
+        spawnTeleport = builder.comment("Should players be able to teleport to spawn? [default: true]")
+                .define("utility.teleports.spawn", true);
     }
 
     public static void generateDefaultFiles() {

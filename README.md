@@ -74,6 +74,16 @@ the command `/skyblock accept <team>`.
 ### Teleporting back to home island
 If home command is enabled in the config, you can teleport back to your teams island with `/skyblock home`.
 
+### Teleporting to spawn island
+If teleporting to spawn is enabled in the config, you can teleport to spawn island with `/skyblock spawn`.
+
+### Visiting other islands
+If visits are enabled in the config and a team enabled visiting, you can visit an island with `/skyblock visit <team>`.
+
+### Enable visiting
+You can see your teams current visiting state with `/skyblock team allowVisits` and enable/disable it with `/skyblock team 
+allowVisits <true/false>`.
+
 ### Create an own island
 If users can create islands with their own command, you can use `/skyblock create <name> <players>`. This will create a 
 team, and the given players will be added to the new team. If no players are given, the user who executes the command will 

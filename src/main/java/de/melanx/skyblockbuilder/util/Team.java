@@ -20,12 +20,14 @@ public class Team {
     private final Random random = new Random();
     private IslandPos island;
     private String name;
+    private boolean allowVisits;
 
     public Team(SkyblockSavedData data, IslandPos island) {
         this.data = data;
         this.island = island;
         this.players = new HashSet<>();
         this.possibleSpawns = new HashSet<>();
+        this.allowVisits = false;
     }
 
     public String getName() {
@@ -79,6 +81,21 @@ public class Team {
         boolean remove = this.possibleSpawns.remove(pos);
         this.data.markDirty();
         return remove;
+    }
+
+    public boolean allowsVisits() {
+        return this.allowVisits;
+    }
+
+    public boolean toggleAllowVisits() {
+        this.allowVisits = !this.allowVisits;
+        this.data.markDirty();
+        return this.allowVisits;
+    }
+
+    public void setAllowVisit(boolean enabled) {
+        this.allowVisits = enabled;
+        this.data.markDirty();
     }
 
     public boolean addPlayer(UUID player) {
@@ -142,6 +159,7 @@ public class Team {
 
         nbt.put("Island", this.island.toTag());
         nbt.putString("Name", this.name != null ? this.name : "");
+        nbt.putBoolean("Visits", this.allowVisits);
 
         ListNBT players = new ListNBT();
         for (UUID player : this.players) {
@@ -169,6 +187,7 @@ public class Team {
     public void deserializeNBT(CompoundNBT nbt) {
         this.island = IslandPos.fromTag(nbt.getCompound("Island"));
         this.name = nbt.getString("Name");
+        this.allowVisits = nbt.getBoolean("Visits");
 
         ListNBT players = nbt.getList("Players", Constants.NBT.TAG_COMPOUND);
         this.players.clear();

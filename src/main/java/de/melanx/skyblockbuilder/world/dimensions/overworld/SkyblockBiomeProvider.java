@@ -69,6 +69,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
             if (biome == null) {
                 biome = this.lookupRegistry.getOrDefault(Biomes.PLAINS.getLocation());
             }
+
             return biome;
         } else {
             return this.parent.getNoiseBiome(((((x << 2) - 4096) % 8192) + 8192) % 8192, y, ((((z << 2) - 4096) % 8192) + 8192) % 8192);

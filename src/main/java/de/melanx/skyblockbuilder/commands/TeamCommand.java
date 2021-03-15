@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.commands;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -57,7 +58,43 @@ public class TeamCommand {
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(context -> renameTeam(context.getSource(), StringArgumentType.getString(context, "name"), null))
                                 .then(Commands.argument("team", StringArgumentType.word()).suggests(ManageCommand.SUGGEST_TEAMS).requires(source -> source.hasPermissionLevel(2))
-                                        .executes(context -> renameTeam(context.getSource(), StringArgumentType.getString(context, "name"), StringArgumentType.getString(context, "team"))))));
+                                        .executes(context -> renameTeam(context.getSource(), StringArgumentType.getString(context, "name"), StringArgumentType.getString(context, "team"))))))
+
+                // Toggle permission to visit the teams island
+                .then(Commands.literal("allowVisit")
+                        .executes(context -> showVisitInformation(context.getSource()))
+                        .then(Commands.argument("enabled", BoolArgumentType.bool())
+                                .executes(context -> toggleAllowVisit(context.getSource(), BoolArgumentType.getBool(context, "enabled")))));
+    }
+
+    private static int showVisitInformation(CommandSource source) throws CommandSyntaxException {
+        ServerWorld world = source.getWorld();
+        SkyblockSavedData data = SkyblockSavedData.get(world);
+
+        Team team = data.getTeamFromPlayer(source.asPlayer());
+        if (team == null) {
+            source.sendFeedback(new StringTextComponent("Currently you aren't in a team."), false);
+            return 0;
+        }
+
+        boolean enabled = team.allowsVisits();
+        source.sendFeedback(new StringTextComponent("Visits by other players are currently " + (enabled ? "enabled." : "disabled.")), false);
+        return 1;
+    }
+
+    private static int toggleAllowVisit(CommandSource source, boolean enabled) throws CommandSyntaxException {
+        ServerWorld world = source.getWorld();
+        SkyblockSavedData data = SkyblockSavedData.get(world);
+
+        Team team = data.getTeamFromPlayer(source.asPlayer());
+        if (team == null) {
+            source.sendFeedback(new StringTextComponent("Currently you aren't in a team."), false);
+            return 0;
+        }
+
+        team.setAllowVisit(enabled);
+        source.sendFeedback(new StringTextComponent((enabled ? "Enabled" : "Disabled") + " ability to being visited by other players."), false);
+        return 1;
     }
 
     private static int addSpawn(CommandSource source, BlockPos pos) throws CommandSyntaxException {

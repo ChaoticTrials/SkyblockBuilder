@@ -10,30 +10,24 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 
-public class HomeCommand {
-
+public class SpawnCommand {
     public static ArgumentBuilder<CommandSource, ?> register() {
-        // Teleports the player back home
-        return Commands.literal("home").requires(source -> ConfigHandler.homeEnabled.get() || source.hasPermissionLevel(2))
-                .executes(context -> home(context.getSource()));
+        // Teleports the player to spawn
+        return Commands.literal("spawn").requires(source -> ConfigHandler.spawnTeleport.get() || source.hasPermissionLevel(2))
+                .executes(context -> spawn(context.getSource()));
     }
 
-    private static int home(CommandSource source) throws CommandSyntaxException {
+    private static int spawn(CommandSource source) throws CommandSyntaxException {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         ServerPlayerEntity player = source.asPlayer();
-        Team team = data.getTeamFromPlayer(player);
+        Team team = data.getTeam("spawn");
 
-        if (team == null) {
-            source.sendFeedback(new StringTextComponent("You're currently in no team!").mergeStyle(TextFormatting.RED), false);
-            return 0;
-        }
-
-        source.sendFeedback(new StringTextComponent("Home sweet home"), false);
+        source.sendFeedback(new StringTextComponent("Successfully teleported to spawn."), false);
+        //noinspection ConstantConditions
         WorldUtil.teleportToIsland(player, team.getIsland());
         return 1;
     }
