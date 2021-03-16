@@ -1,9 +1,11 @@
 package de.melanx.skyblockbuilder;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.melanx.skyblockbuilder.util.WorldUtil;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.JSONUtils;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -12,17 +14,20 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ConfigHandler {
     public static final ForgeConfigSpec COMMON_CONFIG;
-    public static final List<ItemStack> STARTER_ITEMS = new ArrayList<>();
+    public static final List<Pair<EquipmentSlotType, ItemStack>> STARTER_ITEMS = new ArrayList<>();
     private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
     private static final Path MOD_CONFIG = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.MODID);
     private static final Path SCHEMATIC_FILE = MOD_CONFIG.resolve("template.nbt");
@@ -199,10 +204,26 @@ public class ConfigHandler {
 
         if (json.has("items")) {
             JsonArray items = json.getAsJsonArray("items");
-            items.forEach(item -> {
+            Set<EquipmentSlotType> usedTypes = new HashSet<>();
+            int slotsUsedInMainInventory = 0;
+            for (JsonElement item : items) {
                 ItemStack stack = CraftingHelper.getItemStack((JsonObject) item, true);
-                STARTER_ITEMS.add(stack);
-            });
+                EquipmentSlotType slot = ((JsonObject) item).has("Slot") ? EquipmentSlotType.fromString(JSONUtils.getString(item, "Slot")) : EquipmentSlotType.MAINHAND;
+                if (slot == EquipmentSlotType.MAINHAND) {
+                    if (slotsUsedInMainInventory >= 36) {
+                        throw new IllegalStateException("Too many starting items in main inventory. Not more than 36 are allowed.");
+                    } else {
+                        slotsUsedInMainInventory += 1;
+                    }
+                } else {
+                    if (usedTypes.contains(slot)) {
+                        throw new IllegalStateException("Slot type that is not 'mainhand' was used multiple times for starting inventory.");
+                    } else {
+                        usedTypes.add(slot);
+                    }
+                }
+                STARTER_ITEMS.add(Pair.of(slot, stack));
+            }
         }
     }
 

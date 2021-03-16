@@ -32,7 +32,16 @@ command to set it as loot chest. WARNING! Do not open that chest after merging t
 
 ### Starting inventory
 You can set a starting inventory by customising `config/skyblockbuilder/starter_items.json`. These items will be given 
-to the player **only** on **initial joining world**, not when joining a team. The config could look like this:
+to the player **only** on **initial joining world**, not when joining a team. You can also set the items to a special 
+slot with key `Slot`. Available values for the slots are:
+- `mainhand` (default)
+- `offhand`
+- `head`
+- `chest`
+- `legs`
+- `feet`
+
+The config could look like this:
 ```json
 {
   "items": [
@@ -44,7 +53,8 @@ to the player **only** on **initial joining world**, not when joining a team. Th
     },
     {
       "item": "minecraft:bread",
-      "count": 32
+      "count": 32,
+      "Slot": "offhand"
     }
   ]
 }

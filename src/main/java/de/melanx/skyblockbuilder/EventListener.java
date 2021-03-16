@@ -15,6 +15,7 @@ import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
@@ -106,7 +107,13 @@ public class EventListener {
                     player.inventory.clear();
                 }
 
-                ConfigHandler.STARTER_ITEMS.forEach(player.inventory::addItemStackToInventory);
+                ConfigHandler.STARTER_ITEMS.forEach(entry -> {
+                    if (entry.getLeft() == EquipmentSlotType.MAINHAND) {
+                        player.inventory.addItemStackToInventory(entry.getRight().copy());
+                    } else {
+                        player.setItemStackToSlot(entry.getLeft(), entry.getRight().copy());
+                    }
+                });
             }
         }
     }
