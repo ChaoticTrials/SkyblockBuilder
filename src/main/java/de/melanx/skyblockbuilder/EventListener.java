@@ -90,7 +90,7 @@ public class EventListener {
                         if (ConfigHandler.dropItems.get()) {
                             player.inventory.dropAllItems();
                         }
-                        WorldUtil.teleportToIsland(player, spawn.getIsland());
+                        WorldUtil.teleportToIsland(player, spawn);
                         data.addPlayerToTeam("spawn", player);
                     }
 
@@ -100,7 +100,7 @@ public class EventListener {
                 player.getPersistentData().putBoolean(SPAWNED_TAG, true);
                 spawn.addPlayer(player);
                 ((ServerWorld) world).func_241124_a__(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
-                WorldUtil.teleportToIsland(player, spawn.getIsland());
+                WorldUtil.teleportToIsland(player, spawn);
 
                 if (ConfigHandler.clearInv.get()) {
                     player.inventory.clear();

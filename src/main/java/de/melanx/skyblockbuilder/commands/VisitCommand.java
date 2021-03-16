@@ -48,7 +48,7 @@ public class VisitCommand {
             return 0;
         }
 
-        WorldUtil.teleportToIsland(player, team.getIsland());
+        WorldUtil.teleportToIsland(player, team);
         source.sendFeedback(new StringTextComponent(String.format("You're now a visitor of team %s.", name)).mergeStyle(TextFormatting.GOLD), false);
         return 1;
     }

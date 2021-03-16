@@ -53,14 +53,14 @@ public class CreateCommand {
         if (players.isEmpty() && source.getEntity() instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity) source.getEntity();
             team.addPlayer(player);
-            WorldUtil.teleportToIsland(player, team.getIsland());
+            WorldUtil.teleportToIsland(player, team);
         } else {
             players.forEach(player -> {
                 if (data.getTeamFromPlayer(player) != null) {
                     source.sendFeedback(new StringTextComponent(String.format("%s is already in a team, it cannot be added!", player.getDisplayName().getString())).mergeStyle(TextFormatting.RED), false);
                 } else {
                     team.addPlayer(player);
-                    WorldUtil.teleportToIsland(player, team.getIsland());
+                    WorldUtil.teleportToIsland(player, team);
                 }
             });
         }

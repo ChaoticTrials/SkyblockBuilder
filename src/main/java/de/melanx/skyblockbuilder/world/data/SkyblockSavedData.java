@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.world.data;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -349,7 +350,7 @@ public class SkyblockSavedData extends WorldSavedData {
             this.addPlayerToTeam(team.getName(), player);
             this.invites.remove(player);
             //noinspection ConstantConditions
-            WorldUtil.teleportToIsland(this.world.getServer().getPlayerList().getPlayerByUUID(player), team.getIsland());
+            WorldUtil.teleportToIsland(this.world.getServer().getPlayerList().getPlayerByUUID(player), team);
             this.markDirty();
 
             return true;
@@ -388,42 +389,5 @@ public class SkyblockSavedData extends WorldSavedData {
 
     public ServerWorld getWorld() {
         return this.world;
-    }
-
-    // Adapted from https://stackoverflow.com/questions/398299/looping-in-a-spiral
-    private static class Spiral {
-        private int x = 0;
-        private int y = 0;
-        private int dx = 0;
-        private int dy = -1;
-
-        Spiral() {
-        }
-
-        Spiral(int x, int y, int dx, int dy) {
-            this.x = x;
-            this.y = y;
-            this.dx = dx;
-            this.dy = dy;
-        }
-
-        int[] next() {
-            if (this.x == this.y || this.x < 0 && this.x == -this.y || this.x > 0 && this.x == 1 - this.y) {
-                int t = this.dx;
-                this.dx = -this.dy;
-                this.dy = t;
-            }
-            this.x += this.dx;
-            this.y += this.dy;
-            return new int[]{this.x, this.y};
-        }
-
-        int[] toIntArray() {
-            return new int[]{this.x, this.y, this.dx, this.dy};
-        }
-
-        static Spiral fromArray(int[] ints) {
-            return new Spiral(ints[0], ints[1], ints[2], ints[3]);
-        }
     }
 }

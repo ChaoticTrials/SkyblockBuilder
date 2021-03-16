@@ -54,6 +54,7 @@ public class ConfigHandler {
 
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
     public static ForgeConfigSpec.IntValue generationHeight;
+    public static ForgeConfigSpec.IntValue spawnRadius;
 
     public static ForgeConfigSpec.BooleanValue clearInv;
     public static ForgeConfigSpec.BooleanValue dropItems;
@@ -105,6 +106,8 @@ public class ConfigHandler {
         generationHeight = builder.comment("Height of the bottom layer from the structure.",
                 "This affects where exactly the island will be generated.")
                 .defineInRange("spawn.height", 64, 1, 255);
+        spawnRadius = builder.comment("The radius to find a valid spawn if no given spawn is valid")
+                .defineInRange("spawn.radius", 50, 0, Integer.MAX_VALUE);
 
         clearInv = builder.comment("Should all items be reset on first world join? [default: false]",
                 "This will delete all the items given on spawn from other mods guide books.")

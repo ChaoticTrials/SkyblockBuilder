@@ -8,7 +8,6 @@ import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -131,7 +130,7 @@ public class ManageCommand {
                 }
 
                 team.addPlayer(player);
-                WorldUtil.teleportToIsland(player, team.getIsland());
+                WorldUtil.teleportToIsland(player, team);
             } catch (CommandSyntaxException e) {
                 source.sendFeedback(new StringTextComponent("You are no player, how do you want to join?"), false);
                 return 1;
@@ -159,7 +158,7 @@ public class ManageCommand {
         }
 
         PlayerList playerList = source.getServer().getPlayerList();
-        IslandPos spawn = data.getSpawn().getIsland();
+        Team spawn = data.getSpawn();
         players.forEach(id -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(id);
             if (player != null) {
@@ -183,12 +182,13 @@ public class ManageCommand {
             return 0;
         }
 
-        IslandPos island = data.getTeamIsland(teamName);
+        Team island = data.getTeam(teamName);
         ServerPlayerEntity added = null;
         int i = 0;
         for (ServerPlayerEntity addedPlayer : players) {
             if (!data.hasPlayerTeam(addedPlayer)) {
                 data.addPlayerToTeam(teamName, addedPlayer);
+                //noinspection ConstantConditions
                 WorldUtil.teleportToIsland(addedPlayer, island);
                 if (i == 0) added = addedPlayer;
                 i++;
@@ -220,7 +220,7 @@ public class ManageCommand {
 
         String teamName = team.getName();
         data.removePlayerFromTeam(player);
-        IslandPos spawn = data.getSpawn().getIsland();
+        Team spawn = data.getSpawn();
         if (ConfigHandler.dropItems.get()) {
             player.inventory.dropAllItems();
         }

@@ -27,7 +27,7 @@ public class SpawnCommand {
         Team team = data.getSpawn();
 
         source.sendFeedback(new StringTextComponent("Successfully teleported to spawn."), false);
-        WorldUtil.teleportToIsland(player, team.getIsland());
+        WorldUtil.teleportToIsland(player, team);
         return 1;
     }
 }

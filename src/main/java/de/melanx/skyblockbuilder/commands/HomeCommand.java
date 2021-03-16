@@ -34,7 +34,7 @@ public class HomeCommand {
         }
 
         source.sendFeedback(new StringTextComponent("Home sweet home"), false);
-        WorldUtil.teleportToIsland(player, team.getIsland());
+        WorldUtil.teleportToIsland(player, team);
         return 1;
     }
 }
