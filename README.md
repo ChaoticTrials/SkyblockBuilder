@@ -69,6 +69,11 @@ by default, but you can turn that off. Overworld structures are not being genera
 
 
 ## Normal user
+### Team chat
+You can enter your teams chat by using `/skyblock tc <message>`. If you give a message, you will only send a message 
+instead of entering the chat. You could also use `@team` at the beginning of a message to write to your team.
+If you entered the team chat, each new message will be sent only to your teammates.
+
 ### Listing teams
 Everyone can list the teams. For that, you can use `/skyblock list <name>`. That will list either all the teams if no 
 name is provided or the names of all players in a team.

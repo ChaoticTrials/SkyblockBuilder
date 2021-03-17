@@ -3,10 +3,15 @@ package de.melanx.skyblockbuilder.util;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 
@@ -18,6 +23,7 @@ public class Team {
     private final Set<UUID> players;
     private final Set<BlockPos> possibleSpawns;
     private final Random random = new Random();
+    private final Set<UUID> teamChatUsers = new HashSet<>();
     private IslandPos island;
     private String name;
     private boolean allowVisits;
@@ -153,6 +159,41 @@ public class Team {
         return this.data.getWorld();
     }
 
+    public void broadcast(ITextComponent msg) {
+        PlayerList playerList = this.getWorld().getServer().getPlayerList();
+        this.players.forEach(uuid -> {
+            ServerPlayerEntity player = playerList.getPlayerByUUID(uuid);
+            if (player != null) {
+                IFormattableTextComponent component = new StringTextComponent("[" + this.name + "] ");
+                player.sendMessage(component.append(msg), uuid);
+            }
+        });
+    }
+
+    public boolean toggleTeamChat(PlayerEntity player) {
+        return this.toggleTeamChat(player.getGameProfile().getId());
+    }
+
+    public boolean toggleTeamChat(UUID player) {
+        if (this.teamChatUsers.contains(player)) {
+            this.teamChatUsers.remove(player);
+            this.data.markDirty();
+            return false;
+        } else {
+            this.teamChatUsers.add(player);
+            this.data.markDirty();
+            return true;
+        }
+    }
+
+    public boolean isInTeamChat(PlayerEntity player) {
+        return this.isInTeamChat(player.getGameProfile().getId());
+    }
+
+    public boolean isInTeamChat(UUID player) {
+        return this.teamChatUsers.contains(player);
+    }
+
     @Nonnull
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
@@ -179,8 +220,17 @@ public class Team {
             spawns.add(posTag);
         }
 
+        ListNBT teamChat = new ListNBT();
+        for (UUID id : this.teamChatUsers) {
+            CompoundNBT player = new CompoundNBT();
+            player.putUniqueId("Player", id);
+
+            teamChat.add(player);
+        }
+
         nbt.put("Players", players);
         nbt.put("Spawns", spawns);
+        nbt.put("TeamChat", teamChat);
         return nbt;
     }
 
@@ -200,6 +250,14 @@ public class Team {
         for (INBT pos : spawns) {
             CompoundNBT posTag = (CompoundNBT) pos;
             this.possibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
+        }
+
+        this.teamChatUsers.clear();
+        if (nbt.contains("TeamChat")) { // TODO 1.17 remove backwards compatibility
+            ListNBT teamChat = nbt.getList("TeamChat", Constants.NBT.TAG_COMPOUND);
+            for (INBT player : teamChat) {
+                this.teamChatUsers.add(((CompoundNBT) player).getUniqueId("Player"));
+            }
         }
     }
 

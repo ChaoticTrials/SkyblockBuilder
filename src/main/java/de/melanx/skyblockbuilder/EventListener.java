@@ -20,10 +20,13 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -72,6 +75,32 @@ public class EventListener {
                 .then(SpawnsCommand.register())
                 .then(TeamCommand.register())
                 .then(VisitCommand.register()));
+    }
+
+    @SubscribeEvent
+    public void onMessage(ServerChatEvent event) {
+        ServerPlayerEntity player = event.getPlayer();
+        SkyblockSavedData data = SkyblockSavedData.get(player.getServerWorld());
+        Team team = data.getTeamFromPlayer(player);
+        if (team == null) {
+            return;
+        }
+
+        if (!team.isInTeamChat(player) && !event.getMessage().startsWith("@team ")) {
+            return;
+        }
+
+        event.setCanceled(true);
+
+        IFormattableTextComponent component = event.getComponent().deepCopy();
+        if (event.getMessage().startsWith("@team ")) {
+            component = new StringTextComponent("<");
+            component.append(event.getPlayer().getDisplayName());
+            component.appendString("> ");
+            component.appendString(event.getMessage().replaceFirst("@team ", ""));
+        }
+
+        team.broadcast(component);
     }
 
     /*
