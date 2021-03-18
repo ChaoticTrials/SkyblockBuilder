@@ -44,7 +44,8 @@ public class SkyblockBiomeProvider extends BiomeProvider {
         this.lookupRegistry = provider.lookupRegistry;
 
         this.lookupRegistry.getEntries().forEach(biomeEntry -> {
-            biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of();
+            if (biomeEntry.getKey() != Biomes.THE_END)
+                biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of();
         });
     }
 
