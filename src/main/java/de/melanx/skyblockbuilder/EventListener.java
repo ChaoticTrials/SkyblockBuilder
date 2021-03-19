@@ -11,6 +11,7 @@ import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.PlayerEntity;
@@ -20,6 +21,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
@@ -156,6 +159,21 @@ public class EventListener {
         CompoundNBT oldData = oldPlayer.getPersistentData();
 
         newData.putBoolean(SPAWNED_TAG, oldData.getBoolean(SPAWNED_TAG));
+    }
+
+    @SubscribeEvent
+    public void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!event.getPlayer().world.isRemote) {
+            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+            BlockPos pos = player.func_241140_K_();
+
+            ServerWorld world = player.getServerWorld();
+            if (pos == null || !world.getBlockState(pos).isIn(BlockTags.BEDS) && !world.getBlockState(pos).isIn(Blocks.RESPAWN_ANCHOR)) {
+                SkyblockSavedData data = SkyblockSavedData.get(world);
+                Team team = data.getTeamFromPlayer(player);
+                WorldUtil.teleportToIsland(player, team == null ? data.getSpawn() : team);
+            }
+        }
     }
 
     @SubscribeEvent
