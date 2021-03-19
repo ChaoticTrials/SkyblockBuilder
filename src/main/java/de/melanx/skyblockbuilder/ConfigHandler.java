@@ -8,11 +8,12 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.JSONUtils;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -143,6 +144,8 @@ public class ConfigHandler {
             copyTemplateFile();
             generateSpawnsFile();
             generateStarterItemsFile();
+            generateStructureInformation();
+            generateFeatureInformation();
 
             loadStarterItems();
         } catch (IOException e) {
@@ -227,10 +230,32 @@ public class ConfigHandler {
         }
     }
 
-    public static void setup() {
-        generateDefaultFiles();
+    public static void generateFeatureInformation() throws IOException {
+        Path resolve = MOD_CONFIG.resolve("features.txt");
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, COMMON_CONFIG, SkyblockBuilder.MODID + "/config.toml");
+        BufferedWriter w = Files.newBufferedWriter(resolve, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+
+        for (Feature<?> feature : ForgeRegistries.FEATURES.getValues()) {
+            if (feature.getRegistryName() != null) {
+                w.write(feature.getRegistryName().toString() + "\n");
+            }
+        }
+
+        w.close();
+    }
+
+    public static void generateStructureInformation() throws IOException {
+        Path resolve = MOD_CONFIG.resolve("structures.txt");
+
+        BufferedWriter w = Files.newBufferedWriter(resolve, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+
+        for (Structure<?> feature : ForgeRegistries.STRUCTURE_FEATURES.getValues()) {
+            if (feature.getRegistryName() != null) {
+                w.write(feature.getRegistryName().toString() + "\n");
+            }
+        }
+
+        w.close();
     }
 
 }
