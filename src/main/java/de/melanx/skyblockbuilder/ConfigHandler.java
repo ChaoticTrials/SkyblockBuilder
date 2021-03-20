@@ -64,6 +64,7 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue clearInv;
     public static ForgeConfigSpec.BooleanValue dropItems;
 
+    public static ForgeConfigSpec.BooleanValue selfManageTeam;
     public static ForgeConfigSpec.BooleanValue createOwnTeam;
     public static ForgeConfigSpec.BooleanValue modifySpawns;
     public static ForgeConfigSpec.IntValue modifySpawnRange;
@@ -120,6 +121,8 @@ public class ConfigHandler {
         dropItems = builder.comment("Should players' items be dropped when leaving a team? [default: true]")
                 .define("inventory.drop", true);
 
+        selfManageTeam = builder.comment("Should players be able to leave their team or invite others? [default: true]")
+                .define("utility.self-manage", true);
         createOwnTeam = builder.comment("Should players be able to create their own team? [default: false]")
                 .define("utility.create-own-team", false);
         modifySpawns = builder.comment("Should players be able to modify their spawn positions? [default: false]")

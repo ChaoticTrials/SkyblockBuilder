@@ -179,15 +179,23 @@ public class SkyblockSavedData extends WorldSavedData {
     public boolean addPlayerToTeam(String teamName, UUID player) {
         for (Team team : this.skyblocks.values()) {
             if (team.getName().equals(teamName)) {
-                //noinspection ConstantConditions
-                this.getTeam("spawn").removePlayer(player);
-                team.addPlayer(player);
-                this.markDirty();
-                return true;
+                return this.addPlayerToTeam(team, player);
             }
         }
 
         return false;
+    }
+
+    public boolean addPlayerToTeam(Team team, PlayerEntity player) {
+        return this.addPlayerToTeam(team, player.getGameProfile().getId());
+    }
+
+    public boolean addPlayerToTeam(Team team, UUID player) {
+        //noinspection ConstantConditions
+        this.getTeam("spawn").removePlayer(player);
+        team.addPlayer(player);
+        this.markDirty();
+        return true;
     }
 
     @Nullable

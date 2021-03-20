@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
@@ -35,7 +36,7 @@ public class AcceptCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Accepts an invitation
-        return Commands.literal("accept")
+        return Commands.literal("accept").requires(source -> ConfigHandler.selfManageTeam.get() || source.hasPermissionLevel(2))
                 .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
                         .executes(context -> acceptTeam(context.getSource(), StringArgumentType.getString(context, "team"))));
     }

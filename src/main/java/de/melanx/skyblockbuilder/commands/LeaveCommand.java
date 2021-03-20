@@ -15,7 +15,7 @@ import net.minecraft.world.server.ServerWorld;
 public class LeaveCommand {
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Let the player leave a team
-        return Commands.literal("leave")
+        return Commands.literal("leave").requires(source -> ConfigHandler.selfManageTeam.get() || source.hasPermissionLevel(2))
                 .executes(context -> leaveTeam(context.getSource()));
     }
 

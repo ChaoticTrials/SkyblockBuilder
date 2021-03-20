@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.commands.invitation;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
@@ -22,7 +23,7 @@ public class InviteCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Invites the given player
-        return Commands.literal("invite")
+        return Commands.literal("invite").requires(source -> ConfigHandler.selfManageTeam.get() || source.hasPermissionLevel(2))
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(context -> invitePlayer(context.getSource(), EntityArgument.getPlayer(context, "player"))));
     }
