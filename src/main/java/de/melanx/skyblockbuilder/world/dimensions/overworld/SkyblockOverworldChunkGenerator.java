@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.FlatPresetsScreen;
 import net.minecraft.util.ResourceLocation;
@@ -18,9 +17,12 @@ import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.*;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureManager;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -31,7 +33,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
             (instance) -> instance.group(
                     BiomeProvider.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeProvider),
                     Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
-                    DimensionSettings.field_236098_b_.fieldOf("settings").forGetter((gen) -> WorldTypeUtil.getOverworldSettings(gen.settings))
+                    DimensionSettings.field_236098_b_.fieldOf("settings").forGetter((gen) -> gen.settings)
             ).apply(instance, instance.stable(SkyblockOverworldChunkGenerator::new)));
 
     protected final long seed;
@@ -100,6 +102,12 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     }
 
+    @Nullable
+    @Override
+    public BlockPos func_235956_a_(ServerWorld p_235956_1_, Structure<?> p_235956_2_, BlockPos p_235956_3_, int p_235956_4_, boolean p_235956_5_) {
+        return super.func_235956_a_(p_235956_1_, p_235956_2_, p_235956_3_, p_235956_4_, p_235956_5_);
+    }
+
     @Override
     public int getHeight(int x, int z, @Nonnull Heightmap.Type heightmapType) {
         if (ConfigHandler.generateSurface.get()) {
@@ -118,12 +126,12 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     }
 
-    @Override
-    public void func_230351_a_(@Nonnull WorldGenRegion region, @Nonnull StructureManager manager) {
-        if (ConfigHandler.overworldStructures.get()) {
-            super.func_230351_a_(region, manager);
-        }
-    }
+//    @Override
+//    public void func_230351_a_(@Nonnull WorldGenRegion region, @Nonnull StructureManager manager) {
+//        if (ConfigHandler.overworldStructures.get()) {
+//            super.func_230351_a_(region, manager);
+//        }
+//    }
 
     @Nonnull
     @Override

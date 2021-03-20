@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.world.dimensions.nether;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
@@ -10,8 +11,8 @@ import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.biome.provider.NetherBiomeProvider;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.StructureFeature;
-import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -43,29 +44,32 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
         this.parent = parent;
         this.seed = provider.seed;
         this.lookupRegistry = lookupRegistry;
-        if (ConfigHandler.netherStructures.get() && (ConfigHandler.disableFortress.get() || ConfigHandler.disableBastion.get())) {
-            this.lookupRegistry.getEntries().forEach(biomeEntry -> {
-                if (biomeEntry.getValue().getCategory() == Biome.Category.NETHER) {
-                    List<Supplier<StructureFeature<?, ?>>> newStructures = new ArrayList<>();
-                    for (Supplier<StructureFeature<?, ?>> structure : biomeEntry.getValue().getGenerationSettings().structures) {
-                        if (structure.get().field_236268_b_ == Structure.FORTRESS) {
-                            if (!ConfigHandler.disableFortress.get()) {
-                                newStructures.add(structure);
-                                continue;
-                            }
-                        }
 
-                        if (structure.get().field_236268_b_ == Structure.BASTION_REMNANT) {
-                            if (!ConfigHandler.disableBastion.get()) {
-                                newStructures.add(structure);
-                            }
-                        }
+        this.lookupRegistry.getEntries().forEach(biomeEntry -> {
+            // Remove non-whitelisted structures
+            List<Supplier<StructureFeature<?, ?>>> structures = new ArrayList<>();
+            for (Supplier<StructureFeature<?, ?>> structure : biomeEntry.getValue().getGenerationSettings().structures) {
+                ResourceLocation location = structure.get().field_236268_b_.getRegistryName();
+                if (location != null && ConfigHandler.whitelistStructures.get().contains(location.toString())) {
+                    structures.add(structure);
+                }
+            }
+
+            biomeEntry.getValue().getGenerationSettings().structures = ImmutableList.copyOf(structures);
+
+            // Remove non-whitelisted features
+            List<Supplier<ConfiguredFeature<?, ?>>> features = new ArrayList<>();
+            biomeEntry.getValue().getGenerationSettings().features.forEach(list -> {
+                for (Supplier<ConfiguredFeature<?, ?>> feature : list) {
+                    ResourceLocation location = feature.get().feature.getRegistryName();
+                    if (location != null && ConfigHandler.whitelistFeatures.get().contains(location.toString())) {
+                        features.add(feature);
                     }
-
-                    biomeEntry.getValue().getGenerationSettings().structures = newStructures;
                 }
             });
-        }
+
+            biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of(features);
+        });
     }
 
     @Nonnull

@@ -113,6 +113,7 @@ public class EventListener {
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         World world = event.getPlayer().world;
         if (world instanceof ServerWorld) {
+            System.out.println(((ServerWorld) world).getServer().getWorld(World.OVERWORLD));
             if (WorldUtil.isSkyblock(world)) {
                 SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
                 ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();

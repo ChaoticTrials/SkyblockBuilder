@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.world;
 import com.mojang.serialization.Lifecycle;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeProvider;
@@ -27,7 +26,6 @@ import net.minecraftforge.common.world.ForgeWorldType;
 import net.minecraftforge.event.RegistryEvent;
 
 import javax.annotation.Nonnull;
-import java.util.function.Supplier;
 
 public class VoidWorldType extends ForgeWorldType {
     public VoidWorldType() {
@@ -78,21 +76,28 @@ public class VoidWorldType extends ForgeWorldType {
     public static ChunkGenerator overworldChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         BiomeProvider overworld = new OverworldBiomeProvider(seed, false, false, biomeRegistry);
         BiomeProvider provider = new SkyblockBiomeProvider(overworld);
-        Supplier<DimensionSettings> settings = () -> dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c);
+        DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c);
+        settings.structures.field_236193_d_.entrySet().removeIf(next -> !ConfigHandler.whitelistStructures.get().contains(next.getKey().getRegistryName().toString()));
 
-        return new SkyblockOverworldChunkGenerator(provider, seed, WorldTypeUtil.getOverworldSettings(settings));
+        return new SkyblockOverworldChunkGenerator(provider, seed, () -> settings);
     }
 
     private static ChunkGenerator netherChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         NetherBiomeProvider nether = NetherBiomeProvider.Preset.DEFAULT_NETHER_PROVIDER_PRESET.build(biomeRegistry, seed);
         SkyblockNetherBiomeProvider provider = new SkyblockNetherBiomeProvider(nether, biomeRegistry);
 
-        return new SkyblockNetherChunkGenerator(provider, seed, () -> dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242736_e));
+        DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242736_e);
+        settings.structures.field_236193_d_.entrySet().removeIf(next -> !ConfigHandler.whitelistStructures.get().contains(next.getKey().getRegistryName().toString()));
+
+        return new SkyblockNetherChunkGenerator(provider, seed, () -> settings);
     }
 
     private static ChunkGenerator endChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         SkyblockEndBiomeProvider provider = new SkyblockEndBiomeProvider(new EndBiomeProvider(biomeRegistry, seed));
 
-        return new SkyblockEndChunkGenerator(provider, seed, () -> dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242737_f));
+        DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242737_f);
+        settings.structures.field_236193_d_.entrySet().removeIf(next -> !ConfigHandler.whitelistStructures.get().contains(next.getKey().getRegistryName().toString()));
+
+        return new SkyblockEndChunkGenerator(provider, seed, () -> settings);
     }
 }

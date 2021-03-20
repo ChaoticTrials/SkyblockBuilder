@@ -21,10 +21,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ConfigHandler {
     public static final ForgeConfigSpec COMMON_CONFIG;
@@ -40,17 +37,12 @@ public class ConfigHandler {
         COMMON_CONFIG = COMMON_BUILDER.build();
     }
 
-    public static ForgeConfigSpec.BooleanValue overworldStructures;
-    public static ForgeConfigSpec.BooleanValue strongholdOnly;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistStructures;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistFeatures;
 
     public static ForgeConfigSpec.BooleanValue defaultNether;
-    public static ForgeConfigSpec.BooleanValue netherStructures;
-    public static ForgeConfigSpec.BooleanValue disableFortress;
-    public static ForgeConfigSpec.BooleanValue disableBastion;
-
     public static ForgeConfigSpec.BooleanValue defaultEnd;
     public static ForgeConfigSpec.BooleanValue defaultEndIsland;
-    public static ForgeConfigSpec.BooleanValue endStructures;
 
     public static ForgeConfigSpec.BooleanValue generateSurface;
     public static ForgeConfigSpec.ConfigValue<String> generationSettings;
@@ -73,27 +65,22 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue spawnTeleport;
 
     public static void init(ForgeConfigSpec.Builder builder) {
-        overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
-                .define("dimensions.overworld.structures", false);
-        strongholdOnly = builder.comment("Should the stronghold with end portal be the only structure?", "Needs default config be 'true', otherwise it'll be ignored. [default: false]")
-                .define("dimensions.overworld.stronhold-only", false);
+        whitelistStructures = builder.comment("All the structures that should be generated.",
+                "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/structures.txt")
+                .defineList("structures.structures", Collections.emptyList(), (obj) -> obj instanceof String);
+        whitelistFeatures = builder.comment("All the features that should be generated.",
+                "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/features.txt")
+                .defineList("structures.features", Arrays.asList(
+                        "minecraft:end_spike",
+                        "minecraft:end_gateway"
+                ), (obj) -> obj instanceof String);
 
         defaultNether = builder.comment("Should nether generate as in default world type? [default: false]")
                 .define("dimensions.nether.default", false);
-        netherStructures = builder.comment("Should structures like fortresses or bastions be generated in nether? [default: true]")
-                .define("dimensions.nether.structures.enabled", true);
-        disableFortress = builder.comment("Use only if 'enabled' is true!", "Should nether fortress be disabled? [default: false]")
-                .define("dimensions.nether.structures.disable-fortress", false);
-        disableBastion = builder.comment("Use only if 'enabled' is true!", "Should bastions be disabled? [default: true]")
-                .define("dimensions.nether.structures.disable-bastions", true);
-
         defaultEnd = builder.comment("Should end generate as in default world type? [default: false]")
                 .define("dimensions.end.default", false);
         defaultEndIsland = builder.comment("Should the main island be generated as normal? [default: true]")
                 .define("dimensions.end.main-island", true);
-        endStructures = builder.comment("Should structures like end cities be generated in nether? [default: false]",
-                "This also affects the large islands with chorus plants.", "Small islands will still be generated.")
-                .define("dimensions.end.structures", false);
 
         generateSurface = builder.comment("Should a surface be generated in overworld? [default: false]")
                 .define("world.surface", false);
@@ -257,5 +244,4 @@ public class ConfigHandler {
 
         w.close();
     }
-
 }

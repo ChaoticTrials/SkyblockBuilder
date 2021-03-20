@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -39,9 +38,7 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
     public SkyblockNetherChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
         super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
-        if (!ConfigHandler.netherStructures.get()) {
-            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.EMPTY_SETTINGS, settings.get());
-        }
+//TODO            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.EMPTY_SETTINGS, settings.get());
         this.settings = settings;
     }
 
@@ -80,13 +77,6 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
     @Override
     public void func_230350_a_(long seed, @Nonnull BiomeManager manager, @Nonnull IChunk chunk, @Nonnull GenerationStage.Carving carving) {
 
-    }
-
-    @Override
-    public void func_230351_a_(@Nonnull WorldGenRegion region, @Nonnull StructureManager manager) {
-        if (ConfigHandler.netherStructures.get()) {
-            super.func_230351_a_(region, manager);
-        }
     }
 
     @Nonnull
