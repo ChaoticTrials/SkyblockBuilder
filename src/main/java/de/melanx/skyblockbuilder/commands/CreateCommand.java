@@ -48,7 +48,12 @@ public class CreateCommand {
             source.sendFeedback(new StringTextComponent("You can't create that team now.").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
-        
+
+        if (players.isEmpty() && source.getEntity() instanceof ServerPlayerEntity && data.hasPlayerTeam((ServerPlayerEntity) source.getEntity())) {
+            source.sendFeedback(new StringTextComponent("You're already in a team, can't create a new one!").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         Team team = data.createTeam(name);
 
         if (team == null) {
