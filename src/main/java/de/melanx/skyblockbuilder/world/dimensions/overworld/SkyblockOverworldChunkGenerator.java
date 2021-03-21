@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
+    
     // [VanillaCopy] overworld chunk generator codec
     protected static final Codec<SkyblockOverworldChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(

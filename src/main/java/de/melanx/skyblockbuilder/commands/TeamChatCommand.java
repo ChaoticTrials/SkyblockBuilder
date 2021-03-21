@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
@@ -12,8 +13,11 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.eventbus.api.Event;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class TeamChatCommand {
+    
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Toggle team chat
         return Commands.literal("tc")
@@ -35,8 +39,24 @@ public class TeamChatCommand {
             return 0;
         }
 
-        boolean enabled = team.toggleTeamChat(player);
-        player.sendStatusMessage(new StringTextComponent("You're now in " + (enabled ? "team" : "normal") + " chat mode.").mergeStyle(TextFormatting.GOLD), true);
+        boolean mode = !team.isInTeamChat(player);
+        Pair<Boolean, Event.Result> result = SkyblockHooks.onTeamChatChange(player, team, mode);
+        if (result.getLeft()) {
+            source.sendFeedback(new StringTextComponent("You can not change your team chat mode now.").mergeStyle(TextFormatting.RED), false);
+            return 0;
+        } else switch (result.getRight()) {
+            case DENY:
+                mode = false;
+                break;
+            case DEFAULT:
+                break;
+            case ALLOW:
+                mode = true;
+                break;
+        }
+
+        team.setTeamChat(player, mode);
+        player.sendStatusMessage(new StringTextComponent("You're now in " + (mode ? "team" : "normal") + " chat mode.").mergeStyle(TextFormatting.GOLD), true);
         return 1;
     }
 
@@ -51,12 +71,16 @@ public class TeamChatCommand {
             source.sendFeedback(new StringTextComponent("Sad, you have no team to communicate with.").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
+        
+        ITextComponent component = SkyblockHooks.onTeamChat(player, team, new StringTextComponent(msg.getString()));
 
-        StringTextComponent tc = new StringTextComponent("<");
-        tc.append(source.getDisplayName());
-        tc.append(new StringTextComponent("> "));
-        tc.append(new StringTextComponent(msg.getString()));
-        team.broadcast(tc);
+        if (component != null) {
+            StringTextComponent tc = new StringTextComponent("<");
+            tc.append(source.getDisplayName());
+            tc.append(new StringTextComponent("> "));
+            tc.append(component);
+            team.broadcast(tc);
+        }
         return 1;
     }
 }

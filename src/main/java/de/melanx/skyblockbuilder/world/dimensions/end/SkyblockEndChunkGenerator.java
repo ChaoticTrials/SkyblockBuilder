@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 public class SkyblockEndChunkGenerator extends ChunkGenerator {
+    
     // [VanillaCopy] overworld chunk generator codec
     protected static final Codec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(

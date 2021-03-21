@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class SkyblockNetherBiomeProvider extends BiomeProvider {
+    
     public static final Codec<SkyblockNetherBiomeProvider> PACKET_CODEC = RecordCodecBuilder.create(
             (builder) -> builder.group(
                     Codec.LONG.fieldOf("seed").forGetter((provider) -> provider.seed),

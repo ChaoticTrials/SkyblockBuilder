@@ -13,6 +13,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 public class SpawnCommand {
+    
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Teleports the player to spawn
         return Commands.literal("spawn").requires(source -> ConfigHandler.spawnTeleport.get() || source.hasPermissionLevel(2))
