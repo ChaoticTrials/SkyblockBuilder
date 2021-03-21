@@ -216,7 +216,7 @@ public class ManageCommand {
                 //noinspection ConstantConditions
                 WorldUtil.teleportToIsland(addedPlayer, island);
                 if (i == 0) added = addedPlayer;
-                i++;
+                i += 1;
             }
         }
 
@@ -261,6 +261,7 @@ public class ManageCommand {
                     target.inventory.dropAllItems();
                 }
                 WorldUtil.teleportToIsland(target, spawn);
+                i += 1;
             }
         }
         source.sendFeedback(new StringTextComponent(String.format("Successfully removed " + i + " from team %s.", teamName)).mergeStyle(TextFormatting.GREEN), true);
