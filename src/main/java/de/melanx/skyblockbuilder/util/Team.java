@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 public class Team {
+    
     private final SkyblockSavedData data;
     private final Set<UUID> players;
     private final Set<BlockPos> possibleSpawns;
@@ -170,22 +171,20 @@ public class Team {
         });
     }
 
-    public boolean toggleTeamChat(PlayerEntity player) {
-        return this.toggleTeamChat(player.getGameProfile().getId());
+    public void setTeamChat(PlayerEntity player, boolean teamChat) {
+        this.setTeamChat(player.getGameProfile().getId(), teamChat);
     }
 
-    public boolean toggleTeamChat(UUID player) {
+    public void setTeamChat(UUID player, boolean teamChat) {
         if (this.teamChatUsers.contains(player)) {
             this.teamChatUsers.remove(player);
-            this.data.markDirty();
-            return false;
         } else {
             this.teamChatUsers.add(player);
-            this.data.markDirty();
-            return true;
         }
+        this.data.markDirty();
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isInTeamChat(PlayerEntity player) {
         return this.isInTeamChat(player.getGameProfile().getId());
     }

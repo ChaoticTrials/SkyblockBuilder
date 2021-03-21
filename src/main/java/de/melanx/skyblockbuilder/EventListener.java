@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
 import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
@@ -24,6 +25,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -40,6 +42,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class EventListener {
+    
     private static final String SPAWNED_TAG = "alreadySpawned";
 
     @SubscribeEvent
@@ -77,7 +80,9 @@ public class EventListener {
                 .then(SpawnCommand.register())
                 .then(SpawnsCommand.register())
                 .then(TeamCommand.register())
-                .then(VisitCommand.register()));
+                .then(VisitCommand.register())
+                .then(TeamChatCommand.register())
+        );
     }
 
     @SubscribeEvent
@@ -95,15 +100,15 @@ public class EventListener {
 
         event.setCanceled(true);
 
-        IFormattableTextComponent component = event.getComponent().deepCopy();
-        if (event.getMessage().startsWith("@team ")) {
-            component = new StringTextComponent("<");
+        ITextComponent message = SkyblockHooks.onTeamChat(player, team, new StringTextComponent(event.getMessage().startsWith("@team ") ? event.getMessage().substring(6) : event.getMessage()));
+        if (message != null) {
+            IFormattableTextComponent component = new StringTextComponent("<");
             component.append(event.getPlayer().getDisplayName());
             component.appendString("> ");
-            component.appendString(event.getMessage().replaceFirst("@team ", ""));
-        }
+            component.append(message);
 
-        team.broadcast(component);
+            team.broadcast(component);
+        }
     }
 
     /*

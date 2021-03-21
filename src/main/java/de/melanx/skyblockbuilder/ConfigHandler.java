@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 public class ConfigHandler {
+    
     public static final ForgeConfigSpec COMMON_CONFIG;
     public static final List<Pair<EquipmentSlotType, ItemStack>> STARTER_ITEMS = new ArrayList<>();
     private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();

@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
@@ -36,7 +37,7 @@ public class AcceptCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Accepts an invitation
-        return Commands.literal("accept").requires(source -> ConfigHandler.selfManageTeam.get() || source.hasPermissionLevel(2))
+        return Commands.literal("accept")
                 .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
                         .executes(context -> acceptTeam(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
@@ -62,6 +63,20 @@ public class AcceptCommand {
             return 0;
         }
 
+        switch (SkyblockHooks.onAccept(player, team)) {
+            case DENY:
+                source.sendFeedback(new StringTextComponent("You can't accept the invitation.").mergeStyle(TextFormatting.RED), false);
+                return 0;
+            case DEFAULT:
+                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                    source.sendFeedback(new StringTextComponent("You're not allowed to accept invitations.").mergeStyle(TextFormatting.RED), false);
+                    return 0;
+                }
+                break;
+            case ALLOW:
+                break;
+        }
+        
         if (!data.acceptInvite(team, player)) {
             source.sendFeedback(new StringTextComponent("Error while accepting the invitation.").mergeStyle(TextFormatting.RED), false);
             return 0;

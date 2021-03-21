@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
@@ -17,7 +18,7 @@ public class HomeCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Teleports the player back home
-        return Commands.literal("home").requires(source -> ConfigHandler.homeEnabled.get() || source.hasPermissionLevel(2))
+        return Commands.literal("home")
                 .executes(context -> home(context.getSource()));
     }
 
@@ -31,6 +32,20 @@ public class HomeCommand {
         if (team == null) {
             source.sendFeedback(new StringTextComponent("You're currently in no team!").mergeStyle(TextFormatting.RED), false);
             return 0;
+        }
+        
+        switch (SkyblockHooks.onHome(player, team)) {
+            case DENY:
+                source.sendFeedback(new StringTextComponent("You may not teleport home now.").mergeStyle(TextFormatting.RED), false);
+                return 0;
+            case DEFAULT:
+                if (!ConfigHandler.homeEnabled.get() && !source.hasPermissionLevel(2)) {
+                    source.sendFeedback(new StringTextComponent("You are not allowed to teleport to your home point..").mergeStyle(TextFormatting.RED), false);
+                    return 0;
+                }
+                break;
+            case ALLOW:
+                break;
         }
 
         source.sendFeedback(new StringTextComponent("Home sweet home"), false);

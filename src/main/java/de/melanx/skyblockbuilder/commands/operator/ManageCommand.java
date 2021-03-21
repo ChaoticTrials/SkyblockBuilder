@@ -1,10 +1,12 @@
 package de.melanx.skyblockbuilder.commands.operator;
 
+import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -18,16 +20,15 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ManageCommand {
 
-    public static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> {
-        return ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
-                .getTeams().stream().map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
-    };
+    public static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
+            .getTeams().stream().map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("manage").requires(source -> source.hasPermissionLevel(2))
@@ -69,14 +70,16 @@ public class ManageCommand {
     private static int deleteEmptyTeams(CommandSource source) {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
-
+        
         int i = 0;
         Iterator<Team> itr = data.getTeams().iterator();
         while (itr.hasNext()) {
             Team team = itr.next();
-            if (team.isEmpty()) {
-                itr.remove();
-                i++;
+            if (!SkyblockHooks.onManageDeleteTeam(source, team)) {
+                if (team.isEmpty()) {
+                    itr.remove();
+                    i++;
+                }
             }
         }
         data.markDirty();
@@ -95,6 +98,11 @@ public class ManageCommand {
         }
 
         Team team = data.getTeam(teamName);
+        if (SkyblockHooks.onManageClearTeam(source, team)) {
+            source.sendFeedback(new StringTextComponent("You can not clear that team now."), false);
+            return 0;
+        }
+        
         assert team != null;
         int i = team.getPlayers().size();
         team.removeAllPlayers();
@@ -115,9 +123,15 @@ public class ManageCommand {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
-        Team team = data.createTeam(name);
+        Pair<Boolean, String> result = SkyblockHooks.onManageCreateTeam(source, name, join);
+        if (result.getLeft()) {
+            source.sendFeedback(new StringTextComponent("You can not create that team now."), false);
+            return 0;
+        }
+        
+        Team team = data.createTeam(result.getRight());
         if (team == null) {
-            source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", name)).mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", result.getRight())).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
@@ -137,7 +151,7 @@ public class ManageCommand {
             }
         }
 
-        source.sendFeedback(new StringTextComponent(String.format(("Successfully created team %s."), name)).mergeStyle(TextFormatting.GREEN), true);
+        source.sendFeedback(new StringTextComponent(String.format(("Successfully created team %s."), result.getRight())).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 
@@ -150,6 +164,11 @@ public class ManageCommand {
             return 0;
         }
 
+        if (SkyblockHooks.onManageDeleteTeam(source, data.getTeam(team))) {
+            source.sendFeedback(new StringTextComponent("You can not delete that team now."), false);
+            return 0;
+        }
+        
         //noinspection ConstantConditions
         Set<UUID> players = new HashSet<>(data.getTeam(team).getPlayers());
         if (!data.deleteTeam(team)) {
@@ -183,15 +202,21 @@ public class ManageCommand {
         }
 
         Team island = data.getTeam(teamName);
+        Pair<Boolean, Set<ServerPlayerEntity>> result = SkyblockHooks.onManageAddToTeam(source, island, players);
+        if (result.getLeft()) {
+            source.sendFeedback(new StringTextComponent("You can not add players to this team now."), false);
+            return 0;
+        }
+        
         ServerPlayerEntity added = null;
         int i = 0;
-        for (ServerPlayerEntity addedPlayer : players) {
+        for (ServerPlayerEntity addedPlayer : result.getRight()) {
             if (!data.hasPlayerTeam(addedPlayer)) {
                 data.addPlayerToTeam(teamName, addedPlayer);
                 //noinspection ConstantConditions
                 WorldUtil.teleportToIsland(addedPlayer, island);
                 if (i == 0) added = addedPlayer;
-                i++;
+                i += 1;
             }
         }
 
@@ -214,18 +239,32 @@ public class ManageCommand {
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendFeedback(new StringTextComponent("You're currently in no team!").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new StringTextComponent("This player currently in no team!").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
+        Pair<Boolean, Set<ServerPlayerEntity>> result = SkyblockHooks.onManageAddToTeam(source, team, ImmutableSet.of(player));
+        if (result.getLeft()) {
+            source.sendFeedback(new StringTextComponent("You can not add players to this team now."), false);
             return 0;
         }
 
         String teamName = team.getName();
-        data.removePlayerFromTeam(player);
         Team spawn = data.getSpawn();
-        if (ConfigHandler.dropItems.get()) {
-            player.inventory.dropAllItems();
+        int i = 0;
+        for (ServerPlayerEntity target : result.getRight()) {
+            // Even if the event adds players to the list
+            // we only remove the ones that really are in the team.
+            if (team.hasPlayer(target)) {
+                data.removePlayerFromTeam(target);
+                if (ConfigHandler.dropItems.get()) {
+                    target.inventory.dropAllItems();
+                }
+                WorldUtil.teleportToIsland(target, spawn);
+                i += 1;
+            }
         }
-        WorldUtil.teleportToIsland(player, spawn);
-        source.sendFeedback(new StringTextComponent(String.format("Successfully left team %s.", teamName)).mergeStyle(TextFormatting.GREEN), true);
+        source.sendFeedback(new StringTextComponent(String.format("Successfully removed " + i + " from team %s.", teamName)).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 }

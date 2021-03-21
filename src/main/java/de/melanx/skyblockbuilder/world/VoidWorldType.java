@@ -30,6 +30,7 @@ import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 public class VoidWorldType extends ForgeWorldType {
+    
     public VoidWorldType() {
         super(VoidWorldType::overworldChunkGenerator);
     }

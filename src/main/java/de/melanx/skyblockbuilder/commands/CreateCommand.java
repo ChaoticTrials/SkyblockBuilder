@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -43,6 +44,11 @@ public class CreateCommand {
             } while (data.teamExists(name));
         }
 
+        if (SkyblockHooks.onCreateTeam(name)) {
+            source.sendFeedback(new StringTextComponent("You can't create that team now.").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+        
         Team team = data.createTeam(name);
 
         if (team == null) {

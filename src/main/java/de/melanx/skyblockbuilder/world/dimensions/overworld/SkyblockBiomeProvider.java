@@ -16,8 +16,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class SkyblockBiomeProvider extends BiomeProvider {
+    
     // [VanillaCopy] overworld biome provider codec
     public static final Codec<SkyblockBiomeProvider> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
@@ -70,8 +72,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
             if (biome == null) {
                 biome = this.lookupRegistry.getOrDefault(Biomes.PLAINS.getLocation());
             }
-
-            return biome;
+            return Objects.requireNonNull(biome);
         } else {
             return this.parent.getNoiseBiome(((((x << 2) - 4096) % 8192) + 8192) % 8192, y, ((((z << 2) - 4096) % 8192) + 8192) % 8192);
         }

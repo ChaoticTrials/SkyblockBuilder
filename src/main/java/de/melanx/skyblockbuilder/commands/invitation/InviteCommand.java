@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.commands.invitation;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
@@ -23,7 +24,7 @@ public class InviteCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Invites the given player
-        return Commands.literal("invite").requires(source -> ConfigHandler.selfManageTeam.get() || source.hasPermissionLevel(2))
+        return Commands.literal("invite")
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(context -> invitePlayer(context.getSource(), EntityArgument.getPlayer(context, "player"))));
     }
@@ -50,6 +51,20 @@ public class InviteCommand {
                 player.sendStatusMessage(new StringTextComponent("Player already invited to your team!").mergeStyle(TextFormatting.RED), false);
                 return 0;
             }
+        }
+        
+        switch (SkyblockHooks.onInvite(invitePlayer, team, player)) {
+            case DENY:
+                player.sendStatusMessage(new StringTextComponent("You can not invite that player.").mergeStyle(TextFormatting.RED), false);
+                return 0;
+            case DEFAULT:
+                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                    player.sendStatusMessage(new StringTextComponent("You're not allowed to send invitations.").mergeStyle(TextFormatting.RED), false);
+                    return 0;
+                }
+                break;
+            case ALLOW:
+                break;
         }
 
         data.addInvite(team, invitePlayer);
