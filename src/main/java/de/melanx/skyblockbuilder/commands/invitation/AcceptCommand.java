@@ -12,8 +12,8 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.List;
@@ -49,27 +49,27 @@ public class AcceptCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendFeedback(new StringTextComponent("This team does not exist!").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         if (data.hasPlayerTeam(player)) {
-            source.sendFeedback(new StringTextComponent("You already joined a team!").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         if (!data.hasInvites(player)) {
-            source.sendFeedback(new StringTextComponent("You don't have any invitations!").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.no_invitations").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         switch (SkyblockHooks.onAccept(player, team)) {
             case DENY:
-                source.sendFeedback(new StringTextComponent("You can't accept the invitation.").mergeStyle(TextFormatting.RED), false);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.accept_invitations").mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
                 if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new StringTextComponent("You're not allowed to accept invitations.").mergeStyle(TextFormatting.RED), false);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.accept_invitations").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
                 break;
@@ -78,11 +78,11 @@ public class AcceptCommand {
         }
         
         if (!data.acceptInvite(team, player)) {
-            source.sendFeedback(new StringTextComponent("Error while accepting the invitation.").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.error_accept_invitations").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
-        source.sendFeedback(new StringTextComponent(String.format("Successfully joined team %s.", team.getName())).mergeStyle(TextFormatting.GOLD), false);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.joined_team", team.getName()).mergeStyle(TextFormatting.GOLD), true);
         return 1;
     }
 

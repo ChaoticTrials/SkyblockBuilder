@@ -11,16 +11,16 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.server.ServerWorld;
 
 public class InviteCommand {
 
-    public static HoverEvent COPY_TEXT = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Click to copy"));
+    public static HoverEvent COPY_TEXT = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("skyblockbuilder.command.info.click_to_copy"));
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Invites the given player
@@ -36,30 +36,30 @@ public class InviteCommand {
 
         Team team = data.getTeamFromPlayer(player);
         if (team == null) {
-            player.sendStatusMessage(new StringTextComponent("You're currently in no team!").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         Team invitedPlayersTeam = data.getTeamFromPlayer(invitePlayer);
         if (invitedPlayersTeam != null) {
-            player.sendStatusMessage(new StringTextComponent("Invited player already is in a team!").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         if (data.hasInvites(invitePlayer)) {
             if (data.hasInviteFrom(team, invitePlayer)) {
-                player.sendStatusMessage(new StringTextComponent("Player already invited to your team!").mergeStyle(TextFormatting.RED), false);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_already_invited").mergeStyle(TextFormatting.RED), true);
                 return 0;
             }
         }
         
         switch (SkyblockHooks.onInvite(invitePlayer, team, player)) {
             case DENY:
-                player.sendStatusMessage(new StringTextComponent("You can not invite that player.").mergeStyle(TextFormatting.RED), false);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.invite_player").mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
                 if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
-                    player.sendStatusMessage(new StringTextComponent("You're not allowed to send invitations.").mergeStyle(TextFormatting.RED), false);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.send_invitations").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
                 break;
@@ -69,16 +69,16 @@ public class InviteCommand {
 
         data.addInvite(team, invitePlayer);
 
-        IFormattableTextComponent invite = new StringTextComponent(String.format("%s invites you to join %s. Type ", player.getDisplayName().getString(), team.getName())).mergeStyle(TextFormatting.GOLD);
-        invite.append(new StringTextComponent(String.format("/skyblock accept %s", team.getName()))
+        IFormattableTextComponent invite = new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team0", player.getDisplayName().getString(), team.getName()).mergeStyle(TextFormatting.GOLD);
+        invite.append(new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team1", team.getName()))
                 .setStyle(Style.EMPTY
                         .setHoverEvent(COPY_TEXT)
                         .setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock accept " + team.getName()))
-                        .applyFormatting(TextFormatting.UNDERLINE).applyFormatting(TextFormatting.GOLD)));
-        invite.append(new StringTextComponent(" to join team.").mergeStyle(TextFormatting.GOLD));
+                        .applyFormatting(TextFormatting.UNDERLINE).applyFormatting(TextFormatting.GOLD));
+        invite.append(new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team2").mergeStyle(TextFormatting.GOLD));
         invitePlayer.sendStatusMessage(invite, false);
 
-        player.sendStatusMessage(new StringTextComponent(String.format("Successfully invited %s in your team.", invitePlayer.getDisplayName().getString())).mergeStyle(TextFormatting.GOLD), false);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.invite_player", invitePlayer.getDisplayName().getString()).mergeStyle(TextFormatting.GOLD), true);
         return 1;
     }
 }

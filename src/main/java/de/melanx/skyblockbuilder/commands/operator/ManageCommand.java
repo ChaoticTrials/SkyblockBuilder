@@ -17,8 +17,8 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -84,7 +84,7 @@ public class ManageCommand {
         }
         data.markDirty();
 
-        source.sendFeedback(new StringTextComponent(String.format("Deleted %s empty teams.", i)).mergeStyle(TextFormatting.GREEN), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.delete_multiple_teams", i).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 
@@ -93,20 +93,20 @@ public class ManageCommand {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         if (!data.teamExists(teamName)) {
-            source.sendFeedback(new StringTextComponent("Team does not exist!").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         Team team = data.getTeam(teamName);
         if (SkyblockHooks.onManageClearTeam(source, team)) {
-            source.sendFeedback(new StringTextComponent("You can not clear that team now."), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.clear_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
         
         assert team != null;
         int i = team.getPlayers().size();
         team.removeAllPlayers();
-        source.sendFeedback(new StringTextComponent(String.format("Successfully removed all %s players.", i)), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.remove_all_players_from_team", i).mergeStyle(TextFormatting.RED), true);
         return 1;
     }
 
@@ -125,13 +125,13 @@ public class ManageCommand {
 
         Pair<Boolean, String> result = SkyblockHooks.onManageCreateTeam(source, name, join);
         if (result.getLeft()) {
-            source.sendFeedback(new StringTextComponent("You can not create that team now."), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
         
         Team team = data.createTeam(result.getRight());
         if (team == null) {
-            source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", result.getRight())).mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_already_exist", result.getRight()).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
@@ -139,19 +139,19 @@ public class ManageCommand {
             try {
                 ServerPlayerEntity player = source.asPlayer();
                 if (data.getTeamFromPlayer(player) != null) {
-                    source.sendFeedback(new StringTextComponent("You are already in a team, to create a new one you have to leave your team first!").mergeStyle(TextFormatting.RED), false);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_team").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
 
                 team.addPlayer(player);
                 WorldUtil.teleportToIsland(player, team);
             } catch (CommandSyntaxException e) {
-                source.sendFeedback(new StringTextComponent("You are no player, how do you want to join?"), false);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_no_player").mergeStyle(TextFormatting.RED), true);
                 return 1;
             }
         }
 
-        source.sendFeedback(new StringTextComponent(String.format(("Successfully created team %s."), result.getRight())).mergeStyle(TextFormatting.GREEN), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.create_team", result.getRight()).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 
@@ -160,19 +160,19 @@ public class ManageCommand {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         if (!data.teamExists(team)) {
-            source.sendFeedback(new StringTextComponent("Team does not exist!").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         if (SkyblockHooks.onManageDeleteTeam(source, data.getTeam(team))) {
-            source.sendFeedback(new StringTextComponent("You can not delete that team now."), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.delete_team"), true);
             return 0;
         }
         
         //noinspection ConstantConditions
         Set<UUID> players = new HashSet<>(data.getTeam(team).getPlayers());
         if (!data.deleteTeam(team)) {
-            source.sendFeedback(new StringTextComponent(String.format("Error while deleting team %s!", team)).mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.delete_team", team).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
@@ -188,7 +188,7 @@ public class ManageCommand {
             }
         });
 
-        source.sendFeedback(new StringTextComponent(String.format("Successfully deleted team %s.", team)).mergeStyle(TextFormatting.GREEN), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.delete_one_team", team).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 
@@ -197,14 +197,14 @@ public class ManageCommand {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         if (!data.teamExists(teamName)) {
-            source.sendFeedback(new StringTextComponent("Team does not exist!").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         Team island = data.getTeam(teamName);
         Pair<Boolean, Set<ServerPlayerEntity>> result = SkyblockHooks.onManageAddToTeam(source, island, players);
         if (result.getLeft()) {
-            source.sendFeedback(new StringTextComponent("You can not add players to this team now."), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.add_players_to_team"), true);
             return 0;
         }
         
@@ -221,14 +221,14 @@ public class ManageCommand {
         }
 
         if (i == 0) {
-            source.sendFeedback(new StringTextComponent("No player added to team!").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.no_player_added").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         if (i == 1)
-            source.sendFeedback(new StringTextComponent(String.format("Successfully added %s to team %s.", added.getDisplayName().getString(), teamName)).mergeStyle(TextFormatting.GREEN), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.add_one_player", added.getDisplayName().getString(), teamName).mergeStyle(TextFormatting.GREEN), true);
         else
-            source.sendFeedback(new StringTextComponent(String.format("Successfully added %s players to team %s.", i, teamName)).mergeStyle(TextFormatting.GREEN), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.add_multiple_players", i, teamName).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 
@@ -239,13 +239,13 @@ public class ManageCommand {
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendFeedback(new StringTextComponent("This player currently in no team!").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_no_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         Pair<Boolean, Set<ServerPlayerEntity>> result = SkyblockHooks.onManageAddToTeam(source, team, ImmutableSet.of(player));
         if (result.getLeft()) {
-            source.sendFeedback(new StringTextComponent("You can not add players to this team now."), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.add_players_to_team"), true);
             return 0;
         }
 
@@ -264,7 +264,7 @@ public class ManageCommand {
                 i += 1;
             }
         }
-        source.sendFeedback(new StringTextComponent(String.format("Successfully removed " + i + " from team %s.", teamName)).mergeStyle(TextFormatting.GREEN), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.remove_multiple_players", i, teamName).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 }

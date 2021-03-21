@@ -10,8 +10,8 @@ import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 public class HomeCommand {
@@ -30,17 +30,17 @@ public class HomeCommand {
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendFeedback(new StringTextComponent("You're currently in no team!").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
         
         switch (SkyblockHooks.onHome(player, team)) {
             case DENY:
-                source.sendFeedback(new StringTextComponent("You may not teleport home now.").mergeStyle(TextFormatting.RED), false);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.teleport_home").mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
                 if (!ConfigHandler.homeEnabled.get() && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new StringTextComponent("You are not allowed to teleport to your home point..").mergeStyle(TextFormatting.RED), false);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.teleport_home").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
                 break;
@@ -48,7 +48,7 @@ public class HomeCommand {
                 break;
         }
 
-        source.sendFeedback(new StringTextComponent("Home sweet home"), false);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.teleport_home").mergeStyle(TextFormatting.GOLD), true);
         WorldUtil.teleportToIsland(player, team);
         return 1;
     }

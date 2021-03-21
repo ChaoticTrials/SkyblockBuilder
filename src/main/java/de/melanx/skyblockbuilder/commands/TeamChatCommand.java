@@ -12,6 +12,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.eventbus.api.Event;
 import org.apache.commons.lang3.tuple.Pair;
@@ -35,14 +36,14 @@ public class TeamChatCommand {
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendFeedback(new StringTextComponent("Sad, you have no team to communicate with.").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team_teamchat").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         boolean mode = !team.isInTeamChat(player);
         Pair<Boolean, Event.Result> result = SkyblockHooks.onTeamChatChange(player, team, mode);
         if (result.getLeft()) {
-            source.sendFeedback(new StringTextComponent("You can not change your team chat mode now.").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.team_chat").mergeStyle(TextFormatting.RED), true);
             return 0;
         } else switch (result.getRight()) {
             case DENY:
@@ -56,7 +57,7 @@ public class TeamChatCommand {
         }
 
         team.setTeamChat(player, mode);
-        player.sendStatusMessage(new StringTextComponent("You're now in " + (mode ? "team" : "normal") + " chat mode.").mergeStyle(TextFormatting.GOLD), true);
+        player.sendStatusMessage(new TranslationTextComponent("skyblockbuilder.command.success.toggle_teamchat", new TranslationTextComponent("skyblockbuilder.command.argument." + (mode ? "team" : "normal"))).mergeStyle(TextFormatting.GOLD), true);
         return 1;
     }
 
@@ -68,7 +69,7 @@ public class TeamChatCommand {
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendFeedback(new StringTextComponent("Sad, you have no team to communicate with.").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team_teamchat").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
         

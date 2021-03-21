@@ -9,7 +9,7 @@ import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 public class SpawnCommand {
@@ -27,7 +27,7 @@ public class SpawnCommand {
         ServerPlayerEntity player = source.asPlayer();
         Team team = data.getSpawn();
 
-        source.sendFeedback(new StringTextComponent("Successfully teleported to spawn."), false);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.teleport_to_spawn"), true);
         WorldUtil.teleportToIsland(player, team);
         return 1;
     }

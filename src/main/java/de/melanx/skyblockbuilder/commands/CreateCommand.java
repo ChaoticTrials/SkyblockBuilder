@@ -12,8 +12,8 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Collection;
@@ -45,19 +45,19 @@ public class CreateCommand {
         }
 
         if (SkyblockHooks.onCreateTeam(name)) {
-            source.sendFeedback(new StringTextComponent("You can't create that team now.").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         if (players.isEmpty() && source.getEntity() instanceof ServerPlayerEntity && data.hasPlayerTeam((ServerPlayerEntity) source.getEntity())) {
-            source.sendFeedback(new StringTextComponent("You're already in a team, can't create a new one!").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         Team team = data.createTeam(name);
 
         if (team == null) {
-            source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", name)).mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_already_exist", name).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
@@ -68,7 +68,7 @@ public class CreateCommand {
         } else {
             players.forEach(player -> {
                 if (data.getTeamFromPlayer(player) != null) {
-                    source.sendFeedback(new StringTextComponent(String.format("%s is already in a team, it cannot be added!", player.getDisplayName().getString())).mergeStyle(TextFormatting.RED), false);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).mergeStyle(TextFormatting.RED), true);
                 } else {
                     team.addPlayer(player);
                     WorldUtil.teleportToIsland(player, team);
@@ -76,7 +76,7 @@ public class CreateCommand {
             });
         }
 
-        source.sendFeedback(new StringTextComponent(String.format(("Successfully created team %s."), name)).mergeStyle(TextFormatting.GREEN), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.create_team", name).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 }
