@@ -29,7 +29,7 @@ import java.util.*;
  * https://github.com/Vazkii/Botania/blob/master/src/main/java/vazkii/botania/common/world/SkyblockSavedData.java
  */
 public class SkyblockSavedData extends WorldSavedData {
-    
+
     private static final String NAME = "skyblock_builder";
 
     public static final IslandPos SPAWN_ISLAND = new IslandPos(0, 0);

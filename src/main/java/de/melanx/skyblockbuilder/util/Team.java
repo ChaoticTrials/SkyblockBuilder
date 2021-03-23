@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.util;
 
+import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,7 +20,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 public class Team {
-    
+
     private final SkyblockSavedData data;
     private final Set<UUID> players;
     private final Set<BlockPos> possibleSpawns;
@@ -35,6 +36,7 @@ public class Team {
         this.players = new HashSet<>();
         this.possibleSpawns = new HashSet<>();
         this.allowVisits = false;
+        MineMentionCompat.updateMentions(this.getWorld().getServer());
     }
 
     public String getName() {
@@ -62,6 +64,7 @@ public class Team {
     public void setPlayers(Collection<UUID> players) {
         this.players.clear();
         this.players.addAll(players);
+        MineMentionCompat.updateMentions(this.getWorld().getServer());
         this.data.markDirty();
     }
 
@@ -107,6 +110,7 @@ public class Team {
 
     public boolean addPlayer(UUID player) {
         boolean added = this.players.add(player);
+        MineMentionCompat.updateMentions(this.getWorld().getServer());
         this.data.markDirty();
         return added;
     }
@@ -117,6 +121,7 @@ public class Team {
 
     public boolean addPlayers(Collection<UUID> players) {
         boolean added = this.players.addAll(players);
+        MineMentionCompat.updateMentions(this.getWorld().getServer());
         this.data.markDirty();
         return added;
     }
@@ -127,6 +132,7 @@ public class Team {
 
     public boolean removePlayer(UUID player) {
         boolean removed = this.players.remove(player);
+        MineMentionCompat.updateMentions(this.getWorld().getServer());
         this.data.markDirty();
         return removed;
     }
@@ -135,11 +141,13 @@ public class Team {
         for (UUID id : players) {
             this.players.remove(id);
         }
+        MineMentionCompat.updateMentions(this.getWorld().getServer());
         this.data.markDirty();
     }
 
     public void removeAllPlayers() {
         this.players.clear();
+        MineMentionCompat.updateMentions(this.getWorld().getServer());
         this.data.markDirty();
     }
 

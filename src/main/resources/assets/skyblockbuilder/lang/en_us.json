@@ -74,5 +74,7 @@
   "skyblockbuilder.command.success.spawn_added": "Successfully added new spawn point at x %s, y %s, z %s.",
   "skyblockbuilder.command.success.spawn_removed": "Successfully removed spawn point at x %s, y %s, z %s.",
   "skyblockbuilder.command.success.reset_spawns": "Successfully reset all possible spawns.",
-  "skyblockbuilder.command.success.rename_team": "Successfully renamed team to %s."
+  "skyblockbuilder.command.success.rename_team": "Successfully renamed team to %s.",
+
+  "minemention.skyblockbuilder.team": "Mention every player in your team"
 }

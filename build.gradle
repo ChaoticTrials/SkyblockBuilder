@@ -47,6 +47,7 @@ def createRunConfig(String name, Closure extra = {}) {
     minecraft.runs.create(name) { RunConfig run ->
         run.workingDirectory project.file("run_" + name)
         run.property "forge.logging.markers", "SCAN,REGISTRIES"
+        run.jvmArg "-Dmixin.env.disableRefMap=true"
         run.property "forge.logging.console.level", "debug"
         run.mods.create(modid) { ModConfig mod ->
             source sourceSets.main
@@ -116,11 +117,17 @@ repositories {
         name = "JEI"
         url = "https://dvs1.progwml6.com/files/maven/"
     }
+    maven {
+        name = "MelanX Maven"
+        url = "https://maven.melanx.de/"
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+    compile fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.16.3-${libx_version}")
+    compile fg.deobf("io.github.noeppi_noeppi.mods:MineMention:${mc_version}-${mention_version}")
 }
 
 private static String getVersion(String group, String artifact, String baseVersion) {
