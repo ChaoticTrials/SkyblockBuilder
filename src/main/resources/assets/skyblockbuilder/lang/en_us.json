@@ -24,7 +24,7 @@
   "skyblockbuilder.command.error.position_too_far_away": "This position is too far away from the team island.",
   "skyblockbuilder.command.error.remove_spawn0": "You cannot remove that spawn point.%s",
   "skyblockbuilder.command.error.remove_spawn1": "There are not enough spawn points left.",
-  "skyblockbuilder.command.error.user_no_player": "You are not a player, but a mere lier!",
+  "skyblockbuilder.command.error.user_no_player": "You are not a player, but a mere liar!",
 
   "skyblockbuilder.command.denied.accept_invitations": "You cannot accept this invitation!",
   "skyblockbuilder.command.denied.leave_team": "You are not allowed to leave your team.",
