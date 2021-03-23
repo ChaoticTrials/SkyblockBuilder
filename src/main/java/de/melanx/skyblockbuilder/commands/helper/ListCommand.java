@@ -35,7 +35,7 @@ public class ListCommand {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
-        List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).filter(team -> team.getName().equalsIgnoreCase("spawn")).collect(Collectors.toList());
+        List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).filter(team -> !team.getName().equalsIgnoreCase("spawn")).collect(Collectors.toList());
         IFormattableTextComponent info = new TranslationTextComponent("skyblockbuilder.command.info.teams",
                 teams.size(),
                 teams.stream().filter(Team::isEmpty).count());
