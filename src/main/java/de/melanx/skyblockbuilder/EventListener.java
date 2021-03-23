@@ -6,7 +6,6 @@ import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
 import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
-import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
@@ -24,14 +23,10 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -81,33 +76,7 @@ public class EventListener {
                 .then(SpawnsCommand.register())
                 .then(TeamCommand.register())
                 .then(VisitCommand.register())
-                .then(TeamChatCommand.register())
         );
-    }
-
-    @SubscribeEvent
-    public void onMessage(ServerChatEvent event) {
-        ServerPlayerEntity player = event.getPlayer();
-        SkyblockSavedData data = SkyblockSavedData.get(player.getServerWorld());
-        Team team = data.getTeamFromPlayer(player);
-        if (team == null) {
-            return;
-        }
-
-        if (!team.isInTeamChat(player) && !event.getMessage().startsWith("@team ")) {
-            return;
-        }
-
-        ITextComponent message = SkyblockHooks.onTeamChat(player, team, new StringTextComponent(event.getMessage().startsWith("@team ") ? event.getMessage().substring(6) : event.getMessage()));
-        if (message != null) {
-            event.setCanceled(true);
-            IFormattableTextComponent component = new StringTextComponent("<");
-            component.append(event.getPlayer().getDisplayName());
-            component.appendString("> ");
-            component.append(message);
-
-            team.broadcast(component);
-        }
     }
 
     /*

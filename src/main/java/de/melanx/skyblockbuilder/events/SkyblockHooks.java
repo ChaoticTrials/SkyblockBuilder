@@ -4,12 +4,10 @@ import de.melanx.skyblockbuilder.util.Team;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -56,22 +54,6 @@ public class SkyblockHooks {
         SkyblockManageTeamEvent.Leave event = new SkyblockManageTeamEvent.Leave(player, team);
         MinecraftForge.EVENT_BUS.post(event);
         return event.getResult();
-    }
-    
-    public static Pair<Boolean, Event.Result> onTeamChatChange(ServerPlayerEntity player, Team team, boolean teamChat) {
-        SkyblockTeamChatChangeEvent event = new SkyblockTeamChatChangeEvent(player, team, teamChat);
-        boolean canceled = MinecraftForge.EVENT_BUS.post(event);
-        return Pair.of(canceled, event.getResult());
-    }
-    
-    @Nullable
-    public static ITextComponent onTeamChat(ServerPlayerEntity player, Team team, ITextComponent message) {
-        SkyblockTeamMessageEvent event = new SkyblockTeamMessageEvent(player, team, message);
-        if (MinecraftForge.EVENT_BUS.post(event)) {
-            return null;
-        } else {
-            return event.getMessage();
-        }
     }
     
     public static Event.Result onInvite(ServerPlayerEntity player, Team team, ServerPlayerEntity invitor) {

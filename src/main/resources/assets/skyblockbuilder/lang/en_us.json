@@ -1,8 +1,6 @@
 {
   "skyblockbuilder.generator.custom_skyblock": "Skyblock",
 
-  "skyblockbuilder.command.argument.normal": "normal",
-  "skyblockbuilder.command.argument.team": "team",
   "skyblockbuilder.command.argument.empty": "empty",
   "skyblockbuilder.command.argument.enabled": "enabled",
   "skyblockbuilder.command.argument.disabled": "disabled",
@@ -11,7 +9,6 @@
   "skyblockbuilder.command.error.team_already_exist": "Team %s already exists! Please choose another name!",
   "skyblockbuilder.command.error.user_has_team": "You are already in a team!",
   "skyblockbuilder.command.error.user_has_no_team": "You are currently not in any team!",
-  "skyblockbuilder.command.error.user_has_no_team_teamchat": "Too bad, you have no team to communicate with.",
   "skyblockbuilder.command.error.player_has_team": "%s is already in a team!",
   "skyblockbuilder.command.error.player_has_no_team": "This player is currently not in any team!",
   "skyblockbuilder.command.error.no_invitations": "You don't have any invitations!",
@@ -30,7 +27,6 @@
   "skyblockbuilder.command.denied.leave_team": "You are not allowed to leave your team.",
   "skyblockbuilder.command.denied.teleport_home": "You cannot teleport home.",
   "skyblockbuilder.command.denied.create_team": "You cannot create that team.",
-  "skyblockbuilder.command.denied.team_chat": "You cannot change your team chat mode.",
   "skyblockbuilder.command.denied.invite_player": "You cannot invite that player.",
   "skyblockbuilder.command.denied.clear_team": "You cannot clear that team.",
   "skyblockbuilder.command.denied.delete_team": "You cannot delete that team.",
@@ -59,7 +55,6 @@
 
   "skyblockbuilder.command.success.joined_team": "Successfully joined team %s.",
   "skyblockbuilder.command.success.left_team": "Successfully left your teammates alone.",
-  "skyblockbuilder.command.success.toggle_teamchat": "You are now in %s chat mode.",
   "skyblockbuilder.command.success.teleport_to_spawn": "Successfully teleported to spawn.",
   "skyblockbuilder.command.success.teleport_home": "Home sweet home",
   "skyblockbuilder.command.success.visit_team": "You are now a visitor of team %s.",

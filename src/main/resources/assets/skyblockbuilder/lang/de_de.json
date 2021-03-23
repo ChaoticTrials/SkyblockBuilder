@@ -1,8 +1,6 @@
 {
   "skyblockbuilder.generator.custom_skyblock": "Skyblock",
 
-  "skyblockbuilder.command.argument.normal": "normalen",
-  "skyblockbuilder.command.argument.team": "Team",
   "skyblockbuilder.command.argument.empty": "leer",
   "skyblockbuilder.command.argument.enabled": "aktiviert",
   "skyblockbuilder.command.argument.disabled": "deaktiviert",
@@ -11,7 +9,6 @@
   "skyblockbuilder.command.error.team_already_exist": "Das Team %s existiert bereits! Bitte wähle einen anderen Namen!",
   "skyblockbuilder.command.error.user_has_team": "Du bist bereits in einem Team!",
   "skyblockbuilder.command.error.user_has_no_team": "Bu bist derzeit in keinem Team!",
-  "skyblockbuilder.command.error.user_has_no_team_teamchat": "Schade, du hast niemanden zum Reden.",
   "skyblockbuilder.command.error.player_has_team": "%s ist bereits in einem Team!",
   "skyblockbuilder.command.error.player_has_no_team": "Dieser Spieler ist zurzeit in keinem Team!",
   "skyblockbuilder.command.error.no_invitations": "Du hast keine Einladungen!",
@@ -30,7 +27,6 @@
   "skyblockbuilder.command.denied.leave_team": "Du darfst dein Team nicht verlassen.",
   "skyblockbuilder.command.denied.teleport_home": "Du darfst dich nicht nach Hause teleportieren.",
   "skyblockbuilder.command.denied.create_team": "Du kannst dieses Team nicht erstellen.",
-  "skyblockbuilder.command.denied.team_chat": "Du kannst deinen Chat Modus nicht ändern.",
   "skyblockbuilder.command.denied.invite_player": "Du kannst diesen Spieler nicht einladen.",
   "skyblockbuilder.command.denied.clear_team": "Du kannst dieses Team nicht leeren.",
   "skyblockbuilder.command.denied.delete_team": "Du kannst dieses Team nicht löschen.",
@@ -59,7 +55,6 @@
 
   "skyblockbuilder.command.success.joined_team": "Erfolgreich Team %s beigetreten.",
   "skyblockbuilder.command.success.left_team": "Du hast erfolgreich deine Teamkameraden alleine gelassen.",
-  "skyblockbuilder.command.success.toggle_teamchat": "Du bist nun im %s Chat.",
   "skyblockbuilder.command.success.teleport_to_spawn": "Erfolgreich zum Spawn teleportiert.",
   "skyblockbuilder.command.success.teleport_home": "Trautes Heim, Glück allein",
   "skyblockbuilder.command.success.visit_team": "Du bist nun ein Besucher des Teams %s.",

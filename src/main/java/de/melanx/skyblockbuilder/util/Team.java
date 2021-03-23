@@ -25,7 +25,6 @@ public class Team {
     private final Set<UUID> players;
     private final Set<BlockPos> possibleSpawns;
     private final Random random = new Random();
-    private final Set<UUID> teamChatUsers = new HashSet<>();
     private IslandPos island;
     private String name;
     private boolean allowVisits;
@@ -179,28 +178,6 @@ public class Team {
         });
     }
 
-    public void setTeamChat(PlayerEntity player, boolean teamChat) {
-        this.setTeamChat(player.getGameProfile().getId(), teamChat);
-    }
-
-    public void setTeamChat(UUID player, boolean teamChat) {
-        if (this.teamChatUsers.contains(player)) {
-            this.teamChatUsers.remove(player);
-        } else {
-            this.teamChatUsers.add(player);
-        }
-        this.data.markDirty();
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean isInTeamChat(PlayerEntity player) {
-        return this.isInTeamChat(player.getGameProfile().getId());
-    }
-
-    public boolean isInTeamChat(UUID player) {
-        return this.teamChatUsers.contains(player);
-    }
-
     @Nonnull
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
@@ -227,17 +204,8 @@ public class Team {
             spawns.add(posTag);
         }
 
-        ListNBT teamChat = new ListNBT();
-        for (UUID id : this.teamChatUsers) {
-            CompoundNBT player = new CompoundNBT();
-            player.putUniqueId("Player", id);
-
-            teamChat.add(player);
-        }
-
         nbt.put("Players", players);
         nbt.put("Spawns", spawns);
-        nbt.put("TeamChat", teamChat);
         return nbt;
     }
 
@@ -257,14 +225,6 @@ public class Team {
         for (INBT pos : spawns) {
             CompoundNBT posTag = (CompoundNBT) pos;
             this.possibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
-        }
-
-        this.teamChatUsers.clear();
-        if (nbt.contains("TeamChat")) { // TODO 1.17 remove backwards compatibility
-            ListNBT teamChat = nbt.getList("TeamChat", Constants.NBT.TAG_COMPOUND);
-            for (INBT player : teamChat) {
-                this.teamChatUsers.add(((CompoundNBT) player).getUniqueId("Player"));
-            }
         }
     }
 

@@ -1,8 +1,6 @@
 {
   "skyblockbuilder.generator.custom_skyblock": "スカイブロック",
 
-  "skyblockbuilder.command.argument.normal": "ノーマル",
-  "skyblockbuilder.command.argument.team": "チーム",
   "skyblockbuilder.command.argument.empty": "空",
   "skyblockbuilder.command.argument.enabled": "イネーブルド",
   "skyblockbuilder.command.argument.disabled": "無効",
@@ -11,7 +9,6 @@
   "skyblockbuilder.command.error.team_already_exist": "チーム %s はすでに存在しています。別の名前を選択してください.",
   "skyblockbuilder.command.error.user_has_team": "あなたはすでにチームに参加しています.",
   "skyblockbuilder.command.error.user_has_no_team": "あなたは現在、どのチームにも属していません!",
-  "skyblockbuilder.command.error.user_has_no_team_teamchat": "残念ながら、あなたにはコミュニケーションをとるチームがありません.",
   "skyblockbuilder.command.error.player_has_team": "%sはすでにチームに所属しています.",
   "skyblockbuilder.command.error.player_has_no_team": "この選手は現在、どのチームにも所属していません!",
   "skyblockbuilder.command.error.no_invitations": "招待状がないじゃないですか!",
@@ -30,7 +27,6 @@
   "skyblockbuilder.command.denied.leave_team": "自分のチームから離れることは許されません.",
   "skyblockbuilder.command.denied.teleport_home": "家にテレポートすることはできません.",
   "skyblockbuilder.command.denied.create_team": "そのチームを作ることはできません.",
-  "skyblockbuilder.command.denied.team_chat": "そのチームを作ることはできません.",
   "skyblockbuilder.command.denied.invite_player": "そのプレイヤーを招待することはできません.",
   "skyblockbuilder.command.denied.clear_team": "そのチームをクリアすることはできません.",
   "skyblockbuilder.command.denied.delete_team": "そのチームをクリアすることはできません.",
@@ -59,7 +55,6 @@
 
   "skyblockbuilder.command.success.joined_team": "チーム %s への参加に成功しました.",
   "skyblockbuilder.command.success.left_team": "チームメイトの放置に成功.",
-  "skyblockbuilder.command.success.toggle_teamchat": "あなたは今、%sチャットモードにいます.",
   "skyblockbuilder.command.success.teleport_to_spawn": "スポーンへのテレポートに成功しました.",
   "skyblockbuilder.command.success.teleport_home": "ホームスイートホーム",
   "skyblockbuilder.command.success.visit_team": "あなたは現在、チーム%sのビジターです.",
