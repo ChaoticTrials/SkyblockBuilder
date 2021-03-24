@@ -15,6 +15,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -62,8 +63,10 @@ public class Team {
     public void setPlayers(Collection<UUID> players) {
         this.players.clear();
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
-        for (UUID id : players) {
-            MineMentionCompat.updateMentions(playerList.getPlayerByUUID(id));
+        if (ModList.get().isLoaded("minemention")) {
+            for (UUID id : players) {
+                MineMentionCompat.updateMentions(playerList.getPlayerByUUID(id));
+            }
         }
         this.players.addAll(players);
         this.data.markDirty();
@@ -111,7 +114,9 @@ public class Team {
 
     public boolean addPlayer(UUID player) {
         boolean added = this.players.add(player);
-        MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
+        if (ModList.get().isLoaded("minemention")) {
+            MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
+        }
         this.data.markDirty();
         return added;
     }
@@ -123,8 +128,10 @@ public class Team {
     public boolean addPlayers(Collection<UUID> players) {
         boolean added = this.players.addAll(players);
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
-        for (UUID id : players) {
-            MineMentionCompat.updateMentions(playerList.getPlayerByUUID(id));
+        if (ModList.get().isLoaded("minemention")) {
+            for (UUID id : players) {
+                MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(id));
+            }
         }
         this.data.markDirty();
         return added;
@@ -136,7 +143,9 @@ public class Team {
 
     public boolean removePlayer(UUID player) {
         boolean removed = this.players.remove(player);
-        MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
+        if (ModList.get().isLoaded("minemention")) {
+            MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
+        }
         this.data.markDirty();
         return removed;
     }
@@ -145,7 +154,9 @@ public class Team {
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
         for (UUID id : players) {
             this.players.remove(id);
-            MineMentionCompat.updateMentions(playerList.getPlayerByUUID(id));
+            if (ModList.get().isLoaded("minemention")) {
+                MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(id));
+            }
         }
         this.data.markDirty();
     }
@@ -154,8 +165,10 @@ public class Team {
         HashSet<UUID> uuids = new HashSet<>(this.players);
         this.players.clear();
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
-        for (UUID id : uuids) {
-            MineMentionCompat.updateMentions(playerList.getPlayerByUUID(id));
+        if (ModList.get().isLoaded("minemention")) {
+            for (UUID id : uuids) {
+                MineMentionCompat.updateMentions(playerList.getPlayerByUUID(id));
+            }
         }
         this.data.markDirty();
     }

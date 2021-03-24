@@ -14,6 +14,7 @@ import net.minecraft.util.Util;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.world.ForgeWorldType;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -54,7 +55,9 @@ public class SkyblockBuilder {
             SkyblockNetherChunkGenerator.init();
             SkyblockEndChunkGenerator.init();
 
-            MineMentionCompat.register();
+            if (ModList.get().isLoaded("minemention")) {
+                MineMentionCompat.register();
+            }
         });
     }
 }
