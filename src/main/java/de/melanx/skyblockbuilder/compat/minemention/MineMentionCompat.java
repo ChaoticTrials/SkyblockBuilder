@@ -2,15 +2,15 @@ package de.melanx.skyblockbuilder.compat.minemention;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import io.github.noeppi_noeppi.mods.minemention.api.SpecialMentions;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.ModList;
 
 public class MineMentionCompat {
 
-    public static void updateMentions(MinecraftServer server) {
+    public static void updateMentions(ServerPlayerEntity player) {
         if (ModList.get().isLoaded("minemention")) {
-            SpecialMentions.notifyAvailabilityChange(server);
+            SpecialMentions.notifyAvailabilityChange(player);
         }
     }
 
