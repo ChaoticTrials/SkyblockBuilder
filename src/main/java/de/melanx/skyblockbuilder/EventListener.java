@@ -4,6 +4,7 @@ import de.melanx.skyblockbuilder.commands.*;
 import de.melanx.skyblockbuilder.commands.helper.ListCommand;
 import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
 import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
+import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.util.Team;
@@ -67,6 +68,7 @@ public class EventListener {
                 .requires(source -> WorldUtil.isSkyblock(source.getWorld()))
                 .then(AcceptCommand.register())
                 .then(CreateCommand.register())
+                .then(DeclineCommand.register())
                 .then(HomeCommand.register())
                 .then(InviteCommand.register())
                 .then(LeaveCommand.register())

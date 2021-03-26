@@ -12,7 +12,8 @@
   "skyblockbuilder.command.error.player_has_team": "%s ist bereits in einem Team!",
   "skyblockbuilder.command.error.player_has_no_team": "Dieser Spieler ist zurzeit in keinem Team!",
   "skyblockbuilder.command.error.no_invitations": "Du hast keine Einladungen!",
-  "skyblockbuilder.command.error.error_accept_invitations": "Fehler beim Akzeptieren der Einladung.",
+  "skyblockbuilder.command.error.accept_invitations": "Fehler beim Akzeptieren der Einladung.",
+  "skyblockbuilder.command.error.decline_invitations": "Fehler beim Ablehnen der Einladung.",
   "skyblockbuilder.command.error.player_already_invited": "Der Spieler ist bereits in dein Team eingeladen!",
   "skyblockbuilder.command.error.visit_own_team": "Du kannst dein eigenes Team nicht besuchen.",
   "skyblockbuilder.command.error.delete_team": "Fehler beim Löschen von Team %s!",
@@ -24,6 +25,7 @@
   "skyblockbuilder.command.error.user_no_player": "Du bist kein Spieler. Lügner!",
 
   "skyblockbuilder.command.denied.accept_invitations": "Du kannst diese Einladung nicht annehmen!",
+  "skyblockbuilder.command.denied.decline_invitations": "Du kannst diese Einladung nicht ablehnen!",
   "skyblockbuilder.command.denied.leave_team": "Du darfst dein Team nicht verlassen.",
   "skyblockbuilder.command.denied.teleport_home": "Du darfst dich nicht nach Hause teleportieren.",
   "skyblockbuilder.command.denied.create_team": "Du kannst dieses Team nicht erstellen.",
@@ -38,6 +40,7 @@
   "skyblockbuilder.command.disabled.team_visit": "Teambesuche sind deaktiviert.",
   "skyblockbuilder.command.disabled.teleport_home": "Du hast nicht die Erlaubnis, dich zu deinem Heimpunkt zu teleportieren.",
   "skyblockbuilder.command.disabled.accept_invitations": "Du darfst keine Einladungen akzeptieren!",
+  "skyblockbuilder.command.disabled.decline_invitations": "Du darfst keine Einladungen ablehnen!",
   "skyblockbuilder.command.disabled.visit_team": "Dieses Team möchte keine Besucher, entschuldige.",
   "skyblockbuilder.command.disabled.manage_teams": "Du darfst das Team nicht bearbeiten.",
   "skyblockbuilder.command.disabled.send_invitations": "Du darfst keine Einladungen verschicken.",
@@ -54,6 +57,7 @@
   "skyblockbuilder.command.info.click_to_copy": "Klicke zum Kopieren",
 
   "skyblockbuilder.command.success.joined_team": "Erfolgreich Team %s beigetreten.",
+  "skyblockbuilder.command.success.declined_invitation": "Erfolgreich die Einladung von Team %s zerrissen.",
   "skyblockbuilder.command.success.left_team": "Du hast erfolgreich deine Teamkameraden alleine gelassen.",
   "skyblockbuilder.command.success.teleport_to_spawn": "Erfolgreich zum Spawn teleportiert.",
   "skyblockbuilder.command.success.teleport_home": "Trautes Heim, Glück allein",

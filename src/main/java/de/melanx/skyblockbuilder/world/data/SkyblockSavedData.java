@@ -368,6 +368,22 @@ public class SkyblockSavedData extends WorldSavedData {
         return false;
     }
 
+    public boolean declineInvite(Team team, PlayerEntity player) {
+        return this.declineInvite(team, player.getGameProfile().getId());
+    }
+
+    public boolean declineInvite(Team team, UUID player) {
+        List<Team> teams = this.invites.get(player);
+
+        if (teams == null) {
+            return false;
+        }
+
+        teams.remove(team);
+        this.markDirty();
+        return true;
+    }
+
     public void renameTeam(Team team, String name) {
         String oldName = team.getName().toLowerCase();
         this.skyblocks.remove(oldName);

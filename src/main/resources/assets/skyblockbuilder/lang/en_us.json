@@ -12,7 +12,8 @@
   "skyblockbuilder.command.error.player_has_team": "%s is already in a team!",
   "skyblockbuilder.command.error.player_has_no_team": "This player is currently not in any team!",
   "skyblockbuilder.command.error.no_invitations": "You don't have any invitations!",
-  "skyblockbuilder.command.error.error_accept_invitations": "Error while accepting the invitation.",
+  "skyblockbuilder.command.error.accept_invitations": "Error while accepting the invitation.",
+  "skyblockbuilder.command.error.decline_invitations": "Error while declining the invitation.",
   "skyblockbuilder.command.error.player_already_invited": "This player is already invited to your team!",
   "skyblockbuilder.command.error.visit_own_team": "You cannot visit your own team.",
   "skyblockbuilder.command.error.delete_team": "Error while deleting team %s!",
@@ -24,6 +25,7 @@
   "skyblockbuilder.command.error.user_no_player": "You are not a player, but a mere liar!",
 
   "skyblockbuilder.command.denied.accept_invitations": "You cannot accept this invitation!",
+  "skyblockbuilder.command.denied.decline_invitations": "You cannot decline this invitation!",
   "skyblockbuilder.command.denied.leave_team": "You are not allowed to leave your team.",
   "skyblockbuilder.command.denied.teleport_home": "You cannot teleport home.",
   "skyblockbuilder.command.denied.create_team": "You cannot create that team.",
@@ -38,6 +40,7 @@
   "skyblockbuilder.command.disabled.team_visit": "Team visits are disabled.",
   "skyblockbuilder.command.disabled.teleport_home": "You are not allowed to teleport to your home point.",
   "skyblockbuilder.command.disabled.accept_invitations": "You are not allowed to accept invitations!",
+  "skyblockbuilder.command.disabled.decline_invitations": "You are not allowed to decline invitations!",
   "skyblockbuilder.command.disabled.visit_team": "This team doesn't want any visitors, sorry.",
   "skyblockbuilder.command.disabled.manage_teams": "You are not allowed to manage teams.",
   "skyblockbuilder.command.disabled.send_invitations": "You are not allowed to send invitations.",
@@ -54,6 +57,7 @@
   "skyblockbuilder.command.info.click_to_copy": "Click to copy",
 
   "skyblockbuilder.command.success.joined_team": "Successfully joined team %s.",
+  "skyblockbuilder.command.success.declined_invitation": "Successfully destroyed the invitation of team %s.",
   "skyblockbuilder.command.success.left_team": "Successfully left your teammates alone.",
   "skyblockbuilder.command.success.teleport_to_spawn": "Successfully teleported to spawn.",
   "skyblockbuilder.command.success.teleport_home": "Home sweet home",

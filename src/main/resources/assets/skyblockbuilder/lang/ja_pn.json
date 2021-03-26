@@ -12,7 +12,7 @@
   "skyblockbuilder.command.error.player_has_team": "%sはすでにチームに所属しています.",
   "skyblockbuilder.command.error.player_has_no_team": "この選手は現在、どのチームにも所属していません!",
   "skyblockbuilder.command.error.no_invitations": "招待状がないじゃないですか!",
-  "skyblockbuilder.command.error.error_accept_invitations": "招待状を受け取る際のエラー.",
+  "skyblockbuilder.command.error.accept_invitations": "招待状を受け取る際のエラー.",
   "skyblockbuilder.command.error.player_already_invited": "このプレーヤーはすでにあなたのチームに招待されています!",
   "skyblockbuilder.command.error.visit_own_team": "自分のチームを訪問することはできません.",
   "skyblockbuilder.command.error.delete_team": "チーム%sを削除する際にエラーが発生しました.",

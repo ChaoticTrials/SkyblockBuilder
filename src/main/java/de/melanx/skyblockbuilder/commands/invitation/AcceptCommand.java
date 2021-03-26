@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class AcceptCommand {
 
     // Lists all teams except spawn
-    private static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> {
+    protected static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> {
         CommandSource source = context.getSource();
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
@@ -78,7 +78,7 @@ public class AcceptCommand {
         }
         
         if (!data.acceptInvite(team, player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.error_accept_invitations").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.accept_invitations").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 

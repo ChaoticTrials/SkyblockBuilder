@@ -61,18 +61,24 @@ public class SkyblockHooks {
         MinecraftForge.EVENT_BUS.post(event);
         return event.getResult();
     }
-    
+
     public static Event.Result onAccept(ServerPlayerEntity player, Team team) {
         SkyblockInvitationEvent.Accept event = new SkyblockInvitationEvent.Accept(player, team);
         MinecraftForge.EVENT_BUS.post(event);
         return event.getResult();
     }
-    
+
+    public static Event.Result onDecline(ServerPlayerEntity player, Team team) {
+        SkyblockInvitationEvent.Decline event = new SkyblockInvitationEvent.Decline(player, team);
+        MinecraftForge.EVENT_BUS.post(event);
+        return event.getResult();
+    }
+
     public static boolean onCreateTeam(String name) {
         SkyblockCreateTeamEvent event = new SkyblockCreateTeamEvent(name);
         return MinecraftForge.EVENT_BUS.post(event);
     }
-    
+
     public static Event.Result onHome(ServerPlayerEntity player, Team team) {
         SkyblockTeleportHomeEvent event = new SkyblockTeleportHomeEvent(player, team);
         MinecraftForge.EVENT_BUS.post(event);

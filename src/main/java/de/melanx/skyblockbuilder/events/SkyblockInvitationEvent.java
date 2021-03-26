@@ -40,10 +40,17 @@ public abstract class SkyblockInvitationEvent extends Event {
             return this.invitor;
         }
     }
-    
+
     public static class Accept extends SkyblockInvitationEvent {
 
         public Accept(ServerPlayerEntity invitedPlayer, Team team) {
+            super(invitedPlayer, team);
+        }
+    }
+
+    public static class Decline extends SkyblockInvitationEvent {
+
+        public Decline(ServerPlayerEntity invitedPlayer, Team team) {
             super(invitedPlayer, team);
         }
     }
