@@ -18,7 +18,7 @@ public final class IslandPos {
     }
 
     public BlockPos getCenter() {
-        return new BlockPos(this.x * 8192, ConfigHandler.generationHeight.get(), this.z * 8192);
+        return new BlockPos(this.x * ConfigHandler.islandDistance.get(), ConfigHandler.generationHeight.get(), this.z * ConfigHandler.islandDistance.get());
     }
 
     public static IslandPos fromTag(CompoundNBT tag) {

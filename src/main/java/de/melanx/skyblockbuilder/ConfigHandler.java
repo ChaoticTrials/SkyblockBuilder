@@ -57,6 +57,8 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue singleBiome;
     public static ForgeConfigSpec.ConfigValue<String> biome;
     public static ForgeConfigSpec.IntValue seaHeight;
+    public static ForgeConfigSpec.IntValue islandDistance;
+    public static ForgeConfigSpec.IntValue biomeRange;
 
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
     public static ForgeConfigSpec.IntValue generationHeight;
@@ -107,6 +109,10 @@ public class ConfigHandler {
                 .define("world.single-biome.enabled", false);
         biome = builder.comment("Specifies the biome for the whole world")
                 .define("world.single-biome.biome", "minecraft:plains", String.class::isInstance);
+        islandDistance = builder.comment("Distance between islands in overworld [default: 8192]", "nether the distance is 1/8")
+                .defineInRange("world.island-distance", 8192, 64, 29999900);
+        biomeRange = builder.comment("The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes")
+                .defineInRange("world.biome-range", 8192, 64, 29999900);
 
         direction = builder.comment("Direction the player should look at initial spawn")
                 .defineEnum("spawn.direction", WorldUtil.Directions.SOUTH);

@@ -74,7 +74,8 @@ public class SkyblockBiomeProvider extends BiomeProvider {
             }
             return Objects.requireNonNull(biome);
         } else {
-            return this.parent.getNoiseBiome(((((x << 2) - 4096) % 8192) + 8192) % 8192, y, ((((z << 2) - 4096) % 8192) + 8192) % 8192);
+            int range = ConfigHandler.biomeRange.get();
+            return this.parent.getNoiseBiome(((((x << 2) - range / 2) % range) + range) % range, y, ((((z << 2) - range / 2) % range) + range) % range);
         }
     }
 }
