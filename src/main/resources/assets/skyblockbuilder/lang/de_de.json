@@ -75,5 +75,13 @@
   "skyblockbuilder.command.success.reset_spawns": "Erfolgreiche alle möglichen Spawnpunkte zurückgesetzt.",
   "skyblockbuilder.command.success.rename_team": "Team erfolgreich zu %s umbenannt.",
 
+  "skyblockbuilder.event.accept_invite": "%s akzeptierte die Einladung deines Teams.",
+  "skyblockbuilder.event.invite_player": "%s hat %s zum Team eingeladen.",
+  "skyblockbuilder.event.player_joined": "%s ist dem Team beigetreten.",
+  "skyblockbuilder.event.remove_player": "%s ist aus dem Team verschwunden.",
+  "skyblockbuilder.event.rename_team": "%s hat das Team von %s zu %s umbenannt.",
+
+  "skyblockbuilder.unknown_player": "Unbekannter Spieler",
+
   "minemention.skyblockbuilder.team": "Erwähne jeden Spieler in deinem Team"
 }

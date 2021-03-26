@@ -8,6 +8,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.events.SkyblockManageTeamEvent;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
@@ -255,8 +256,8 @@ public class TeamCommand {
                 return 0;
             }
 
-            Pair<Event.Result, String> result = SkyblockHooks.onRename(null, team, newName);
-            switch (result.getLeft()) {
+            SkyblockManageTeamEvent.Rename event = SkyblockHooks.onRename(null, team, newName);
+            switch (event.getResult()) {
                 case DENY:
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.denied_rename_team").mergeStyle(TextFormatting.RED), true);
                     return 0;
@@ -270,7 +271,7 @@ public class TeamCommand {
                     break;
             }
 
-            data.renameTeam(team, result.getRight());
+            data.renameTeam(team, event.getPlayer(), event.getNewName());
         } else { // Get team from command user
             ServerPlayerEntity player = source.asPlayer();
             Team team = data.getTeamFromPlayer(player);
@@ -280,8 +281,8 @@ public class TeamCommand {
                 return 0;
             }
 
-            Pair<Event.Result, String> result = SkyblockHooks.onRename(player, team, newName);
-            switch (result.getLeft()) {
+            SkyblockManageTeamEvent.Rename event = SkyblockHooks.onRename(player, team, newName);
+            switch (event.getResult()) {
                 case DENY:
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.denied_rename_team").mergeStyle(TextFormatting.RED), true);
                     return 0;
@@ -290,7 +291,7 @@ public class TeamCommand {
                     break;
             }
 
-            data.renameTeam(team, result.getRight());
+            data.renameTeam(team, event.getPlayer(), event.getNewName());
         }
 
         source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.rename_team", newName).mergeStyle(TextFormatting.GOLD), true);

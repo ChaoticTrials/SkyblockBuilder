@@ -4,6 +4,8 @@ import de.melanx.skyblockbuilder.util.Team;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.eventbus.api.Event;
 
+import javax.annotation.Nonnull;
+
 public abstract class SkyblockInvitationEvent extends Event {
 
     private final ServerPlayerEntity invitedPlayer;
@@ -30,12 +32,13 @@ public abstract class SkyblockInvitationEvent extends Event {
     public static class Invite extends SkyblockInvitationEvent {
 
         private final ServerPlayerEntity invitor;
-        
-        public Invite(ServerPlayerEntity invitedPlayer, Team team, ServerPlayerEntity invitor) {
+
+        public Invite(ServerPlayerEntity invitedPlayer, Team team, @Nonnull ServerPlayerEntity invitor) {
             super(invitedPlayer, team);
             this.invitor = invitor;
         }
 
+        @Nonnull
         public ServerPlayerEntity getInvitor() {
             return this.invitor;
         }

@@ -8,6 +8,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,11 +44,11 @@ public class SkyblockHooks {
         MinecraftForge.EVENT_BUS.post(event);
         return event.getResult();
     }
-    
-    public static Pair<Event.Result, String> onRename(ServerPlayerEntity player, Team team, String newName) {
+
+    public static SkyblockManageTeamEvent.Rename onRename(ServerPlayerEntity player, Team team, String newName) {
         SkyblockManageTeamEvent.Rename event = new SkyblockManageTeamEvent.Rename(player, team, newName);
         MinecraftForge.EVENT_BUS.post(event);
-        return Pair.of(event.getResult(), newName);
+        return event;
     }
     
     public static Event.Result onLeave(ServerPlayerEntity player, Team team) {
@@ -55,11 +56,11 @@ public class SkyblockHooks {
         MinecraftForge.EVENT_BUS.post(event);
         return event.getResult();
     }
-    
-    public static Event.Result onInvite(ServerPlayerEntity player, Team team, ServerPlayerEntity invitor) {
+
+    public static SkyblockInvitationEvent.Invite onInvite(ServerPlayerEntity player, Team team, @Nonnull ServerPlayerEntity invitor) {
         SkyblockInvitationEvent.Invite event = new SkyblockInvitationEvent.Invite(player, team, invitor);
         MinecraftForge.EVENT_BUS.post(event);
-        return event.getResult();
+        return event;
     }
 
     public static Event.Result onAccept(ServerPlayerEntity player, Team team) {

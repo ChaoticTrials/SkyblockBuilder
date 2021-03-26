@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.ModList;
@@ -190,13 +191,13 @@ public class Team {
         return this.data.getWorld();
     }
 
-    public void broadcast(ITextComponent msg) {
+    public void broadcast(ITextComponent msg, Style style) {
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
         this.players.forEach(uuid -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(uuid);
             if (player != null) {
                 IFormattableTextComponent component = new StringTextComponent("[" + this.name + "] ");
-                player.sendMessage(component.append(msg), uuid);
+                player.sendMessage(component.append(msg).mergeStyle(style), uuid);
             }
         });
     }

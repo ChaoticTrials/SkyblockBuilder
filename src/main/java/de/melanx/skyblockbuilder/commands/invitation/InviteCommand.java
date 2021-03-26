@@ -4,6 +4,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.events.SkyblockInvitationEvent;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
@@ -52,8 +53,9 @@ public class InviteCommand {
                 return 0;
             }
         }
-        
-        switch (SkyblockHooks.onInvite(invitePlayer, team, player)) {
+
+        SkyblockInvitationEvent.Invite event = SkyblockHooks.onInvite(invitePlayer, team, player);
+        switch (event.getResult()) {
             case DENY:
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.invite_player").mergeStyle(TextFormatting.RED), true);
                 return 0;
@@ -67,7 +69,7 @@ public class InviteCommand {
                 break;
         }
 
-        data.addInvite(team, invitePlayer);
+        data.addInvite(team, event.getInvitor(), invitePlayer);
 
         IFormattableTextComponent invite = new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team0", player.getDisplayName().getString(), team.getName()).mergeStyle(TextFormatting.GOLD);
         invite.append(new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team1", team.getName()))

@@ -2,17 +2,16 @@ package de.melanx.skyblockbuilder.world.data;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import de.melanx.skyblockbuilder.util.Spiral;
-import de.melanx.skyblockbuilder.util.Team;
-import de.melanx.skyblockbuilder.util.TemplateLoader;
-import de.melanx.skyblockbuilder.util.WorldUtil;
+import de.melanx.skyblockbuilder.util.*;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.*;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
@@ -192,6 +191,7 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public boolean addPlayerToTeam(Team team, UUID player) {
+        team.broadcast(new TranslationTextComponent("skyblockbuilder.event.player_joined", RandomUtility.getDisplayNameByUuid(this.world, player)), Style.EMPTY.applyFormatting(TextFormatting.GOLD));
         //noinspection ConstantConditions
         this.getTeam("spawn").removePlayer(player);
         team.addPlayer(player);
@@ -246,6 +246,7 @@ public class SkyblockSavedData extends WorldSavedData {
             if (team.hasPlayer(player)) {
                 boolean removed = team.removePlayer(player);
                 if (removed) {
+                    team.broadcast(new TranslationTextComponent("skyblockbuilder.event.remove_player", RandomUtility.getDisplayNameByUuid(this.world, player)), Style.EMPTY.applyFormatting(TextFormatting.RED));
                     //noinspection ConstantConditions
                     this.getTeam("spawn").addPlayer(player);
                 }
@@ -306,15 +307,17 @@ public class SkyblockSavedData extends WorldSavedData {
         return this.skyblocks.values();
     }
 
-    public void addInvite(Team team, PlayerEntity player) {
-        this.addInvite(team, player.getGameProfile().getId());
+    public void addInvite(Team team, PlayerEntity invitor, PlayerEntity player) {
+        this.addInvite(team, invitor, player.getGameProfile().getId());
     }
 
-    public void addInvite(Team team, UUID player) {
-        List<Team> teams = this.invites.computeIfAbsent(player, id -> new ArrayList<>());
+    public void addInvite(Team team, PlayerEntity invitor, UUID id) {
+        List<Team> teams = this.invites.computeIfAbsent(id, uuid -> new ArrayList<>());
 
         if (!teams.contains(team)) {
             teams.add(team);
+            PlayerEntity player = team.getWorld().getPlayerByUuid(id);
+            team.broadcast(new TranslationTextComponent("skyblockbuilder.event.invite_player", invitor.getDisplayName(), RandomUtility.getDisplayNameByUuid(this.world, id)), Style.EMPTY.applyFormatting(TextFormatting.GOLD));
         }
 
         this.markDirty();
@@ -348,18 +351,20 @@ public class SkyblockSavedData extends WorldSavedData {
         return this.acceptInvite(team, player.getGameProfile().getId());
     }
 
-    public boolean acceptInvite(Team team, UUID player) {
-        List<Team> teams = this.invites.get(player);
+    public boolean acceptInvite(Team team, UUID id) {
+        List<Team> teams = this.invites.get(id);
 
         if (teams == null) {
             return false;
         }
 
         if (teams.contains(team)) {
-            this.addPlayerToTeam(team.getName(), player);
-            this.invites.remove(player);
+            team.broadcast(new TranslationTextComponent("skyblockbuilder.event.accept_invite", RandomUtility.getDisplayNameByUuid(this.world, id)), Style.EMPTY.applyFormatting(TextFormatting.GOLD));
+
+            this.addPlayerToTeam(team.getName(), id);
+            this.invites.remove(id);
             //noinspection ConstantConditions
-            WorldUtil.teleportToIsland(this.world.getServer().getPlayerList().getPlayerByUUID(player), team);
+            WorldUtil.teleportToIsland(this.world.getServer().getPlayerList().getPlayerByUUID(id), team);
             this.markDirty();
 
             return true;
@@ -384,7 +389,7 @@ public class SkyblockSavedData extends WorldSavedData {
         return true;
     }
 
-    public void renameTeam(Team team, String name) {
+    public void renameTeam(Team team, @Nullable ServerPlayerEntity player, String name) {
         String oldName = team.getName().toLowerCase();
         this.skyblocks.remove(oldName);
         this.skyblockPositions.remove(oldName);
@@ -392,6 +397,10 @@ public class SkyblockSavedData extends WorldSavedData {
         team.setName(name);
         this.skyblocks.put(name.toLowerCase(), team);
         this.skyblockPositions.put(name.toLowerCase(), team.getIsland());
+
+        ITextComponent playerName = player != null ? player.getDisplayName() : new StringTextComponent("Server");
+
+        team.broadcast(new TranslationTextComponent("skyblockbuilder.event.rename_team", playerName, oldName, name), Style.EMPTY.applyFormatting(TextFormatting.DARK_RED));
 
         this.markDirty();
     }
