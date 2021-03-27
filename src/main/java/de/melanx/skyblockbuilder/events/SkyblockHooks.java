@@ -51,7 +51,7 @@ public class SkyblockHooks {
         return event;
     }
     
-    public static Event.Result onLeave(ServerPlayerEntity player, Team team) {
+    public static Event.Result onLeave(@Nonnull ServerPlayerEntity player, Team team) {
         SkyblockManageTeamEvent.Leave event = new SkyblockManageTeamEvent.Leave(player, team);
         MinecraftForge.EVENT_BUS.post(event);
         return event.getResult();
