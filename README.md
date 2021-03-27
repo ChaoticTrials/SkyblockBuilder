@@ -123,6 +123,10 @@ Each user of a team can use `/skyblock team accept <player>` to accept the given
 your island.
 You can also deny the request by using `/skyblock team deny <player>`.
 
+### Disabling requests
+You can see your teams current join request state with `/skyblock team allowRequests` and enable/disable it with `/skyblock team 
+allowRequests <true/false>`.
+
 
 ## Using teams
 Only an operator with permission level 2 or higher can change anything in the `/skyblock manage` category.

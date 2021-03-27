@@ -90,6 +90,12 @@ public class TeamCommand {
                         .then(Commands.argument("enabled", BoolArgumentType.bool())
                                 .executes(context -> toggleAllowVisit(context.getSource(), BoolArgumentType.getBool(context, "enabled")))))
 
+                // Toggle permission to send join requests to your team
+                .then(Commands.literal("allowRequests")
+                        .executes(context -> showRequestInformation(context.getSource()))
+                        .then(Commands.argument("enabled", BoolArgumentType.bool())
+                                .executes(context -> toggleAllowRequest(context.getSource(), BoolArgumentType.getBool(context, "enabled")))))
+
                 // Accept a join request
                 .then(Commands.literal("accept")
                         .then(Commands.argument("player", EntityArgument.player()).suggests(SUGGEST_PLAYERS)
@@ -201,17 +207,54 @@ public class TeamCommand {
 
         Team team = data.getTeamFromPlayer(player);
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("Currently you aren't in a team.").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         Pair<Event.Result, Boolean> result = SkyblockHooks.onToggleVisits(player, team, enabled);
         if (result.getLeft() == Event.Result.DENY) {
-            source.sendFeedback(new TranslationTextComponent("You can not " + (result.getRight() ? "enable" : "disable") + " team visits.").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.toggle_request", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))).mergeStyle(TextFormatting.RED), true);
             return 0;
         } else {
             team.setAllowVisit(result.getRight());
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.toggle_visit", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), true);
+            return 1;
+        }
+    }
+
+    private static int showRequestInformation(CommandSource source) throws CommandSyntaxException {
+        ServerWorld world = source.getWorld();
+        SkyblockSavedData data = SkyblockSavedData.get(world);
+
+        Team team = data.getTeamFromPlayer(source.asPlayer());
+        if (team == null) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
+        boolean enabled = team.allowsVisits();
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.visit_status", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), true);
+        return 1;
+    }
+
+    private static int toggleAllowRequest(CommandSource source, boolean enabled) throws CommandSyntaxException {
+        ServerWorld world = source.getWorld();
+        SkyblockSavedData data = SkyblockSavedData.get(world);
+        ServerPlayerEntity player = source.asPlayer();
+
+        Team team = data.getTeamFromPlayer(player);
+        if (team == null) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
+        Pair<Event.Result, Boolean> result = SkyblockHooks.onToggleRequests(player, team, enabled);
+        if (result.getLeft() == Event.Result.DENY) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.toggle_request", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))).mergeStyle(TextFormatting.RED), true);
+            return 0;
+        } else {
+            team.setAllowJoinRequest(result.getRight());
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.toggle_request", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), true);
             return 1;
         }
     }

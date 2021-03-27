@@ -2,7 +2,9 @@
   "skyblockbuilder.generator.custom_skyblock": "Skyblock",
 
   "skyblockbuilder.command.argument.empty": "empty",
+  "skyblockbuilder.command.argument.enable": "enable",
   "skyblockbuilder.command.argument.enabled": "enabled",
+  "skyblockbuilder.command.argument.disable": "disable",
   "skyblockbuilder.command.argument.disabled": "disabled",
 
   "skyblockbuilder.command.error.team_not_exist": "This team doesn't exist!",
@@ -39,6 +41,8 @@
   "skyblockbuilder.command.denied.reset_spawns": "You cannot reset the teams spawns.",
   "skyblockbuilder.command.denied.rename_team": "You cannot rename that team.",
   "skyblockbuilder.command.denied.add_players_to_team": "You cannot add players to this team.",
+  "skyblockbuilder.command.denied.toggle_visits": "You cannot %s team visits.",
+  "skyblockbuilder.command.denied.toggle_request": "You cannot %s join requests.",
 
   "skyblockbuilder.command.disabled.team_visit": "Team visits are disabled.",
   "skyblockbuilder.command.disabled.teleport_home": "You are not allowed to teleport to your home point.",
@@ -59,6 +63,8 @@
   "skyblockbuilder.command.info.invited_to_team1": " to join the team.",
   "skyblockbuilder.command.info.visit_status": "Visits by other players are currently %s.",
   "skyblockbuilder.command.info.toggle_visit": "Visits by other players are now %s.",
+  "skyblockbuilder.command.info.request_status": "Join requests by other players are currently %s.",
+  "skyblockbuilder.command.info.toggle_request": "Join requests by other players are now %s.",
   "skyblockbuilder.command.info.click_to_copy": "Click to copy",
 
   "skyblockbuilder.command.success.joined_team": "Successfully joined team %s.",

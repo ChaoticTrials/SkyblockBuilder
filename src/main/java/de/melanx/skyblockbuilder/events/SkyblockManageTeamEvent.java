@@ -57,6 +57,24 @@ public abstract class SkyblockManageTeamEvent extends Event {
         }
     }
 
+    public static class ToggleRequests extends SkyblockManageTeamEvent {
+
+        private boolean allowRequests;
+
+        public ToggleRequests(@Nonnull ServerPlayerEntity player, Team team, boolean allowRequests) {
+            super(player, team);
+            this.allowRequests = allowRequests;
+        }
+
+        public boolean shouldAllowRequests() {
+            return this.allowRequests;
+        }
+
+        public void setAllowRequests(boolean allowRequests) {
+            this.allowRequests = allowRequests;
+        }
+    }
+
     public static class AddSpawn extends SkyblockManageTeamEvent {
 
         private BlockPos pos;

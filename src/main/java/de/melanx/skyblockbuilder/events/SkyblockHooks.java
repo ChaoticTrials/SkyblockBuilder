@@ -93,6 +93,12 @@ public class SkyblockHooks {
         return event;
     }
 
+    public static Pair<Event.Result, Boolean> onToggleRequests(ServerPlayerEntity player, Team team, boolean allowVisits) {
+        SkyblockManageTeamEvent.ToggleRequests event = new SkyblockManageTeamEvent.ToggleRequests(player, team, allowVisits);
+        MinecraftForge.EVENT_BUS.post(event);
+        return Pair.of(event.getResult(), event.shouldAllowRequests());
+    }
+
     public static boolean onCreateTeam(String name) {
         SkyblockCreateTeamEvent event = new SkyblockCreateTeamEvent(name);
         return MinecraftForge.EVENT_BUS.post(event);
