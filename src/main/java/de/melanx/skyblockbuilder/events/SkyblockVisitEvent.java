@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.events;
 
-import de.melanx.skyblockbuilder.util.Team;
+import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.eventbus.api.Event;
 

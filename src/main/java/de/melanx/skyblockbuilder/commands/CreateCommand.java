@@ -3,11 +3,11 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.NameGenerator;
-import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
@@ -63,14 +63,14 @@ public class CreateCommand {
 
         if (players.isEmpty() && source.getEntity() instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity) source.getEntity();
-            team.addPlayer(player);
+            data.addPlayerToTeam(team, player);
             WorldUtil.teleportToIsland(player, team);
         } else {
             players.forEach(player -> {
                 if (data.getTeamFromPlayer(player) != null) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).mergeStyle(TextFormatting.RED), true);
                 } else {
-                    team.addPlayer(player);
+                    data.addPlayerToTeam(team, player);
                     WorldUtil.teleportToIsland(player, team);
                 }
             });

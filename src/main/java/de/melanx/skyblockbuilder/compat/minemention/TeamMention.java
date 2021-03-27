@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.compat.minemention;
 
-import de.melanx.skyblockbuilder.util.Team;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import io.github.noeppi_noeppi.mods.minemention.api.SpecialMention;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.IFormattableTextComponent;

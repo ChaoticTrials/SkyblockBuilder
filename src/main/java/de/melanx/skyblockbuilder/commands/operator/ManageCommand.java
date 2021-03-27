@@ -6,11 +6,11 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.NameGenerator;
-import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
@@ -104,7 +104,7 @@ public class ManageCommand {
         }
 
         int i = team.getPlayers().size();
-        team.removeAllPlayers();
+        data.removeAllPlayersFromTeam(team);
         source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.remove_all_players_from_team", i).mergeStyle(TextFormatting.RED), true);
         return 1;
     }
@@ -142,7 +142,7 @@ public class ManageCommand {
                     return 0;
                 }
 
-                team.addPlayer(player);
+                data.addPlayerToTeam(team, player);
                 WorldUtil.teleportToIsland(player, team);
             } catch (CommandSyntaxException e) {
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_no_player").mergeStyle(TextFormatting.RED), true);

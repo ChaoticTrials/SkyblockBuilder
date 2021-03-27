@@ -1,9 +1,8 @@
-package de.melanx.skyblockbuilder.util;
+package de.melanx.skyblockbuilder.data;
 
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.world.IslandPos;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -114,7 +113,7 @@ public class Team {
         this.data.markDirty();
     }
 
-    public boolean addPlayer(UUID player) {
+    protected boolean addPlayer(UUID player) {
         boolean added = this.players.add(player);
         if (ModList.get().isLoaded("minemention")) {
             MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
@@ -123,11 +122,11 @@ public class Team {
         return added;
     }
 
-    public boolean addPlayer(PlayerEntity player) {
+    protected boolean addPlayer(PlayerEntity player) {
         return this.addPlayer(player.getGameProfile().getId());
     }
 
-    public boolean addPlayers(Collection<UUID> players) {
+    protected boolean addPlayers(Collection<UUID> players) {
         boolean added = this.players.addAll(players);
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
         if (ModList.get().isLoaded("minemention")) {
@@ -139,11 +138,11 @@ public class Team {
         return added;
     }
 
-    public boolean removePlayer(PlayerEntity player) {
+    protected boolean removePlayer(PlayerEntity player) {
         return this.removePlayer(player.getGameProfile().getId());
     }
 
-    public boolean removePlayer(UUID player) {
+    protected boolean removePlayer(UUID player) {
         boolean removed = this.players.remove(player);
         if (ModList.get().isLoaded("minemention")) {
             MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
@@ -152,7 +151,7 @@ public class Team {
         return removed;
     }
 
-    public void removePlayers(Collection<UUID> players) {
+    protected void removePlayers(Collection<UUID> players) {
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
         for (UUID id : players) {
             this.players.remove(id);
@@ -163,7 +162,7 @@ public class Team {
         this.data.markDirty();
     }
 
-    public void removeAllPlayers() {
+    protected void removeAllPlayers() {
         HashSet<UUID> uuids = new HashSet<>(this.players);
         this.players.clear();
         PlayerList playerList = this.getWorld().getServer().getPlayerList();

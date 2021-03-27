@@ -1,8 +1,11 @@
-package de.melanx.skyblockbuilder.world.data;
+package de.melanx.skyblockbuilder.data;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import de.melanx.skyblockbuilder.util.*;
+import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.Spiral;
+import de.melanx.skyblockbuilder.util.TemplateLoader;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -196,8 +199,7 @@ public class SkyblockSavedData extends WorldSavedData {
 
     public boolean addPlayerToTeam(Team team, UUID player) {
         team.broadcast(new TranslationTextComponent("skyblockbuilder.event.player_joined", RandomUtility.getDisplayNameByUuid(this.world, player)), Style.EMPTY.applyFormatting(TextFormatting.GOLD));
-        //noinspection ConstantConditions
-        this.getTeam("spawn").removePlayer(player);
+        this.getSpawn().removePlayer(player);
         team.addPlayer(player);
         this.markDirty();
         return true;
@@ -258,6 +260,16 @@ public class SkyblockSavedData extends WorldSavedData {
             }
         }
         return false;
+    }
+
+    public void removeAllPlayersFromTeam(Team team) {
+        Set<UUID> players = new HashSet<>(team.getPlayers());
+        team.removeAllPlayers();
+        Team spawn = this.getSpawn();
+        for (UUID player : players) {
+            this.addPlayerToTeam(spawn, player);
+        }
+        this.markDirty();
     }
 
     @Nullable

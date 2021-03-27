@@ -8,11 +8,11 @@ import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
-import de.melanx.skyblockbuilder.util.Team;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
@@ -108,7 +108,7 @@ public class EventListener {
                 }
 
                 player.getPersistentData().putBoolean(SPAWNED_TAG, true);
-                spawn.addPlayer(player);
+                data.addPlayerToTeam(spawn, player);
                 ((ServerWorld) world).func_241124_a__(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
                 WorldUtil.teleportToIsland(player, spawn);
 
