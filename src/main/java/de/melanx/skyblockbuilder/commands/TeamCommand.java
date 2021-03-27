@@ -12,6 +12,7 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.events.SkyblockJoinRequestEvent;
 import de.melanx.skyblockbuilder.events.SkyblockManageTeamEvent;
+import de.melanx.skyblockbuilder.util.CompatHelper;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
@@ -108,6 +109,11 @@ public class TeamCommand {
     }
 
     private static int acceptRequest(CommandSource source, ServerPlayerEntity player) throws CommandSyntaxException {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -148,6 +154,11 @@ public class TeamCommand {
     }
 
     private static int denyRequest(CommandSource source, ServerPlayerEntity player) throws CommandSyntaxException {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -201,6 +212,11 @@ public class TeamCommand {
     }
 
     private static int toggleAllowVisit(CommandSource source, boolean enabled) throws CommandSyntaxException {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
         ServerPlayerEntity player = source.asPlayer();
@@ -238,6 +254,11 @@ public class TeamCommand {
     }
 
     private static int toggleAllowRequest(CommandSource source, boolean enabled) throws CommandSyntaxException {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
         ServerPlayerEntity player = source.asPlayer();
@@ -260,6 +281,11 @@ public class TeamCommand {
     }
 
     private static int addSpawn(CommandSource source, BlockPos pos) throws CommandSyntaxException {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -305,6 +331,11 @@ public class TeamCommand {
     }
 
     private static int removeSpawn(CommandSource source, BlockPos pos) throws CommandSyntaxException {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -349,6 +380,11 @@ public class TeamCommand {
     }
 
     private static int resetSpawns(CommandSource source, String name) {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -398,6 +434,11 @@ public class TeamCommand {
     }
 
     private static int renameTeam(CommandSource source, String newName, String oldName) throws CommandSyntaxException {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 

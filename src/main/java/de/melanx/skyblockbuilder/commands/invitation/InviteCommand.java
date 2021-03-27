@@ -7,6 +7,7 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.events.SkyblockInvitationEvent;
+import de.melanx.skyblockbuilder.util.CompatHelper;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
@@ -28,6 +29,11 @@ public class InviteCommand {
     }
 
     private static int invitePlayer(CommandSource source, ServerPlayerEntity invitePlayer) throws CommandSyntaxException {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
         ServerPlayerEntity player = source.asPlayer();

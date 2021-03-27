@@ -99,6 +99,7 @@
   "skyblockbuilder.event.rename_team": "%s hat das Team von %s zu %s umbenannt.",
 
   "skyblockbuilder.unknown_player": "Unbekannter Spieler",
+  "skyblockbuilder.compat.disabled_management": "Diese und andere Teamverwaltungsfunktionen sind aktuell durch eine andere Mod deaktiviert.",
 
   "minemention.skyblockbuilder.team": "Erwähne jeden Spieler in deinem Team"
 }

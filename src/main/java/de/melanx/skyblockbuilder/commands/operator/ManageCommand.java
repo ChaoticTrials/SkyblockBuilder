@@ -9,6 +9,7 @@ import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.util.CompatHelper;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
@@ -68,9 +69,14 @@ public class ManageCommand {
     }
 
     private static int deleteEmptyTeams(CommandSource source) {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
-        
+
         int i = 0;
         Iterator<Team> itr = data.getTeams().iterator();
         while (itr.hasNext()) {
@@ -89,6 +95,11 @@ public class ManageCommand {
     }
 
     private static int clearTeam(CommandSource source, String teamName) {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -119,6 +130,11 @@ public class ManageCommand {
     }
 
     private static int createTeam(CommandSource source, String name, boolean join) {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -155,6 +171,11 @@ public class ManageCommand {
     }
 
     private static int deleteTeam(CommandSource source, String team) {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -192,6 +213,11 @@ public class ManageCommand {
     }
 
     private static int addToTeam(CommandSource source, String teamName, Collection<ServerPlayerEntity> players) {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -232,6 +258,11 @@ public class ManageCommand {
     }
 
     private static int removeFromTeam(CommandSource source, ServerPlayerEntity player) {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 

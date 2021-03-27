@@ -99,6 +99,7 @@
   "skyblockbuilder.event.rename_team": "%s renamed your team from %s to %s.",
 
   "skyblockbuilder.unknown_player": "Unknown Player",
+  "skyblockbuilder.compat.disabled_management": "This and all other team management is disabled by another mod.",
 
   "minemention.skyblockbuilder.team": "Mention every player in your team"
 }

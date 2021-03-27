@@ -80,7 +80,7 @@ If home command is enabled in the config, you can teleport back to your teams is
 If teleporting to spawn is enabled in the config, you can teleport to spawn island with `/skyblock spawn`.
 
 ### Visiting other islands
-If visits are enabled in the config and a team enabled visiting, you can visit an island with `/skyblock visit <team>`.
+If visits are enabled in the config, and a team enabled visiting, you can visit an island with `/skyblock visit <team>`.
 
 ### Enable visiting
 You can see your teams current visiting state with `/skyblock team allowVisits` and enable/disable it with `/skyblock team 
@@ -131,7 +131,7 @@ allowRequests <true/false>`.
 ## Using teams
 Only an operator with permission level 2 or higher can change anything in the `/skyblock manage` category.
 ### Creating teams
-Use the `/skyblock manage teams create <name>` command to generate a team with the given name. If no name if provided, a random
+Use the `/skyblock manage teams create <name>` command to generate a team with the given name. If no name is provided, a random
 name will be generated.
 
 Alternatively (good for servers) you can use `/skyblock manage teams createAndJoin <name>` to create the team and join it.
