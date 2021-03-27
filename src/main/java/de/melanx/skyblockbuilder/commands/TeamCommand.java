@@ -8,16 +8,21 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.events.SkyblockJoinRequestEvent;
 import de.melanx.skyblockbuilder.events.SkyblockManageTeamEvent;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.BlockPosArgument;
+import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
@@ -25,6 +30,7 @@ import net.minecraftforge.eventbus.api.Event;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Set;
+import java.util.UUID;
 
 public class TeamCommand {
 
@@ -36,6 +42,22 @@ public class TeamCommand {
         }
 
         return BlockPosArgument.blockPos().listSuggestions(context, builder);
+    };
+
+    public static final SuggestionProvider<CommandSource> SUGGEST_PLAYERS = (context, builder) -> {
+        Team team = SkyblockSavedData.get(context.getSource().getWorld()).getTeamFromPlayer(context.getSource().asPlayer());
+        if (team != null) {
+            Set<UUID> players = team.getJoinRequests();
+            PlayerList playerList = context.getSource().getServer().getPlayerList();
+            players.forEach(id -> {
+                ServerPlayerEntity player = playerList.getPlayerByUUID(id);
+                if (player != null) {
+                    builder.suggest(player.getDisplayName().getString());
+                }
+            });
+        }
+
+        return EntityArgument.entity().listSuggestions(context, builder);
     };
 
     public static ArgumentBuilder<CommandSource, ?> register() {
@@ -66,7 +88,95 @@ public class TeamCommand {
                 .then(Commands.literal("allowVisit")
                         .executes(context -> showVisitInformation(context.getSource()))
                         .then(Commands.argument("enabled", BoolArgumentType.bool())
-                                .executes(context -> toggleAllowVisit(context.getSource(), BoolArgumentType.getBool(context, "enabled")))));
+                                .executes(context -> toggleAllowVisit(context.getSource(), BoolArgumentType.getBool(context, "enabled")))))
+
+                // Accept a join request
+                .then(Commands.literal("accept")
+                        .then(Commands.argument("player", EntityArgument.player()).suggests(SUGGEST_PLAYERS)
+                                .executes(context -> acceptRequest(context.getSource(), EntityArgument.getPlayer(context, "player")))))
+
+                // Deny a join request
+                .then(Commands.literal("deny")
+                        .then(Commands.argument("player", EntityArgument.player()).suggests(SUGGEST_PLAYERS)
+                                .executes(context -> denyRequest(context.getSource(), EntityArgument.getPlayer(context, "player")))));
+    }
+
+    private static int acceptRequest(CommandSource source, ServerPlayerEntity player) throws CommandSyntaxException {
+        ServerWorld world = source.getWorld();
+        SkyblockSavedData data = SkyblockSavedData.get(world);
+
+        ServerPlayerEntity commandPlayer = source.asPlayer();
+        Team team = data.getTeamFromPlayer(commandPlayer);
+        if (team == null) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
+        if (data.hasPlayerTeam(player)) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team"), true);
+            team.removeJoinRequest(player);
+            return 0;
+        }
+
+        SkyblockJoinRequestEvent.AcceptRequest event = SkyblockHooks.onAcceptJoinRequest(commandPlayer, player, team);
+        switch (event.getResult()) {
+            case DENY:
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.accept_join_request").mergeStyle(TextFormatting.RED), true);
+                return 0;
+            case DEFAULT:
+                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.accept_join_request").mergeStyle(TextFormatting.RED), true);
+                    return 0;
+                }
+                break;
+            case ALLOW:
+                break;
+        }
+
+        team.broadcast(new TranslationTextComponent("skyblockbuilder.event.accept_join_request", commandPlayer.getDisplayName(), player.getDisplayName()), Style.EMPTY.applyFormatting(TextFormatting.GOLD));
+        data.addPlayerToTeam(team, player);
+        team.removeJoinRequest(player);
+        WorldUtil.teleportToIsland(player, team);
+        player.sendStatusMessage(new TranslationTextComponent("skyblockbuilder.command.success.join_request_accepted", team.getName()).mergeStyle(TextFormatting.GOLD), false);
+        return 1;
+    }
+
+    private static int denyRequest(CommandSource source, ServerPlayerEntity player) throws CommandSyntaxException {
+        ServerWorld world = source.getWorld();
+        SkyblockSavedData data = SkyblockSavedData.get(world);
+
+        ServerPlayerEntity commandPlayer = source.asPlayer();
+        Team team = data.getTeamFromPlayer(commandPlayer);
+        if (team == null) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
+        if (data.hasPlayerTeam(player)) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team"), true);
+            team.removeJoinRequest(player);
+            return 0;
+        }
+
+        SkyblockJoinRequestEvent.DenyRequest event = SkyblockHooks.onDenyJoinRequest(commandPlayer, player, team);
+        switch (event.getResult()) {
+            case DENY:
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.deny_join_request").mergeStyle(TextFormatting.RED), true);
+                return 0;
+            case DEFAULT:
+                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.deny_join_request").mergeStyle(TextFormatting.RED), true);
+                    return 0;
+                }
+                break;
+            case ALLOW:
+                break;
+        }
+
+        team.broadcast(new TranslationTextComponent("skyblockbuilder.event.deny_join_request", commandPlayer.getDisplayName(), player.getDisplayName()), Style.EMPTY.applyFormatting(TextFormatting.GOLD));
+        team.removeJoinRequest(player);
+        player.sendStatusMessage(new TranslationTextComponent("skyblockbuilder.command.success.deny_request_accepted", team.getName()).mergeStyle(TextFormatting.GOLD), false);
+        return 1;
     }
 
     private static int showVisitInformation(CommandSource source) throws CommandSyntaxException {

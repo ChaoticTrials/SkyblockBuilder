@@ -73,15 +73,6 @@ by default, but you can turn that off. Overworld structures are not being genera
 Everyone can list the teams. For that, you can use `/skyblock list <name>`. That will list either all the teams if no 
 name is provided or the names of all players in a team.
 
-### Inviting users
-Everyone in a team can invite other players. For that, you can use `/skyblock invite <player>`. That will send an invitation 
-to the given player. Only players with no team can be invited.
-
-### Accepting invitations
-Everyone with an invitation can accept them. You can only accept invitations if you're in no team. For that, you use 
-the command `/skyblock accept <team>`.
-You can also decline an invitation by using the command `/skyblock decline <team>`.
-
 ### Teleporting back to home island
 If home command is enabled in the config, you can teleport back to your teams island with `/skyblock home`.
 
@@ -109,6 +100,28 @@ If enabled in the config, you can modify spawns from your team. You can add them
 no position is given, the current position will be used. Remove them with `/skyblock team spawns remove <pos>`. Same as 
 before: position is optional. For users with permission level 2: `/skyblock team spawns reset <team>` will reset the 
 spawn points to the default ones. To add the spawns, you need to be within the range specified in the config.
+
+
+## Invitations
+### Inviting users
+Everyone in a team can invite other players. For that, you can use `/skyblock invite <player>`. That will send an invitation 
+to the given player. Only players with no team can be invited.
+
+### Accepting invitations
+Everyone with an invitation can accept them. You can only accept invitations if you're in no team. For that, you use 
+the command `/skyblock accept <team>`.
+You can also decline an invitation by using the command `/skyblock decline <team>`.
+
+
+## Join requests
+### Sending a join request
+You can send a join request to all teams if you're currently in no team by using `/skyblock join <team>`. That will send a 
+request to the team and each player in the team can accept or deny your request.
+
+### Accepting requests
+Each user of a team can use `/skyblock team accept <player>` to accept the given player. That will teleport the player to 
+your island.
+You can also deny the request by using `/skyblock team deny <player>`.
 
 
 ## Using teams

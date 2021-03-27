@@ -11,10 +11,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.server.ServerWorld;
@@ -72,15 +69,13 @@ public class InviteCommand {
         data.addInvite(team, event.getInvitor(), invitePlayer);
 
         IFormattableTextComponent invite = new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team0", player.getDisplayName().getString(), team.getName()).mergeStyle(TextFormatting.GOLD);
-        invite.append(new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team1", team.getName()))
-                .setStyle(Style.EMPTY
-                        .setHoverEvent(COPY_TEXT)
-                        .setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock accept " + team.getName()))
-                        .applyFormatting(TextFormatting.UNDERLINE).applyFormatting(TextFormatting.GOLD));
-        invite.append(new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team2").mergeStyle(TextFormatting.GOLD));
+        invite.append(new StringTextComponent("/skyblock accept " + team.getName()).setStyle(Style.EMPTY
+                .setHoverEvent(COPY_TEXT)
+                .setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock accept " + team.getName()))
+                .applyFormatting(TextFormatting.UNDERLINE).applyFormatting(TextFormatting.GOLD)));
+        invite.append(new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team1").mergeStyle(TextFormatting.GOLD));
         invitePlayer.sendStatusMessage(invite, false);
 
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.invite_player", invitePlayer.getDisplayName().getString()).mergeStyle(TextFormatting.GOLD), true);
         return 1;
     }
 }

@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.util;
 
+import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
@@ -10,10 +11,8 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.util.text.*;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.ModList;
@@ -27,9 +26,11 @@ public class Team {
     private final Set<UUID> players;
     private final Set<BlockPos> possibleSpawns;
     private final Random random = new Random();
+    private final Set<UUID> joinRequests = new HashSet<>();
     private IslandPos island;
     private String name;
     private boolean allowVisits;
+    private boolean allowJoinRequests;
 
     public Team(SkyblockSavedData data, IslandPos island) {
         this.data = data;
@@ -186,18 +187,67 @@ public class Team {
         return this.players.isEmpty();
     }
 
+    public boolean toggleAllowJoinRequest() {
+        this.allowJoinRequests = !this.allowJoinRequests;
+        this.data.markDirty();
+        return this.allowJoinRequests;
+    }
+
+    public void setAllowJoinRequest(boolean enabled) {
+        this.allowJoinRequests = enabled;
+        this.data.markDirty();
+    }
+
+    public Set<UUID> getJoinRequests() {
+        return this.joinRequests;
+    }
+
+    public void addJoinRequest(PlayerEntity player) {
+        this.addJoinRequest(player.getGameProfile().getId());
+    }
+
+    public void addJoinRequest(UUID id) {
+        this.joinRequests.add(id);
+        this.data.markDirty();
+    }
+
+    public void removeJoinRequest(PlayerEntity player) {
+        this.removeJoinRequest(player.getGameProfile().getId());
+    }
+
+    public void removeJoinRequest(UUID id) {
+        this.joinRequests.remove(id);
+        this.data.markDirty();
+    }
+
+    public void resetJoinRequests() {
+        this.joinRequests.clear();
+        this.data.markDirty();
+    }
+
+    public void sendJoinRequest(PlayerEntity requestingPlayer) {
+        this.addJoinRequest(requestingPlayer.getGameProfile().getId());
+        TranslationTextComponent component = new TranslationTextComponent("skyblockbuilder.event.join_request0", requestingPlayer.getDisplayName());
+        component.append(new StringTextComponent("/skyblock team accept " + requestingPlayer.getDisplayName().getString()).setStyle(Style.EMPTY
+                .setHoverEvent(InviteCommand.COPY_TEXT)
+                .setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock team accept " + requestingPlayer.getDisplayName().getString()))
+                .createStyleFromFormattings(TextFormatting.UNDERLINE, TextFormatting.GOLD)));
+        component.append(new TranslationTextComponent("skyblockbuilder.event.join_request1"));
+        this.broadcast(component, Style.EMPTY.applyFormatting(TextFormatting.GOLD));
+    }
+
     @Nonnull
     public ServerWorld getWorld() {
         return this.data.getWorld();
     }
 
-    public void broadcast(ITextComponent msg, Style style) {
+    public void broadcast(IFormattableTextComponent msg, Style style) {
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
         this.players.forEach(uuid -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(uuid);
             if (player != null) {
-                IFormattableTextComponent component = new StringTextComponent("[" + this.name + "] ");
-                player.sendMessage(component.append(msg).mergeStyle(style), uuid);
+                IFormattableTextComponent component = new StringTextComponent("[" + this.name + "] ").setStyle(Style.EMPTY);
+                player.sendMessage(component.append(msg.mergeStyle(style)), uuid);
             }
         });
     }
@@ -209,6 +259,7 @@ public class Team {
         nbt.put("Island", this.island.toTag());
         nbt.putString("Name", this.name != null ? this.name : "");
         nbt.putBoolean("Visits", this.allowVisits);
+        nbt.putBoolean("AllowJoinRequests", this.allowJoinRequests);
 
         ListNBT players = new ListNBT();
         for (UUID player : this.players) {
@@ -228,8 +279,17 @@ public class Team {
             spawns.add(posTag);
         }
 
+        ListNBT joinRequests = new ListNBT();
+        for (UUID id : this.joinRequests) {
+            CompoundNBT idTag = new CompoundNBT();
+            idTag.putUniqueId("Id", id);
+
+            joinRequests.add(idTag);
+        }
+
         nbt.put("Players", players);
         nbt.put("Spawns", spawns);
+        nbt.put("JoinRequests", joinRequests);
         return nbt;
     }
 
@@ -237,6 +297,7 @@ public class Team {
         this.island = IslandPos.fromTag(nbt.getCompound("Island"));
         this.name = nbt.getString("Name");
         this.allowVisits = nbt.getBoolean("Visits");
+        this.allowJoinRequests = nbt.getBoolean("AllowJoinRequests");
 
         ListNBT players = nbt.getList("Players", Constants.NBT.TAG_COMPOUND);
         this.players.clear();
@@ -249,6 +310,15 @@ public class Team {
         for (INBT pos : spawns) {
             CompoundNBT posTag = (CompoundNBT) pos;
             this.possibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
+        }
+
+        if (nbt.contains("JoinRequests")) { // TODO 1.17 remove this check
+            ListNBT joinRequests = nbt.getList("JoinRequests", Constants.NBT.TAG_COMPOUND);
+            this.joinRequests.clear();
+            for (INBT id : joinRequests) {
+                CompoundNBT idTag = (CompoundNBT) id;
+                this.joinRequests.add(idTag.getUniqueId("Id"));
+            }
         }
     }
 

@@ -92,18 +92,17 @@ public class ManageCommand {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
-        if (!data.teamExists(teamName)) {
+        Team team = data.getTeam(teamName);
+        if (team == null) {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
-        Team team = data.getTeam(teamName);
         if (SkyblockHooks.onManageClearTeam(source, team)) {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.clear_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
-        
-        assert team != null;
+
         int i = team.getPlayers().size();
         team.removeAllPlayers();
         source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.remove_all_players_from_team", i).mergeStyle(TextFormatting.RED), true);

@@ -75,6 +75,24 @@ public class SkyblockHooks {
         return event.getResult();
     }
 
+    public static SkyblockJoinRequestEvent.SendRequest onSendJoinRequest(ServerPlayerEntity player, Team team) {
+        SkyblockJoinRequestEvent.SendRequest event = new SkyblockJoinRequestEvent.SendRequest(player, team);
+        MinecraftForge.EVENT_BUS.post(event);
+        return event;
+    }
+
+    public static SkyblockJoinRequestEvent.AcceptRequest onAcceptJoinRequest(ServerPlayerEntity acceptor, ServerPlayerEntity requester, Team team) {
+        SkyblockJoinRequestEvent.AcceptRequest event = new SkyblockJoinRequestEvent.AcceptRequest(acceptor, requester, team);
+        MinecraftForge.EVENT_BUS.post(event);
+        return event;
+    }
+
+    public static SkyblockJoinRequestEvent.DenyRequest onDenyJoinRequest(ServerPlayerEntity denier, ServerPlayerEntity requester, Team team) {
+        SkyblockJoinRequestEvent.DenyRequest event = new SkyblockJoinRequestEvent.DenyRequest(denier, requester, team);
+        MinecraftForge.EVENT_BUS.post(event);
+        return event;
+    }
+
     public static boolean onCreateTeam(String name) {
         SkyblockCreateTeamEvent event = new SkyblockCreateTeamEvent(name);
         return MinecraftForge.EVENT_BUS.post(event);

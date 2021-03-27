@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
 import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
 import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
+import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
@@ -71,6 +72,7 @@ public class EventListener {
                 .then(DeclineCommand.register())
                 .then(HomeCommand.register())
                 .then(InviteCommand.register())
+                .then(JoinCommand.register())
                 .then(LeaveCommand.register())
                 .then(ListCommand.register())
                 .then(ManageCommand.register())

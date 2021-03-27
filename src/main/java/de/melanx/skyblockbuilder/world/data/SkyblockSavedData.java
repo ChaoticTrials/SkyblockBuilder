@@ -62,6 +62,10 @@ public class SkyblockSavedData extends WorldSavedData {
         return team;
     }
 
+    public Optional<Team> getSpawnOption() {
+        return Optional.of(this.skyblocks.get("spawn"));
+    }
+
     public Pair<IslandPos, Team> create(String teamName) {
         IslandPos islandPos;
         if (teamName.equalsIgnoreCase("spawn")) {
