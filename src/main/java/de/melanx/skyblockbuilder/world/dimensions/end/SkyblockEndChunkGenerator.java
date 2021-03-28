@@ -43,7 +43,6 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     public SkyblockEndChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
         super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
-//          TODO  settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.EMPTY_SETTINGS, settings.get());
         this.settings = settings;
         this.parent = new NoiseChunkGenerator(provider, seed, settings);
     }
