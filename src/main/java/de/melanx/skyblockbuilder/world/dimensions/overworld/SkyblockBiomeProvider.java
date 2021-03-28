@@ -1,6 +1,5 @@
 package de.melanx.skyblockbuilder.world.dimensions.overworld;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
@@ -12,15 +11,10 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.biome.provider.OverworldBiomeProvider;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
 import java.util.Objects;
 
 public class SkyblockBiomeProvider extends BiomeProvider {
@@ -48,33 +42,9 @@ public class SkyblockBiomeProvider extends BiomeProvider {
         OverworldBiomeProvider provider = (OverworldBiomeProvider) parent;
         this.parent = parent;
         this.seed = provider.seed;
-        this.lookupRegistry = provider.lookupRegistry;
+        this.lookupRegistry = provider.lookupRegistry; // RandomUtility.modifyLookupRegistry(provider.lookupRegistry);
 
-        this.lookupRegistry.getEntries().forEach(biomeEntry -> {
-            // Remove non-whitelisted structures
-            List<Supplier<StructureFeature<?, ?>>> structures = new ArrayList<>();
-            for (Supplier<StructureFeature<?, ?>> structure : biomeEntry.getValue().getGenerationSettings().structures) {
-                ResourceLocation location = structure.get().field_236268_b_.getRegistryName();
-                if (location != null && ConfigHandler.whitelistStructures.get().contains(location.toString())) {
-                    structures.add(structure);
-                }
-            }
-
-            biomeEntry.getValue().getGenerationSettings().structures = ImmutableList.copyOf(structures);
-
-            // Remove non-whitelisted features
-            List<Supplier<ConfiguredFeature<?, ?>>> features = new ArrayList<>();
-            biomeEntry.getValue().getGenerationSettings().features.forEach(list -> {
-                for (Supplier<ConfiguredFeature<?, ?>> feature : list) {
-                    ResourceLocation location = feature.get().feature.getRegistryName();
-                    if (location != null && ConfigHandler.whitelistFeatures.get().contains(location.toString())) {
-                        features.add(feature);
-                    }
-                }
-            });
-
-            biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of(features);
-        });
+        System.out.println();
     }
 
     @Nonnull

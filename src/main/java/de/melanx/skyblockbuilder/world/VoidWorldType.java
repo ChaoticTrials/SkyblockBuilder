@@ -28,7 +28,7 @@ import net.minecraftforge.event.RegistryEvent;
 import javax.annotation.Nonnull;
 
 public class VoidWorldType extends ForgeWorldType {
-    
+
     public VoidWorldType() {
         super(VoidWorldType::overworldChunkGenerator);
     }
@@ -78,7 +78,7 @@ public class VoidWorldType extends ForgeWorldType {
         BiomeProvider overworld = new OverworldBiomeProvider(seed, false, false, biomeRegistry);
         BiomeProvider provider = new SkyblockBiomeProvider(overworld);
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c);
-        settings.structures.field_236193_d_.entrySet().removeIf(next -> !ConfigHandler.whitelistStructures.get().contains(next.getKey().getRegistryName().toString()));
+        applyWhitelist(settings);
 
         return new SkyblockOverworldChunkGenerator(provider, seed, () -> settings);
     }
@@ -88,7 +88,7 @@ public class VoidWorldType extends ForgeWorldType {
         SkyblockNetherBiomeProvider provider = new SkyblockNetherBiomeProvider(nether, biomeRegistry);
 
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242736_e);
-        settings.structures.field_236193_d_.entrySet().removeIf(next -> !ConfigHandler.whitelistStructures.get().contains(next.getKey().getRegistryName().toString()));
+        applyWhitelist(settings);
 
         return new SkyblockNetherChunkGenerator(provider, seed, () -> settings);
     }
@@ -97,8 +97,20 @@ public class VoidWorldType extends ForgeWorldType {
         SkyblockEndBiomeProvider provider = new SkyblockEndBiomeProvider(new EndBiomeProvider(biomeRegistry, seed));
 
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242737_f);
-        settings.structures.field_236193_d_.entrySet().removeIf(next -> !ConfigHandler.whitelistStructures.get().contains(next.getKey().getRegistryName().toString()));
+        applyWhitelist(settings);
 
         return new SkyblockEndChunkGenerator(provider, seed, () -> settings);
+    }
+
+    private static void applyWhitelist(DimensionSettings settings) {
+        settings.structures.field_236193_d_.entrySet().removeIf(structure -> {
+            if (ConfigHandler.toggleWhitelist.get()) {
+                //noinspection ConstantConditions
+                return ConfigHandler.whitelistStructures.get().contains(structure.getKey().getRegistryName().toString());
+            }
+
+            //noinspection ConstantConditions
+            return !ConfigHandler.whitelistStructures.get().contains(structure.getKey().getRegistryName().toString());
+        });
     }
 }

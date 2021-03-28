@@ -24,7 +24,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 public class ConfigHandler {
-    
+
     public static final ForgeConfigSpec COMMON_CONFIG;
     public static final List<Pair<EquipmentSlotType, ItemStack>> STARTER_ITEMS = new ArrayList<>();
     private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
@@ -40,6 +40,7 @@ public class ConfigHandler {
 
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistStructures;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistFeatures;
+    public static ForgeConfigSpec.BooleanValue toggleWhitelist;
 
     public static ForgeConfigSpec.BooleanValue defaultNether;
     public static ForgeConfigSpec.BooleanValue defaultEnd;
@@ -69,15 +70,22 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue spawnTeleport;
 
     public static void init(ForgeConfigSpec.Builder builder) {
+        builder.push("structures").comment("With this you can configure the structures and features which are generated.",
+                "WARNING: Some features like trees need special surface!",
+                "WARNING: Some structures like mansions only exist in special biomes! If the biome range is too low, the \"/locate\" command will run for a lot of minutes where you cannot play because it blocks the whole server tick.");
         whitelistStructures = builder.comment("All the structures that should be generated.",
                 "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/structures.txt")
-                .defineList("structures.structures", Collections.emptyList(), (obj) -> obj instanceof String);
+                .defineList("structures", Collections.emptyList(), (obj) -> obj instanceof String);
         whitelistFeatures = builder.comment("All the features that should be generated.",
-                "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/features.txt")
-                .defineList("structures.features", Arrays.asList(
+                "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/features.txt",
+                "INFO: The two default values are required for the obsidian towers in end. If this is missing, they will be first generated when respawning the dragon.")
+                .defineList("features", Arrays.asList(
                         "minecraft:end_spike",
                         "minecraft:end_gateway"
                 ), (obj) -> obj instanceof String);
+        toggleWhitelist = builder.comment("If this is true, the structure and feature whitelist will be blacklists and everything except of the given structures/features are being generated. [default: false]")
+                .define("whitelist-is-blacklist", false);
+        builder.pop();
 
         defaultNether = builder.comment("Should nether generate as in default world type? [default: false]")
                 .define("dimensions.nether.default", false);
@@ -93,13 +101,15 @@ public class ConfigHandler {
                 .define("world.surface-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block", String.class::isInstance);
         seaHeight = builder.comment("Sea level in world [default: 63]")
                 .defineInRange("world.sea-level", 63, 0, 256);
-        singleBiome = builder.comment("Should only one biome be generated? [default: false]")
+        singleBiome = builder.comment("Should only one biome be generated? [default: false]",
+                "WARNING: Some structures need a special biome, e.g. Mansion needs Dark Oak Forest! These structures will not be generated if you have only one biome!")
                 .define("world.single-biome.enabled", false);
         biome = builder.comment("Specifies the biome for the whole world")
                 .define("world.single-biome.biome", "minecraft:plains", String.class::isInstance);
         islandDistance = builder.comment("Distance between islands in overworld [default: 8192]", "nether the distance is 1/8")
                 .defineInRange("world.island-distance", 8192, 64, 29999900);
-        biomeRange = builder.comment("The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes")
+        biomeRange = builder.comment("The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes",
+                "WARNING: Too small biome range will prevent some structures to generate, if structures are enabled, because some need a special biome!")
                 .defineInRange("world.biome-range", 8192, 64, 29999900);
 
         direction = builder.comment("Direction the player should look at initial spawn")
