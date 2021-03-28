@@ -138,7 +138,7 @@ public abstract class SkyblockOpManageEvent extends Event {
         }
 
         /**
-         * This {@link Set<ServerPlayerEntity>} can be modified
+         * This {@link Set} of {@link ServerPlayerEntity} can be modified
          *
          * @return The players which will be added
          */
@@ -169,7 +169,7 @@ public abstract class SkyblockOpManageEvent extends Event {
         }
 
         /**
-         * This {@link Set<ServerPlayerEntity>} can be modified
+         * This {@link Set} of {@link ServerPlayerEntity} can be modified
          *
          * @return The players which will be removed
          */
