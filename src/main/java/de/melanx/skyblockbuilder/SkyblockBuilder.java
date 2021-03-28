@@ -14,8 +14,8 @@ import net.minecraft.util.Util;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.world.ForgeWorldType;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -42,6 +42,7 @@ public class SkyblockBuilder {
         bus.addListener(this::commonSetup);
         bus.addGenericListener(ForgeWorldType.class, VoidWorldType::register);
 
+        ConfigHandler.createDirectories();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON_CONFIG, SkyblockBuilder.MODID + "/config.toml");
 
         MinecraftForge.EVENT_BUS.register(new EventListener());

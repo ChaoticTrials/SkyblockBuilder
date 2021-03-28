@@ -144,11 +144,19 @@ public class ConfigHandler {
                 .define("utility.teleports.spawn", true);
     }
 
-    public static void generateDefaultFiles() {
+    public static void createDirectories() {
         try {
             if (!Files.isDirectory(MOD_CONFIG)) {
                 Files.createDirectories(MOD_CONFIG);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void generateDefaultFiles() {
+        try {
+            createDirectories();
 
             copyTemplateFile();
             generateSpawnsFile();
