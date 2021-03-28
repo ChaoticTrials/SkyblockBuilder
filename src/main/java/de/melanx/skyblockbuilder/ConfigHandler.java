@@ -8,11 +8,12 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.JSONUtils;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -20,13 +21,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ConfigHandler {
-    
+
     public static final ForgeConfigSpec COMMON_CONFIG;
     public static final List<Pair<EquipmentSlotType, ItemStack>> STARTER_ITEMS = new ArrayList<>();
     private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
@@ -40,17 +38,13 @@ public class ConfigHandler {
         COMMON_CONFIG = COMMON_BUILDER.build();
     }
 
-    public static ForgeConfigSpec.BooleanValue overworldStructures;
-    public static ForgeConfigSpec.BooleanValue strongholdOnly;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistStructures;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistFeatures;
+    public static ForgeConfigSpec.BooleanValue toggleWhitelist;
 
     public static ForgeConfigSpec.BooleanValue defaultNether;
-    public static ForgeConfigSpec.BooleanValue netherStructures;
-    public static ForgeConfigSpec.BooleanValue disableFortress;
-    public static ForgeConfigSpec.BooleanValue disableBastion;
-
     public static ForgeConfigSpec.BooleanValue defaultEnd;
     public static ForgeConfigSpec.BooleanValue defaultEndIsland;
-    public static ForgeConfigSpec.BooleanValue endStructures;
 
     public static ForgeConfigSpec.BooleanValue generateSurface;
     public static ForgeConfigSpec.ConfigValue<String> generationSettings;
@@ -76,27 +70,31 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue spawnTeleport;
 
     public static void init(ForgeConfigSpec.Builder builder) {
-        overworldStructures = builder.comment("Should structures like end portal or villages be generated in overworld? [default: false]")
-                .define("dimensions.overworld.structures", false);
-        strongholdOnly = builder.comment("Should the stronghold with end portal be the only structure?", "Needs default config be 'true', otherwise it'll be ignored. [default: false]")
-                .define("dimensions.overworld.stronhold-only", false);
+        builder.push("structures").comment("With this you can configure the structures and features which are generated.",
+                "WARNING: Some features like trees need special surface!",
+                "WARNING: Some structures like mansions only exist in special biomes! If the biome range is too low, the \"/locate\" command will run for a lot of minutes where you cannot play because it blocks the whole server tick.");
+        whitelistStructures = builder.comment("All the structures that should be generated.",
+                "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/structures.txt")
+                .defineList("structures", Collections.singletonList(
+                        "minecraft:fortress"
+                ), (obj) -> obj instanceof String);
+        whitelistFeatures = builder.comment("All the features that should be generated.",
+                "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/features.txt",
+                "INFO: The two default values are required for the obsidian towers in end. If this is missing, they will be first generated when respawning the dragon.")
+                .defineList("features", Arrays.asList(
+                        "minecraft:end_spike",
+                        "minecraft:end_gateway"
+                ), (obj) -> obj instanceof String);
+        toggleWhitelist = builder.comment("If this is true, the structure and feature whitelist will be blacklists and everything except of the given structures/features are being generated. [default: false]")
+                .define("whitelist-is-blacklist", false);
+        builder.pop();
 
         defaultNether = builder.comment("Should nether generate as in default world type? [default: false]")
                 .define("dimensions.nether.default", false);
-        netherStructures = builder.comment("Should structures like fortresses or bastions be generated in nether? [default: true]")
-                .define("dimensions.nether.structures.enabled", true);
-        disableFortress = builder.comment("Use only if 'enabled' is true!", "Should nether fortress be disabled? [default: false]")
-                .define("dimensions.nether.structures.disable-fortress", false);
-        disableBastion = builder.comment("Use only if 'enabled' is true!", "Should bastions be disabled? [default: true]")
-                .define("dimensions.nether.structures.disable-bastions", true);
-
         defaultEnd = builder.comment("Should end generate as in default world type? [default: false]")
                 .define("dimensions.end.default", false);
         defaultEndIsland = builder.comment("Should the main island be generated as normal? [default: true]")
                 .define("dimensions.end.main-island", true);
-        endStructures = builder.comment("Should structures like end cities be generated in nether? [default: false]",
-                "This also affects the large islands with chorus plants.", "Small islands will still be generated.")
-                .define("dimensions.end.structures", false);
 
         generateSurface = builder.comment("Should a surface be generated in overworld? [default: false]")
                 .define("world.surface", false);
@@ -105,13 +103,15 @@ public class ConfigHandler {
                 .define("world.surface-settings", "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block", String.class::isInstance);
         seaHeight = builder.comment("Sea level in world [default: 63]")
                 .defineInRange("world.sea-level", 63, 0, 256);
-        singleBiome = builder.comment("Should only one biome be generated? [default: false]")
+        singleBiome = builder.comment("Should only one biome be generated? [default: false]",
+                "WARNING: Some structures need a special biome, e.g. Mansion needs Dark Oak Forest! These structures will not be generated if you have only one biome!")
                 .define("world.single-biome.enabled", false);
         biome = builder.comment("Specifies the biome for the whole world")
                 .define("world.single-biome.biome", "minecraft:plains", String.class::isInstance);
         islandDistance = builder.comment("Distance between islands in overworld [default: 8192]", "nether the distance is 1/8")
                 .defineInRange("world.island-distance", 8192, 64, 29999900);
-        biomeRange = builder.comment("The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes")
+        biomeRange = builder.comment("The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes",
+                "WARNING: Too small biome range will prevent some structures to generate, if structures are enabled, because some need a special biome!")
                 .defineInRange("world.biome-range", 8192, 64, 29999900);
 
         direction = builder.comment("Direction the player should look at initial spawn")
@@ -153,6 +153,8 @@ public class ConfigHandler {
             copyTemplateFile();
             generateSpawnsFile();
             generateStarterItemsFile();
+            generateStructureInformation();
+            generateFeatureInformation();
 
             loadStarterItems();
         } catch (IOException e) {
@@ -237,10 +239,31 @@ public class ConfigHandler {
         }
     }
 
-    public static void setup() {
-        generateDefaultFiles();
+    public static void generateFeatureInformation() throws IOException {
+        Path resolve = MOD_CONFIG.resolve("features.txt");
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, COMMON_CONFIG, SkyblockBuilder.MODID + "/config.toml");
+        BufferedWriter w = Files.newBufferedWriter(resolve, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+
+        for (Feature<?> feature : ForgeRegistries.FEATURES.getValues()) {
+            if (feature.getRegistryName() != null) {
+                w.write(feature.getRegistryName().toString() + "\n");
+            }
+        }
+
+        w.close();
     }
 
+    public static void generateStructureInformation() throws IOException {
+        Path resolve = MOD_CONFIG.resolve("structures.txt");
+
+        BufferedWriter w = Files.newBufferedWriter(resolve, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+
+        for (Structure<?> feature : ForgeRegistries.STRUCTURE_FEATURES.getValues()) {
+            if (feature.getRegistryName() != null) {
+                w.write(feature.getRegistryName().toString() + "\n");
+            }
+        }
+
+        w.close();
+    }
 }

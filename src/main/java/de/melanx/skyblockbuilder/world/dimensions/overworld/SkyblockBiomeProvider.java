@@ -1,10 +1,10 @@
 package de.melanx.skyblockbuilder.world.dimensions.overworld;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class SkyblockBiomeProvider extends BiomeProvider {
-    
+
     // [VanillaCopy] overworld biome provider codec
     public static final Codec<SkyblockBiomeProvider> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
@@ -43,12 +43,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
         OverworldBiomeProvider provider = (OverworldBiomeProvider) parent;
         this.parent = parent;
         this.seed = provider.seed;
-        this.lookupRegistry = provider.lookupRegistry;
-
-        this.lookupRegistry.getEntries().forEach(biomeEntry -> {
-            if (biomeEntry.getKey() != Biomes.THE_END)
-                biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of();
-        });
+        this.lookupRegistry = RandomUtility.modifyLookupRegistry(provider.lookupRegistry);
     }
 
     @Nonnull

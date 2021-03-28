@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.ResourceLocation;
@@ -44,9 +43,6 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     public SkyblockEndChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
         super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
-        if (!ConfigHandler.endStructures.get()) {
-            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.EMPTY_SETTINGS, settings.get());
-        }
         this.settings = settings;
         this.parent = new NoiseChunkGenerator(provider, seed, settings);
     }
@@ -97,8 +93,9 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     public void func_230350_a_(long seed, @Nonnull BiomeManager manager, @Nonnull IChunk chunk, @Nonnull GenerationStage.Carving carving) {
         ChunkPos pos = chunk.getPos();
         int value = 10 * 16;
-        if (pos.getXStart() < value && pos.getXStart() > -value && pos.getZStart() < value && pos.getZStart() > -value)
+        if (pos.getXStart() < value && pos.getXStart() > -value && pos.getZStart() < value && pos.getZStart() > -value) {
             super.func_230350_a_(seed, manager, chunk, carving);
+        }
     }
 
     @Nonnull

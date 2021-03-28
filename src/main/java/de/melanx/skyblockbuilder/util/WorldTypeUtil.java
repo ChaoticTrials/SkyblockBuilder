@@ -2,7 +2,6 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -51,15 +50,5 @@ public class WorldTypeUtil {
 
     public static Supplier<DimensionSettings> changeDimensionStructureSettings(DimensionStructuresSettings structuresSettings, DimensionSettings oldSettings) {
         return () -> new DimensionSettings(structuresSettings, oldSettings.getNoise(), oldSettings.getDefaultBlock(), oldSettings.getDefaultFluid(), oldSettings.func_236117_e_(), oldSettings.func_236118_f_(), oldSettings.func_236119_g_(), oldSettings.func_236120_h_());
-    }
-
-    public static Supplier<DimensionSettings> getOverworldSettings(Supplier<DimensionSettings> settings) {
-        if (!ConfigHandler.overworldStructures.get()) {
-            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.EMPTY_SETTINGS, settings.get());
-        } else if (ConfigHandler.strongholdOnly.get()) {
-            settings = WorldTypeUtil.changeDimensionStructureSettings(WorldTypeUtil.STRONGHOLD_ONLY_STRUCTURE_SETTINGS, settings.get());
-        }
-
-        return settings;
     }
 }

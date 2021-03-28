@@ -1,15 +1,13 @@
 package de.melanx.skyblockbuilder.world.dimensions.end;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.biome.provider.EndBiomeProvider;
 import net.minecraftforge.api.distmarker.Dist;
@@ -40,15 +38,7 @@ public class SkyblockEndBiomeProvider extends BiomeProvider {
         EndBiomeProvider provider = (EndBiomeProvider) parent;
         this.parent = parent;
         this.seed = provider.seed;
-        this.lookupRegistry = provider.lookupRegistry;
-
-        if (!ConfigHandler.defaultEnd.get() && !ConfigHandler.endStructures.get()) {
-            this.lookupRegistry.getEntries().forEach(biomeEntry -> {
-                if (biomeEntry.getKey() == Biomes.SMALL_END_ISLANDS) {
-                    biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of();
-                }
-            });
-        }
+        this.lookupRegistry = RandomUtility.modifyLookupRegistry(provider.lookupRegistry);
     }
 
     @Nonnull
