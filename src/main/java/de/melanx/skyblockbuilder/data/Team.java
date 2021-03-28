@@ -1,7 +1,8 @@
-package de.melanx.skyblockbuilder.util;
+package de.melanx.skyblockbuilder.data;
 
+import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
+import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.world.IslandPos;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -9,24 +10,26 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.*;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 
 public class Team {
+
     private final SkyblockSavedData data;
     private final Set<UUID> players;
     private final Set<BlockPos> possibleSpawns;
     private final Random random = new Random();
-    private final Set<UUID> teamChatUsers = new HashSet<>();
+    private final Set<UUID> joinRequests = new HashSet<>();
     private IslandPos island;
     private String name;
     private boolean allowVisits;
+    private boolean allowJoinRequests;
 
     public Team(SkyblockSavedData data, IslandPos island) {
         this.data = data;
@@ -60,6 +63,12 @@ public class Team {
 
     public void setPlayers(Collection<UUID> players) {
         this.players.clear();
+        PlayerList playerList = this.getWorld().getServer().getPlayerList();
+        if (ModList.get().isLoaded("minemention")) {
+            for (UUID id : players) {
+                MineMentionCompat.updateMentions(playerList.getPlayerByUUID(id));
+            }
+        }
         this.players.addAll(players);
         this.data.markDirty();
     }
@@ -104,41 +113,64 @@ public class Team {
         this.data.markDirty();
     }
 
-    public boolean addPlayer(UUID player) {
+    protected boolean addPlayer(UUID player) {
         boolean added = this.players.add(player);
+        if (ModList.get().isLoaded("minemention")) {
+            MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
+        }
         this.data.markDirty();
         return added;
     }
 
-    public boolean addPlayer(PlayerEntity player) {
+    protected boolean addPlayer(PlayerEntity player) {
         return this.addPlayer(player.getGameProfile().getId());
     }
 
-    public boolean addPlayers(Collection<UUID> players) {
+    protected boolean addPlayers(Collection<UUID> players) {
         boolean added = this.players.addAll(players);
+        PlayerList playerList = this.getWorld().getServer().getPlayerList();
+        if (ModList.get().isLoaded("minemention")) {
+            for (UUID id : players) {
+                MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(id));
+            }
+        }
         this.data.markDirty();
         return added;
     }
 
-    public boolean removePlayer(PlayerEntity player) {
+    protected boolean removePlayer(PlayerEntity player) {
         return this.removePlayer(player.getGameProfile().getId());
     }
 
-    public boolean removePlayer(UUID player) {
+    protected boolean removePlayer(UUID player) {
         boolean removed = this.players.remove(player);
+        if (ModList.get().isLoaded("minemention")) {
+            MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
+        }
         this.data.markDirty();
         return removed;
     }
 
-    public void removePlayers(Collection<UUID> players) {
+    protected void removePlayers(Collection<UUID> players) {
+        PlayerList playerList = this.getWorld().getServer().getPlayerList();
         for (UUID id : players) {
             this.players.remove(id);
+            if (ModList.get().isLoaded("minemention")) {
+                MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(id));
+            }
         }
         this.data.markDirty();
     }
 
-    public void removeAllPlayers() {
+    protected void removeAllPlayers() {
+        HashSet<UUID> uuids = new HashSet<>(this.players);
         this.players.clear();
+        PlayerList playerList = this.getWorld().getServer().getPlayerList();
+        if (ModList.get().isLoaded("minemention")) {
+            for (UUID id : uuids) {
+                MineMentionCompat.updateMentions(playerList.getPlayerByUUID(id));
+            }
+        }
         this.data.markDirty();
     }
 
@@ -154,44 +186,69 @@ public class Team {
         return this.players.isEmpty();
     }
 
+    public boolean toggleAllowJoinRequest() {
+        this.allowJoinRequests = !this.allowJoinRequests;
+        this.data.markDirty();
+        return this.allowJoinRequests;
+    }
+
+    public void setAllowJoinRequest(boolean enabled) {
+        this.allowJoinRequests = enabled;
+        this.data.markDirty();
+    }
+
+    public Set<UUID> getJoinRequests() {
+        return this.joinRequests;
+    }
+
+    public void addJoinRequest(PlayerEntity player) {
+        this.addJoinRequest(player.getGameProfile().getId());
+    }
+
+    public void addJoinRequest(UUID id) {
+        this.joinRequests.add(id);
+        this.data.markDirty();
+    }
+
+    public void removeJoinRequest(PlayerEntity player) {
+        this.removeJoinRequest(player.getGameProfile().getId());
+    }
+
+    public void removeJoinRequest(UUID id) {
+        this.joinRequests.remove(id);
+        this.data.markDirty();
+    }
+
+    public void resetJoinRequests() {
+        this.joinRequests.clear();
+        this.data.markDirty();
+    }
+
+    public void sendJoinRequest(PlayerEntity requestingPlayer) {
+        this.addJoinRequest(requestingPlayer.getGameProfile().getId());
+        TranslationTextComponent component = new TranslationTextComponent("skyblockbuilder.event.join_request0", requestingPlayer.getDisplayName());
+        component.append(new StringTextComponent("/skyblock team accept " + requestingPlayer.getDisplayName().getString()).setStyle(Style.EMPTY
+                .setHoverEvent(InviteCommand.COPY_TEXT)
+                .setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock team accept " + requestingPlayer.getDisplayName().getString()))
+                .createStyleFromFormattings(TextFormatting.UNDERLINE, TextFormatting.GOLD)));
+        component.append(new TranslationTextComponent("skyblockbuilder.event.join_request1"));
+        this.broadcast(component, Style.EMPTY.applyFormatting(TextFormatting.GOLD));
+    }
+
     @Nonnull
     public ServerWorld getWorld() {
         return this.data.getWorld();
     }
 
-    public void broadcast(ITextComponent msg) {
+    public void broadcast(IFormattableTextComponent msg, Style style) {
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
         this.players.forEach(uuid -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(uuid);
             if (player != null) {
-                IFormattableTextComponent component = new StringTextComponent("[" + this.name + "] ");
-                player.sendMessage(component.append(msg), uuid);
+                IFormattableTextComponent component = new StringTextComponent("[" + this.name + "] ").setStyle(Style.EMPTY);
+                player.sendMessage(component.append(msg.mergeStyle(style)), uuid);
             }
         });
-    }
-
-    public boolean toggleTeamChat(PlayerEntity player) {
-        return this.toggleTeamChat(player.getGameProfile().getId());
-    }
-
-    public boolean toggleTeamChat(UUID player) {
-        if (this.teamChatUsers.contains(player)) {
-            this.teamChatUsers.remove(player);
-            this.data.markDirty();
-            return false;
-        } else {
-            this.teamChatUsers.add(player);
-            this.data.markDirty();
-            return true;
-        }
-    }
-
-    public boolean isInTeamChat(PlayerEntity player) {
-        return this.isInTeamChat(player.getGameProfile().getId());
-    }
-
-    public boolean isInTeamChat(UUID player) {
-        return this.teamChatUsers.contains(player);
     }
 
     @Nonnull
@@ -201,6 +258,7 @@ public class Team {
         nbt.put("Island", this.island.toTag());
         nbt.putString("Name", this.name != null ? this.name : "");
         nbt.putBoolean("Visits", this.allowVisits);
+        nbt.putBoolean("AllowJoinRequests", this.allowJoinRequests);
 
         ListNBT players = new ListNBT();
         for (UUID player : this.players) {
@@ -220,17 +278,17 @@ public class Team {
             spawns.add(posTag);
         }
 
-        ListNBT teamChat = new ListNBT();
-        for (UUID id : this.teamChatUsers) {
-            CompoundNBT player = new CompoundNBT();
-            player.putUniqueId("Player", id);
+        ListNBT joinRequests = new ListNBT();
+        for (UUID id : this.joinRequests) {
+            CompoundNBT idTag = new CompoundNBT();
+            idTag.putUniqueId("Id", id);
 
-            teamChat.add(player);
+            joinRequests.add(idTag);
         }
 
         nbt.put("Players", players);
         nbt.put("Spawns", spawns);
-        nbt.put("TeamChat", teamChat);
+        nbt.put("JoinRequests", joinRequests);
         return nbt;
     }
 
@@ -238,6 +296,7 @@ public class Team {
         this.island = IslandPos.fromTag(nbt.getCompound("Island"));
         this.name = nbt.getString("Name");
         this.allowVisits = nbt.getBoolean("Visits");
+        this.allowJoinRequests = nbt.getBoolean("AllowJoinRequests");
 
         ListNBT players = nbt.getList("Players", Constants.NBT.TAG_COMPOUND);
         this.players.clear();
@@ -252,11 +311,12 @@ public class Team {
             this.possibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
         }
 
-        this.teamChatUsers.clear();
-        if (nbt.contains("TeamChat")) { // TODO 1.17 remove backwards compatibility
-            ListNBT teamChat = nbt.getList("TeamChat", Constants.NBT.TAG_COMPOUND);
-            for (INBT player : teamChat) {
-                this.teamChatUsers.add(((CompoundNBT) player).getUniqueId("Player"));
+        if (nbt.contains("JoinRequests")) { // TODO 1.17 remove this check
+            ListNBT joinRequests = nbt.getList("JoinRequests", Constants.NBT.TAG_COMPOUND);
+            this.joinRequests.clear();
+            for (INBT id : joinRequests) {
+                CompoundNBT idTag = (CompoundNBT) id;
+                this.joinRequests.add(idTag.getUniqueId("Id"));
             }
         }
     }

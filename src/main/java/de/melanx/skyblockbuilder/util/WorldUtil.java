@@ -1,8 +1,9 @@
 package de.melanx.skyblockbuilder.util;
 
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.IslandPos;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Direction;
@@ -17,6 +18,7 @@ import java.util.Random;
 import java.util.Set;
 
 public class WorldUtil {
+    
     public static void teleportToIsland(ServerPlayerEntity player, Team team) {
         //noinspection ConstantConditions
         ServerWorld world = player.getServer().func_241755_D_();
@@ -34,10 +36,12 @@ public class WorldUtil {
     }
 
     private static BlockPos validPosition(ServerWorld world, Team team) {
+        
         List<BlockPos> spawns = new ArrayList<>(team.getPossibleSpawns());
         Random random = new Random();
         while (!spawns.isEmpty()) {
             BlockPos pos = spawns.get(random.nextInt(spawns.size()));
+            //noinspection deprecation
             if (!world.getBlockState(pos.down()).isAir(world, pos.down())) {
                 return pos;
             }
@@ -48,6 +52,7 @@ public class WorldUtil {
         BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(BlockPos.ZERO);
         BlockPos.Mutable mpos = new BlockPos.Mutable(pos.getX(), world.getHeight(), pos.getZ());
         Spiral spiral = new Spiral();
+        //noinspection deprecation
         while (world.getBlockState(mpos.down()).isAir(world, mpos.down())) {
             if (mpos.getY() <= 0) {
                 if (spiral.getX() > ConfigHandler.spawnRadius.get() || spiral.getY() > ConfigHandler.spawnRadius.get()) {

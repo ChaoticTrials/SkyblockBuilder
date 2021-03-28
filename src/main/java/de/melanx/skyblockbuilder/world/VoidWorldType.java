@@ -28,6 +28,7 @@ import net.minecraftforge.event.RegistryEvent;
 import javax.annotation.Nonnull;
 
 public class VoidWorldType extends ForgeWorldType {
+    
     public VoidWorldType() {
         super(VoidWorldType::overworldChunkGenerator);
     }

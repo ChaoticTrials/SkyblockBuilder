@@ -21,8 +21,10 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.Objects;
 
 public class SkyblockBiomeProvider extends BiomeProvider {
+
     // [VanillaCopy] overworld biome provider codec
     public static final Codec<SkyblockBiomeProvider> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
@@ -96,10 +98,10 @@ public class SkyblockBiomeProvider extends BiomeProvider {
             if (biome == null) {
                 biome = this.lookupRegistry.getOrDefault(Biomes.PLAINS.getLocation());
             }
-
-            return biome;
+            return Objects.requireNonNull(biome);
         } else {
-            return this.parent.getNoiseBiome(((((x << 2) - 4096) % 8192) + 8192) % 8192, y, ((((z << 2) - 4096) % 8192) + 8192) % 8192);
+            int range = ConfigHandler.biomeRange.get();
+            return this.parent.getNoiseBiome(((((x << 2) - range / 2) % range) + range) % range, y, ((((z << 2) - range / 2) % range) + range) % range);
         }
     }
 }

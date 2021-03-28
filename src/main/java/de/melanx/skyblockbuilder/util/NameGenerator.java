@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.util;
 import java.util.Random;
 
 public class NameGenerator {
+    
     private static final String[] random1 = new String[]{
             "Del", "Mel", "Nep", "Yog", "Mal", "Fin", "Kat", "Cas", "Kal", "Ag", "Nik", "Tro", "Keg",
             "Mo", "Pro", "Par", "Sir", "Sah", "Kak", "Dea", "Sta", "Kaz", "Cly", "Ska", "Pal", "Tig"

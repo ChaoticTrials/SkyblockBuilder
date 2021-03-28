@@ -69,22 +69,9 @@ by default, but you can turn that off. Overworld structures are not being genera
 
 
 ## Normal user
-### Team chat
-You can enter your teams chat by using `/skyblock tc <message>`. If you give a message, you will only send a message 
-instead of entering the chat. You could also use `@team` at the beginning of a message to write to your team.
-If you entered the team chat, each new message will be sent only to your teammates.
-
 ### Listing teams
 Everyone can list the teams. For that, you can use `/skyblock list <name>`. That will list either all the teams if no 
 name is provided or the names of all players in a team.
-
-### Inviting users
-Everyone in a team can invite other players. For that, you can use `/skyblock invite <player>`. That will send an invitation 
-to the given player. Only players with no team can be invited.
-
-### Accepting invitations
-Everyone with an invitation can accept them. You can only accept invitations if you're in no team. For that, you use 
-the command `/skyblock accept <team>`.
 
 ### Teleporting back to home island
 If home command is enabled in the config, you can teleport back to your teams island with `/skyblock home`.
@@ -93,7 +80,7 @@ If home command is enabled in the config, you can teleport back to your teams is
 If teleporting to spawn is enabled in the config, you can teleport to spawn island with `/skyblock spawn`.
 
 ### Visiting other islands
-If visits are enabled in the config and a team enabled visiting, you can visit an island with `/skyblock visit <team>`.
+If visits are enabled in the config, and a team enabled visiting, you can visit an island with `/skyblock visit <team>`.
 
 ### Enable visiting
 You can see your teams current visiting state with `/skyblock team allowVisits` and enable/disable it with `/skyblock team 
@@ -115,10 +102,36 @@ before: position is optional. For users with permission level 2: `/skyblock team
 spawn points to the default ones. To add the spawns, you need to be within the range specified in the config.
 
 
+## Invitations
+### Inviting users
+Everyone in a team can invite other players. For that, you can use `/skyblock invite <player>`. That will send an invitation 
+to the given player. Only players with no team can be invited.
+
+### Accepting invitations
+Everyone with an invitation can accept them. You can only accept invitations if you're in no team. For that, you use 
+the command `/skyblock accept <team>`.
+You can also decline an invitation by using the command `/skyblock decline <team>`.
+
+
+## Join requests
+### Sending a join request
+You can send a join request to all teams if you're currently in no team by using `/skyblock join <team>`. That will send a 
+request to the team and each player in the team can accept or deny your request.
+
+### Accepting requests
+Each user of a team can use `/skyblock team accept <player>` to accept the given player. That will teleport the player to 
+your island.
+You can also deny the request by using `/skyblock team deny <player>`.
+
+### Disabling requests
+You can see your teams current join request state with `/skyblock team allowRequests` and enable/disable it with `/skyblock team 
+allowRequests <true/false>`.
+
+
 ## Using teams
 Only an operator with permission level 2 or higher can change anything in the `/skyblock manage` category.
 ### Creating teams
-Use the `/skyblock manage teams create <name>` command to generate a team with the given name. If no name if provided, a random
+Use the `/skyblock manage teams create <name>` command to generate a team with the given name. If no name is provided, a random
 name will be generated.
 
 Alternatively (good for servers) you can use `/skyblock manage teams createAndJoin <name>` to create the team and join it.

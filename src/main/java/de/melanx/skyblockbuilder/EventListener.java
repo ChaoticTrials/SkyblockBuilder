@@ -4,13 +4,15 @@ import de.melanx.skyblockbuilder.commands.*;
 import de.melanx.skyblockbuilder.commands.helper.ListCommand;
 import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
 import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
+import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
+import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
-import de.melanx.skyblockbuilder.util.Team;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
@@ -23,13 +25,10 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -40,6 +39,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class EventListener {
+
     private static final String SPAWNED_TAG = "alreadySpawned";
 
     @SubscribeEvent
@@ -69,41 +69,18 @@ public class EventListener {
                 .requires(source -> WorldUtil.isSkyblock(source.getWorld()))
                 .then(AcceptCommand.register())
                 .then(CreateCommand.register())
+                .then(DeclineCommand.register())
                 .then(HomeCommand.register())
                 .then(InviteCommand.register())
+                .then(JoinCommand.register())
                 .then(LeaveCommand.register())
                 .then(ListCommand.register())
                 .then(ManageCommand.register())
                 .then(SpawnCommand.register())
                 .then(SpawnsCommand.register())
                 .then(TeamCommand.register())
-                .then(VisitCommand.register()));
-    }
-
-    @SubscribeEvent
-    public void onMessage(ServerChatEvent event) {
-        ServerPlayerEntity player = event.getPlayer();
-        SkyblockSavedData data = SkyblockSavedData.get(player.getServerWorld());
-        Team team = data.getTeamFromPlayer(player);
-        if (team == null) {
-            return;
-        }
-
-        if (!team.isInTeamChat(player) && !event.getMessage().startsWith("@team ")) {
-            return;
-        }
-
-        event.setCanceled(true);
-
-        IFormattableTextComponent component = event.getComponent().deepCopy();
-        if (event.getMessage().startsWith("@team ")) {
-            component = new StringTextComponent("<");
-            component.append(event.getPlayer().getDisplayName());
-            component.appendString("> ");
-            component.appendString(event.getMessage().replaceFirst("@team ", ""));
-        }
-
-        team.broadcast(component);
+                .then(VisitCommand.register())
+        );
     }
 
     /*
@@ -132,7 +109,7 @@ public class EventListener {
                 }
 
                 player.getPersistentData().putBoolean(SPAWNED_TAG, true);
-                spawn.addPlayer(player);
+                data.addPlayerToTeam(spawn, player);
                 ((ServerWorld) world).func_241124_a__(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
                 WorldUtil.teleportToIsland(player, spawn);
 

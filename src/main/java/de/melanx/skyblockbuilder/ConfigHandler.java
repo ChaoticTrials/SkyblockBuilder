@@ -24,6 +24,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 public class ConfigHandler {
+    
     public static final ForgeConfigSpec COMMON_CONFIG;
     public static final List<Pair<EquipmentSlotType, ItemStack>> STARTER_ITEMS = new ArrayList<>();
     private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
@@ -49,6 +50,8 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue singleBiome;
     public static ForgeConfigSpec.ConfigValue<String> biome;
     public static ForgeConfigSpec.IntValue seaHeight;
+    public static ForgeConfigSpec.IntValue islandDistance;
+    public static ForgeConfigSpec.IntValue biomeRange;
 
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
     public static ForgeConfigSpec.IntValue generationHeight;
@@ -57,6 +60,7 @@ public class ConfigHandler {
     public static ForgeConfigSpec.BooleanValue clearInv;
     public static ForgeConfigSpec.BooleanValue dropItems;
 
+    public static ForgeConfigSpec.BooleanValue selfManageTeam;
     public static ForgeConfigSpec.BooleanValue createOwnTeam;
     public static ForgeConfigSpec.BooleanValue modifySpawns;
     public static ForgeConfigSpec.IntValue modifySpawnRange;
@@ -93,6 +97,10 @@ public class ConfigHandler {
                 .define("world.single-biome.enabled", false);
         biome = builder.comment("Specifies the biome for the whole world")
                 .define("world.single-biome.biome", "minecraft:plains", String.class::isInstance);
+        islandDistance = builder.comment("Distance between islands in overworld [default: 8192]", "nether the distance is 1/8")
+                .defineInRange("world.island-distance", 8192, 64, 29999900);
+        biomeRange = builder.comment("The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes")
+                .defineInRange("world.biome-range", 8192, 64, 29999900);
 
         direction = builder.comment("Direction the player should look at initial spawn")
                 .defineEnum("spawn.direction", WorldUtil.Directions.SOUTH);
@@ -108,6 +116,8 @@ public class ConfigHandler {
         dropItems = builder.comment("Should players' items be dropped when leaving a team? [default: true]")
                 .define("inventory.drop", true);
 
+        selfManageTeam = builder.comment("Should players be able to leave their team or invite others? [default: true]")
+                .define("utility.self-manage", true);
         createOwnTeam = builder.comment("Should players be able to create their own team? [default: false]")
                 .define("utility.create-own-team", false);
         modifySpawns = builder.comment("Should players be able to modify their spawn positions? [default: false]")

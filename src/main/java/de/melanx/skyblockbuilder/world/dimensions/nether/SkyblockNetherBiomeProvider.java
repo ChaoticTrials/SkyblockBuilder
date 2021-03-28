@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class SkyblockNetherBiomeProvider extends BiomeProvider {
+    
     public static final Codec<SkyblockNetherBiomeProvider> PACKET_CODEC = RecordCodecBuilder.create(
             (builder) -> builder.group(
                     Codec.LONG.fieldOf("seed").forGetter((provider) -> provider.seed),
@@ -88,6 +89,7 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        return this.parent.getNoiseBiome(((((x << 2) - 512) % 1024) + 1024) % 1024, y, ((((z << 2) - 512) % 1024) + 1024) % 1024);
+        int range = ConfigHandler.biomeRange.get() / 8;
+        return this.parent.getNoiseBiome(((((x << 2) - range / 2) % range) + range) % range, y, ((((z << 2) - range / 2) % range) + range) % range);
     }
 }

@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
@@ -14,6 +15,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.world.ForgeWorldType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -54,6 +56,10 @@ public class SkyblockBuilder {
             SkyblockOverworldChunkGenerator.init();
             SkyblockNetherChunkGenerator.init();
             SkyblockEndChunkGenerator.init();
+
+            if (ModList.get().isLoaded("minemention")) {
+                MineMentionCompat.register();
+            }
         });
 
         ConfigHandler.generateDefaultFiles();

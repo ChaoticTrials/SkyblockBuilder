@@ -3,16 +3,17 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.ConfigHandler;
-import de.melanx.skyblockbuilder.util.Team;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 public class SpawnCommand {
+    
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Teleports the player to spawn
         return Commands.literal("spawn").requires(source -> ConfigHandler.spawnTeleport.get() || source.hasPermissionLevel(2))
@@ -26,7 +27,7 @@ public class SpawnCommand {
         ServerPlayerEntity player = source.asPlayer();
         Team team = data.getSpawn();
 
-        source.sendFeedback(new StringTextComponent("Successfully teleported to spawn."), false);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.teleport_to_spawn"), true);
         WorldUtil.teleportToIsland(player, team);
         return 1;
     }

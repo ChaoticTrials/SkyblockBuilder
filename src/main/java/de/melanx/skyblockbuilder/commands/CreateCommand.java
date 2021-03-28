@@ -3,16 +3,18 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.util.CompatHelper;
 import de.melanx.skyblockbuilder.util.NameGenerator;
-import de.melanx.skyblockbuilder.util.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Collection;
@@ -33,6 +35,11 @@ public class CreateCommand {
     }
 
     private static int create(CommandSource source, String name, Collection<ServerPlayerEntity> players) {
+        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -43,29 +50,39 @@ public class CreateCommand {
             } while (data.teamExists(name));
         }
 
+        if (SkyblockHooks.onCreateTeam(name)) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_team").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
+        if (players.isEmpty() && source.getEntity() instanceof ServerPlayerEntity && data.hasPlayerTeam((ServerPlayerEntity) source.getEntity())) {
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_team").mergeStyle(TextFormatting.RED), true);
+            return 0;
+        }
+
         Team team = data.createTeam(name);
 
         if (team == null) {
-            source.sendFeedback(new StringTextComponent(String.format("Team %s already exists! Please choose another name!", name)).mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_already_exist", name).mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         if (players.isEmpty() && source.getEntity() instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity) source.getEntity();
-            team.addPlayer(player);
+            data.addPlayerToTeam(team, player);
             WorldUtil.teleportToIsland(player, team);
         } else {
             players.forEach(player -> {
                 if (data.getTeamFromPlayer(player) != null) {
-                    source.sendFeedback(new StringTextComponent(String.format("%s is already in a team, it cannot be added!", player.getDisplayName().getString())).mergeStyle(TextFormatting.RED), false);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).mergeStyle(TextFormatting.RED), true);
                 } else {
-                    team.addPlayer(player);
+                    data.addPlayerToTeam(team, player);
                     WorldUtil.teleportToIsland(player, team);
                 }
             });
         }
 
-        source.sendFeedback(new StringTextComponent(String.format(("Successfully created team %s."), name)).mergeStyle(TextFormatting.GREEN), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.create_team", name).mergeStyle(TextFormatting.GREEN), true);
         return 1;
     }
 }

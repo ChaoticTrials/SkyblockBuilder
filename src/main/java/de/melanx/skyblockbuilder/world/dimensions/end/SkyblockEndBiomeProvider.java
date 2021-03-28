@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class SkyblockEndBiomeProvider extends BiomeProvider {
+    
     public static final Codec<SkyblockEndBiomeProvider> CODEC = RecordCodecBuilder.create(
             (builder) -> builder.group(
                     Codec.LONG.fieldOf("seed").stable().forGetter((provider) -> provider.seed),

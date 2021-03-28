@@ -4,8 +4,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
-import de.melanx.skyblockbuilder.util.Team;
-import de.melanx.skyblockbuilder.world.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.server.management.PlayerProfileCache;
@@ -13,6 +13,7 @@ import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Comparator;
@@ -34,10 +35,10 @@ public class ListCommand {
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
-        List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).collect(Collectors.toList());
-        IFormattableTextComponent info = new StringTextComponent(String.format("There's a total of %s teams where %s are empty.",
-                teams.size() - 1,
-                teams.stream().filter(Team::isEmpty).count()));
+        List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).filter(team -> !team.getName().equalsIgnoreCase("spawn")).collect(Collectors.toList());
+        IFormattableTextComponent info = new TranslationTextComponent("skyblockbuilder.command.info.teams",
+                teams.size(),
+                teams.stream().filter(Team::isEmpty).count());
         info.mergeStyle(TextFormatting.GOLD);
         source.sendFeedback(info, true);
 
@@ -45,13 +46,15 @@ public class ListCommand {
             if (!team.getName().equalsIgnoreCase("spawn")) {
                 IFormattableTextComponent list = (new StringTextComponent("- " + team.getName()));
                 if (team.isEmpty()) {
-                    list.append(new StringTextComponent(" (Empty)"));
+                    list.appendString(" (");
+                    list.append(new TranslationTextComponent("skyblockbuilder.command.argument.empty"));
+                    list.appendString(")");
                     list.mergeStyle(TextFormatting.RED);
                 } else {
                     list.mergeStyle(TextFormatting.GREEN);
                 }
 
-                source.sendFeedback(list, false);
+                source.sendFeedback(list, true);
             }
         }
 
@@ -64,21 +67,22 @@ public class ListCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendFeedback(new StringTextComponent("Team does not exist!").mergeStyle(TextFormatting.RED), false);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
 
         PlayerProfileCache profileCache = source.getServer().getPlayerProfileCache();
-        source.sendFeedback(new StringTextComponent(String.format("%s contains %s players.", team.getName(), team.getPlayers().size())).mergeStyle(TextFormatting.GOLD), false);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.team_detailed", team.getName(), team.getPlayers().size()).mergeStyle(TextFormatting.GOLD), true);
         team.getPlayers().forEach(id -> {
             GameProfile profile = profileCache.getProfileByUUID(id);
             if (profile != null) {
                 String name = profile.getName();
                 if (!StringUtils.isNullOrEmpty(name)) {
-                    source.sendFeedback(new StringTextComponent("- " + name), false);
+                    source.sendFeedback(new StringTextComponent("- " + name), true);
                 }
             }
         });
+
         return 1;
     }
 }
