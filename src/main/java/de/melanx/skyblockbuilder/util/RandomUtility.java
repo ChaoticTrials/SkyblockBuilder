@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.ImmutableList;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
@@ -14,6 +15,7 @@ import net.minecraft.world.gen.feature.StructureFeature;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -26,7 +28,12 @@ public class RandomUtility {
     }
 
     public static Registry<Biome> modifyLookupRegistry(Registry<Biome> registry) {
-        registry.getEntries().forEach(biomeEntry -> {
+        for (Map.Entry<RegistryKey<Biome>, Biome> biomeEntry : registry.getEntries()) {
+            if ((biomeEntry.getValue().getCategory() == Biome.Category.NETHER && ConfigHandler.defaultNether.get()) ||
+                    (biomeEntry.getValue().getCategory() == Biome.Category.THEEND && ConfigHandler.defaultEnd.get())) {
+                continue;
+            }
+
             // Remove non-whitelisted structures
             List<Supplier<StructureFeature<?, ?>>> structures = new ArrayList<>();
 
@@ -68,7 +75,7 @@ public class RandomUtility {
             });
 
             biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of(features);
-        });
+        }
 
         return registry;
     }
