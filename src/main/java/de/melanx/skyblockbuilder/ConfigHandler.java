@@ -75,7 +75,9 @@ public class ConfigHandler {
                 "WARNING: Some structures like mansions only exist in special biomes! If the biome range is too low, the \"/locate\" command will run for a lot of minutes where you cannot play because it blocks the whole server tick.");
         whitelistStructures = builder.comment("All the structures that should be generated.",
                 "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/structures.txt")
-                .defineList("structures", Collections.emptyList(), (obj) -> obj instanceof String);
+                .defineList("structures", Collections.singletonList(
+                        "minecraft:fortress"
+                ), (obj) -> obj instanceof String);
         whitelistFeatures = builder.comment("All the features that should be generated.",
                 "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/features.txt",
                 "INFO: The two default values are required for the obsidian towers in end. If this is missing, they will be first generated when respawning the dragon.")
