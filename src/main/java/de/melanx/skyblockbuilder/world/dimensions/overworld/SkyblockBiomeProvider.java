@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
@@ -42,9 +43,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
         OverworldBiomeProvider provider = (OverworldBiomeProvider) parent;
         this.parent = parent;
         this.seed = provider.seed;
-        this.lookupRegistry = provider.lookupRegistry; // RandomUtility.modifyLookupRegistry(provider.lookupRegistry);
-
-        System.out.println();
+        this.lookupRegistry = RandomUtility.modifyLookupRegistry(provider.lookupRegistry);
     }
 
     @Nonnull
