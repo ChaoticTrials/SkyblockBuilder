@@ -4,8 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.gui.screen.FlatPresetsScreen;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -51,7 +51,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
         this.seed = seed;
         this.settings = settings;
         this.parent = new NoiseChunkGenerator(provider, seed, settings);
-        this.layerInfos = ConfigHandler.generateSurface.get() ? FlatPresetsScreen.func_238637_a_(ConfigHandler.generationSettings.get()) : new ArrayList<>();
+        this.layerInfos = ConfigHandler.generateSurface.get() ? WorldUtil.layersInfoFromString(ConfigHandler.generationSettings.get()) : new ArrayList<>();
     }
 
     @Nonnull

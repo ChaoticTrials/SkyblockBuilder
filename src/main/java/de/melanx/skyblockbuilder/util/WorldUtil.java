@@ -1,21 +1,25 @@
 package de.melanx.skyblockbuilder.util;
 
+import com.google.common.collect.Lists;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.FlatLayerInfo;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 
 public class WorldUtil {
     
@@ -69,6 +73,63 @@ public class WorldUtil {
         }
 
         return mpos;
+    }
+
+    // [Vanilla copy] Get flat world info on servers
+    public static List<FlatLayerInfo> layersInfoFromString(String settings) {
+        List<FlatLayerInfo> list = Lists.newArrayList();
+        String[] astring = settings.split(",");
+        int i = 0;
+
+        for (String s : astring) {
+            FlatLayerInfo flatlayerinfo = getLayerInfo(s, i);
+            if (flatlayerinfo == null) {
+                return Collections.emptyList();
+            }
+
+            list.add(flatlayerinfo);
+            i += flatlayerinfo.getLayerCount();
+        }
+
+        return list;
+    }
+
+    // [Vanilla copy]
+    @Nullable
+    private static FlatLayerInfo getLayerInfo(String setting, int currentLayers) {
+        String[] info = setting.split("\\*", 2);
+        int i;
+        if (info.length == 2) {
+            try {
+                i = Math.max(Integer.parseInt(info[0]), 0);
+            } catch (NumberFormatException numberformatexception) {
+                SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => {}", numberformatexception.getMessage());
+                return null;
+            }
+        } else {
+            i = 1;
+        }
+
+        int maxLayers = Math.min(currentLayers + i, 256);
+        int height = maxLayers - currentLayers;
+        String blockName = info[info.length - 1];
+
+        Block block;
+        try {
+            block = Registry.BLOCK.getOptional(new ResourceLocation(blockName)).orElse(null);
+        } catch (Exception exception) {
+            SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => {}", exception.getMessage());
+            return null;
+        }
+
+        if (block == null) {
+            SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => Unknown block, {}", blockName);
+            return null;
+        } else {
+            FlatLayerInfo layerInfo = new FlatLayerInfo(height, block);
+            layerInfo.setMinY(currentLayers);
+            return layerInfo;
+        }
     }
 
     public enum Directions {
