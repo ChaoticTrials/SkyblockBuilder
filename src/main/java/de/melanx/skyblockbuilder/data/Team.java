@@ -113,7 +113,7 @@ public class Team {
         this.data.markDirty();
     }
 
-    protected boolean addPlayer(UUID player) {
+    public boolean addPlayer(UUID player) {
         boolean added = this.players.add(player);
         if (ModList.get().isLoaded("minemention")) {
             MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
@@ -122,11 +122,11 @@ public class Team {
         return added;
     }
 
-    protected boolean addPlayer(PlayerEntity player) {
+    public boolean addPlayer(PlayerEntity player) {
         return this.addPlayer(player.getGameProfile().getId());
     }
 
-    protected boolean addPlayers(Collection<UUID> players) {
+    public boolean addPlayers(Collection<UUID> players) {
         boolean added = this.players.addAll(players);
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
         if (ModList.get().isLoaded("minemention")) {
@@ -138,11 +138,11 @@ public class Team {
         return added;
     }
 
-    protected boolean removePlayer(PlayerEntity player) {
+    public boolean removePlayer(PlayerEntity player) {
         return this.removePlayer(player.getGameProfile().getId());
     }
 
-    protected boolean removePlayer(UUID player) {
+    public boolean removePlayer(UUID player) {
         boolean removed = this.players.remove(player);
         if (ModList.get().isLoaded("minemention")) {
             MineMentionCompat.updateMentions(this.getWorld().getServer().getPlayerList().getPlayerByUUID(player));
@@ -151,7 +151,7 @@ public class Team {
         return removed;
     }
 
-    protected void removePlayers(Collection<UUID> players) {
+    public void removePlayers(Collection<UUID> players) {
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
         for (UUID id : players) {
             this.players.remove(id);
@@ -162,7 +162,7 @@ public class Team {
         this.data.markDirty();
     }
 
-    protected void removeAllPlayers() {
+    public void removeAllPlayers() {
         HashSet<UUID> uuids = new HashSet<>(this.players);
         this.players.clear();
         PlayerList playerList = this.getWorld().getServer().getPlayerList();
@@ -336,7 +336,7 @@ public class Team {
     @Override
     public int hashCode() {
         int result = this.name.hashCode();
-        result = result * this.island.hashCode();
+        result = 31 * result * this.island.hashCode();
         return result;
     }
 }
