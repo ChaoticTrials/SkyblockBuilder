@@ -1,7 +1,6 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.Lists;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.ConfigHandler;
@@ -16,12 +15,12 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.FlatLayerInfo;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -127,7 +126,7 @@ public class WorldUtil {
 
         Block block;
         try {
-            block = Registry.BLOCK.getOptional(new ResourceLocation(blockName)).orElse(null);
+            block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockName));
         } catch (Exception exception) {
             SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => {}", exception.getMessage());
             return null;
