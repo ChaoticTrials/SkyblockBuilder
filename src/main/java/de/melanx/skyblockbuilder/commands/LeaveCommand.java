@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
-import de.melanx.skyblockbuilder.util.CompatHelper;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -23,11 +22,7 @@ public class LeaveCommand {
     }
 
     private static int leaveTeam(CommandSource source) throws CommandSyntaxException {
-        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
-            return 0;
-        }
-
+        WorldUtil.checkSkyblock(source);
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
         ServerPlayerEntity player = source.asPlayer();

@@ -2,11 +2,11 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
-import de.melanx.skyblockbuilder.util.CompatHelper;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
@@ -34,12 +34,8 @@ public class CreateCommand {
                                 .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), EntityArgument.getPlayers(context, "players")))));
     }
 
-    private static int create(CommandSource source, String name, Collection<ServerPlayerEntity> players) {
-        if (!CompatHelper.ALLOW_TEAM_MANAGEMENT) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.compat.disabled_management").mergeStyle(TextFormatting.RED), true);
-            return 0;
-        }
-
+    private static int create(CommandSource source, String name, Collection<ServerPlayerEntity> players) throws CommandSyntaxException {
+        WorldUtil.checkSkyblock(source);
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 

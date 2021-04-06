@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -27,6 +28,7 @@ public class SpawnsCommand {
     }
 
     private static int showSpawns(CommandSource source, boolean debug) throws CommandSyntaxException {
+        WorldUtil.checkSkyblock(source);
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 

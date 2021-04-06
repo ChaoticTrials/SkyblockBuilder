@@ -1,6 +1,9 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.Lists;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
@@ -8,11 +11,13 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.block.Block;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.FlatLayerInfo;
 import net.minecraft.world.server.ServerChunkProvider;
@@ -37,6 +42,12 @@ public class WorldUtil {
     public static boolean isSkyblock(World world) {
         return world.getChunkProvider() instanceof ServerChunkProvider &&
                 ((ServerChunkProvider) world.getChunkProvider()).getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
+    }
+    
+    public static void checkSkyblock(CommandSource source) throws CommandSyntaxException {
+        if (!isSkyblock(source.getServer().func_241755_D_())) {
+            throw new SimpleCommandExceptionType(new TranslationTextComponent("skyblockbuilder.error.no_skyblock")).create();
+        }
     }
 
     private static BlockPos validPosition(ServerWorld world, Team team) {

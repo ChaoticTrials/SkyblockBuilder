@@ -3,9 +3,11 @@ package de.melanx.skyblockbuilder.commands.helper;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.server.management.PlayerProfileCache;
@@ -31,7 +33,8 @@ public class ListCommand {
                         .executes(context -> listPlayers(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 
-    private static int listTeams(CommandSource source) {
+    private static int listTeams(CommandSource source) throws CommandSyntaxException {
+        WorldUtil.checkSkyblock(source);
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
@@ -61,7 +64,8 @@ public class ListCommand {
         return 1;
     }
 
-    private static int listPlayers(CommandSource source, String teamName) {
+    private static int listPlayers(CommandSource source, String teamName) throws CommandSyntaxException {
+        WorldUtil.checkSkyblock(source);
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
         Team team = data.getTeam(teamName);

@@ -7,6 +7,7 @@
   "skyblockbuilder.command.argument.disable": "disable",
   "skyblockbuilder.command.argument.disabled": "disabled",
 
+  "skyblockbuilder.error.no_skyblock": "This command can only be used in a skyblock world.",
   "skyblockbuilder.command.error.team_not_exist": "This team doesn't exist!",
   "skyblockbuilder.command.error.team_already_exist": "Team %s already exists! Please choose another name!",
   "skyblockbuilder.command.error.user_has_team": "You are already in a team!",
@@ -99,7 +100,7 @@
   "skyblockbuilder.event.rename_team": "%s renamed your team from %s to %s.",
 
   "skyblockbuilder.unknown_player": "Unknown Player",
-  "skyblockbuilder.compat.disabled_management": "This and all other team management is disabled by another mod.",
+  "skyblockbuilder.compat.disabled_management": "This and all other team management is disabled by %s.",
 
   "minemention.skyblockbuilder.team": "Mention every player in your team"
 }
