@@ -21,6 +21,7 @@ public class SpawnCommand {
     }
 
     private static int spawn(CommandSource source) throws CommandSyntaxException {
+        WorldUtil.checkSkyblock(source);
         ServerWorld world = source.getWorld();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 

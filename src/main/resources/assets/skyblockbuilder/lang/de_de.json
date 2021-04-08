@@ -7,6 +7,7 @@
   "skyblockbuilder.command.argument.disable": "deaktivieren",
   "skyblockbuilder.command.argument.disabled": "deaktiviert",
 
+  "skyblockbuilder.error.no_skyblock": "Dieser Befehl kann nur in SkyBlock Welten verwendet werden.",
   "skyblockbuilder.command.error.team_not_exist": "Dieses Team existiert nicht!",
   "skyblockbuilder.command.error.team_already_exist": "Das Team %s existiert bereits! Bitte wähle einen anderen Namen!",
   "skyblockbuilder.command.error.user_has_team": "Du bist bereits in einem Team!",
@@ -99,7 +100,7 @@
   "skyblockbuilder.event.rename_team": "%s hat das Team von %s zu %s umbenannt.",
 
   "skyblockbuilder.unknown_player": "Unbekannter Spieler",
-  "skyblockbuilder.compat.disabled_management": "Diese und andere Teamverwaltungsfunktionen sind aktuell durch eine andere Mod deaktiviert.",
+  "skyblockbuilder.compat.disabled_management": "Diese und andere Teamverwaltungsfunktionen sind aktuell durch %s deaktiviert.",
 
   "minemention.skyblockbuilder.team": "Erwähne jeden Spieler in deinem Team"
 }

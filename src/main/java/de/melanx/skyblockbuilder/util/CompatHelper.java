@@ -1,9 +1,17 @@
 package de.melanx.skyblockbuilder.util;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import net.minecraft.util.text.TranslationTextComponent;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class CompatHelper {
-    public static boolean ALLOW_TEAM_MANAGEMENT = true;
+    
+    private static List<String> teamManagementDisablingMods = new ArrayList<>();
 
     /**
      * Used to disable that users can modify anything about teams, e.g. creating new teams, leaving a team, renaming
@@ -12,7 +20,18 @@ public class CompatHelper {
      * @param modid The modid of the mod which disables management
      */
     public static void disableAllTeamManagement(String modid) {
-        ALLOW_TEAM_MANAGEMENT = false;
-        SkyblockBuilder.LOGGER.warn(modid + " disabled all team management things.");
+        teamManagementDisablingMods.add(modid);
+        teamManagementDisablingMods.sort(Comparator.naturalOrder());
+        SkyblockBuilder.LOGGER.warn(modid + " disabled all team management features.");
+    }
+    
+    public static void checkTeamManagement() throws CommandSyntaxException {
+        if (!teamManagementDisablingMods.isEmpty()) {
+            throw new SimpleCommandExceptionType(new TranslationTextComponent("skyblockbuilder.compat.disabled_management", String.join(", ", teamManagementDisablingMods))).create();
+        }
+    }
+
+    public static boolean teamManagementEnabled() {
+        return teamManagementDisablingMods.isEmpty();
     }
 }

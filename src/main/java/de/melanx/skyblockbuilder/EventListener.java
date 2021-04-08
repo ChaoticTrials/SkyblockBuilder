@@ -10,6 +10,7 @@ import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.CompatHelper;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldTypeUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -66,7 +67,7 @@ public class EventListener {
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("skyblock")
-                .requires(source -> WorldUtil.isSkyblock(source.getWorld()))
+                .requires(source -> CompatHelper.teamManagementEnabled())
                 .then(AcceptCommand.register())
                 .then(CreateCommand.register())
                 .then(DeclineCommand.register())
