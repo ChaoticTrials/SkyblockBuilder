@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -30,16 +31,15 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
         Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_nether_provider"), SkyblockNetherBiomeProvider.PACKET_CODEC);
     }
 
-    private final BiomeProvider parent;
+    private final NetherBiomeProvider parent;
     private final long seed;
     public final Registry<Biome> lookupRegistry;
 
-    public SkyblockNetherBiomeProvider(BiomeProvider parent, Registry<Biome> lookupRegistry) {
+    public SkyblockNetherBiomeProvider(NetherBiomeProvider parent, Registry<Biome> lookupRegistry) {
         super(parent.getBiomes());
-        NetherBiomeProvider provider = (NetherBiomeProvider) parent;
         this.parent = parent;
-        this.seed = provider.seed;
-        this.lookupRegistry = RandomUtility.modifyLookupRegistry(lookupRegistry);
+        this.seed = parent.seed;
+        this.lookupRegistry = new LazyBiomeRegistryWrapper(lookupRegistry);
     }
 
     @Nonnull
@@ -52,7 +52,7 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
     @Override
     @OnlyIn(Dist.CLIENT)
     public BiomeProvider getBiomeProvider(long seed) {
-        return new SkyblockNetherBiomeProvider(this.parent.getBiomeProvider(seed), this.lookupRegistry);
+        return new SkyblockNetherBiomeProvider((NetherBiomeProvider) this.parent.getBiomeProvider(seed), this.lookupRegistry);
     }
 
     @Nonnull
