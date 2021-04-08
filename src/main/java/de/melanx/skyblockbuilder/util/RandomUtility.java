@@ -3,23 +3,21 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.ImmutableList;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeGenerationSettings;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.StructureFeature;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 public class RandomUtility {
+
     public static final ITextComponent UNKNOWN_PLAYER = new TranslationTextComponent("skyblockbuilder.unknown_player");
 
     public static ITextComponent getDisplayNameByUuid(World world, UUID id) {
@@ -27,56 +25,55 @@ public class RandomUtility {
         return player != null ? player.getDisplayName() : UNKNOWN_PLAYER;
     }
 
-    public static Registry<Biome> modifyLookupRegistry(Registry<Biome> registry) {
-        for (Map.Entry<RegistryKey<Biome>, Biome> biomeEntry : registry.getEntries()) {
-            if ((biomeEntry.getValue().getCategory() == Biome.Category.NETHER && ConfigHandler.defaultNether.get()) ||
-                    (biomeEntry.getValue().getCategory() == Biome.Category.THEEND && ConfigHandler.defaultEnd.get())) {
-                continue;
-            }
+    public static Biome modifyCopyBiome(Biome biome) {
+        Biome newBiome = new Biome(biome.climate, biome.getCategory(), biome.getDepth(), biome.getScale(), biome.getAmbience(), modifyCopyGeneration(biome.getGenerationSettings()), biome.getMobSpawnInfo());
+        if (biome.getRegistryName() != null) {
+            newBiome.setRegistryName(biome.getRegistryName());
+        }
+        return newBiome;
+    }
 
-            // Remove non-whitelisted structures
-            List<Supplier<StructureFeature<?, ?>>> structures = new ArrayList<>();
+    public static BiomeGenerationSettings modifyCopyGeneration(BiomeGenerationSettings settings) {
+        // Remove non-whitelisted structures
+        ImmutableList.Builder<Supplier<StructureFeature<?, ?>>> structures = ImmutableList.builder();
 
-            for (Supplier<StructureFeature<?, ?>> structure : biomeEntry.getValue().getGenerationSettings().structures) {
-                ResourceLocation location = structure.get().field_236268_b_.getRegistryName();
-                if (location != null) {
-                    if (ConfigHandler.toggleWhitelist.get()) {
-                        if (!ConfigHandler.whitelistStructures.get().contains(location.toString())) {
-                            structures.add(structure);
-                        }
-                    } else {
-                        if (ConfigHandler.whitelistStructures.get().contains(location.toString())) {
-                            structures.add(structure);
-                        }
+        for (Supplier<StructureFeature<?, ?>> structure : settings.getStructures()) {
+            ResourceLocation location = structure.get().field_236268_b_.getRegistryName();
+            if (location != null) {
+                if (ConfigHandler.toggleWhitelist.get()) {
+                    if (!ConfigHandler.whitelistStructures.get().contains(location.toString())) {
+                        structures.add(structure);
+                    }
+                } else {
+                    if (ConfigHandler.whitelistStructures.get().contains(location.toString())) {
+                        structures.add(structure);
                     }
                 }
             }
-
-            biomeEntry.getValue().getGenerationSettings().structures = ImmutableList.copyOf(structures);
-
-            // Remove non-whitelisted features
-            List<Supplier<ConfiguredFeature<?, ?>>> features = new ArrayList<>();
-
-            biomeEntry.getValue().getGenerationSettings().features.forEach(list -> {
-                for (Supplier<ConfiguredFeature<?, ?>> feature : list) {
-                    ResourceLocation location = feature.get().feature.getRegistryName();
-                    if (location != null) {
-                        if (ConfigHandler.toggleWhitelist.get()) {
-                            if (!ConfigHandler.whitelistFeatures.get().contains(location.toString())) {
-                                features.add(feature);
-                            }
-                        } else {
-                            if (ConfigHandler.whitelistFeatures.get().contains(location.toString())) {
-                                features.add(feature);
-                            }
-                        }
-                    }
-                }
-            });
-
-            biomeEntry.getValue().getGenerationSettings().features = ImmutableList.of(features);
         }
 
-        return registry;
+        // Remove non-whitelisted features
+        ImmutableList.Builder<List<Supplier<ConfiguredFeature<?, ?>>>> featureList = ImmutableList.builder();
+
+        settings.getFeatures().forEach(list -> {
+            ImmutableList.Builder<Supplier<ConfiguredFeature<?, ?>>> features = ImmutableList.builder();
+            for (Supplier<ConfiguredFeature<?, ?>> feature : list) {
+                ResourceLocation location = feature.get().feature.getRegistryName();
+                if (location != null) {
+                    if (ConfigHandler.toggleWhitelist.get()) {
+                        if (!ConfigHandler.whitelistFeatures.get().contains(location.toString())) {
+                            features.add(feature);
+                        }
+                    } else {
+                        if (ConfigHandler.whitelistFeatures.get().contains(location.toString())) {
+                            features.add(feature);
+                        }
+                    }
+                }
+            }
+            featureList.add(features.build());
+        });
+
+        return new BiomeGenerationSettings(settings.getSurfaceBuilder(), settings.carvers, featureList.build(), structures.build());
     }
 }

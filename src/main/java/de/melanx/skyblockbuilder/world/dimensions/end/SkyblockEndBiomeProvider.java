@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.world.dimensions.end;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -29,16 +30,16 @@ public class SkyblockEndBiomeProvider extends BiomeProvider {
         Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_end_provider"), SkyblockEndBiomeProvider.CODEC);
     }
 
-    private final BiomeProvider parent;
+    private final EndBiomeProvider parent;
     private final long seed;
     public final Registry<Biome> lookupRegistry;
 
-    public SkyblockEndBiomeProvider(BiomeProvider parent) {
+    public SkyblockEndBiomeProvider(EndBiomeProvider parent) {
         super(parent.getBiomes());
-        EndBiomeProvider provider = (EndBiomeProvider) parent;
         this.parent = parent;
-        this.seed = provider.seed;
-        this.lookupRegistry = RandomUtility.modifyLookupRegistry(provider.lookupRegistry);
+        this.seed = parent.seed;
+        this.lookupRegistry = new LazyBiomeRegistryWrapper(parent.lookupRegistry);
+        parent.lookupRegistry = this.lookupRegistry;
     }
 
     @Nonnull
@@ -51,7 +52,7 @@ public class SkyblockEndBiomeProvider extends BiomeProvider {
     @Override
     @OnlyIn(Dist.CLIENT)
     public BiomeProvider getBiomeProvider(long seed) {
-        return new SkyblockEndBiomeProvider(this.parent.getBiomeProvider(seed));
+        return new SkyblockEndBiomeProvider((EndBiomeProvider) this.parent.getBiomeProvider(seed));
     }
 
     @Nonnull

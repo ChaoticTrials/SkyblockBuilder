@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
@@ -34,16 +34,16 @@ public class SkyblockBiomeProvider extends BiomeProvider {
         Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_provider"), SkyblockBiomeProvider.CODEC);
     }
 
-    private final BiomeProvider parent;
+    private final OverworldBiomeProvider parent;
     public final long seed;
     public final Registry<Biome> lookupRegistry;
 
-    public SkyblockBiomeProvider(BiomeProvider parent) {
+    public SkyblockBiomeProvider(OverworldBiomeProvider parent) {
         super(parent.getBiomes());
-        OverworldBiomeProvider provider = (OverworldBiomeProvider) parent;
         this.parent = parent;
-        this.seed = provider.seed;
-        this.lookupRegistry = RandomUtility.modifyLookupRegistry(provider.lookupRegistry);
+        this.seed = parent.seed;
+        this.lookupRegistry = new LazyBiomeRegistryWrapper(parent.lookupRegistry);
+        parent.lookupRegistry = this.lookupRegistry;
     }
 
     @Nonnull
@@ -56,7 +56,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
     @Nonnull
     @OnlyIn(Dist.CLIENT)
     public BiomeProvider getBiomeProvider(long seed) {
-        return new SkyblockBiomeProvider(this.parent.getBiomeProvider(seed));
+        return new SkyblockBiomeProvider((OverworldBiomeProvider) this.parent.getBiomeProvider(seed));
     }
 
     @Nonnull
