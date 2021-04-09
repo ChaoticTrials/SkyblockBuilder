@@ -126,6 +126,12 @@ repositories {
         name = "MelanX Maven"
         url = "https://maven.melanx.de/"
     }
+
+    // for testing with other mods
+    maven {
+        name = "CurseMaven"
+        url = "https://cursemaven.com/"
+    }
 }
 
 dependencies {
@@ -135,6 +141,8 @@ dependencies {
     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
     compile fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.16.3-${libx_version}")
     compile fg.deobf("io.github.noeppi_noeppi.mods:MineMention:${mc_version}-${mention_version}")
+
+    runtimeOnly fg.deobf("curse.maven:good-nights-sleep-61461:3208812")
 }
 
 private static String getVersion(String group, String artifact, String baseVersion) {

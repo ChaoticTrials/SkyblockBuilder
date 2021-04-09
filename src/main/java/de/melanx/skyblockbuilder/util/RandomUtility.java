@@ -45,11 +45,11 @@ public class RandomUtility {
             ResourceLocation location = structure.get().field_236268_b_.getRegistryName();
             if (location != null) {
                 if (ConfigHandler.toggleWhitelist.get()) {
-                    if (!ConfigHandler.whitelistStructures.get().contains(location.toString())) {
+                    if (!ListHandler.WHITELIST_STRUCTURES.contains(location)) {
                         structures.add(structure);
                     }
                 } else {
-                    if (ConfigHandler.whitelistStructures.get().contains(location.toString())) {
+                    if (ListHandler.WHITELIST_STRUCTURES.contains(location)) {
                         structures.add(structure);
                     }
                 }
@@ -65,11 +65,11 @@ public class RandomUtility {
                 ResourceLocation location = feature.get().feature.getRegistryName();
                 if (location != null) {
                     if (ConfigHandler.toggleWhitelist.get()) {
-                        if (!ConfigHandler.whitelistFeatures.get().contains(location.toString())) {
+                        if (!ListHandler.WHITELIST_FEATURES.contains(location)) {
                             features.add(feature);
                         }
                     } else {
-                        if (ConfigHandler.whitelistFeatures.get().contains(location.toString())) {
+                        if (ListHandler.WHITELIST_FEATURES.contains(location)) {
                             features.add(feature);
                         }
                     }

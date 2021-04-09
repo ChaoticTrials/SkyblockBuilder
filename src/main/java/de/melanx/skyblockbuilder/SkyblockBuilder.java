@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
-import de.melanx.skyblockbuilder.util.CompatHelper;
+import de.melanx.skyblockbuilder.util.ListHandler;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
@@ -41,6 +41,7 @@ public class SkyblockBuilder {
     public SkyblockBuilder() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::commonSetup);
+        bus.addListener(this::onConfigChange);
         bus.addGenericListener(ForgeWorldType.class, VoidWorldType::register);
 
         ConfigHandler.createDirectories();
@@ -65,5 +66,12 @@ public class SkyblockBuilder {
         });
 
         ConfigHandler.generateDefaultFiles();
+        ListHandler.initLists();
+    }
+
+    private void onConfigChange(ModConfig.ModConfigEvent event) {
+        if (event.getConfig().getModId().equals(MODID)) {
+            ListHandler.initLists();
+        }
     }
 }

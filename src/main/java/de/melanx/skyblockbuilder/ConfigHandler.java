@@ -71,8 +71,10 @@ public class ConfigHandler {
 
     public static void init(ForgeConfigSpec.Builder builder) {
         builder.push("structures").comment("With this you can configure the structures and features which are generated.",
+                "INFO: You can also just use the modid as wildcard for all features/structures from this mod.",
                 "WARNING: Some features like trees need special surface!",
-                "WARNING: Some structures like mansions only exist in special biomes! If the biome range is too low, the \"/locate\" command will run for a lot of minutes where you cannot play because it blocks the whole server tick.");
+                "WARNING: Some structures like mansions only exist in special biomes! If the biome range is too low, the \"/locate\" command will run for a lot of minutes where you cannot play because it blocks the whole server tick.",
+                "WARNING: This only works for vanilla dimensions (Overworld, Nether, End)");
         whitelistStructures = builder.comment("All the structures that should be generated.",
                 "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/structures.txt")
                 .defineList("structures", Collections.singletonList(

@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.world;
 import com.mojang.serialization.Lifecycle;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.ListHandler;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeProvider;
@@ -105,12 +106,10 @@ public class VoidWorldType extends ForgeWorldType {
     private static void applyWhitelist(DimensionSettings settings) {
         settings.structures.field_236193_d_.entrySet().removeIf(structure -> {
             if (ConfigHandler.toggleWhitelist.get()) {
-                //noinspection ConstantConditions
-                return ConfigHandler.whitelistStructures.get().contains(structure.getKey().getRegistryName().toString());
+                return ListHandler.WHITELIST_STRUCTURES.contains(structure.getKey().getRegistryName());
             }
 
-            //noinspection ConstantConditions
-            return !ConfigHandler.whitelistStructures.get().contains(structure.getKey().getRegistryName().toString());
+            return ListHandler.WHITELIST_STRUCTURES.contains(structure.getKey().getRegistryName());
         });
     }
 }
