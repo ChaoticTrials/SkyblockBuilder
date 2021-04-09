@@ -10,10 +10,7 @@ import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
-import de.melanx.skyblockbuilder.util.CompatHelper;
-import de.melanx.skyblockbuilder.util.TemplateLoader;
-import de.melanx.skyblockbuilder.util.WorldTypeUtil;
-import de.melanx.skyblockbuilder.util.WorldUtil;
+import de.melanx.skyblockbuilder.util.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
@@ -163,6 +160,7 @@ public class EventListener {
 
     @SubscribeEvent
     public void onServerStarted(FMLServerStartedEvent event) {
+        RandomUtility.dynamicRegistries = event.getServer().func_244267_aX();
         if (WorldUtil.isSkyblock(event.getServer().func_241755_D_())) {
             SkyblockSavedData.get(event.getServer().func_241755_D_()).getSpawn();
         }

@@ -75,7 +75,7 @@ public class VoidWorldType extends ForgeWorldType {
     }
 
     public static ChunkGenerator overworldChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
-        BiomeProvider overworld = new OverworldBiomeProvider(seed, false, false, biomeRegistry);
+        OverworldBiomeProvider overworld = new OverworldBiomeProvider(seed, false, false, biomeRegistry);
         BiomeProvider provider = new SkyblockBiomeProvider(overworld);
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c);
         applyWhitelist(settings);

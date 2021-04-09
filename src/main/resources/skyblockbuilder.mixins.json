@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "libx.refmap.json",
+  "package": "de.melanx.skyblockbuilder.mixin",
+  "minVersion": "0.8",
+  "client": [],
+  "server": [],
+  "mixins": [
+    "MixinBiomeContainer"
+  ]
+}

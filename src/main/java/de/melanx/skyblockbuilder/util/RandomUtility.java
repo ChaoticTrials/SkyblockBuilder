@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -17,9 +19,11 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public class RandomUtility {
-
+    
     public static final ITextComponent UNKNOWN_PLAYER = new TranslationTextComponent("skyblockbuilder.unknown_player");
-
+    
+    public static DynamicRegistries dynamicRegistries = null;
+    
     public static ITextComponent getDisplayNameByUuid(World world, UUID id) {
         PlayerEntity player = world.getPlayerByUuid(id);
         return player != null ? player.getDisplayName() : UNKNOWN_PLAYER;
@@ -75,5 +79,14 @@ public class RandomUtility {
         });
 
         return new BiomeGenerationSettings(settings.getSurfaceBuilder(), settings.carvers, featureList.build(), structures.build());
+    }
+    
+    public static int validateBiome(Biome biome) {
+        if (dynamicRegistries != null) {
+            Registry<Biome> lookup = dynamicRegistries.getRegistry(Registry.BIOME_KEY);
+            return lookup.getId(lookup.getOrDefault(biome.getRegistryName()));
+        } else {
+            return -1;
+        }
     }
 }
