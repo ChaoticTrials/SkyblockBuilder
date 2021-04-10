@@ -28,6 +28,10 @@ apply plugin: 'org.spongepowered.mixin'
 apply from: 'https://raw.githubusercontent.com/MinecraftModDevelopment/Gradle-Collection/master/generic/secrets.gradle'
 apply from: 'https://raw.githubusercontent.com/MinecraftModDevelopment/Gradle-Collection/master/generic/markdown-git-changelog.gradle'
 
+mixin {
+    add sourceSets.main, "${modid}.refmap.json"
+}
+
 loadSecrets()
 group = "de.melanx.${modid}"
 archivesBaseName = "${modid}-${mc_version}"
