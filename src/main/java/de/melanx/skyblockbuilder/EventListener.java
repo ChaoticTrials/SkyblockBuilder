@@ -89,15 +89,16 @@ public class EventListener {
         World world = event.getPlayer().world;
         if (world instanceof ServerWorld) {
             if (WorldUtil.isSkyblock(world)) {
+
                 SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
                 ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
                 Team spawn = data.getSpawn();
                 if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
-                    Team team = data.getTeamFromPlayer(player);
                     if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
                         if (ConfigHandler.dropItems.get()) {
                             player.inventory.dropAllItems();
                         }
+
                         WorldUtil.teleportToIsland(player, spawn);
                         data.addPlayerToTeam("spawn", player);
                     }

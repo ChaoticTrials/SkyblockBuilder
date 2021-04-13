@@ -12,6 +12,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.*;
@@ -44,12 +45,15 @@ public class SkyblockSavedData extends WorldSavedData {
 
     public SkyblockSavedData(ServerWorld world) {
         super(NAME);
-        this.world = world;
+        this.world = WorldUtil.getConfiguredWorld(world.getServer());
     }
 
     public static SkyblockSavedData get(ServerWorld world) {
-        DimensionSavedDataManager storage = world.getServer().func_241755_D_().getSavedData();
-        return storage.getOrCreate(() -> new SkyblockSavedData(world), NAME);
+        MinecraftServer server = world.getServer();
+        ServerWorld configuredWorld = WorldUtil.getConfiguredWorld(server);
+
+        DimensionSavedDataManager storage = server.func_241755_D_().getSavedData();
+        return storage.getOrCreate(() -> new SkyblockSavedData(configuredWorld), NAME);
     }
 
     public Team getSpawn() {

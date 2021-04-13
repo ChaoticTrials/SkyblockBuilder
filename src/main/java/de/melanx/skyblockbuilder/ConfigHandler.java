@@ -57,6 +57,7 @@ public class ConfigHandler {
     public static ForgeConfigSpec.EnumValue<WorldUtil.Directions> direction;
     public static ForgeConfigSpec.IntValue generationHeight;
     public static ForgeConfigSpec.IntValue spawnRadius;
+    public static ForgeConfigSpec.ConfigValue<String> spawnDimension;
 
     public static ForgeConfigSpec.BooleanValue clearInv;
     public static ForgeConfigSpec.BooleanValue dropItems;
@@ -123,6 +124,9 @@ public class ConfigHandler {
                 .defineInRange("spawn.height", 64, 1, 255);
         spawnRadius = builder.comment("The radius to find a valid spawn if no given spawn is valid")
                 .defineInRange("spawn.radius", 50, 0, Integer.MAX_VALUE);
+        spawnDimension = builder.comment("The dimension the islands will be generated in. Vanilla dimensions:",
+                "minecraft:overworld", "minecraft:the_nether", "minecraft:the_end")
+                .define("spawn.dimension", "minecraft:overworld", String.class::isInstance);
 
         clearInv = builder.comment("Should all items be reset on first world join? [default: false]",
                 "This will delete all the items given on spawn from other mods guide books.")

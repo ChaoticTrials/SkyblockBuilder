@@ -5,52 +5,66 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
-import de.melanx.skyblockbuilder.world.IslandPos;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.block.Block;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Direction;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.FlatLayerInfo;
-import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public class WorldUtil {
     
     public static void teleportToIsland(ServerPlayerEntity player, Team team) {
+        MinecraftServer server = player.getServer();
         //noinspection ConstantConditions
-        ServerWorld world = player.getServer().func_241755_D_();
-        IslandPos island = team.getIsland();
+        ServerWorld world = getConfiguredWorld(server);
 
-        Set<BlockPos> possibleSpawns = SkyblockSavedData.get(world).getPossibleSpawns(island);
         BlockPos spawn = validPosition(world, team);
         player.teleport(world, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, ConfigHandler.direction.get().getYaw(), 0);
         player.func_242111_a(world.getDimensionKey(), spawn, 0, true, false);
     }
 
     public static boolean isSkyblock(World world) {
-        return world.getChunkProvider() instanceof ServerChunkProvider &&
-                ((ServerChunkProvider) world.getChunkProvider()).getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
+        return world instanceof ServerWorld &&
+                ((ServerWorld) world).getServer().func_241755_D_().getChunkProvider().getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
     }
-    
+
     public static void checkSkyblock(CommandSource source) throws CommandSyntaxException {
         if (!isSkyblock(source.getServer().func_241755_D_())) {
             throw new SimpleCommandExceptionType(new TranslationTextComponent("skyblockbuilder.error.no_skyblock")).create();
         }
     }
 
+    public static ServerWorld getConfiguredWorld(MinecraftServer server) {
+        ResourceLocation location = new ResourceLocation(ConfigHandler.spawnDimension.get());
+        RegistryKey<World> worldKey = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, location);
+        ServerWorld configWorld = server.getWorld(worldKey);
+
+        if (configWorld == null) {
+            SkyblockBuilder.LOGGER.warn("Configured dimension for spawn does not exist: " + location);
+        }
+
+        return configWorld != null ? configWorld : server.func_241755_D_();
+    }
+
     private static BlockPos validPosition(ServerWorld world, Team team) {
-        
+
         List<BlockPos> spawns = new ArrayList<>(team.getPossibleSpawns());
         Random random = new Random();
         while (!spawns.isEmpty()) {
