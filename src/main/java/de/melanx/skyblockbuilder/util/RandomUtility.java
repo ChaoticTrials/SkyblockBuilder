@@ -3,7 +3,9 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.ImmutableList;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
@@ -88,5 +90,19 @@ public class RandomUtility {
         } else {
             return -1;
         }
+    }
+
+    public static void writeBlockPos(BlockPos pos, CompoundNBT nbt) {
+        nbt.putInt("posX", pos.getX());
+        nbt.putInt("posY", pos.getY());
+        nbt.putInt("posZ", pos.getZ());
+    }
+
+    public static BlockPos getPosFromNbt(CompoundNBT nbt) {
+        int x = nbt.getInt("posX");
+        int y = nbt.getInt("posY");
+        int z = nbt.getInt("posZ");
+
+        return new BlockPos(x, y, z);
     }
 }

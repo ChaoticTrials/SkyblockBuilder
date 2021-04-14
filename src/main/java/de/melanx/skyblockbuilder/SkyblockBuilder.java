@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
+import de.melanx.skyblockbuilder.item.StructureSaver;
 import de.melanx.skyblockbuilder.util.ListHandler;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
@@ -11,6 +12,7 @@ import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeProv
 import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
+import net.minecraft.item.Item;
 import net.minecraft.util.Util;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.world.ForgeWorldType;
@@ -43,6 +45,7 @@ public class SkyblockBuilder {
         bus.addListener(this::commonSetup);
         bus.addListener(this::onConfigChange);
         bus.addGenericListener(ForgeWorldType.class, VoidWorldType::register);
+        bus.addGenericListener(Item.class, StructureSaver::register);
 
         ConfigHandler.createDirectories();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON_CONFIG, SkyblockBuilder.MODID + "/config.toml");
