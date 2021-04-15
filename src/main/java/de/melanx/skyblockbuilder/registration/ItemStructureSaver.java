@@ -1,10 +1,13 @@
-package de.melanx.skyblockbuilder.item;
+package de.melanx.skyblockbuilder.registration;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -16,10 +19,11 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.Template;
-import net.minecraftforge.event.RegistryEvent;
 import org.apache.commons.compress.utils.IOUtils;
 
 import javax.annotation.Nonnull;
@@ -31,10 +35,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-public class StructureSaver extends Item {
-    public StructureSaver() {
+public class ItemStructureSaver extends Item {
+    public ItemStructureSaver() {
         super(new Properties().group(ItemGroup.TOOLS));
-        this.setRegistryName(SkyblockBuilder.MODID, "structure_saver");
     }
 
     @Nonnull
@@ -83,16 +86,31 @@ public class StructureSaver extends Item {
                 return ActionResult.resultPass(stack);
             }
 
-            String schematic = saveSchematic(world, stack);
-            if (schematic == null) {
-                player.sendStatusMessage(new StringTextComponent("Something went terribly wrong."), false);
-                return ActionResult.resultPass(stack);
-            }
+            INamedContainerProvider containerProvider = new INamedContainerProvider() {
+                @Nonnull
+                @Override
+                public Container createMenu(int windowId, @Nonnull PlayerInventory inventory, @Nonnull PlayerEntity player) {
+                    return new ContainerStructureSaver(windowId);
+                }
 
-            tag.remove("Position1");
-            tag.remove("Position2");
-            tag.remove("CanSave");
-            player.sendStatusMessage(new StringTextComponent("Successfully saved structure as " + schematic), false);
+                @Nonnull
+                @Override
+                public ITextComponent getDisplayName() {
+                    return new TranslationTextComponent("screen." + SkyblockBuilder.MODID + ".structure_saver");
+                }
+            };
+            player.openContainer(containerProvider);
+
+//            String schematic = saveSchematic(world, stack);
+//            if (schematic == null) {
+//                player.sendStatusMessage(new StringTextComponent("Something went terribly wrong."), false);
+//                return ActionResult.resultPass(stack);
+//            }
+//
+//            tag.remove("Position1");
+//            tag.remove("Position2");
+//            tag.remove("CanSave");
+//            player.sendStatusMessage(new StringTextComponent("Successfully saved structure as " + schematic), false);
 
             return ActionResult.func_233538_a_(stack, false);
         }
@@ -121,10 +139,6 @@ public class StructureSaver extends Item {
         BlockPos pos2 = RandomUtility.getPosFromNbt(tag2);
 
         return new MutableBoundingBox(pos1, pos2);
-    }
-
-    public static void register(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new StructureSaver());
     }
 
     public static String saveSchematic(World world, ItemStack stack) {

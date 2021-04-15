@@ -12,16 +12,14 @@ import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
-import de.melanx.skyblockbuilder.item.StructureSaver;
+import de.melanx.skyblockbuilder.registration.ItemStructureSaver;
 import de.melanx.skyblockbuilder.util.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,15 +34,11 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderBlockOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -192,21 +186,25 @@ public class EventListener {
     @SubscribeEvent
     public void renderBoundingBox(RenderWorldLastEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
-        if (player == null || !(player.getHeldItemMainhand().getItem() instanceof StructureSaver)) {
+        if (player == null || !(player.getHeldItemMainhand().getItem() instanceof ItemStructureSaver)) {
             return;
         }
 
         ItemStack stack = player.getHeldItemMainhand();
-        MutableBoundingBox area = StructureSaver.getArea(stack);
+        MutableBoundingBox area = ItemStructureSaver.getArea(stack);
         if (area == null) {
             return;
         }
+
         MatrixStack matrixStack = event.getMatrixStack();
-        matrixStack.translate(area.maxX, area.maxY, area.maxZ);
+        matrixStack.push();
+        Vector3d projection = Minecraft.getInstance().gameRenderer.getActiveRenderInfo().getProjectedView();
+        matrixStack.translate(-projection.x, -projection.y, -projection.z);
 
         IRenderTypeBuffer.Impl source = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
         IVertexBuilder buffer = source.getBuffer(RenderType.LINES);
 
         WorldRenderer.drawBoundingBox(matrixStack, buffer, AxisAlignedBB.toImmutable(area), 0.9F, 0.9F, 0.9F, 1.0F);
+        matrixStack.pop();
     }
 }

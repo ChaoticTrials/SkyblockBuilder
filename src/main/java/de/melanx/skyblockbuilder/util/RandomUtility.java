@@ -2,9 +2,12 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
@@ -15,6 +18,8 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeGenerationSettings;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 import java.util.UUID;
@@ -82,7 +87,7 @@ public class RandomUtility {
 
         return new BiomeGenerationSettings(settings.getSurfaceBuilder(), settings.carvers, featureList.build(), structures.build());
     }
-    
+
     public static int validateBiome(Biome biome) {
         if (dynamicRegistries != null) {
             Registry<Biome> lookup = dynamicRegistries.getRegistry(Registry.BIOME_KEY);
@@ -90,6 +95,11 @@ public class RandomUtility {
         } else {
             return -1;
         }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void playSound(SoundEvent sound) {
+        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(sound, 1));
     }
 
     public static void writeBlockPos(BlockPos pos, CompoundNBT nbt) {

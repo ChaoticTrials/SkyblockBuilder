@@ -24,7 +24,6 @@ import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.DimensionSettings;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import net.minecraftforge.common.world.ForgeWorldType;
-import net.minecraftforge.event.RegistryEvent;
 
 import javax.annotation.Nonnull;
 
@@ -32,10 +31,6 @@ public class VoidWorldType extends ForgeWorldType {
 
     public VoidWorldType() {
         super(VoidWorldType::overworldChunkGenerator);
-    }
-
-    public static void register(RegistryEvent.Register<ForgeWorldType> event) {
-        event.getRegistry().register(new VoidWorldType().setRegistryName("custom_skyblock"));
     }
 
     @Override
