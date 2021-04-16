@@ -11,7 +11,7 @@ import java.util.List;
 
 public class CompatHelper {
     
-    private static List<String> teamManagementDisablingMods = new ArrayList<>();
+    private static final List<String> teamManagementDisablingMods = new ArrayList<>();
 
     /**
      * Used to disable that users can modify anything about teams, e.g. creating new teams, leaving a team, renaming
@@ -22,7 +22,7 @@ public class CompatHelper {
     public static void disableAllTeamManagement(String modid) {
         teamManagementDisablingMods.add(modid);
         teamManagementDisablingMods.sort(Comparator.naturalOrder());
-        SkyblockBuilder.LOGGER.warn(modid + " disabled all team management features.");
+        SkyblockBuilder.getLogger().warn(modid + " disabled all team management features.");
     }
     
     public static void checkTeamManagement() throws CommandSyntaxException {

@@ -3,13 +3,10 @@ package de.melanx.skyblockbuilder.world.dimensions.overworld;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Blockreader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
@@ -30,7 +27,7 @@ import java.util.function.Supplier;
 public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
     
     // [VanillaCopy] overworld chunk generator codec
-    protected static final Codec<SkyblockOverworldChunkGenerator> CODEC = RecordCodecBuilder.create(
+    public static final Codec<SkyblockOverworldChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
                     BiomeProvider.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeProvider),
                     Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
@@ -41,10 +38,6 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
     protected final Supplier<DimensionSettings> settings;
     protected final NoiseChunkGenerator parent;
     protected final List<FlatLayerInfo> layerInfos;
-
-    public static void init() {
-        Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock"), CODEC);
-    }
 
     public SkyblockOverworldChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
         super(provider, provider, settings.get().getStructures(), seed);

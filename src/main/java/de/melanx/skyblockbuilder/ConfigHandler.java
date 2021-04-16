@@ -28,7 +28,7 @@ public class ConfigHandler {
     public static final ForgeConfigSpec COMMON_CONFIG;
     public static final List<Pair<EquipmentSlotType, ItemStack>> STARTER_ITEMS = new ArrayList<>();
     private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
-    private static final Path MOD_CONFIG = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.MODID);
+    private static final Path MOD_CONFIG = FMLPaths.CONFIGDIR.get().resolve("skyblockbuilder");
     private static final Path SCHEMATIC_FILE = MOD_CONFIG.resolve("template.nbt");
     private static final Path SPAWNS_FILE = MOD_CONFIG.resolve("spawns.json");
     private static final Path ITEMS_FILE = MOD_CONFIG.resolve("starter_item.json");
@@ -77,12 +77,12 @@ public class ConfigHandler {
                 "WARNING: Some structures like mansions only exist in special biomes! If the biome range is too low, the \"/locate\" command will run for a lot of minutes where you cannot play because it blocks the whole server tick.",
                 "WARNING: This only works for vanilla dimensions (Overworld, Nether, End)");
         whitelistStructures = builder.comment("All the structures that should be generated.",
-                "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/structures.txt")
+                "A list with all possible structures can be found in config/skyblockbuilder/structures.txt")
                 .defineList("structures", Collections.singletonList(
                         "minecraft:fortress"
                 ), (obj) -> obj instanceof String);
         whitelistFeatures = builder.comment("All the features that should be generated.",
-                "A list with all possible structures can be found in config/" + SkyblockBuilder.MODID + "/features.txt",
+                "A list with all possible structures can be found in config/skyblockbuilder/features.txt",
                 "INFO: The two default values are required for the obsidian towers in end. If this is missing, they will be first generated when respawning the dragon.")
                 .defineList("features", Arrays.asList(
                         "minecraft:end_spike",
@@ -181,6 +181,7 @@ public class ConfigHandler {
             return;
         }
 
+        //noinspection ConstantConditions
         Files.copy(SkyblockBuilder.class.getResourceAsStream("/skyblockbuilder-template.nbt"), SCHEMATIC_FILE);
     }
 

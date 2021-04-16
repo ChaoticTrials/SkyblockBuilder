@@ -11,21 +11,18 @@ import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.*;
+import io.github.noeppi_noeppi.libx.event.DatapacksReloadedEvent;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -33,7 +30,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class EventListener {
@@ -41,24 +37,13 @@ public class EventListener {
     private static final String SPAWNED_TAG = "alreadySpawned";
 
     @SubscribeEvent
-    public void resourcesReload(AddReloadListenerEvent event) {
-        event.addListener(new ReloadListener<Object>() {
-            @Nonnull
-            @Override
-            protected Object prepare(@Nonnull IResourceManager manager, @Nonnull IProfiler profilerIn) {
-                return new Object();
-            }
-
-            @Override
-            protected void apply(@Nonnull Object unused, @Nonnull IResourceManager manager, @Nonnull IProfiler profiler) {
-                try {
-                    ConfigHandler.generateDefaultFiles();
-                    TemplateLoader.loadSchematic(manager);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+    public void resourcesReload(DatapacksReloadedEvent event) {
+        try {
+            ConfigHandler.generateDefaultFiles();
+            TemplateLoader.loadSchematic();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SubscribeEvent

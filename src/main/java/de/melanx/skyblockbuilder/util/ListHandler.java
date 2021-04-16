@@ -29,7 +29,7 @@ public class ListHandler {
                 );
             }
         }
-        SkyblockBuilder.LOGGER.info("Whitelisted structures: " + Arrays.toString(WHITELIST_STRUCTURES.toArray()));
+        SkyblockBuilder.getLogger().info("Whitelisted structures: " + Arrays.toString(WHITELIST_STRUCTURES.toArray()));
 
         String[] whitelistFeatures = ConfigHandler.whitelistFeatures.get().toArray(new String[0]);
         WHITELIST_FEATURES = new ArrayList<>();
@@ -44,6 +44,6 @@ public class ListHandler {
                 );
             }
         }
-        SkyblockBuilder.LOGGER.info("Whitelisted features: " + Arrays.toString(WHITELIST_FEATURES.toArray()));
+        SkyblockBuilder.getLogger().info("Whitelisted features: " + Arrays.toString(WHITELIST_FEATURES.toArray()));
     }
 }

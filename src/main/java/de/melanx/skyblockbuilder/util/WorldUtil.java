@@ -57,7 +57,7 @@ public class WorldUtil {
         ServerWorld configWorld = server.getWorld(worldKey);
 
         if (configWorld == null) {
-            SkyblockBuilder.LOGGER.warn("Configured dimension for spawn does not exist: " + location);
+            SkyblockBuilder.getLogger().warn("Configured dimension for spawn does not exist: " + location);
         }
 
         return configWorld != null ? configWorld : server.func_241755_D_();
@@ -127,7 +127,7 @@ public class WorldUtil {
             try {
                 i = Math.max(Integer.parseInt(info[0]), 0);
             } catch (NumberFormatException numberformatexception) {
-                SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => {}", numberformatexception.getMessage());
+                SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", numberformatexception.getMessage());
                 return null;
             }
         } else {
@@ -142,12 +142,12 @@ public class WorldUtil {
         try {
             block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockName));
         } catch (Exception exception) {
-            SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => {}", exception.getMessage());
+            SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", exception.getMessage());
             return null;
         }
 
         if (block == null) {
-            SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => Unknown block, {}", blockName);
+            SkyblockBuilder.getLogger().error("Error while parsing surface settings string => Unknown block, {}", blockName);
             return null;
         } else {
             FlatLayerInfo layerInfo = new FlatLayerInfo(height, block);

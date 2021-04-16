@@ -3,10 +3,7 @@ package de.melanx.skyblockbuilder.world.dimensions.nether;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Blockreader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
@@ -22,7 +19,7 @@ import java.util.function.Supplier;
 public class SkyblockNetherChunkGenerator extends ChunkGenerator {
     
     // [VanillaCopy] overworld chunk generator codec
-    protected static final Codec<SkyblockNetherChunkGenerator> CODEC = RecordCodecBuilder.create(
+    public static final Codec<SkyblockNetherChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
                     BiomeProvider.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeProvider),
                     Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
@@ -31,10 +28,6 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
 
     protected final long seed;
     protected final Supplier<DimensionSettings> settings;
-
-    public static void init() {
-        Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_nether"), CODEC);
-    }
 
     public SkyblockNetherChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
         super(provider, provider, settings.get().getStructures(), seed);

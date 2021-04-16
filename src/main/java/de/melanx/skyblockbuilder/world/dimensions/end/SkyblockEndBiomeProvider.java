@@ -2,10 +2,7 @@ package de.melanx.skyblockbuilder.world.dimensions.end;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
-import de.melanx.skyblockbuilder.util.RandomUtility;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraft.world.biome.Biome;
@@ -25,10 +22,6 @@ public class SkyblockEndBiomeProvider extends BiomeProvider {
             ).apply(builder, builder.stable((seed, lookupRegistry) -> new SkyblockEndBiomeProvider(
                     new EndBiomeProvider(lookupRegistry, seed)
             ))));
-
-    public static void init() {
-        Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_end_provider"), SkyblockEndBiomeProvider.CODEC);
-    }
 
     private final EndBiomeProvider parent;
     private final long seed;

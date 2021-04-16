@@ -7,7 +7,6 @@ import com.google.gson.JsonParser;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.template.Template;
@@ -23,13 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TemplateLoader {
-    
-    private static final Path SCHEMATIC_FILE = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.MODID).resolve("template.nbt");
-    private static final Path SPAWNS_FILE = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.MODID).resolve("spawns.json");
+
+    private static final Path SCHEMATIC_FILE = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.getInstance().modid).resolve("template.nbt");
+    private static final Path SPAWNS_FILE = FMLPaths.CONFIGDIR.get().resolve(SkyblockBuilder.getInstance().modid).resolve("spawns.json");
     public static final Template TEMPLATE = new Template();
     public static final List<BlockPos> SPAWNS = new ArrayList<>();
 
-    public static void loadSchematic(IResourceManager manager) throws IOException {
+    public static void loadSchematic() throws IOException {
         File schematic = new File(SCHEMATIC_FILE.toUri());
         CompoundNBT nbt = CompressedStreamTools.readCompressed(new FileInputStream(schematic));
         TEMPLATE.read(nbt);

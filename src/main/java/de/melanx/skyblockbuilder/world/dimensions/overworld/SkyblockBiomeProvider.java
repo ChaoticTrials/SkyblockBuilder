@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.world.dimensions.overworld;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -29,10 +28,6 @@ public class SkyblockBiomeProvider extends BiomeProvider {
                     new OverworldBiomeProvider(seed, false, false, lookupRegistry))
             )));
     public static final ResourceLocation SINGLE_BIOME = ResourceLocation.tryCreate(ConfigHandler.biome.get());
-
-    public static void init() {
-        Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_provider"), SkyblockBiomeProvider.CODEC);
-    }
 
     private final OverworldBiomeProvider parent;
     public final long seed;

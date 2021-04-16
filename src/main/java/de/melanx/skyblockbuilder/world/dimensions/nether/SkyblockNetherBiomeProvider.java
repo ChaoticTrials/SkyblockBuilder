@@ -3,10 +3,7 @@ package de.melanx.skyblockbuilder.world.dimensions.nether;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
-import de.melanx.skyblockbuilder.util.RandomUtility;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraft.world.biome.Biome;
@@ -26,10 +23,6 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
             ).apply(builder, (seed, lookupRegistry) -> new SkyblockNetherBiomeProvider(
                     NetherBiomeProvider.Preset.DEFAULT_NETHER_PROVIDER_PRESET.build(lookupRegistry, seed), lookupRegistry
             )));
-
-    public static void init() {
-        Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_nether_provider"), SkyblockNetherBiomeProvider.PACKET_CODEC);
-    }
 
     private final NetherBiomeProvider parent;
     private final long seed;

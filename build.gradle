@@ -107,7 +107,7 @@ publishing {
                 licenses {
                     license {
                         name = "Apache License"
-                        url = "http://www.apache.org/licenses/LICENSE-2.0"
+                        url = "https://www.apache.org/licenses/LICENSE-2.0"
                     }
                 }
             }
@@ -140,6 +140,7 @@ repositories {
 
 dependencies {
     annotationProcessor "org.spongepowered:mixin:0.8.2:processor"
+    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.16.3-${libx_version}"
 
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
