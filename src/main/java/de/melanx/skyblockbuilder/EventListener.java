@@ -10,7 +10,10 @@ import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
-import de.melanx.skyblockbuilder.util.*;
+import de.melanx.skyblockbuilder.util.CompatHelper;
+import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.TemplateLoader;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.command.Commands;
@@ -20,7 +23,6 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
-import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -30,7 +32,6 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 
 import javax.annotation.Nonnull;
@@ -149,13 +150,6 @@ public class EventListener {
                 Team team = data.getTeamFromPlayer(player);
                 WorldUtil.teleportToIsland(player, team == null ? data.getSpawn() : team);
             }
-        }
-    }
-
-    @SubscribeEvent
-    public void serverAboutToStart(FMLServerAboutToStartEvent event) {
-        if (event.getServer() instanceof DedicatedServer) {
-            WorldTypeUtil.setupForDedicatedServer((DedicatedServer) event.getServer());
         }
     }
 
