@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
@@ -28,7 +29,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
-    
+
     // [VanillaCopy] overworld chunk generator codec
     protected static final Codec<SkyblockOverworldChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
@@ -105,8 +106,9 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Nullable
     @Override
-    public BlockPos func_235956_a_(ServerWorld p_235956_1_, Structure<?> p_235956_2_, BlockPos p_235956_3_, int p_235956_4_, boolean p_235956_5_) {
-        return super.func_235956_a_(p_235956_1_, p_235956_2_, p_235956_3_, p_235956_4_, p_235956_5_);
+    public BlockPos func_235956_a_(@Nonnull ServerWorld world, Structure<?> structure, @Nonnull BlockPos startPos, int radius, boolean skipExististingChunks) {
+        boolean shouldSearch = RandomUtility.isStructureGenerated(structure.getRegistryName());
+        return shouldSearch ? super.func_235956_a_(world, structure, startPos, radius, skipExististingChunks) : null;
     }
 
     @Override

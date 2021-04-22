@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.ResourceLocation;
@@ -17,9 +18,12 @@ import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.*;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureManager;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 public class SkyblockEndChunkGenerator extends ChunkGenerator {
@@ -82,6 +86,13 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
         if (ConfigHandler.defaultEndIsland.get()) {
             this.parent.func_230352_b_(world, manager, chunk);
         }
+    }
+
+    @Nullable
+    @Override
+    public BlockPos func_235956_a_(@Nonnull ServerWorld world, Structure<?> structure, @Nonnull BlockPos startPos, int radius, boolean skipExististingChunks) {
+        boolean shouldSearch = RandomUtility.isStructureGenerated(structure.getRegistryName());
+        return shouldSearch ? super.func_235956_a_(world, structure, startPos, radius, skipExististingChunks) : null;
     }
 
     @Override
