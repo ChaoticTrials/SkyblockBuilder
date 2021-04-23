@@ -9,7 +9,7 @@ A minecraft mod which lets you generate custom skyblock islands by using config.
 You can simply set `World Type` to `Skyblock` when creating a new world on a click on `More World Options...`
 
 ### Setting world type on server
-You can simply set `level-type` in `server.properties` to `custom_skyblock`.
+You can simply set `level-type` in `server.properties` to `skyblockbuilder:custom_skyblock`.
 
 ### Creating a custom skyblock island
 1. Build an island.

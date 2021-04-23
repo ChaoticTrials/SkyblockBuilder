@@ -20,9 +20,12 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
             (builder) -> builder.group(
                     Codec.LONG.fieldOf("seed").forGetter((provider) -> provider.seed),
                     RegistryLookupCodec.getLookUpCodec(Registry.BIOME_KEY).forGetter(provider -> provider.lookupRegistry)
-            ).apply(builder, (seed, lookupRegistry) -> new SkyblockNetherBiomeProvider(
-                    NetherBiomeProvider.Preset.DEFAULT_NETHER_PROVIDER_PRESET.build(lookupRegistry, seed), lookupRegistry
-            )));
+            ).apply(builder, (seed, lookupRegistry) -> {
+                LazyBiomeRegistryWrapper biomes = new LazyBiomeRegistryWrapper(lookupRegistry);
+                return new SkyblockNetherBiomeProvider(
+                        NetherBiomeProvider.Preset.DEFAULT_NETHER_PROVIDER_PRESET.build(biomes, seed), biomes
+                );
+            }));
 
     private final NetherBiomeProvider parent;
     private final long seed;
@@ -32,7 +35,7 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
         super(parent.getBiomes());
         this.parent = parent;
         this.seed = parent.seed;
-        this.lookupRegistry = new LazyBiomeRegistryWrapper(lookupRegistry);
+        this.lookupRegistry = lookupRegistry;
     }
 
     @Nonnull

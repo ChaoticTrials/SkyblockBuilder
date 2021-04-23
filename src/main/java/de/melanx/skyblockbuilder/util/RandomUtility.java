@@ -89,4 +89,14 @@ public class RandomUtility {
             return -1;
         }
     }
+
+    public static boolean isStructureGenerated(ResourceLocation registryName) {
+        if (ConfigHandler.toggleWhitelist.get()) {
+            // blacklist
+            return !ListHandler.WHITELIST_STRUCTURES.contains(registryName) && !ListHandler.WHITELIST_FEATURES.contains(registryName);
+        } else {
+            // whitelist
+            return ListHandler.WHITELIST_STRUCTURES.contains(registryName) || ListHandler.WHITELIST_FEATURES.contains(registryName);
+        }
+    }
 }
