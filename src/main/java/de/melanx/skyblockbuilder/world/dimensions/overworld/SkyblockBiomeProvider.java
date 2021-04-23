@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
@@ -42,8 +41,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
         super(parent.getBiomes());
         this.parent = parent;
         this.seed = parent.seed;
-        this.lookupRegistry = new LazyBiomeRegistryWrapper(parent.lookupRegistry);
-        parent.lookupRegistry = this.lookupRegistry;
+        this.lookupRegistry = parent.lookupRegistry;
     }
 
     @Nonnull
