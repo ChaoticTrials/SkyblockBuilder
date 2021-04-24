@@ -76,9 +76,9 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
 
     @Nullable
     @Override
-    public BlockPos func_235956_a_(@Nonnull ServerWorld world, Structure<?> structure, @Nonnull BlockPos startPos, int radius, boolean skipExististingChunks) {
+    public BlockPos func_235956_a_(@Nonnull ServerWorld world, Structure<?> structure, @Nonnull BlockPos startPos, int radius, boolean skipExistingChunks) {
         boolean shouldSearch = RandomUtility.isStructureGenerated(structure.getRegistryName());
-        return shouldSearch ? super.func_235956_a_(world, structure, startPos, radius, skipExististingChunks) : null;
+        return shouldSearch ? super.func_235956_a_(world, structure, startPos, radius, skipExistingChunks) : null;
     }
 
     @Override

@@ -4,7 +4,6 @@ import com.mojang.serialization.Lifecycle;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
-import de.melanx.skyblockbuilder.util.ListHandler;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeProvider;
@@ -86,7 +85,6 @@ public class VoidWorldType extends ForgeWorldType {
         OverworldBiomeProvider overworld = new OverworldBiomeProvider(seed, false, false, biomeRegistry);
         BiomeProvider provider = new SkyblockBiomeProvider(overworld);
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c);
-        applyWhitelist(settings);
 
         return new SkyblockOverworldChunkGenerator(provider, seed, () -> settings);
     }
@@ -96,7 +94,6 @@ public class VoidWorldType extends ForgeWorldType {
         SkyblockNetherBiomeProvider provider = new SkyblockNetherBiomeProvider(nether, biomeRegistry);
 
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242736_e);
-        applyWhitelist(settings);
 
         return new SkyblockNetherChunkGenerator(provider, seed, () -> settings);
     }
@@ -105,18 +102,7 @@ public class VoidWorldType extends ForgeWorldType {
         SkyblockEndBiomeProvider provider = new SkyblockEndBiomeProvider(new EndBiomeProvider(biomeRegistry, seed));
 
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242737_f);
-        applyWhitelist(settings);
 
         return new SkyblockEndChunkGenerator(provider, seed, () -> settings);
-    }
-
-    private static void applyWhitelist(DimensionSettings settings) {
-        settings.structures.field_236193_d_.entrySet().removeIf(structure -> {
-            if (ConfigHandler.toggleWhitelist.get()) {
-                return ListHandler.WHITELIST_STRUCTURES.contains(structure.getKey().getRegistryName());
-            }
-
-            return ListHandler.WHITELIST_STRUCTURES.contains(structure.getKey().getRegistryName());
-        });
     }
 }
