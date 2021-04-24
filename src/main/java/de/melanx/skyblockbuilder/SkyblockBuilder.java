@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.util.ListHandler;
+import io.github.noeppi_noeppi.libx.config.ConfigManager;
 import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -40,6 +42,8 @@ public class SkyblockBuilder extends ModXRegistration {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON_CONFIG, "skyblockbuilder/config.toml");
 
         MinecraftForge.EVENT_BUS.register(new EventListener());
+
+        ConfigManager.registerConfig(new ResourceLocation("skyblockbuilder", "test"), LibXConfigHandler.class, false);
     }
 
     private void onConfigChange(ModConfig.ModConfigEvent event) {
