@@ -106,11 +106,7 @@ public class EventListener {
 
                     return;
                 }
-
                 player.getPersistentData().putBoolean(SPAWNED_TAG, true);
-                data.addPlayerToTeam(spawn, player);
-                ((ServerWorld) world).func_241124_a__(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
-                WorldUtil.teleportToIsland(player, spawn);
 
                 if (ConfigHandler.clearInv.get()) {
                     player.inventory.clear();
@@ -123,6 +119,14 @@ public class EventListener {
                         player.setItemStackToSlot(entry.getLeft(), entry.getRight().copy());
                     }
                 });
+
+                if (!CompatHelper.isSpawnTeleportEnabled()) {
+                    return;
+                }
+
+                data.addPlayerToTeam(spawn, player);
+                ((ServerWorld) world).func_241124_a__(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
+                WorldUtil.teleportToIsland(player, spawn);
             }
         }
     }

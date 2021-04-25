@@ -11,7 +11,8 @@ import java.util.List;
 
 public class CompatHelper {
     
-    private static List<String> teamManagementDisablingMods = new ArrayList<>();
+    private static final List<String> teamManagementDisablingMods = new ArrayList<>();
+    private static boolean spawnTeleportEnabled = true;
 
     /**
      * Used to disable that users can modify anything about teams, e.g. creating new teams, leaving a team, renaming
@@ -24,6 +25,11 @@ public class CompatHelper {
         teamManagementDisablingMods.sort(Comparator.naturalOrder());
         SkyblockBuilder.LOGGER.warn(modid + " disabled all team management features.");
     }
+
+    public static void disableSpawnTeleport(String modid) {
+        spawnTeleportEnabled = false;
+        SkyblockBuilder.LOGGER.warn(modid + " disabled teleporting to spawn on world join.");
+    }
     
     public static void checkTeamManagement() throws CommandSyntaxException {
         if (!teamManagementDisablingMods.isEmpty()) {
@@ -33,5 +39,9 @@ public class CompatHelper {
 
     public static boolean teamManagementEnabled() {
         return teamManagementDisablingMods.isEmpty();
+    }
+
+    public static boolean isSpawnTeleportEnabled() {
+        return spawnTeleportEnabled;
     }
 }
