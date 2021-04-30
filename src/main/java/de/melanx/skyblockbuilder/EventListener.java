@@ -70,42 +70,40 @@ public class EventListener {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         World world = event.getPlayer().world;
-        if (world instanceof ServerWorld) {
-            if (WorldUtil.isSkyblock(world)) {
+        if (world instanceof ServerWorld && WorldUtil.isSkyblock(world) && CompatHelper.isSpawnTeleportEnabled()) {
 
-                SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
-                ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-                Team spawn = data.getSpawn();
-                if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
-                    if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
-                        if (ConfigHandler.dropItems.get()) {
-                            player.inventory.dropAllItems();
-                        }
-
-                        WorldUtil.teleportToIsland(player, spawn);
-                        data.addPlayerToTeam("spawn", player);
+            SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
+            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+            Team spawn = data.getSpawn();
+            if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
+                if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
+                    if (ConfigHandler.dropItems.get()) {
+                        player.inventory.dropAllItems();
                     }
 
-                    return;
+                    WorldUtil.teleportToIsland(player, spawn);
+                    data.addPlayerToTeam("spawn", player);
                 }
 
-                player.getPersistentData().putBoolean(SPAWNED_TAG, true);
-                data.addPlayerToTeam(spawn, player);
-                ((ServerWorld) world).func_241124_a__(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
-                WorldUtil.teleportToIsland(player, spawn);
-
-                if (ConfigHandler.clearInv.get()) {
-                    player.inventory.clear();
-                }
-
-                ConfigHandler.STARTER_ITEMS.forEach(entry -> {
-                    if (entry.getLeft() == EquipmentSlotType.MAINHAND) {
-                        player.inventory.addItemStackToInventory(entry.getRight().copy());
-                    } else {
-                        player.setItemStackToSlot(entry.getLeft(), entry.getRight().copy());
-                    }
-                });
+                return;
             }
+            player.getPersistentData().putBoolean(SPAWNED_TAG, true);
+
+            if (ConfigHandler.clearInv.get()) {
+                player.inventory.clear();
+            }
+
+            ConfigHandler.STARTER_ITEMS.forEach(entry -> {
+                if (entry.getLeft() == EquipmentSlotType.MAINHAND) {
+                    player.inventory.addItemStackToInventory(entry.getRight().copy());
+                } else {
+                    player.setItemStackToSlot(entry.getLeft(), entry.getRight().copy());
+                }
+            });
+
+            data.addPlayerToTeam(spawn, player);
+            ((ServerWorld) world).func_241124_a__(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
+            WorldUtil.teleportToIsland(player, spawn);
         }
     }
 

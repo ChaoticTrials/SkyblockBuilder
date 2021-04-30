@@ -3,20 +3,27 @@ package de.melanx.skyblockbuilder.world.dimensions.overworld;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.block.BlockState;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.Blockreader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.*;
+import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.world.gen.feature.structure.StructureFeatures;
 import net.minecraft.world.gen.feature.structure.StructureManager;
+import net.minecraft.world.gen.feature.template.TemplateManager;
 import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nonnull;
@@ -99,9 +106,9 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Nullable
     @Override
-    public BlockPos func_235956_a_(@Nonnull ServerWorld world, Structure<?> structure, @Nonnull BlockPos startPos, int radius, boolean skipExististingChunks) {
+    public BlockPos func_235956_a_(@Nonnull ServerWorld world, Structure<?> structure, @Nonnull BlockPos startPos, int radius, boolean skipExistingChunks) {
         boolean shouldSearch = RandomUtility.isStructureGenerated(structure.getRegistryName());
-        return shouldSearch ? super.func_235956_a_(world, structure, startPos, radius, skipExististingChunks) : null;
+        return shouldSearch ? super.func_235956_a_(world, structure, startPos, radius, skipExistingChunks) : null;
     }
 
     @Override
@@ -122,12 +129,19 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     }
 
-//    @Override
-//    public void func_230351_a_(@Nonnull WorldGenRegion region, @Nonnull StructureManager manager) {
-//        if (ConfigHandler.overworldStructures.get()) {
-//            super.func_230351_a_(region, manager);
-//        }
-//    }
+    // Vanilla copy
+    @Override
+    public void func_242707_a(@Nonnull DynamicRegistries dynamicRegistries, @Nonnull StructureManager structureManager, @Nonnull IChunk chunk, @Nonnull TemplateManager templateManager, long seed) {
+        ChunkPos chunkpos = chunk.getPos();
+        Biome biome = this.biomeProvider.getNoiseBiome((chunkpos.x << 2) + 2, 0, (chunkpos.z << 2) + 2);
+        if (RandomUtility.isStructureGenerated(Structure.STRONGHOLD.getRegistryName())) {
+            this.func_242705_a(StructureFeatures.STRONGHOLD, dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
+        }
+
+        for(Supplier<StructureFeature<?, ?>> supplier : biome.getGenerationSettings().getStructures()) {
+            this.func_242705_a(supplier.get(), dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
+        }
+    }
 
     @Nonnull
     @Override

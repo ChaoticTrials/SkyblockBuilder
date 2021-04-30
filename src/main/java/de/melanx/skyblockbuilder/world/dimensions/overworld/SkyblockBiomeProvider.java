@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
@@ -26,7 +27,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
                     Codec.LONG.fieldOf("seed").stable().forGetter(provider -> provider.seed),
                     RegistryLookupCodec.getLookUpCodec(Registry.BIOME_KEY).forGetter(provider -> provider.lookupRegistry)
             ).apply(instance, instance.stable((seed, lookupRegistry) -> new SkyblockBiomeProvider(
-                    new OverworldBiomeProvider(seed, false, false, lookupRegistry))
+                    new OverworldBiomeProvider(seed, false, false, new LazyBiomeRegistryWrapper(lookupRegistry)))
             )));
     public static final ResourceLocation SINGLE_BIOME = ResourceLocation.tryCreate(ConfigHandler.biome.get());
 
