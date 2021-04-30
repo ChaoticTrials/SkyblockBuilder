@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.DynamicRegistries;
@@ -44,14 +44,8 @@ public class RandomUtility {
         for (Supplier<StructureFeature<?, ?>> structure : settings.getStructures()) {
             ResourceLocation location = structure.get().field_236268_b_.getRegistryName();
             if (location != null) {
-                if (ConfigHandler.toggleWhitelist.get()) {
-                    if (!ListHandler.WHITELIST_STRUCTURES.contains(location)) {
-                        structures.add(structure);
-                    }
-                } else {
-                    if (ListHandler.WHITELIST_STRUCTURES.contains(location)) {
-                        structures.add(structure);
-                    }
+                if (LibXConfigHandler.Structures.generationStructures.test(location)) {
+                    structures.add(structure);
                 }
             }
         }
@@ -64,14 +58,8 @@ public class RandomUtility {
             for (Supplier<ConfiguredFeature<?, ?>> feature : list) {
                 ResourceLocation location = feature.get().feature.getRegistryName();
                 if (location != null) {
-                    if (ConfigHandler.toggleWhitelist.get()) {
-                        if (!ListHandler.WHITELIST_FEATURES.contains(location)) {
-                            features.add(feature);
-                        }
-                    } else {
-                        if (ListHandler.WHITELIST_FEATURES.contains(location)) {
-                            features.add(feature);
-                        }
+                    if (LibXConfigHandler.Structures.generationFeatures.test(location)) {
+                        features.add(feature);
                     }
                 }
             }
@@ -91,12 +79,6 @@ public class RandomUtility {
     }
 
     public static boolean isStructureGenerated(ResourceLocation registryName) {
-        if (ConfigHandler.toggleWhitelist.get()) {
-            // blacklist
-            return !ListHandler.WHITELIST_STRUCTURES.contains(registryName) && !ListHandler.WHITELIST_FEATURES.contains(registryName);
-        } else {
-            // whitelist
-            return ListHandler.WHITELIST_STRUCTURES.contains(registryName) || ListHandler.WHITELIST_FEATURES.contains(registryName);
-        }
+        return LibXConfigHandler.Structures.generationStructures.test(registryName) || LibXConfigHandler.Structures.generationFeatures.test(registryName);
     }
 }

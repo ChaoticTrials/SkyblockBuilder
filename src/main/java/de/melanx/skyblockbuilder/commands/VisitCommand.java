@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -54,7 +54,7 @@ public class VisitCommand {
                     return 0;
                 }
                 if (!player.hasPermissionLevel(2)) {
-                    if (!ConfigHandler.allowVisits.get()) {
+                    if (!LibXConfigHandler.Utility.Teleports.allowVisits) {
                         source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.team_visit").mergeStyle(TextFormatting.RED), true);
                         return 0;
                     }

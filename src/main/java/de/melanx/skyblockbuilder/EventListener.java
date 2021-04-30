@@ -10,7 +10,10 @@ import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
-import de.melanx.skyblockbuilder.util.*;
+import de.melanx.skyblockbuilder.util.CompatHelper;
+import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.TemplateLoader;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.event.DatapacksReloadedEvent;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.Commands;
@@ -20,6 +23,8 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -71,6 +76,12 @@ public class EventListener {
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         World world = event.getPlayer().world;
         if (world instanceof ServerWorld && WorldUtil.isSkyblock(world) && CompatHelper.isSpawnTeleportEnabled()) {
+            if (LibXConfigHandler._reminder) {
+                event.getPlayer().sendStatusMessage(new StringTextComponent("[Skyblock Builder] The config system for this mod changed. " +
+                        "It now uses LibX and its config system. All your current configs were transferred to the new one. " +
+                        "You should only change the new config from now. You find it at config/skyblockbuilder/common-config.json5. " +
+                        "You can disable this annoying message in the config.").mergeStyle(TextFormatting.RED), false);
+            }
 
             SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
             ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();

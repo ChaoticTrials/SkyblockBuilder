@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -70,7 +70,7 @@ public class AcceptCommand {
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.accept_invitations").mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.accept_invitations").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }

@@ -33,7 +33,7 @@ Let you create a custom skyblock island via config
 [[dependencies.skyblockbuilder]]
     modId = "libx"
     mandatory = true
-    versionRange = "[1.0.40,)"
+    versionRange = "[1.0.62,)"
     ordering = "NONE"
     side = "BOTH"
 

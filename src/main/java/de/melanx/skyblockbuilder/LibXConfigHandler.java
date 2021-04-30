@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder;
 
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.config.Config;
 import io.github.noeppi_noeppi.libx.config.Group;
 import io.github.noeppi_noeppi.libx.config.validator.IntRange;
@@ -8,6 +9,9 @@ import net.minecraft.util.ResourceLocation;
 
 public class LibXConfigHandler {
 
+    @Config("Setting this to false will disable the reminder to use the new config")
+    public static boolean _reminder = true;
+
     @Group(value = {"With this you can configure the structures and features which are generated.",
             "INFO: You can also just use the modid as wildcard for all features/structures from this mod.",
             "WARNING: Some features like trees need special surface!",
@@ -15,14 +19,14 @@ public class LibXConfigHandler {
             "WARNING: This only works for vanilla dimensions (Overworld, Nether, End)"})
     public static class Structures {
 
-        @Config(value = {"All the structures that should be generated.", "A list with all possible structures can be found in config/skyblockbuilder/structures.txt"})
-        public static ResourceList whitelistStructures = new ResourceList(true, b -> {
+        @Config({"All the structures that should be generated.", "A list with all possible structures can be found in config/skyblockbuilder/structures.txt"})
+        public static ResourceList generationStructures = new ResourceList(true, b -> {
             b.simple(new ResourceLocation("minecraft", "fortress"));
         });
 
-        @Config(value = {"All the features that should be generated.", "A list with all possible structures can be found in config/skyblockbuilder/features.txt",
+        @Config({"All the features that should be generated.", "A list with all possible structures can be found in config/skyblockbuilder/features.txt",
                 "INFO: The two default values are required for the obsidian towers in end. If this is missing, they will be first generated when respawning the dragon."})
-        public static ResourceList whitelistFeatures = new ResourceList(true, b -> {
+        public static ResourceList generationFeatures = new ResourceList(true, b -> {
             b.simple(new ResourceLocation("minecraft", "end_spike"));
             b.simple(new ResourceLocation("minecraft", "end_gateway"));
         });
@@ -51,18 +55,18 @@ public class LibXConfigHandler {
         @Config("Should a surface be generated in overworld? [default: false]")
         public static boolean surface = false;
 
-        @Config(value = {"The block settings for generating the surface.", "Same format as flat world generation settings (blocks only)"})
+        @Config({"The block settings for generating the surface.", "Same format as flat world generation settings (blocks only)"})
         public static String surfaceSettings = "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block";
 
         @Config("Sea level in world [default: 63]")
         @IntRange(min = 0, max = 256)
         public static int seaHeight = 63;
 
-        @Config(value = {"Distance between islands in overworld [default: 8192]", "nether the distance is 1/8"})
+        @Config({"Distance between islands in overworld [default: 8192]", "nether the distance is 1/8"})
         @IntRange(min = 64, max = 29999900)
         public static int islandDistance = 8192;
 
-        @Config(value = {"The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes",
+        @Config({"The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes",
                 "WARNING: Too small biome range will prevent some structures to generate, if structures are enabled, because some need a special biome!"})
         @IntRange(min = 64, max = 29999900)
         public static int biomeRange = 8192;
@@ -72,7 +76,7 @@ public class LibXConfigHandler {
             @Config("Specifies the biome for the whole world")
             public static ResourceLocation biome = new ResourceLocation("minecraft", "plains");
 
-            @Config(value = {"Should only one biome be generated? [default: false]",
+            @Config({"Should only one biome be generated? [default: false]",
                     "WARNING: Some structures need a special biome, e.g. Mansion needs Dark Oak Forest! These structures will not be generated if you have only one biome!"})
             public static boolean enabled = false;
         }
@@ -84,20 +88,29 @@ public class LibXConfigHandler {
         @IntRange(min = 0)
         public static int radius = 50;
 
-        @Config(value = {"The dimension the islands will be generated in. Vanilla dimensions:",
+        @Config({"The dimension the islands will be generated in. Vanilla dimensions:",
                 "minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"})
         public static ResourceLocation dimension = new ResourceLocation("minecraft", "the_nether");
 
-        // fixme
-//        @Config(value = "Direction the player should look at initial spawn", elementType = Enum.class)
-//        public static Enum<?> direction = Enum.valueOf(WorldUtil.Directions.class, WorldUtil.Directions.SOUTH.name());
+        @Config("Direction the player should look at initial spawn")
+        public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
 
-        @Config(value = {"Height of the bottom layer from the structure.", "This affects where exactly the island will be generated."})
+        @Config({"Height of the bottom layer from the structure.", "This affects where exactly the island will be generated."})
         @IntRange(min = 0, max = 255)
         public static int height = 64;
     }
 
     public static class Inventory {
+
+        @Config({"Should all items be reset on first world join? [default: false]",
+                "This will delete all the items given on spawn from other mods guide books."})
+        public static boolean clearInv = false;
+
+        @Config("Should players' items be dropped when leaving a team? [default: true]")
+        public static boolean dropItems = true;
+    }
+
+    public static class Utility {
 
         @Config("Should players be able to leave their team or invite others? [default: true]")
         public static boolean selfManage = true;

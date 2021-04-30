@@ -2,12 +2,10 @@ package de.melanx.skyblockbuilder.world.dimensions.overworld;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.ConfigHandler;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.DynamicRegistries;
@@ -52,7 +50,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
         this.seed = seed;
         this.settings = settings;
         this.parent = new NoiseChunkGenerator(provider, seed, settings);
-        this.layerInfos = ConfigHandler.generateSurface.get() ? WorldUtil.layersInfoFromString(ConfigHandler.generationSettings.get()) : new ArrayList<>();
+        this.layerInfos = LibXConfigHandler.World.surface ? WorldUtil.layersInfoFromString(LibXConfigHandler.World.surfaceSettings) : new ArrayList<>();
     }
 
     @Nonnull
@@ -63,7 +61,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return ConfigHandler.seaHeight.get();
+        return LibXConfigHandler.World.seaHeight;
     }
 
     @Nonnull
@@ -74,7 +72,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Override
     public void generateSurface(@Nonnull WorldGenRegion region, @Nonnull IChunk chunk) {
-        if (ConfigHandler.generateSurface.get()) {
+        if (LibXConfigHandler.World.surface) {
             ChunkPos cp = chunk.getPos();
             int xs = cp.getXStart();
             int zs = cp.getZStart();
@@ -113,7 +111,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getHeight(int x, int z, @Nonnull Heightmap.Type heightmapType) {
-        if (ConfigHandler.generateSurface.get()) {
+        if (LibXConfigHandler.World.surface) {
             int i = 0;
             for (FlatLayerInfo info : this.layerInfos) {
                 i += info.getLayerCount();

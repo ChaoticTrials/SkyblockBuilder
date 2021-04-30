@@ -1,5 +1,7 @@
 package de.melanx.skyblockbuilder;
 
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.io.WritingMode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
+// TODO 1.17: remove
 public class ConfigHandler {
 
     public static final ForgeConfigSpec COMMON_CONFIG;
@@ -280,5 +283,12 @@ public class ConfigHandler {
         }
 
         w.close();
+    }
+
+    public static void loadConfig(ForgeConfigSpec spec, Path path) {
+        SkyblockBuilder.getInstance().logger.debug("Loading config file {}", path);
+        final CommentedFileConfig configData = CommentedFileConfig.builder(path).sync().autosave().writingMode(WritingMode.REPLACE).build();
+        configData.load();
+        spec.setConfig(configData);
     }
 }

@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.world;
 
 import com.mojang.serialization.Lifecycle;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
@@ -68,10 +68,10 @@ public class VoidWorldType extends ForgeWorldType {
         LazyBiomeRegistryWrapper biomes = new LazyBiomeRegistryWrapper(biomeRegistry);
         registry.register(Dimension.OVERWORLD, new Dimension(() -> DimensionType.OVERWORLD_TYPE, overworldChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         registry.register(Dimension.THE_NETHER, new Dimension(() -> DimensionType.NETHER_TYPE,
-                ConfigHandler.defaultNether.get() ? DimensionType.getNetherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
+                LibXConfigHandler.Dimensions.Nether.Default ? DimensionType.getNetherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
                         : netherChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         registry.register(Dimension.THE_END, new Dimension(() -> DimensionType.END_TYPE,
-                ConfigHandler.defaultEnd.get() ? DimensionType.getEndChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
+                LibXConfigHandler.Dimensions.End.Default ? DimensionType.getEndChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
                         : endChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         return registry;
     }

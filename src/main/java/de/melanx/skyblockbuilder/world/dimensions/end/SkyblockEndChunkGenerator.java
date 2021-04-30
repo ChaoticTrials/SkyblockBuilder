@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.world.dimensions.end;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -52,7 +52,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return ConfigHandler.seaHeight.get();
+        return LibXConfigHandler.World.seaHeight;
     }
 
     @Nonnull
@@ -63,7 +63,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Override
     public void generateSurface(@Nonnull WorldGenRegion region, @Nonnull IChunk chunk) {
-        if (ConfigHandler.defaultEndIsland.get()) {
+        if (LibXConfigHandler.Dimensions.End.mainIsland) {
             this.parent.generateSurface(region, chunk);
             return;
         }
@@ -76,7 +76,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Override
     public void func_230352_b_(@Nonnull IWorld world, @Nonnull StructureManager manager, @Nonnull IChunk chunk) {
-        if (ConfigHandler.defaultEndIsland.get()) {
+        if (LibXConfigHandler.Dimensions.End.mainIsland) {
             this.parent.func_230352_b_(world, manager, chunk);
         }
     }
