@@ -2,8 +2,7 @@ package de.melanx.skyblockbuilder.world.dimensions.overworld;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.ConfigHandler;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -26,13 +25,9 @@ public class SkyblockBiomeProvider extends BiomeProvider {
                     Codec.LONG.fieldOf("seed").stable().forGetter(provider -> provider.seed),
                     RegistryLookupCodec.getLookUpCodec(Registry.BIOME_KEY).forGetter(provider -> provider.lookupRegistry)
             ).apply(instance, instance.stable((seed, lookupRegistry) -> new SkyblockBiomeProvider(
-                    new OverworldBiomeProvider(seed, false, false, lookupRegistry))
+                    new OverworldBiomeProvider(seed, false, false, new LazyBiomeRegistryWrapper(lookupRegistry)))
             )));
-    public static final ResourceLocation SINGLE_BIOME = ResourceLocation.tryCreate(ConfigHandler.biome.get());
-
-    public static void init() {
-        Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_provider"), SkyblockBiomeProvider.CODEC);
-    }
+    public static final ResourceLocation SINGLE_BIOME = LibXConfigHandler.World.SingleBiome.biome;
 
     private final OverworldBiomeProvider parent;
     public final long seed;
@@ -42,8 +37,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
         super(parent.getBiomes());
         this.parent = parent;
         this.seed = parent.seed;
-        this.lookupRegistry = new LazyBiomeRegistryWrapper(parent.lookupRegistry);
-        parent.lookupRegistry = this.lookupRegistry;
+        this.lookupRegistry = parent.lookupRegistry;
     }
 
     @Nonnull
@@ -62,14 +56,14 @@ public class SkyblockBiomeProvider extends BiomeProvider {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        if (ConfigHandler.singleBiome.get()) {
+        if (LibXConfigHandler.World.SingleBiome.enabled) {
             Biome biome = this.lookupRegistry.getOrDefault(SINGLE_BIOME);
             if (biome == null) {
                 biome = this.lookupRegistry.getOrDefault(Biomes.PLAINS.getLocation());
             }
             return Objects.requireNonNull(biome);
         } else {
-            int range = ConfigHandler.biomeRange.get();
+            int range = LibXConfigHandler.World.biomeRange;
             return this.parent.getNoiseBiome(((((x << 2) - range / 2) % range) + range) % range, y, ((((z << 2) - range / 2) % range) + range) % range);
         }
     }

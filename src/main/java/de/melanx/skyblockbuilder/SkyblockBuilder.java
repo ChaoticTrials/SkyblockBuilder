@@ -13,6 +13,10 @@ import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGene
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.client.gui.ScreenManager;
+import io.github.noeppi_noeppi.libx.config.ConfigManager;
+import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
+import io.github.noeppi_noeppi.libx.util.ResourceList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -22,16 +26,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.logging.log4j.Logger;
 
-@Mod(SkyblockBuilder.MODID)
-public class SkyblockBuilder {
+@Mod("skyblockbuilder")
+public class SkyblockBuilder extends ModXRegistration {
 
-    public static final String MODID = "skyblockbuilder";
-    public static final Logger LOGGER = LogManager.getLogger(MODID);
-
+    private static SkyblockBuilder instance;
     public static final Gson PRETTY_GSON = Util.make(() -> {
         GsonBuilder gsonbuilder = new GsonBuilder();
         gsonbuilder.disableHtmlEscaping();
@@ -41,6 +42,8 @@ public class SkyblockBuilder {
     });
 
     public SkyblockBuilder() {
+        super("skyblockbuilder", null);
+        instance = this;
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::clientSetup);
         bus.addListener(this::commonSetup);
@@ -48,9 +51,27 @@ public class SkyblockBuilder {
         Registration.init();
 
         ConfigHandler.createDirectories();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON_CONFIG, SkyblockBuilder.MODID + "/config.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON_CONFIG, "skyblockbuilder/config.toml");
+        ConfigHandler.loadConfig(ConfigHandler.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve("skyblockbuilder/config.toml"));
 
         MinecraftForge.EVENT_BUS.register(new EventListener());
+
+        // TODO 1.17: remove as fast as possible
+        // start config override
+        LibXConfigHandler.Structures.generationStructures = new ResourceList(!ConfigHandler.toggleWhitelist.get(), b -> {
+            for (String s : ConfigHandler.whitelistStructures.get()) {
+                b.simple(new ResourceLocation(s));
+            }
+        });
+        LibXConfigHandler.Structures.generationFeatures = new ResourceList(!ConfigHandler.toggleWhitelist.get(), b -> {
+            for (String s : ConfigHandler.whitelistFeatures.get()) {
+                b.simple(new ResourceLocation(s));
+            }
+        });
+
+        LibXConfigHandler.Dimensions.Nether.Default = ConfigHandler.defaultNether.get();
+        LibXConfigHandler.Dimensions.End.Default = ConfigHandler.defaultEnd.get();
+        LibXConfigHandler.Dimensions.End.mainIsland = ConfigHandler.defaultEndIsland.get();
     }
 
     private void clientSetup(FMLClientSetupEvent event) {
@@ -62,23 +83,54 @@ public class SkyblockBuilder {
             SkyblockBiomeProvider.init();
             SkyblockNetherBiomeProvider.init();
             SkyblockEndBiomeProvider.init();
+        LibXConfigHandler.World.surface = ConfigHandler.generateSurface.get();
+        LibXConfigHandler.World.surfaceSettings = ConfigHandler.generationSettings.get();
+        LibXConfigHandler.World.seaHeight = ConfigHandler.seaHeight.get();
+        LibXConfigHandler.World.islandDistance = ConfigHandler.islandDistance.get();
+        LibXConfigHandler.World.biomeRange = ConfigHandler.biomeRange.get();
+        LibXConfigHandler.World.SingleBiome.biome = new ResourceLocation(ConfigHandler.biome.get());
+        LibXConfigHandler.World.SingleBiome.enabled = ConfigHandler.singleBiome.get();
 
-            SkyblockOverworldChunkGenerator.init();
-            SkyblockNetherChunkGenerator.init();
-            SkyblockEndChunkGenerator.init();
+        LibXConfigHandler.Spawn.radius = ConfigHandler.spawnRadius.get();
+        LibXConfigHandler.Spawn.dimension = new ResourceLocation(ConfigHandler.spawnDimension.get());
+        LibXConfigHandler.Spawn.direction = ConfigHandler.direction.get();
+        LibXConfigHandler.Spawn.height = ConfigHandler.generationHeight.get();
 
-            if (ModList.get().isLoaded("minemention")) {
-                MineMentionCompat.register();
-            }
-        });
+        LibXConfigHandler.Inventory.clearInv = ConfigHandler.clearInv.get();
+        LibXConfigHandler.Inventory.dropItems = ConfigHandler.dropItems.get();
 
+        LibXConfigHandler.Utility.selfManage = ConfigHandler.selfManageTeam.get();
+        LibXConfigHandler.Utility.createOwnTeam = ConfigHandler.createOwnTeam.get();
+        LibXConfigHandler.Utility.Teleports.spawn = ConfigHandler.spawnTeleport.get();
+        LibXConfigHandler.Utility.Teleports.allowVisits = ConfigHandler.allowVisits.get();
+        LibXConfigHandler.Utility.Teleports.home = ConfigHandler.homeEnabled.get();
+        LibXConfigHandler.Utility.Spawns.range = ConfigHandler.modifySpawnRange.get();
+        LibXConfigHandler.Utility.Spawns.modifySpawns = ConfigHandler.modifySpawns.get();
+        // enc config override
+
+        ConfigManager.registerConfig(new ResourceLocation("skyblockbuilder", "common-config"), LibXConfigHandler.class, false);
+    }}
+
+    @Override
+    protected void setup(FMLCommonSetupEvent event) {
+        if (ModList.get().isLoaded("minemention")) {
+            MineMentionCompat.register();
+        }
+
+        Registration.registerCodecs();
         ConfigHandler.generateDefaultFiles();
-        ListHandler.initLists();
     }
 
-    private void onConfigChange(ModConfig.ModConfigEvent event) {
-        if (event.getConfig().getModId().equals(MODID)) {
-            ListHandler.initLists();
-        }
+    @Override
+    protected void clientSetup(FMLClientSetupEvent event) {
+        // not now
+    }
+
+    public static SkyblockBuilder getInstance() {
+        return instance;
+    }
+
+    public static Logger getLogger() {
+        return instance.logger;
     }
 }

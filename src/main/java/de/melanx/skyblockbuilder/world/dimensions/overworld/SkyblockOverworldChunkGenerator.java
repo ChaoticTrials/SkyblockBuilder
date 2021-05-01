@@ -2,23 +2,26 @@ package de.melanx.skyblockbuilder.world.dimensions.overworld;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.ConfigHandler;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.Blockreader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.*;
+import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.world.gen.feature.structure.StructureFeatures;
 import net.minecraft.world.gen.feature.structure.StructureManager;
+import net.minecraft.world.gen.feature.template.TemplateManager;
 import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nonnull;
@@ -28,9 +31,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
-    
+
     // [VanillaCopy] overworld chunk generator codec
-    protected static final Codec<SkyblockOverworldChunkGenerator> CODEC = RecordCodecBuilder.create(
+    public static final Codec<SkyblockOverworldChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
                     BiomeProvider.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeProvider),
                     Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
@@ -42,16 +45,12 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
     protected final NoiseChunkGenerator parent;
     protected final List<FlatLayerInfo> layerInfos;
 
-    public static void init() {
-        Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock"), CODEC);
-    }
-
     public SkyblockOverworldChunkGenerator(BiomeProvider provider, long seed, Supplier<DimensionSettings> settings) {
         super(provider, provider, settings.get().getStructures(), seed);
         this.seed = seed;
         this.settings = settings;
         this.parent = new NoiseChunkGenerator(provider, seed, settings);
-        this.layerInfos = ConfigHandler.generateSurface.get() ? WorldUtil.layersInfoFromString(ConfigHandler.generationSettings.get()) : new ArrayList<>();
+        this.layerInfos = LibXConfigHandler.World.surface ? WorldUtil.layersInfoFromString(LibXConfigHandler.World.surfaceSettings) : new ArrayList<>();
     }
 
     @Nonnull
@@ -62,7 +61,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return ConfigHandler.seaHeight.get();
+        return LibXConfigHandler.World.seaHeight;
     }
 
     @Nonnull
@@ -73,7 +72,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Override
     public void generateSurface(@Nonnull WorldGenRegion region, @Nonnull IChunk chunk) {
-        if (ConfigHandler.generateSurface.get()) {
+        if (LibXConfigHandler.World.surface) {
             ChunkPos cp = chunk.getPos();
             int xs = cp.getXStart();
             int zs = cp.getZStart();
@@ -105,13 +104,14 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Nullable
     @Override
-    public BlockPos func_235956_a_(ServerWorld p_235956_1_, Structure<?> p_235956_2_, BlockPos p_235956_3_, int p_235956_4_, boolean p_235956_5_) {
-        return super.func_235956_a_(p_235956_1_, p_235956_2_, p_235956_3_, p_235956_4_, p_235956_5_);
+    public BlockPos func_235956_a_(@Nonnull ServerWorld world, Structure<?> structure, @Nonnull BlockPos startPos, int radius, boolean skipExistingChunks) {
+        boolean shouldSearch = RandomUtility.isStructureGenerated(structure.getRegistryName());
+        return shouldSearch ? super.func_235956_a_(world, structure, startPos, radius, skipExistingChunks) : null;
     }
 
     @Override
     public int getHeight(int x, int z, @Nonnull Heightmap.Type heightmapType) {
-        if (ConfigHandler.generateSurface.get()) {
+        if (LibXConfigHandler.World.surface) {
             int i = 0;
             for (FlatLayerInfo info : this.layerInfos) {
                 i += info.getLayerCount();
@@ -127,12 +127,19 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     }
 
-//    @Override
-//    public void func_230351_a_(@Nonnull WorldGenRegion region, @Nonnull StructureManager manager) {
-//        if (ConfigHandler.overworldStructures.get()) {
-//            super.func_230351_a_(region, manager);
-//        }
-//    }
+    // Vanilla copy
+    @Override
+    public void func_242707_a(@Nonnull DynamicRegistries dynamicRegistries, @Nonnull StructureManager structureManager, @Nonnull IChunk chunk, @Nonnull TemplateManager templateManager, long seed) {
+        ChunkPos chunkpos = chunk.getPos();
+        Biome biome = this.biomeProvider.getNoiseBiome((chunkpos.x << 2) + 2, 0, (chunkpos.z << 2) + 2);
+        if (RandomUtility.isStructureGenerated(Structure.STRONGHOLD.getRegistryName())) {
+            this.func_242705_a(StructureFeatures.STRONGHOLD, dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
+        }
+
+        for(Supplier<StructureFeature<?, ?>> supplier : biome.getGenerationSettings().getStructures()) {
+            this.func_242705_a(supplier.get(), dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
+        }
+    }
 
     @Nonnull
     @Override

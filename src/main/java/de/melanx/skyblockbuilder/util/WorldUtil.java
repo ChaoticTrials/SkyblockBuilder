@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
@@ -36,7 +36,7 @@ public class WorldUtil {
         ServerWorld world = getConfiguredWorld(server);
 
         BlockPos spawn = validPosition(world, team);
-        player.teleport(world, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, ConfigHandler.direction.get().getYaw(), 0);
+        player.teleport(world, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, LibXConfigHandler.Spawn.direction.getYaw(), 0);
         player.func_242111_a(world.getDimensionKey(), spawn, 0, true, false);
     }
 
@@ -52,12 +52,12 @@ public class WorldUtil {
     }
 
     public static ServerWorld getConfiguredWorld(MinecraftServer server) {
-        ResourceLocation location = new ResourceLocation(ConfigHandler.spawnDimension.get());
+        ResourceLocation location = LibXConfigHandler.Spawn.dimension;
         RegistryKey<World> worldKey = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, location);
         ServerWorld configWorld = server.getWorld(worldKey);
 
         if (configWorld == null) {
-            SkyblockBuilder.LOGGER.warn("Configured dimension for spawn does not exist: " + location);
+            SkyblockBuilder.getLogger().warn("Configured dimension for spawn does not exist: " + location);
         }
 
         return configWorld != null ? configWorld : server.func_241755_D_();
@@ -83,7 +83,7 @@ public class WorldUtil {
         //noinspection deprecation
         while (world.getBlockState(mpos.down()).isAir(world, mpos.down())) {
             if (mpos.getY() <= 0) {
-                if (spiral.getX() > ConfigHandler.spawnRadius.get() || spiral.getY() > ConfigHandler.spawnRadius.get()) {
+                if (spiral.getX() > LibXConfigHandler.Spawn.radius || spiral.getY() > LibXConfigHandler.Spawn.radius) {
                     return pos;
                 }
                 spiral.next();
@@ -127,7 +127,7 @@ public class WorldUtil {
             try {
                 i = Math.max(Integer.parseInt(info[0]), 0);
             } catch (NumberFormatException numberformatexception) {
-                SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => {}", numberformatexception.getMessage());
+                SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", numberformatexception.getMessage());
                 return null;
             }
         } else {
@@ -142,12 +142,12 @@ public class WorldUtil {
         try {
             block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockName));
         } catch (Exception exception) {
-            SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => {}", exception.getMessage());
+            SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", exception.getMessage());
             return null;
         }
 
         if (block == null) {
-            SkyblockBuilder.LOGGER.error("Error while parsing surface settings string => Unknown block, {}", blockName);
+            SkyblockBuilder.getLogger().error("Error while parsing surface settings string => Unknown block, {}", blockName);
             return null;
         } else {
             FlatLayerInfo layerInfo = new FlatLayerInfo(height, block);

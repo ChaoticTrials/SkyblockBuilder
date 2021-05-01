@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -185,7 +185,7 @@ public class ManageCommand {
         players.forEach(id -> {
             ServerPlayerEntity player = playerList.getPlayerByUUID(id);
             if (player != null) {
-                if (ConfigHandler.dropItems.get()) {
+                if (LibXConfigHandler.Inventory.dropItems) {
                     player.inventory.dropAllItems();
                 }
                 WorldUtil.teleportToIsland(player, spawn);
@@ -263,7 +263,7 @@ public class ManageCommand {
             // we only remove the ones that really are in the team.
             if (team.hasPlayer(target)) {
                 data.removePlayerFromTeam(target);
-                if (ConfigHandler.dropItems.get()) {
+                if (LibXConfigHandler.Inventory.dropItems) {
                     target.inventory.dropAllItems();
                 }
                 WorldUtil.teleportToIsland(target, spawn);

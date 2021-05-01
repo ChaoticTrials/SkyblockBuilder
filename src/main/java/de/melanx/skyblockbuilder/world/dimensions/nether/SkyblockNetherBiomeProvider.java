@@ -2,11 +2,8 @@ package de.melanx.skyblockbuilder.world.dimensions.nether;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.ConfigHandler;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
-import de.melanx.skyblockbuilder.util.RandomUtility;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraft.world.biome.Biome;
@@ -23,13 +20,12 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
             (builder) -> builder.group(
                     Codec.LONG.fieldOf("seed").forGetter((provider) -> provider.seed),
                     RegistryLookupCodec.getLookUpCodec(Registry.BIOME_KEY).forGetter(provider -> provider.lookupRegistry)
-            ).apply(builder, (seed, lookupRegistry) -> new SkyblockNetherBiomeProvider(
-                    NetherBiomeProvider.Preset.DEFAULT_NETHER_PROVIDER_PRESET.build(lookupRegistry, seed), lookupRegistry
-            )));
-
-    public static void init() {
-        Registry.register(Registry.BIOME_PROVIDER_CODEC, new ResourceLocation(SkyblockBuilder.MODID, "skyblock_nether_provider"), SkyblockNetherBiomeProvider.PACKET_CODEC);
-    }
+            ).apply(builder, (seed, lookupRegistry) -> {
+                LazyBiomeRegistryWrapper biomes = new LazyBiomeRegistryWrapper(lookupRegistry);
+                return new SkyblockNetherBiomeProvider(
+                        NetherBiomeProvider.Preset.DEFAULT_NETHER_PROVIDER_PRESET.build(biomes, seed), biomes
+                );
+            }));
 
     private final NetherBiomeProvider parent;
     private final long seed;
@@ -39,7 +35,7 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
         super(parent.getBiomes());
         this.parent = parent;
         this.seed = parent.seed;
-        this.lookupRegistry = new LazyBiomeRegistryWrapper(lookupRegistry);
+        this.lookupRegistry = lookupRegistry;
     }
 
     @Nonnull
@@ -58,7 +54,7 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        int range = ConfigHandler.biomeRange.get() / 8;
+        int range = LibXConfigHandler.World.biomeRange / 8;
         return this.parent.getNoiseBiome(((((x << 2) - range / 2) % range) + range) % range, y, ((((z << 2) - range / 2) % range) + range) % range);
     }
 }

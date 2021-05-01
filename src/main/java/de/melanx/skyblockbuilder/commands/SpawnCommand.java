@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -16,7 +16,7 @@ public class SpawnCommand {
     
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Teleports the player to spawn
-        return Commands.literal("spawn").requires(source -> ConfigHandler.spawnTeleport.get() || source.hasPermissionLevel(2))
+        return Commands.literal("spawn").requires(source -> LibXConfigHandler.Utility.Teleports.spawn || source.hasPermissionLevel(2))
                 .executes(context -> spawn(context.getSource()));
     }
 

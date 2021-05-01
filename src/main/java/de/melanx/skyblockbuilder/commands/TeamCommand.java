@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -131,7 +131,7 @@ public class TeamCommand {
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.accept_join_request").mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.accept_join_request").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
@@ -172,7 +172,7 @@ public class TeamCommand {
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.deny_join_request").mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.deny_join_request").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
@@ -289,14 +289,14 @@ public class TeamCommand {
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_spawn").mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
                 BlockPos templateSize = TemplateLoader.TEMPLATE.getSize();
                 BlockPos center = team.getIsland().getCenter().toMutable();
                 center.add(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
-                if (!pos.withinDistance(center, ConfigHandler.modifySpawnRange.get())) {
+                if (!pos.withinDistance(center, LibXConfigHandler.Utility.Spawns.range)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.position_too_far_away").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
@@ -334,7 +334,7 @@ public class TeamCommand {
                 source.sendFeedback(new TranslationTextComponent("You can't remove this spawn point. " + (team.getPossibleSpawns().size() <= 1 ? "There are too less spawn points left." : "")).mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
@@ -391,7 +391,7 @@ public class TeamCommand {
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.reset_spawns").mergeStyle(TextFormatting.GOLD), true);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }

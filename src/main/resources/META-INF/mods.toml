@@ -31,6 +31,13 @@ Let you create a custom skyblock island via config
     side = "BOTH"
 
 [[dependencies.skyblockbuilder]]
+    modId = "libx"
+    mandatory = true
+    versionRange = "[1.0.62,)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.skyblockbuilder]]
     modId = "minemention"
     mandatory = false
     versionRange = "[0.1.5,)"

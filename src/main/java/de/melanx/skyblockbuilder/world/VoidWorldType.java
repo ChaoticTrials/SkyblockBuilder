@@ -1,9 +1,9 @@
 package de.melanx.skyblockbuilder.world;
 
 import com.mojang.serialization.Lifecycle;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.ListHandler;
+import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeProvider;
@@ -35,7 +35,7 @@ public class VoidWorldType extends ForgeWorldType {
 
     @Override
     public String getTranslationKey() {
-        return SkyblockBuilder.MODID + ".generator.custom_skyblock";
+        return SkyblockBuilder.getInstance().modid + ".generator.custom_skyblock";
     }
 
     @Override
@@ -51,22 +51,28 @@ public class VoidWorldType extends ForgeWorldType {
 
         SimpleRegistry<Dimension> dimensions = DimensionGeneratorSettings.func_242749_a(
                 dimensionTypeRegistry,
-                voidDimensions(dynamicRegistries, biomeRegistry, dimensionSettingsRegistry, seed),
+                voidDimensions(biomeRegistry, dimensionSettingsRegistry, seed),
                 this.createChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed, null)
         );
 
         return new DimensionGeneratorSettings(seed, generateStructures, generateLoot, dimensions);
     }
 
+    @Deprecated // use without DynamicRegistries instead
     public static SimpleRegistry<Dimension> voidDimensions(DynamicRegistries dynamicRegistries, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
+        return voidDimensions(biomeRegistry, dimensionSettingsRegistry, seed);
+    }
+
+    public static SimpleRegistry<Dimension> voidDimensions(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         SimpleRegistry<Dimension> registry = new SimpleRegistry<>(Registry.DIMENSION_KEY, Lifecycle.experimental());
-        registry.register(Dimension.OVERWORLD, new Dimension(() -> DimensionType.OVERWORLD_TYPE, overworldChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
+        LazyBiomeRegistryWrapper biomes = new LazyBiomeRegistryWrapper(biomeRegistry);
+        registry.register(Dimension.OVERWORLD, new Dimension(() -> DimensionType.OVERWORLD_TYPE, overworldChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         registry.register(Dimension.THE_NETHER, new Dimension(() -> DimensionType.NETHER_TYPE,
-                ConfigHandler.defaultNether.get() ? DimensionType.getNetherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
-                        : netherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
+                LibXConfigHandler.Dimensions.Nether.Default ? DimensionType.getNetherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
+                        : netherChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         registry.register(Dimension.THE_END, new Dimension(() -> DimensionType.END_TYPE,
-                ConfigHandler.defaultEnd.get() ? DimensionType.getEndChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
-                        : endChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
+                LibXConfigHandler.Dimensions.End.Default ? DimensionType.getEndChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
+                        : endChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         return registry;
     }
 
@@ -74,7 +80,6 @@ public class VoidWorldType extends ForgeWorldType {
         OverworldBiomeProvider overworld = new OverworldBiomeProvider(seed, false, false, biomeRegistry);
         BiomeProvider provider = new SkyblockBiomeProvider(overworld);
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c);
-        applyWhitelist(settings);
 
         return new SkyblockOverworldChunkGenerator(provider, seed, () -> settings);
     }
@@ -84,7 +89,6 @@ public class VoidWorldType extends ForgeWorldType {
         SkyblockNetherBiomeProvider provider = new SkyblockNetherBiomeProvider(nether, biomeRegistry);
 
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242736_e);
-        applyWhitelist(settings);
 
         return new SkyblockNetherChunkGenerator(provider, seed, () -> settings);
     }
@@ -93,18 +97,7 @@ public class VoidWorldType extends ForgeWorldType {
         SkyblockEndBiomeProvider provider = new SkyblockEndBiomeProvider(new EndBiomeProvider(biomeRegistry, seed));
 
         DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242737_f);
-        applyWhitelist(settings);
 
         return new SkyblockEndChunkGenerator(provider, seed, () -> settings);
-    }
-
-    private static void applyWhitelist(DimensionSettings settings) {
-        settings.structures.field_236193_d_.entrySet().removeIf(structure -> {
-            if (ConfigHandler.toggleWhitelist.get()) {
-                return ListHandler.WHITELIST_STRUCTURES.contains(structure.getKey().getRegistryName());
-            }
-
-            return ListHandler.WHITELIST_STRUCTURES.contains(structure.getKey().getRegistryName());
-        });
     }
 }

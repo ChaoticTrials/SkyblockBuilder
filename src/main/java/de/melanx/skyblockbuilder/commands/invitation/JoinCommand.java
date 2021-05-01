@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.commands.invitation;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -49,7 +49,7 @@ public class JoinCommand {
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.join_request").mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.join_request").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }

@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.commands.invitation;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -46,7 +46,7 @@ public class DeclineCommand {
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.decline_invitations").mergeStyle(TextFormatting.RED), true);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.selfManageTeam.get() && !source.hasPermissionLevel(2)) {
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.decline_invitations").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }

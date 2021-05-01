@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.melanx.skyblockbuilder.ConfigHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -26,11 +27,11 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public class RandomUtility {
-    
+
     public static final ITextComponent UNKNOWN_PLAYER = new TranslationTextComponent("skyblockbuilder.unknown_player");
-    
+
     public static DynamicRegistries dynamicRegistries = null;
-    
+
     public static ITextComponent getDisplayNameByUuid(World world, UUID id) {
         PlayerEntity player = world.getPlayerByUuid(id);
         return player != null ? player.getDisplayName() : UNKNOWN_PLAYER;
@@ -51,14 +52,8 @@ public class RandomUtility {
         for (Supplier<StructureFeature<?, ?>> structure : settings.getStructures()) {
             ResourceLocation location = structure.get().field_236268_b_.getRegistryName();
             if (location != null) {
-                if (ConfigHandler.toggleWhitelist.get()) {
-                    if (!ListHandler.WHITELIST_STRUCTURES.contains(location)) {
-                        structures.add(structure);
-                    }
-                } else {
-                    if (ListHandler.WHITELIST_STRUCTURES.contains(location)) {
-                        structures.add(structure);
-                    }
+                if (LibXConfigHandler.Structures.generationStructures.test(location)) {
+                    structures.add(structure);
                 }
             }
         }
@@ -71,14 +66,8 @@ public class RandomUtility {
             for (Supplier<ConfiguredFeature<?, ?>> feature : list) {
                 ResourceLocation location = feature.get().feature.getRegistryName();
                 if (location != null) {
-                    if (ConfigHandler.toggleWhitelist.get()) {
-                        if (!ListHandler.WHITELIST_FEATURES.contains(location)) {
-                            features.add(feature);
-                        }
-                    } else {
-                        if (ListHandler.WHITELIST_FEATURES.contains(location)) {
-                            features.add(feature);
-                        }
+                    if (LibXConfigHandler.Structures.generationFeatures.test(location)) {
+                        features.add(feature);
                     }
                 }
             }
@@ -95,6 +84,10 @@ public class RandomUtility {
         } else {
             return -1;
         }
+    }
+
+    public static boolean isStructureGenerated(ResourceLocation registryName) {
+        return LibXConfigHandler.Structures.generationStructures.test(registryName) || LibXConfigHandler.Structures.generationFeatures.test(registryName);
     }
 
     @OnlyIn(Dist.CLIENT)
