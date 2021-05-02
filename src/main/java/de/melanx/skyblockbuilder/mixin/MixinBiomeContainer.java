@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(BiomeContainer.class)
 public class MixinBiomeContainer {
-    
+
     @Redirect(
             method = "Lnet/minecraft/world/biome/BiomeContainer;getBiomeIds()[I",
             at = @At(

@@ -131,7 +131,7 @@ public class ManageCommand {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
-        
+
         Team team = data.createTeam(result.getRight());
         if (team == null) {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_already_exist", result.getRight()).mergeStyle(TextFormatting.RED), true);
@@ -172,7 +172,7 @@ public class ManageCommand {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.delete_team"), true);
             return 0;
         }
-        
+
         //noinspection ConstantConditions
         Set<UUID> players = new HashSet<>(data.getTeam(team).getPlayers());
         if (!data.deleteTeam(team)) {
@@ -212,7 +212,7 @@ public class ManageCommand {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.add_players_to_team"), true);
             return 0;
         }
-        
+
         ServerPlayerEntity added = null;
         int i = 0;
         for (ServerPlayerEntity addedPlayer : result.getRight()) {

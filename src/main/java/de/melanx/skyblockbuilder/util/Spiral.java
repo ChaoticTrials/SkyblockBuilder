@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.util;
 
 // Adapted from https://stackoverflow.com/questions/398299/looping-in-a-spiral
 public class Spiral {
-    
+
     private int x;
     private int y;
     private int dx;

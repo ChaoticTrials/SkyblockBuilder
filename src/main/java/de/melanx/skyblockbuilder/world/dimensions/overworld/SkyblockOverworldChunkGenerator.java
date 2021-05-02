@@ -136,7 +136,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
             this.func_242705_a(StructureFeatures.STRONGHOLD, dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
         }
 
-        for(Supplier<StructureFeature<?, ?>> supplier : biome.getGenerationSettings().getStructures()) {
+        for (Supplier<StructureFeature<?, ?>> supplier : biome.getGenerationSettings().getStructures()) {
             this.func_242705_a(supplier.get(), dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
         }
     }

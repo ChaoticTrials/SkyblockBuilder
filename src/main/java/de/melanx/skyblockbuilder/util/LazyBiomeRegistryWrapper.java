@@ -112,7 +112,7 @@ public class LazyBiomeRegistryWrapper extends SimpleRegistry<Biome> {
                 .map(e -> Pair.of(e.getKey(), this.modified(e.getValue())))
                 .collect(Collectors.toSet());
     }
-    
+
     private Biome modified(@Nullable Biome biome) {
         if (biome == null) {
             return null;

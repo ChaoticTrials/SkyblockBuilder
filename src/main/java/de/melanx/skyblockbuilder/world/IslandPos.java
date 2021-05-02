@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
  * Credits go to Botania authors
  */
 public final class IslandPos {
-    
+
     private final int x;
     private final int z;
 

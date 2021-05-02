@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 public class SkyblockNetherChunkGenerator extends ChunkGenerator {
-    
+
     // [VanillaCopy] overworld chunk generator codec
     public static final Codec<SkyblockNetherChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(

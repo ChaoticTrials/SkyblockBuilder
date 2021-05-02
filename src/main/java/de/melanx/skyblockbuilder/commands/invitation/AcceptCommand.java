@@ -78,7 +78,7 @@ public class AcceptCommand {
             case ALLOW:
                 break;
         }
-        
+
         if (!data.acceptInvite(team, player)) {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.accept_invitations").mergeStyle(TextFormatting.RED), true);
             return 0;

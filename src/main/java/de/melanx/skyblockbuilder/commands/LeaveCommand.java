@@ -14,7 +14,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 public class LeaveCommand {
-    
+
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Let the player leave a team
         return Commands.literal("leave")
@@ -31,7 +31,7 @@ public class LeaveCommand {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
-        
+
         switch (SkyblockHooks.onLeave(player, data.getTeamFromPlayer(player))) {
             case DENY:
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.leave_team").mergeStyle(TextFormatting.RED), true);

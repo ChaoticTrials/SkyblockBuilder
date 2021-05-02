@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Random;
 
 public class WorldUtil {
-    
+
     public static void teleportToIsland(ServerPlayerEntity player, Team team) {
         MinecraftServer server = player.getServer();
         //noinspection ConstantConditions

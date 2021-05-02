@@ -1,7 +1,8 @@
 {
-  "skyblockbuilder.generator.custom_skyblock": "Skyblock",
+  "item.skyblockbuilder.structure_saver": "Structure Saver",
+  "screen.skyblockbuilder.structure_saver": "Structure Saver",
 
-  "skyblockbuilder.item.structure_saver": "Structure Saver",
+  "skyblockbuilder.generator.custom_skyblock": "Skyblock",
 
   "skyblockbuilder.command.argument.empty": "empty",
   "skyblockbuilder.command.argument.enable": "enable",
@@ -100,6 +101,11 @@
   "skyblockbuilder.event.player_joined": "%s joined your team.",
   "skyblockbuilder.event.remove_player": "%s was kicked out of your team.",
   "skyblockbuilder.event.rename_team": "%s renamed your team from %s to %s.",
+
+  "skyblockbuilder.screen.button.save": "Save",
+  "skyblockbuilder.screen.button.abort": "Abort",
+  "skyblockbuilder.schematic.saved": "Schematic saved in skyblock_exports/%s",
+  "skyblockbuilder.structure_saver.pos": "Position %s set at x %s, y %s, z %s",
 
   "skyblockbuilder.unknown_player": "Unknown Player",
   "skyblockbuilder.compat.disabled_management": "This and all other team management is disabled by %s.",

@@ -14,7 +14,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import javax.annotation.Nonnull;
 
 public class SkyblockEndBiomeProvider extends BiomeProvider {
-    
+
     public static final Codec<SkyblockEndBiomeProvider> CODEC = RecordCodecBuilder.create(
             (builder) -> builder.group(
                     Codec.LONG.fieldOf("seed").stable().forGetter((provider) -> provider.seed),

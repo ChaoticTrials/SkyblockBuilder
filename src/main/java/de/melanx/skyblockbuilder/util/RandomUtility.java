@@ -1,15 +1,12 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
-import de.melanx.skyblockbuilder.ConfigHandler;
+import de.melanx.skyblockbuilder.LibXConfigHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
-import de.melanx.skyblockbuilder.LibXConfigHandler;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
@@ -22,7 +19,10 @@ import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -95,17 +95,20 @@ public class RandomUtility {
         Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(sound, 1));
     }
 
-    public static void writeBlockPos(BlockPos pos, CompoundNBT nbt) {
-        nbt.putInt("posX", pos.getX());
-        nbt.putInt("posY", pos.getY());
-        nbt.putInt("posZ", pos.getZ());
+    public static String normalize(String s) {
+        return s.toLowerCase(Locale.ROOT).replaceAll("\\W+", "_");
     }
 
-    public static BlockPos getPosFromNbt(CompoundNBT nbt) {
-        int x = nbt.getInt("posX");
-        int y = nbt.getInt("posY");
-        int z = nbt.getInt("posZ");
+    public static String getFilePath(String folderPath, String name) {
+        int index = 0;
+        String filename;
+        String filepath;
+        do {
+            filename = (name == null ? "template" : RandomUtility.normalize(name)) + ((index == 0) ? "" : "_" + index) + ".nbt";
+            index++;
+            filepath = folderPath + "/" + filename;
+        } while (Files.exists(Paths.get(filepath)));
 
-        return new BlockPos(x, y, z);
+        return filepath;
     }
 }

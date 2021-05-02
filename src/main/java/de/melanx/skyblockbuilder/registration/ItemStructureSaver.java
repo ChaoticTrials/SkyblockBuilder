@@ -2,9 +2,9 @@ package de.melanx.skyblockbuilder.registration;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import io.github.noeppi_noeppi.libx.util.NBTX;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -17,7 +17,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.Template;
 import org.apache.commons.compress.utils.IOUtils;
@@ -30,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Locale;
 
 public class ItemStructureSaver extends Item {
     public ItemStructureSaver() {
@@ -48,20 +47,14 @@ public class ItemStructureSaver extends Item {
             CompoundNBT tag = stack.getOrCreateTag();
 
             if (!tag.contains("Position1")) {
-                CompoundNBT position = new CompoundNBT();
-                RandomUtility.writeBlockPos(pos, position);
-
-                tag.put("Position1", position);
-                player.sendStatusMessage(new StringTextComponent("Position 1 set at " + pos), false);
+                NBTX.putPos(tag, "Position1", pos);
+                player.sendStatusMessage(new TranslationTextComponent("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
                 return ActionResultType.SUCCESS;
             }
 
             if (!tag.contains("Position2")) {
-                CompoundNBT position = new CompoundNBT();
-                RandomUtility.writeBlockPos(pos, position);
-
-                tag.put("Position2", position);
-                player.sendStatusMessage(new StringTextComponent("Position 2 set at " + pos), false);
+                NBTX.putPos(tag, "Position2", pos);
+                player.sendStatusMessage(new TranslationTextComponent("skyblockbuilder.structure_saver.pos", 2, pos.getX(), pos.getY(), pos.getZ()), false);
                 return ActionResultType.SUCCESS;
             }
         }
@@ -84,31 +77,13 @@ public class ItemStructureSaver extends Item {
             }
 
             if (world.isRemote) {
-                ((ClientPlayerEntity) player).mc.displayGuiScreen(new ScreenStructureSaver(stack, new StringTextComponent("Structure Saver")));
+                ((ClientPlayerEntity) player).mc.displayGuiScreen(new ScreenStructureSaver(stack, new TranslationTextComponent("screen.skyblockbuilder.structure_saver")));
             }
-
-//            String schematic = saveSchematic(world, stack);
-//            if (schematic == null) {
-//                player.sendStatusMessage(new StringTextComponent("Something went terribly wrong."), false);
-//                return ActionResult.resultPass(stack);
-//            }
-//
-//            tag.remove("Position1");
-//            tag.remove("Position2");
-//            tag.remove("CanSave");
-//            player.sendStatusMessage(new StringTextComponent("Successfully saved structure as " + schematic), false);
 
             return ActionResult.func_233538_a_(stack, false);
         }
 
         return ActionResult.resultPass(stack);
-    }
-
-    @Override
-    public void inventoryTick(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull Entity entity, int itemSlot, boolean isSelected) {
-        if (world.isRemote) {
-            MutableBoundingBox area = getArea(stack);
-        }
     }
 
     @Nullable
@@ -118,12 +93,10 @@ public class ItemStructureSaver extends Item {
             return null;
         }
 
-        CompoundNBT tag1 = nbt.getCompound("Position1");
-        CompoundNBT tag2 = nbt.getCompound("Position2");
+        BlockPos pos1 = NBTX.getPos(nbt, "Position1");
+        BlockPos pos2 = NBTX.getPos(nbt, "Position2");
 
-        BlockPos pos1 = RandomUtility.getPosFromNbt(tag1);
-        BlockPos pos2 = RandomUtility.getPosFromNbt(tag2);
-
+        //noinspection ConstantConditions
         return new MutableBoundingBox(pos1, pos2);
     }
 
@@ -152,17 +125,7 @@ public class ItemStructureSaver extends Item {
             return null;
         }
 
-        int index = 0;
-        String filename;
-        String filepath;
-        do {
-            filename = (name == null ? "template" : name) + ((index == 0) ? "" : "_" + index) + ".nbt";
-            filename = filename.toLowerCase(Locale.ROOT).replaceAll("\\W+", "_");
-            index++;
-            filepath = folderPath + "/" + filename;
-        } while (Files.exists(Paths.get(filepath)));
-
-        Path path = Paths.get(filepath);
+        Path path = Paths.get(RandomUtility.getFilePath(folderPath, name));
         OutputStream outputStream = null;
         try {
             outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE);
@@ -177,7 +140,7 @@ public class ItemStructureSaver extends Item {
             }
         }
 
-        return filename;
+        return path.getFileName().toString();
     }
 
     public static ItemStack removeTags(ItemStack stack) {

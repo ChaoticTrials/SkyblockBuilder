@@ -7,7 +7,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -27,7 +28,8 @@ public class ClickScreenButtonHandler {
                     String name = ItemStructureSaver.saveSchematic(world, msg.stack, msg.name);
                     stack = ItemStructureSaver.removeTags(msg.stack);
                     player.setHeldItem(Hand.MAIN_HAND, stack);
-                    player.sendStatusMessage(new StringTextComponent("Saved schematic as skyblock_exports/" + name), true);
+                    IFormattableTextComponent component = new TranslationTextComponent("skyblockbuilder.schematic.saved", name);
+                    player.sendStatusMessage(component, true);
                     break;
                 case DELETE:
                     stack = ItemStructureSaver.removeTags(msg.stack);

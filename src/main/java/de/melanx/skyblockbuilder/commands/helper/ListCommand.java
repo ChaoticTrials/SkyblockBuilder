@@ -25,10 +25,10 @@ import java.util.stream.Collectors;
 public class ListCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-       // Lists all teams
+        // Lists all teams
         return Commands.literal("list")
                 .executes(context -> listTeams(context.getSource()))
-                 // Lists all members in team
+                // Lists all members in team
                 .then(Commands.argument("team", StringArgumentType.word()).suggests(ManageCommand.SUGGEST_TEAMS)
                         .executes(context -> listPlayers(context.getSource(), StringArgumentType.getString(context, "team"))));
     }

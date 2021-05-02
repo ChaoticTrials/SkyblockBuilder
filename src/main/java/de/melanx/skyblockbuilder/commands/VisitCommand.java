@@ -20,7 +20,7 @@ import net.minecraft.world.server.ServerWorld;
 import java.util.stream.Collectors;
 
 public class VisitCommand {
-    
+
     public static final SuggestionProvider<CommandSource> SUGGEST_VISIT_TEAMS = (context, builder) -> ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
             .getTeams().stream().filter(Team::allowsVisits).map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
 

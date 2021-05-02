@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class CompatHelper {
-    
+
     private static final List<String> teamManagementDisablingMods = new ArrayList<>();
     private static boolean spawnTeleportEnabled = true;
 
