@@ -1,10 +1,10 @@
 package de.melanx.skyblockbuilder.registration;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import io.github.noeppi_noeppi.libx.util.NBTX;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -77,7 +77,7 @@ public class ItemStructureSaver extends Item {
             }
 
             if (world.isRemote) {
-                ((ClientPlayerEntity) player).mc.displayGuiScreen(new ScreenStructureSaver(stack, new TranslationTextComponent("screen.skyblockbuilder.structure_saver")));
+                ClientUtility.openItemScreen(stack);
             }
 
             return ActionResult.func_233538_a_(stack, false);

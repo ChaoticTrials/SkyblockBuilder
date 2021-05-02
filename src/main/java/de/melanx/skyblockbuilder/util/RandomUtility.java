@@ -2,11 +2,8 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
 import de.melanx.skyblockbuilder.LibXConfigHandler;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
@@ -16,8 +13,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeGenerationSettings;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.StructureFeature;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -88,11 +83,6 @@ public class RandomUtility {
 
     public static boolean isStructureGenerated(ResourceLocation registryName) {
         return LibXConfigHandler.Structures.generationStructures.test(registryName) || LibXConfigHandler.Structures.generationFeatures.test(registryName);
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public static void playSound(SoundEvent sound) {
-        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(sound, 1));
     }
 
     public static String normalize(String s) {

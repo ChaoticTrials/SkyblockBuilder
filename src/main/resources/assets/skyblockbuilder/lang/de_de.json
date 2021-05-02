@@ -1,4 +1,7 @@
 {
+  "item.skyblockbuilder.structure_saver": "Struktur-Sicherer",
+  "screen.skyblockbuilder.structure_saver": "Struktur-Sicherer",
+
   "skyblockbuilder.generator.custom_skyblock": "Himmelsblock",
 
   "skyblockbuilder.command.argument.empty": "leer",
@@ -98,6 +101,13 @@
   "skyblockbuilder.event.player_joined": "%s ist dem Team beigetreten.",
   "skyblockbuilder.event.remove_player": "%s ist aus dem Team verschwunden.",
   "skyblockbuilder.event.rename_team": "%s hat das Team von %s zu %s umbenannt.",
+
+  "skyblockbuilder.screen.button.save": "Sichern",
+  "skyblockbuilder.screen.button.abort": "Abbrechen",
+  "skyblockbuilder.screen.widget.structure_name": "Strukturname",
+  "skyblockbuilder.screen.open_folder.error": "Ordner konnte nicht geöffnet werden: %s",
+  "skyblockbuilder.schematic.saved": "Schema gespeichert in skyblock_exports/%s",
+  "skyblockbuilder.structure_saver.pos": "Position %s gesetzt an x %s, y %s, z %s",
 
   "skyblockbuilder.unknown_player": "Unbekannter Spieler",
   "skyblockbuilder.compat.disabled_management": "Diese und andere Teamverwaltungsfunktionen sind aktuell durch %s deaktiviert.",

@@ -56,7 +56,7 @@ public class ClickScreenButtonHandler {
 
         @Override
         public Message decode(PacketBuffer buffer) {
-            return new Message(buffer.readItemStack(), buffer.readEnumValue(ScreenStructureSaver.Button.class), buffer.readString());
+            return new Message(buffer.readItemStack(), buffer.readEnumValue(ScreenStructureSaver.Button.class), buffer.readString(32767));
         }
     }
 

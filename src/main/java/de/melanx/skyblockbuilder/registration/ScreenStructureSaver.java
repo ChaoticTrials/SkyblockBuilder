@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.registration;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.ClientUtility;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
@@ -14,7 +14,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nonnull;
@@ -28,9 +27,7 @@ public class ScreenStructureSaver extends Screen {
     private final int xSize;
     private final int ySize;
     private final ItemStack stack;
-    @SuppressWarnings("FieldCanBeLocal")
     private int relX;
-    @SuppressWarnings("FieldCanBeLocal")
     private int relY;
     private TextFieldWidget name;
 
@@ -46,7 +43,7 @@ public class ScreenStructureSaver extends Screen {
         super.init(mc, x, y);
         this.relX = (x - this.xSize) / 2;
         this.relY = (y - this.ySize) / 2;
-        this.name = new TextFieldWidget(this.font, this.relX + 15, this.relY + 25, 143, 17, new StringTextComponent("test"));
+        this.name = new TextFieldWidget(this.font, this.relX + 11, this.relY + 25, 125, 17, new TranslationTextComponent("skyblockbuilder.screen.widget.structure_name"));
         this.name.setMaxStringLength(32767);
         this.name.changeFocus(true);
         this.name.setText(this.name.getText());
@@ -93,8 +90,13 @@ public class ScreenStructureSaver extends Screen {
         if (button == 0) {
             Button pressed = this.getHoveredButton((int) x, (int) y);
             if (pressed != null) {
-                this.closeScreen();
-                RandomUtility.playSound(SoundEvents.UI_BUTTON_CLICK);
+                if (pressed == Button.OPEN_FOLDER) {
+                    ClientUtility.openPath("skyblock_exports");
+                } else {
+                    this.closeScreen();
+                }
+
+                ClientUtility.playSound(SoundEvents.UI_BUTTON_CLICK);
                 SkyblockBuilder.getNetwork().handleButtonClick(this.stack, pressed, this.name.getText().isEmpty() ? "template" : this.name.getText());
             }
         }
@@ -146,7 +148,8 @@ public class ScreenStructureSaver extends Screen {
     public enum Button {
         SAVE(10, 55, 60, 20, 0, new TranslationTextComponent("skyblockbuilder.screen.button.save")),
         ABORT(77, 55, 60, 20, 0, new TranslationTextComponent("skyblockbuilder.screen.button.abort")),
-        DELETE(144, 55, 20, 20, 60, null);
+        DELETE(144, 55, 20, 20, 60, null),
+        OPEN_FOLDER(144, 23, 20, 20, 80, null);
 
         private final int x;
         private final int y;

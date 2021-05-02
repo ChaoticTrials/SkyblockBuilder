@@ -104,6 +104,8 @@
 
   "skyblockbuilder.screen.button.save": "Save",
   "skyblockbuilder.screen.button.abort": "Abort",
+  "skyblockbuilder.screen.widget.structure_name": "Structure Name",
+  "skyblockbuilder.screen.open_folder.error": "Could not open folder: %s",
   "skyblockbuilder.schematic.saved": "Schematic saved in skyblock_exports/%s",
   "skyblockbuilder.structure_saver.pos": "Position %s set at x %s, y %s, z %s",
 
