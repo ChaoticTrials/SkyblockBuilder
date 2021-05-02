@@ -1,6 +1,8 @@
 {
   "skyblockbuilder.generator.custom_skyblock": "Skyblock",
 
+  "skyblockbuilder.item.structure_saver": "Structure Saver",
+
   "skyblockbuilder.command.argument.empty": "empty",
   "skyblockbuilder.command.argument.enable": "enable",
   "skyblockbuilder.command.argument.enabled": "enabled",
