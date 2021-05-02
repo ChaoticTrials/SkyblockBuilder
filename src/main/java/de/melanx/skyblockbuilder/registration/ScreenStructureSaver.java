@@ -6,10 +6,10 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.InputMappings;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.text.ITextComponent;
@@ -19,10 +19,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
 
-public class ScreenStructureSaver extends ContainerScreen<ContainerStructureSaver> {
+public class ScreenStructureSaver extends Screen {
 
-    private static final ResourceLocation SCREEN_LOCATION = new ResourceLocation(SkyblockBuilder.MODID, "textures/gui/structure_saver.png");
+    private static final ResourceLocation SCREEN_LOCATION = new ResourceLocation(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
 
+    private final int xSize;
+    private final int ySize;
+    private final ItemStack stack;
     @SuppressWarnings("FieldCanBeLocal")
     private int relX;
     @SuppressWarnings("FieldCanBeLocal")
@@ -35,9 +38,11 @@ public class ScreenStructureSaver extends ContainerScreen<ContainerStructureSave
     private int yTrash;
     private TextFieldWidget name;
 
-    public ScreenStructureSaver(ContainerStructureSaver container, PlayerInventory inv, ITextComponent title) {
-        super(container, inv, title);
+    public ScreenStructureSaver(ItemStack stack, ITextComponent title) {
+        super(title);
+        this.xSize = 176;
         this.ySize = 85;
+        this.stack = stack;
     }
 
     @Override
@@ -61,23 +66,13 @@ public class ScreenStructureSaver extends ContainerScreen<ContainerStructureSave
     @Override
     public void render(@Nonnull MatrixStack ms, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(ms);
-        super.render(ms, mouseX, mouseY, partialTicks);
-    }
-
-    @Override
-    protected void drawGuiContainerForegroundLayer(@Nonnull MatrixStack ms, int x, int y) {
-        this.font.func_243248_b(ms, this.title, this.titleX, this.titleY, Color.DARK_GRAY.getRGB());
-    }
-
-    @Override
-    protected void drawGuiContainerBackgroundLayer(@Nonnull MatrixStack ms, float partialTicks, int x, int y) {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         //noinspection ConstantConditions
         this.minecraft.getTextureManager().bindTexture(SCREEN_LOCATION);
         int relX = (this.width - this.xSize) / 2;
         int relY = (this.height - this.ySize) / 2;
         this.blit(ms, relX, relY, 0, 0, this.xSize, this.ySize);
-        Button button = this.getPressedButton(x, y);
+        Button button = this.getPressedButton(mouseX, mouseY);
         boolean overSave = button == Button.SAVE;
         boolean overAbort = button == Button.ABORT;
         boolean overTrash = button == Button.DELETE;
@@ -85,30 +80,20 @@ public class ScreenStructureSaver extends ContainerScreen<ContainerStructureSave
         this.blit(ms, this.xSave, this.ySave, 0, overSave ? this.ySize + 20 : this.ySize, 60, 20);
         this.blit(ms, this.xAbort, this.yAbort, 0, overAbort ? this.ySize + 20 : this.ySize, 60, 20);
         this.blit(ms, this.xTrash, this.yTrash, 60, overTrash ? this.ySize + 20 : this.ySize, 20, 20);
-        this.name.render(ms, x, y, partialTicks);
+        this.name.render(ms, mouseX, mouseY, partialTicks);
+        super.render(ms, mouseX, mouseY, partialTicks);
+        this.font.func_243248_b(ms, this.title, this.relX + 10, this.relY + 8, Color.DARK_GRAY.getRGB());
     }
 
     @Override
     public boolean mouseClicked(double x, double y, int button) {
         if (button == 0) {
             Button pressed = this.getPressedButton((int) x, (int) y);
-            switch (pressed) {
-                case SAVE:
-                    // TODO save schematic and remove tags from ItemStack
-                    this.closeScreen();
-                    RandomUtility.playSound(SoundEvents.UI_BUTTON_CLICK);
-                    break;
-                case ABORT:
-                    this.closeScreen();
-                    RandomUtility.playSound(SoundEvents.UI_BUTTON_CLICK);
-                    break;
-                case DELETE:
-                    // TODO remove tags from ItemStack
-                    this.closeScreen();
-                    RandomUtility.playSound(SoundEvents.UI_BUTTON_CLICK);
-                    break;
-            }
-        }
+            if (pressed != Button.EMPTY) {
+            this.closeScreen();
+            RandomUtility.playSound(SoundEvents.UI_BUTTON_CLICK);
+            SkyblockBuilder.getNetwork().handleButtonClick(this.stack, pressed, this.name.getText().isEmpty() ? "template" : this.name.getText());
+        }}
         return super.mouseClicked(x, y, button);
     }
 
@@ -146,6 +131,11 @@ public class ScreenStructureSaver extends ContainerScreen<ContainerStructureSave
         }
 
         return Button.EMPTY;
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
     }
 
     public enum Button {

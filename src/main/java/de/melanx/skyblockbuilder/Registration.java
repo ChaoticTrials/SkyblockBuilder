@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder;
 
+import de.melanx.skyblockbuilder.registration.ItemStructureSaver;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
@@ -8,6 +9,7 @@ import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGene
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import io.github.noeppi_noeppi.libx.annotation.RegisterClass;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.common.world.ForgeWorldType;
@@ -16,6 +18,8 @@ import net.minecraftforge.common.world.ForgeWorldType;
 public class Registration {
 
     public static final ForgeWorldType customSkyblock = new VoidWorldType();
+
+    public static final Item structureSaver = new ItemStructureSaver();
 
     public static void registerCodecs() {
         Registry.register(Registry.CHUNK_GENERATOR_CODEC, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skyblock"), SkyblockOverworldChunkGenerator.CODEC);

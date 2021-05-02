@@ -3,23 +3,13 @@ package de.melanx.skyblockbuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
-import de.melanx.skyblockbuilder.registration.Registration;
-import de.melanx.skyblockbuilder.registration.ScreenStructureSaver;
-import de.melanx.skyblockbuilder.util.ListHandler;
-import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
-import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
-import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeProvider;
-import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGenerator;
-import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockBiomeProvider;
-import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
-import net.minecraft.client.gui.ScreenManager;
+import de.melanx.skyblockbuilder.network.SkyNetwork;
 import io.github.noeppi_noeppi.libx.config.ConfigManager;
 import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
 import io.github.noeppi_noeppi.libx.util.ResourceList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -33,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 public class SkyblockBuilder extends ModXRegistration {
 
     private static SkyblockBuilder instance;
+    private static SkyNetwork network;
     public static final Gson PRETTY_GSON = Util.make(() -> {
         GsonBuilder gsonbuilder = new GsonBuilder();
         gsonbuilder.disableHtmlEscaping();
@@ -44,11 +35,7 @@ public class SkyblockBuilder extends ModXRegistration {
     public SkyblockBuilder() {
         super("skyblockbuilder", null);
         instance = this;
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.addListener(this::clientSetup);
-        bus.addListener(this::commonSetup);
-        bus.addListener(this::onConfigChange);
-        Registration.init();
+        network = new SkyNetwork(this);
 
         ConfigHandler.createDirectories();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON_CONFIG, "skyblockbuilder/config.toml");
@@ -72,17 +59,7 @@ public class SkyblockBuilder extends ModXRegistration {
         LibXConfigHandler.Dimensions.Nether.Default = ConfigHandler.defaultNether.get();
         LibXConfigHandler.Dimensions.End.Default = ConfigHandler.defaultEnd.get();
         LibXConfigHandler.Dimensions.End.mainIsland = ConfigHandler.defaultEndIsland.get();
-    }
 
-    private void clientSetup(FMLClientSetupEvent event) {
-        ScreenManager.registerFactory(Registration.CONTAINER_STRUCTURE_SAVER.get(), ScreenStructureSaver::new);
-    }
-
-    private void commonSetup(FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> {
-            SkyblockBiomeProvider.init();
-            SkyblockNetherBiomeProvider.init();
-            SkyblockEndBiomeProvider.init();
         LibXConfigHandler.World.surface = ConfigHandler.generateSurface.get();
         LibXConfigHandler.World.surfaceSettings = ConfigHandler.generationSettings.get();
         LibXConfigHandler.World.seaHeight = ConfigHandler.seaHeight.get();
@@ -109,7 +86,7 @@ public class SkyblockBuilder extends ModXRegistration {
         // enc config override
 
         ConfigManager.registerConfig(new ResourceLocation("skyblockbuilder", "common-config"), LibXConfigHandler.class, false);
-    }}
+    }
 
     @Override
     protected void setup(FMLCommonSetupEvent event) {
@@ -128,6 +105,10 @@ public class SkyblockBuilder extends ModXRegistration {
 
     public static SkyblockBuilder getInstance() {
         return instance;
+    }
+
+    public static SkyNetwork getNetwork() {
+        return network;
     }
 
     public static Logger getLogger() {

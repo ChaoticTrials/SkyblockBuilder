@@ -3,11 +3,9 @@ package de.melanx.skyblockbuilder.registration;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -19,9 +17,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.Template;
 import org.apache.commons.compress.utils.IOUtils;
@@ -34,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Locale;
 
 public class ItemStructureSaver extends Item {
     public ItemStructureSaver() {
@@ -78,7 +75,7 @@ public class ItemStructureSaver extends Item {
         ItemStack stack = player.getHeldItem(hand);
         CompoundNBT tag = stack.getOrCreateTag();
 
-        if (!world.isRemote && tag.contains("Position1") && tag.contains("Position2")) {
+        if (tag.contains("Position1") && tag.contains("Position2")) {
 
             // prevent instant save
             if (!tag.contains("CanSave")) {
@@ -86,20 +83,9 @@ public class ItemStructureSaver extends Item {
                 return ActionResult.resultPass(stack);
             }
 
-            INamedContainerProvider containerProvider = new INamedContainerProvider() {
-                @Nonnull
-                @Override
-                public Container createMenu(int windowId, @Nonnull PlayerInventory inventory, @Nonnull PlayerEntity player) {
-                    return new ContainerStructureSaver(windowId);
-                }
-
-                @Nonnull
-                @Override
-                public ITextComponent getDisplayName() {
-                    return new TranslationTextComponent("screen." + SkyblockBuilder.MODID + ".structure_saver");
-                }
-            };
-            player.openContainer(containerProvider);
+            if (world.isRemote) {
+                ((ClientPlayerEntity) player).mc.displayGuiScreen(new ScreenStructureSaver(stack, new StringTextComponent("Structure Saver")));
+            }
 
 //            String schematic = saveSchematic(world, stack);
 //            if (schematic == null) {
@@ -145,7 +131,7 @@ public class ItemStructureSaver extends Item {
         return saveSchematic(world, stack, null);
     }
 
-    public static String saveSchematic(World world, ItemStack stack, String name) {
+    public static String saveSchematic(World world, ItemStack stack, @Nullable String name) {
         Template template = new Template();
         MutableBoundingBox boundingBox = getArea(stack);
 
@@ -162,7 +148,7 @@ public class ItemStructureSaver extends Item {
         try {
             Files.createDirectories(Paths.get(folderPath));
         } catch (IOException e) {
-            SkyblockBuilder.LOGGER.warn("Could not create folder: {}", folderPath);
+            SkyblockBuilder.getLogger().warn("Could not create folder: {}", folderPath);
             return null;
         }
 
@@ -171,6 +157,7 @@ public class ItemStructureSaver extends Item {
         String filepath;
         do {
             filename = (name == null ? "template" : name) + ((index == 0) ? "" : "_" + index) + ".nbt";
+            filename = filename.toLowerCase(Locale.ROOT).replaceAll("\\W+", "_");
             index++;
             filepath = folderPath + "/" + filename;
         } while (Files.exists(Paths.get(filepath)));
@@ -185,10 +172,20 @@ public class ItemStructureSaver extends Item {
             e.printStackTrace();
             return null;
         } finally {
-            if (outputStream != null)
+            if (outputStream != null) {
                 IOUtils.closeQuietly(outputStream);
+            }
         }
 
         return filename;
+    }
+
+    public static ItemStack removeTags(ItemStack stack) {
+        CompoundNBT tag = stack.getOrCreateTag();
+        tag.remove("Position1");
+        tag.remove("Position2");
+        tag.remove("CanSave");
+        stack.setTag(tag);
+        return stack;
     }
 }
