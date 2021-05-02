@@ -18,6 +18,7 @@ import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.event.DatapacksReloadedEvent;
+import io.github.noeppi_noeppi.libx.render.RenderHelperWorld;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -34,7 +35,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -183,13 +183,13 @@ public class EventListener {
 
         MatrixStack matrixStack = event.getMatrixStack();
         matrixStack.push();
-        Vector3d projection = Minecraft.getInstance().gameRenderer.getActiveRenderInfo().getProjectedView();
-        matrixStack.translate(-projection.x, -projection.y, -projection.z);
+        RenderHelperWorld.loadProjection(matrixStack, 0, 0, 0);
 
         IRenderTypeBuffer.Impl source = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
         IVertexBuilder buffer = source.getBuffer(RenderType.LINES);
 
         WorldRenderer.drawBoundingBox(matrixStack, buffer, AxisAlignedBB.toImmutable(area), 0.9F, 0.9F, 0.9F, 1.0F);
+        source.finish(RenderType.LINES);
         matrixStack.pop();
     }
 }
