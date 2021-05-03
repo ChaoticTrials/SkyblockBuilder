@@ -24,7 +24,9 @@ relative to the 0, 0, 0 from the template structure.
 
 ### Possible spawns
 Possible spawns are set in `config/skyblockbuilder/spawns.json`. For each player, the game will choose a random position
-and places the player on that position. Good on big islands when adding a lot of players at once at one team.
+and places the player on that position. Good on big islands when adding a lot of players at once at one team. You can
+also export your current spawn points with command `/skyblock spawns EXPORT`. For this, you should first
+[modify spawns](#modify-spawns). You will find your exported spawns in `skyblock_exports/spawns.json`.
 
 ### Loot chests on island
 If you want a loot chest on an island, you need to set the NBT data to the chest with the `/data merge block x y z {LootTable: modid:path/to/loot_table}`

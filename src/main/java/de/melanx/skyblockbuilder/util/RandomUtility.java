@@ -90,11 +90,15 @@ public class RandomUtility {
     }
 
     public static String getFilePath(String folderPath, String name) {
+        return getFilePath(folderPath, name, "nbt");
+    }
+
+    public static String getFilePath(String folderPath, String name, String extension) {
         int index = 0;
         String filename;
         String filepath;
         do {
-            filename = (name == null ? "template" : RandomUtility.normalize(name)) + ((index == 0) ? "" : "_" + index) + ".nbt";
+            filename = (name == null ? "template" : RandomUtility.normalize(name)) + ((index == 0) ? "" : "_" + index) + "." + extension;
             index++;
             filepath = folderPath + "/" + filename;
         } while (Files.exists(Paths.get(filepath)));

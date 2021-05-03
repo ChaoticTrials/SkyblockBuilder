@@ -11,6 +11,8 @@
   "skyblockbuilder.command.argument.disabled": "disabled",
 
   "skyblockbuilder.error.no_skyblock": "This command can only be used in a skyblock world.",
+  "skyblockbuilder.command.error.creating_file": "Failed to create file %s",
+  "skyblockbuilder.command.error.creating_path": "Failed to create path %s",
   "skyblockbuilder.command.error.team_not_exist": "This team doesn't exist!",
   "skyblockbuilder.command.error.team_already_exist": "Team %s already exists! Please choose another name!",
   "skyblockbuilder.command.error.user_has_team": "You are already in a team!",
@@ -71,6 +73,7 @@
   "skyblockbuilder.command.info.toggle_request": "Join requests by other players are now %s.",
   "skyblockbuilder.command.info.click_to_copy": "Click to copy",
 
+  "skyblockbuilder.command.success.export_spawns": "Successfully exported current spawns to %s",
   "skyblockbuilder.command.success.joined_team": "Successfully joined team %s.",
   "skyblockbuilder.command.success.declined_invitation": "Successfully destroyed the invitation of team %s.",
   "skyblockbuilder.command.success.left_team": "Successfully left your teammates alone.",
