@@ -13,8 +13,8 @@ You can simply set `level-type` in `server.properties` to `skyblockbuilder:custo
 
 ### Creating a custom skyblock island
 1. Build an island.
-2. Use the vanilla Structure Block if your island is smaller or equals 48x48x48 blocks to save it as a `.nbt` file. 
-Otherwise, you need to use a mod like [Create](https://www.curseforge.com/minecraft/mc-mods/create) to generate this file.
+2. Use the vanilla Structure Block if your island is smaller or equals 48x48x48 blocks to save it as a `.nbt` file.
+   Otherwise, you can use the Structure Saver item to generate this file.
 3. Copy the generated file from `saves/<world>/generated/minecraft/structures/<name>.nbt` to `config/skyblockbuilder/template.nbt`.
 4. Set the possible spawns in `config/skyblockbuilder/spawns.json`. There can be multiple spawns, each one is an array with `[x, y, z]`
 relative to the 0, 0, 0 from the template structure. 

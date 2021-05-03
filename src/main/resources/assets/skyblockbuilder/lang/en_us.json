@@ -102,6 +102,8 @@
   "skyblockbuilder.event.remove_player": "%s was kicked out of your team.",
   "skyblockbuilder.event.rename_team": "%s renamed your team from %s to %s.",
 
+  "skyblockbuilder.item.structure_saver.info.tooltip": "Shift-right click a block to set corner",
+  "skyblockbuilder.item.structure_saver.position.tooltip": "Position %s: x %s, y %s, z %s",
   "skyblockbuilder.screen.button.save": "Save",
   "skyblockbuilder.screen.button.abort": "Abort",
   "skyblockbuilder.screen.button.delete.tooltip": "Discard Positions",

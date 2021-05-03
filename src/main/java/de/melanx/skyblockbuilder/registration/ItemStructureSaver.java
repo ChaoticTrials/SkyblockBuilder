@@ -5,6 +5,7 @@ import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import io.github.noeppi_noeppi.libx.util.NBTX;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -17,6 +18,9 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.Template;
@@ -30,8 +34,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 public class ItemStructureSaver extends Item {
+
+    private static final IFormattableTextComponent TOOLTIP_INFO = new TranslationTextComponent("skyblockbuilder.item.structure_saver.info.tooltip").mergeStyle(TextFormatting.GOLD);
+
     public ItemStructureSaver() {
         super(new Properties().group(ItemGroup.TOOLS));
     }
@@ -84,6 +92,24 @@ public class ItemStructureSaver extends Item {
         }
 
         return ActionResult.resultPass(stack);
+    }
+
+    @Override
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<ITextComponent> tooltip, @Nonnull ITooltipFlag flag) {
+        super.addInformation(stack, world, tooltip, flag);
+        CompoundNBT nbt = stack.getOrCreateTag();
+        BlockPos pos1 = NBTX.getPos(nbt, "Position1");
+        BlockPos pos2 = NBTX.getPos(nbt, "Position2");
+
+        if (pos1 != null) {
+            tooltip.add(new TranslationTextComponent("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos1.getX(), pos1.getY(), pos1.getZ()).mergeStyle(TextFormatting.DARK_GRAY));
+        }
+
+        if (pos2 != null) {
+            tooltip.add(new TranslationTextComponent("skyblockbuilder.item.structure_saver.position.tooltip", 2, pos2.getX(), pos2.getY(), pos2.getZ()).mergeStyle(TextFormatting.DARK_GRAY));
+        }
+
+        tooltip.add(TOOLTIP_INFO);
     }
 
     @Nullable
