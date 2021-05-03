@@ -316,6 +316,7 @@ public class SkyblockSavedData extends WorldSavedData {
                 return team;
             }
         }
+
         return null;
     }
 

@@ -92,6 +92,8 @@
   "skyblockbuilder.command.success.reset_spawns": "Successfully reset all possible spawns.",
   "skyblockbuilder.command.success.rename_team": "Successfully renamed team to %s.",
 
+  "skyblockbuilder.command.warning.edit_spawn_spawns": "[WARNING] You are editing the spawn island!",
+
   "skyblockbuilder.event.accept_invite": "%s accepted your teams invitation.",
   "skyblockbuilder.event.accept_join_request": "%s accepted join request from %s.",
   "skyblockbuilder.event.deny_join_request": "%s denied join request by %s.",

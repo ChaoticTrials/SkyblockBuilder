@@ -279,8 +279,13 @@ public class TeamCommand {
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
-            return 0;
+            if (!source.hasPermissionLevel(2)) {
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+                return 0;
+            }
+
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.warning.edit_spawn_spawns").mergeStyle(TextFormatting.RED), true);
+            team = data.getSpawn();
         }
 
         Pair<Event.Result, BlockPos> result = SkyblockHooks.onAddSpawn(player, team, pos);
