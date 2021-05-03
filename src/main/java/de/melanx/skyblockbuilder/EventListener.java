@@ -163,6 +163,13 @@ public class EventListener {
     public void onServerStarted(FMLServerStartedEvent event) {
         RandomUtility.dynamicRegistries = event.getServer().func_244267_aX();
         if (WorldUtil.isSkyblock(event.getServer().func_241755_D_())) {
+            try {
+                ConfigHandler.generateDefaultFiles();
+                TemplateLoader.loadSchematic();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
             SkyblockSavedData.get(event.getServer().func_241755_D_()).getSpawn();
         }
     }
