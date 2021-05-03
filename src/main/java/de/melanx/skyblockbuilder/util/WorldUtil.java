@@ -69,8 +69,7 @@ public class WorldUtil {
         Random random = new Random();
         while (!spawns.isEmpty()) {
             BlockPos pos = spawns.get(random.nextInt(spawns.size()));
-            //noinspection deprecation
-            if (!world.getBlockState(pos.down()).isAir(world, pos.down())) {
+            if (!world.getBlockState(pos.down()).getCollisionShape(world, pos.down()).isEmpty()) {
                 return pos;
             }
 
@@ -80,8 +79,7 @@ public class WorldUtil {
         BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(BlockPos.ZERO);
         BlockPos.Mutable mpos = new BlockPos.Mutable(pos.getX(), world.getHeight(), pos.getZ());
         Spiral spiral = new Spiral();
-        //noinspection deprecation
-        while (world.getBlockState(mpos.down()).isAir(world, mpos.down())) {
+        while (world.getBlockState(mpos.down()).getCollisionShape(world, mpos.down()).isEmpty()) {
             if (mpos.getY() <= 0) {
                 if (spiral.getX() > LibXConfigHandler.Spawn.radius || spiral.getY() > LibXConfigHandler.Spawn.radius) {
                     return pos;
