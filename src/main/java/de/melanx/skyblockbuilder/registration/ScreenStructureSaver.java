@@ -52,13 +52,15 @@ public class ScreenStructureSaver extends Screen {
     @Override
     public void render(@Nonnull MatrixStack ms, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(ms);
+        //noinspection deprecation
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         //noinspection ConstantConditions
         this.minecraft.getTextureManager().bindTexture(SCREEN_LOCATION);
         this.blit(ms, this.relX, this.relY, 0, 0, this.xSize, this.ySize);
 
+        Button hoveredButton = this.getHoveredButton(mouseX, mouseY);
         for (Button button : Button.values()) {
-            this.renderButton(ms, button, this.getHoveredButton(mouseX, mouseY) == button);
+            this.renderButton(ms, button, hoveredButton == button);
         }
 
         this.name.render(ms, mouseX, mouseY, partialTicks);
@@ -66,6 +68,9 @@ public class ScreenStructureSaver extends Screen {
         this.font.func_243248_b(ms, this.title, this.relX + 10, this.relY + 8, Color.DARK_GRAY.getRGB());
         for (Button button : Button.values()) {
             this.renderTitle(ms, button);
+            if (hoveredButton == button && button.tooltip != null) {
+                this.renderTooltip(ms, button.tooltip, mouseX, mouseY);
+            }
         }
     }
 
@@ -146,10 +151,10 @@ public class ScreenStructureSaver extends Screen {
     }
 
     public enum Button {
-        SAVE(10, 55, 60, 20, 0, new TranslationTextComponent("skyblockbuilder.screen.button.save")),
-        ABORT(77, 55, 60, 20, 0, new TranslationTextComponent("skyblockbuilder.screen.button.abort")),
-        DELETE(144, 55, 20, 20, 60, null),
-        OPEN_FOLDER(144, 23, 20, 20, 80, null);
+        SAVE(10, 55, 60, 20, 0, new TranslationTextComponent("skyblockbuilder.screen.button.save"), null),
+        ABORT(77, 55, 60, 20, 0, new TranslationTextComponent("skyblockbuilder.screen.button.abort"), null),
+        DELETE(144, 55, 20, 20, 60, null, new TranslationTextComponent("skyblockbuilder.screen.button.delete.tooltip")),
+        OPEN_FOLDER(144, 23, 20, 20, 80, null, new TranslationTextComponent("skyblockbuilder.screen.button.open_folder.tooltip"));
 
         private final int x;
         private final int y;
@@ -157,14 +162,16 @@ public class ScreenStructureSaver extends Screen {
         private final int height;
         private final int offset;
         private final IFormattableTextComponent title;
+        private final IFormattableTextComponent tooltip;
 
-        Button(int x, int y, int width, int height, int offset, IFormattableTextComponent title) {
+        Button(int x, int y, int width, int height, int offset, IFormattableTextComponent title, IFormattableTextComponent tooltip) {
             this.x = x;
             this.y = y;
             this.width = width;
             this.height = height;
             this.offset = offset;
             this.title = title;
+            this.tooltip = tooltip;
         }
 
         /**
@@ -205,8 +212,17 @@ public class ScreenStructureSaver extends Screen {
         /**
          * @return showed title on button
          */
+        @Nullable
         public IFormattableTextComponent getTitle() {
             return this.title;
+        }
+
+        /**
+         * @return tooltip when hovered over button
+         */
+        @Nullable
+        public IFormattableTextComponent getTooltip() {
+            return this.tooltip;
         }
     }
 }

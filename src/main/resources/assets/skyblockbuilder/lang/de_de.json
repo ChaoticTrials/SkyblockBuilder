@@ -104,6 +104,8 @@
 
   "skyblockbuilder.screen.button.save": "Sichern",
   "skyblockbuilder.screen.button.abort": "Abbrechen",
+  "skyblockbuilder.screen.button.delete.tooltip": "Verwerfe ausgewählte Positionen",
+  "skyblockbuilder.screen.button.open_folder.tooltip": "Öffne Ordner",
   "skyblockbuilder.screen.widget.structure_name": "Strukturname",
   "skyblockbuilder.screen.open_folder.error": "Ordner konnte nicht geöffnet werden: %s",
   "skyblockbuilder.schematic.saved": "Schema gespeichert in skyblock_exports/%s",
