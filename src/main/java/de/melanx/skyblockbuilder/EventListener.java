@@ -32,7 +32,6 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.text.StringTextComponent;
@@ -190,12 +189,12 @@ public class EventListener {
 
         MatrixStack matrixStack = event.getMatrixStack();
         matrixStack.push();
-        RenderHelperWorld.loadProjection(matrixStack, 0, 0, 0);
+        RenderHelperWorld.loadProjection(matrixStack, area.minX, area.minY, area.minZ);
 
         IRenderTypeBuffer.Impl source = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
         IVertexBuilder buffer = source.getBuffer(RenderType.LINES);
 
-        WorldRenderer.drawBoundingBox(matrixStack, buffer, AxisAlignedBB.toImmutable(area), 0.9F, 0.9F, 0.9F, 1.0F);
+        WorldRenderer.drawBoundingBox(matrixStack, buffer, 0, 0, 0, area.maxX - area.minX + 1, area.maxY - area.minY + 1, area.maxZ - area.minZ + 1, 0.9F, 0.9F, 0.9F, 1.0F);
         source.finish(RenderType.LINES);
         matrixStack.pop();
     }
