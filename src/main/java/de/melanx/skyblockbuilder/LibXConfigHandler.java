@@ -71,6 +71,9 @@ public class LibXConfigHandler {
         @IntRange(min = 64, max = 29999900)
         public static int biomeRange = 8192;
 
+        @Config({"The offset from 0, 0 to generate the islands", "Can be used to generate them in the middle of .mca files"})
+        public static int offset = 0;
+
         public static class SingleBiome {
 
             @Config("Specifies the biome for the whole world")

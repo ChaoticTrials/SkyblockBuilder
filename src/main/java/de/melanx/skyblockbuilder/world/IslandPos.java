@@ -18,7 +18,7 @@ public final class IslandPos {
     }
 
     public BlockPos getCenter() {
-        return new BlockPos(this.x * LibXConfigHandler.World.islandDistance, LibXConfigHandler.Spawn.height, this.z * LibXConfigHandler.World.islandDistance);
+        return new BlockPos(this.x * LibXConfigHandler.World.islandDistance + LibXConfigHandler.World.offset, LibXConfigHandler.Spawn.height, this.z * LibXConfigHandler.World.islandDistance + LibXConfigHandler.World.offset);
     }
 
     public static IslandPos fromTag(CompoundNBT tag) {
