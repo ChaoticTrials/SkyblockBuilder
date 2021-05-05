@@ -6,7 +6,9 @@ A minecraft mod which lets you generate custom skyblock islands by using config.
 
 ## How to use
 ### Setting world type on singleplayer
-You can simply set `World Type` to `Skyblock` when creating a new world on a click on `More World Options...`
+You can simply set `World Type` to `Skyblock` when creating a new world on a click on `More World Options...`. If there
+are multiple templates in `config/skyblockbuilder/templates/`, you can select your favorite by pressing the `Customize`
+button.
 
 ### Setting world type on server
 You can simply set `level-type` in `server.properties` to `skyblockbuilder:custom_skyblock`.
@@ -16,8 +18,11 @@ You can simply set `level-type` in `server.properties` to `skyblockbuilder:custo
 2. Use the vanilla Structure Block if your island is smaller or equals 48x48x48 blocks to save it as a `.nbt` file.
    Otherwise, you can use the Structure Saver item to generate this file.
 3. Copy the generated file from `saves/<world>/generated/minecraft/structures/<name>.nbt` to `config/skyblockbuilder/template.nbt`.
-4. Set the possible spawns in `config/skyblockbuilder/spawns.json`. There can be multiple spawns, each one is an array with `[x, y, z]`
-relative to the 0, 0, 0 from the template structure. 
+4. Set the possible spawns in `config/skyblockbuilder/spawns.json`. There can be multiple spawns, each one is an array
+   with `[x, y, z]`
+   relative to the 0, 0, 0 from the template structure. You can also [modify existing spawns](#modify-spawns) and export
+   them with
+   `/skyblock spawns EXPORT`.
 5. To view your current spawns, you need to use the `/reload` command to reload the config. After that, you need to use the 
 `/skyblock spawns true` command to view all possible spawn points.
 6. Repeat step 4 and 5 until everything is correct.

@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.network;
 
-import de.melanx.skyblockbuilder.registration.ItemStructureSaver;
-import de.melanx.skyblockbuilder.registration.ScreenStructureSaver;
+import de.melanx.skyblockbuilder.client.ScreenStructureSaver;
+import de.melanx.skyblockbuilder.item.ItemStructureSaver;
 import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;

@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder;
 
-import de.melanx.skyblockbuilder.registration.ItemStructureSaver;
+import de.melanx.skyblockbuilder.item.ItemStructureSaver;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;

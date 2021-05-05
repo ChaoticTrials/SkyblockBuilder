@@ -221,7 +221,7 @@ public class SkyblockSavedData extends WorldSavedData {
         team.setPossibleSpawns(possibleSpawns);
 
         PlacementSettings settings = new PlacementSettings();
-        TemplateLoader.TEMPLATE.func_237152_b_(this.world, team.getIsland().getCenter(), settings, new Random());
+        TemplateData.get(this.world).getTemplate().func_237152_b_(this.world, team.getIsland().getCenter(), settings, new Random());
 
         this.skyblocks.put(team.getName().toLowerCase(), team);
         this.skyblockPositions.put(team.getName().toLowerCase(), team.getIsland());
@@ -436,9 +436,10 @@ public class SkyblockSavedData extends WorldSavedData {
 
     public static Set<BlockPos> initialPossibleSpawns(BlockPos center) {
         Set<BlockPos> positions = new HashSet<>();
-        for (BlockPos pos : TemplateLoader.SPAWNS) {
+        for (BlockPos pos : TemplateLoader.getSpawns()) {
             positions.add(center.add(pos.toImmutable()));
         }
+
         return positions;
     }
 

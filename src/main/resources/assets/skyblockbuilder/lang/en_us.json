@@ -1,6 +1,7 @@
 {
   "item.skyblockbuilder.structure_saver": "Structure Saver",
   "screen.skyblockbuilder.structure_saver": "Structure Saver",
+  "screen.skyblockbuilder.select_template": "Please select a template",
 
   "skyblockbuilder.generator.custom_skyblock": "Skyblock",
 
@@ -73,6 +74,7 @@
   "skyblockbuilder.command.info.toggle_request": "Join requests by other players are now %s.",
   "skyblockbuilder.command.info.click_to_copy": "Click to copy",
 
+  "skyblockbuilder.command.success.reset_island": "Successfully set island shape to %s",
   "skyblockbuilder.command.success.export_spawns": "Successfully exported current spawns to %s",
   "skyblockbuilder.command.success.joined_team": "Successfully joined team %s.",
   "skyblockbuilder.command.success.declined_invitation": "Successfully destroyed the invitation of team %s.",

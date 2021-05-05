@@ -1,6 +1,7 @@
 {
   "item.skyblockbuilder.structure_saver": "Struktur-Sicherer",
   "screen.skyblockbuilder.structure_saver": "Struktur-Sicherer",
+  "screen.skyblockbuilder.select_template": "Bitte wähle eine Vorlage",
 
   "skyblockbuilder.generator.custom_skyblock": "Himmelsblock",
 
@@ -73,6 +74,7 @@
   "skyblockbuilder.command.info.toggle_request": "Beitrittsanfragen anderer Spieler sind nun %s.",
   "skyblockbuilder.command.info.click_to_copy": "Klicke zum Kopieren",
 
+  "skyblockbuilder.command.success.reset_island": "Insel-Vorlage erfolgreich gesetzt zu %s",
   "skyblockbuilder.command.success.export_spawns": "Spawns erfolgreich exportiert nach %s",
   "skyblockbuilder.command.success.joined_team": "Erfolgreich Team %s beigetreten.",
   "skyblockbuilder.command.success.declined_invitation": "Erfolgreich die Einladung von Team %s zerrissen.",

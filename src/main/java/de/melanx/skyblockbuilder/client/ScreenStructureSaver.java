@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.registration;
+package de.melanx.skyblockbuilder.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;

@@ -5,36 +5,29 @@ import com.electronwill.nightconfig.core.io.WritingMode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.JSONUtils;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.io.*;
-import java.nio.file.Files;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 // TODO 1.17: remove
 public class ConfigHandler {
 
     public static final ForgeConfigSpec COMMON_CONFIG;
-    public static final List<Pair<EquipmentSlotType, ItemStack>> STARTER_ITEMS = new ArrayList<>();
     private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
-    private static final Path MOD_CONFIG = FMLPaths.CONFIGDIR.get().resolve("skyblockbuilder");
-    private static final Path SCHEMATIC_FILE = MOD_CONFIG.resolve("template.nbt");
-    private static final Path SPAWNS_FILE = MOD_CONFIG.resolve("spawns.json");
-    private static final Path ITEMS_FILE = MOD_CONFIG.resolve("starter_item.json");
+    private static final List<Pair<EquipmentSlotType, ItemStack>> STARTER_ITEMS = new ArrayList<>();
 
     static {
         init(COMMON_BUILDER);
@@ -153,81 +146,17 @@ public class ConfigHandler {
                 .define("utility.teleports.spawn", true);
     }
 
-    public static void createDirectories() {
-        try {
-            if (!Files.isDirectory(MOD_CONFIG)) {
-                Files.createDirectories(MOD_CONFIG);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void loadConfig(ForgeConfigSpec spec, Path path) {
+        SkyblockBuilder.getInstance().logger.debug("Loading config file {}", path);
+        final CommentedFileConfig configData = CommentedFileConfig.builder(path).sync().autosave().writingMode(WritingMode.REPLACE).build();
+        configData.load();
+        spec.setConfig(configData);
     }
 
-    public static void generateDefaultFiles() {
-        try {
-            createDirectories();
+    public static void loadStarterItems() throws IOException {
+        ConfigHandler.STARTER_ITEMS.clear();
 
-            copyTemplateFile();
-            generateSpawnsFile();
-            generateStarterItemsFile();
-            generateStructureInformation();
-            generateFeatureInformation();
-
-            loadStarterItems();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void copyTemplateFile() throws IOException {
-        if (Files.isRegularFile(SCHEMATIC_FILE)) {
-            return;
-        }
-
-        //noinspection ConstantConditions
-        Files.copy(SkyblockBuilder.class.getResourceAsStream("/skyblockbuilder-template.nbt"), SCHEMATIC_FILE);
-    }
-
-    private static void generateSpawnsFile() throws IOException {
-        if (Files.isRegularFile(SPAWNS_FILE)) {
-            return;
-        }
-
-        JsonObject object = new JsonObject();
-
-        JsonArray spawns = new JsonArray();
-        JsonArray defaultSpawn = new JsonArray();
-        defaultSpawn.add(6);
-        defaultSpawn.add(3);
-        defaultSpawn.add(5);
-        spawns.add(defaultSpawn);
-
-        object.add("islandSpawns", spawns);
-
-        BufferedWriter w = Files.newBufferedWriter(SPAWNS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        w.write(SkyblockBuilder.PRETTY_GSON.toJson(object));
-        w.close();
-    }
-
-    private static void generateStarterItemsFile() throws IOException {
-        if (Files.isRegularFile(ITEMS_FILE)) {
-            return;
-        }
-
-        JsonObject object = new JsonObject();
-        JsonArray items = new JsonArray();
-        object.add("items", items);
-
-        BufferedWriter w = Files.newBufferedWriter(ITEMS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        w.write(SkyblockBuilder.PRETTY_GSON.toJson(object));
-        w.close();
-    }
-
-    private static void loadStarterItems() throws IOException {
-        STARTER_ITEMS.clear();
-
-        File spawns = new File(ITEMS_FILE.toUri());
-        JsonParser parser = new JsonParser();
+        File spawns = new File(SkyPaths.ITEMS_FILE.toUri());
 
         String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
         JsonObject json = JSONUtils.fromJson(s);
@@ -252,43 +181,12 @@ public class ConfigHandler {
                         usedTypes.add(slot);
                     }
                 }
-                STARTER_ITEMS.add(Pair.of(slot, stack));
+                ConfigHandler.STARTER_ITEMS.add(Pair.of(slot, stack));
             }
         }
     }
 
-    public static void generateFeatureInformation() throws IOException {
-        Path resolve = MOD_CONFIG.resolve("features.txt");
-
-        BufferedWriter w = Files.newBufferedWriter(resolve, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-
-        for (Feature<?> feature : ForgeRegistries.FEATURES.getValues()) {
-            if (feature.getRegistryName() != null) {
-                w.write(feature.getRegistryName().toString() + "\n");
-            }
-        }
-
-        w.close();
-    }
-
-    public static void generateStructureInformation() throws IOException {
-        Path resolve = MOD_CONFIG.resolve("structures.txt");
-
-        BufferedWriter w = Files.newBufferedWriter(resolve, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-
-        for (Structure<?> feature : ForgeRegistries.STRUCTURE_FEATURES.getValues()) {
-            if (feature.getRegistryName() != null) {
-                w.write(feature.getRegistryName().toString() + "\n");
-            }
-        }
-
-        w.close();
-    }
-
-    public static void loadConfig(ForgeConfigSpec spec, Path path) {
-        SkyblockBuilder.getInstance().logger.debug("Loading config file {}", path);
-        final CommentedFileConfig configData = CommentedFileConfig.builder(path).sync().autosave().writingMode(WritingMode.REPLACE).build();
-        configData.load();
-        spec.setConfig(configData);
+    public static List<Pair<EquipmentSlotType, ItemStack>> getStarterItems() {
+        return STARTER_ITEMS;
     }
 }

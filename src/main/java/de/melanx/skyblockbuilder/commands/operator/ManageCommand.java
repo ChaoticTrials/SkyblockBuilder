@@ -8,8 +8,10 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.NameGenerator;
+import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -29,9 +31,16 @@ public class ManageCommand {
 
     public static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
             .getTeams().stream().map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
+    public static final SuggestionProvider<CommandSource> SUGGEST_TEMPLATES = ((context, builder) -> ISuggestionProvider.suggest(TemplateLoader.getTemplates().keySet(), builder));
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("manage").requires(source -> source.hasPermissionLevel(2))
+                // refreshes the island shape
+                .then(Commands.literal("islandShape")
+                        .requires(source -> source.hasPermissionLevel(3))
+                        .then(Commands.argument("template", StringArgumentType.word()).suggests(SUGGEST_TEMPLATES)
+                                .executes(context -> refreshIsland(context.getSource(), StringArgumentType.getString(context, "template")))))
+
                 .then(Commands.literal("teams")
                         // Removes all empty teams in the world
                         .then(Commands.literal("clear")
@@ -65,6 +74,14 @@ public class ManageCommand {
                 .then(Commands.literal("kickPlayer")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(context -> removeFromTeam(context.getSource(), EntityArgument.getPlayer(context, "player")))));
+    }
+
+    private static int refreshIsland(CommandSource source, String name) {
+        TemplateLoader.setTemplate(TemplateLoader.getTemplates().get(name));
+        TemplateData.get(source.getWorld()).refreshTemplate();
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.reset_island", name), true);
+
+        return 1;
     }
 
     private static int deleteEmptyTeams(CommandSource source) throws CommandSyntaxException {

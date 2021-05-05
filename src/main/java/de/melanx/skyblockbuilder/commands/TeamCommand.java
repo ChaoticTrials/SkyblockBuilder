@@ -9,10 +9,10 @@ import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.events.SkyblockJoinRequestEvent;
 import de.melanx.skyblockbuilder.events.SkyblockManageTeamEvent;
-import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -298,7 +298,7 @@ public class TeamCommand {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), true);
                     return 0;
                 }
-                BlockPos templateSize = TemplateLoader.TEMPLATE.getSize();
+                BlockPos templateSize = TemplateData.get(world).getTemplate().getSize();
                 BlockPos center = team.getIsland().getCenter().toMutable();
                 center.add(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
                 if (!pos.withinDistance(center, LibXConfigHandler.Utility.Spawns.range)) {

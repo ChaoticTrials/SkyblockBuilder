@@ -1,8 +1,8 @@
-package de.melanx.skyblockbuilder.registration;
+package de.melanx.skyblockbuilder.item;
 
-import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyPaths;
 import io.github.noeppi_noeppi.libx.util.NBTX;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.util.ITooltipFlag;
@@ -143,15 +143,7 @@ public class ItemStructureSaver extends Item {
 
         template.takeBlocksFromWorld(world, origin, bounds, true, Blocks.STRUCTURE_VOID);
 
-        String folderPath = "skyblock_exports";
-        try {
-            Files.createDirectories(Paths.get(folderPath));
-        } catch (IOException e) {
-            SkyblockBuilder.getLogger().warn("Could not create folder: {}", folderPath);
-            return null;
-        }
-
-        Path path = Paths.get(RandomUtility.getFilePath(folderPath, name));
+        Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name));
         OutputStream outputStream = null;
         try {
             outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE);

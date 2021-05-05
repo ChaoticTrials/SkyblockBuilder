@@ -2,13 +2,17 @@ package de.melanx.skyblockbuilder;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.melanx.skyblockbuilder.client.ScreenCustomizeSkyblock;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.network.SkyNetwork;
+import de.melanx.skyblockbuilder.util.SkyPaths;
+import de.melanx.skyblockbuilder.util.TemplateLoader;
 import io.github.noeppi_noeppi.libx.config.ConfigManager;
 import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
 import io.github.noeppi_noeppi.libx.util.ResourceList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
+import net.minecraftforge.client.ForgeWorldTypeScreens;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -37,7 +41,7 @@ public class SkyblockBuilder extends ModXRegistration {
         instance = this;
         network = new SkyNetwork(this);
 
-        ConfigHandler.createDirectories();
+        SkyPaths.createDirectories();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.COMMON_CONFIG, "skyblockbuilder/config.toml");
         ConfigHandler.loadConfig(ConfigHandler.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve("skyblockbuilder/config.toml"));
 
@@ -95,12 +99,13 @@ public class SkyblockBuilder extends ModXRegistration {
         }
 
         Registration.registerCodecs();
-        ConfigHandler.generateDefaultFiles();
+        SkyPaths.generateDefaultFiles();
     }
 
     @Override
     protected void clientSetup(FMLClientSetupEvent event) {
-        // not now
+        TemplateLoader.loadSchematic();
+        ForgeWorldTypeScreens.registerFactory(Registration.customSkyblock, (parent, settings) -> new ScreenCustomizeSkyblock(parent, TemplateLoader.getTemplate()));
     }
 
     public static SkyblockBuilder getInstance() {

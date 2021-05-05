@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.util;
 
-import de.melanx.skyblockbuilder.registration.ScreenStructureSaver;
+import de.melanx.skyblockbuilder.client.ScreenStructureSaver;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.item.ItemStack;
