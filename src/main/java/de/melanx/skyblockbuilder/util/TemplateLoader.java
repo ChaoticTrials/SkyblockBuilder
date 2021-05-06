@@ -72,6 +72,8 @@ public class TemplateLoader {
 
     public static void updateTemplates() {
         try {
+            TEMPLATES.clear();
+
             //noinspection ConstantConditions
             for (File file : SkyPaths.TEMPLATES_DIR.toFile().listFiles()) {
                 CompoundNBT nbt;
