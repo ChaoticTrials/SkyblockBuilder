@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.LibXConfigHandler;
+import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
@@ -15,7 +15,6 @@ import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.PlayerList;
@@ -25,27 +24,22 @@ import net.minecraft.world.server.ServerWorld;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ManageCommand {
-
-    public static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
-            .getTeams().stream().map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
-    public static final SuggestionProvider<CommandSource> SUGGEST_TEMPLATES = ((context, builder) -> ISuggestionProvider.suggest(TemplateLoader.getTemplates().keySet(), builder));
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("manage").requires(source -> source.hasPermissionLevel(2))
                 // refreshes the island shape
                 .then(Commands.literal("islandShape")
                         .requires(source -> source.hasPermissionLevel(3))
-                        .then(Commands.argument("template", StringArgumentType.word()).suggests(SUGGEST_TEMPLATES)
+                        .then(Commands.argument("template", StringArgumentType.word()).suggests(Suggestions.TEMPLATES)
                                 .executes(context -> refreshIsland(context.getSource(), StringArgumentType.getString(context, "template")))))
 
                 .then(Commands.literal("teams")
                         // Removes all empty teams in the world
                         .then(Commands.literal("clear")
                                 .executes(context -> deleteEmptyTeams(context.getSource()))
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> clearTeam(context.getSource(), StringArgumentType.getString(context, "team")))))
 
                         // Creates a team
@@ -62,13 +56,13 @@ public class ManageCommand {
 
                         // Deletes the team with the given name
                         .then(Commands.literal("delete")
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> deleteTeam(context.getSource(), StringArgumentType.getString(context, "team"))))))
 
                 // Adds player(s) to a given team
                 .then(Commands.literal("addPlayer")
                         .then(Commands.argument("players", EntityArgument.players())
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> addToTeam(context.getSource(), StringArgumentType.getString(context, "team"), EntityArgument.getPlayers(context, "players"))))))
                 // Kicks player from its current team
                 .then(Commands.literal("kickPlayer")

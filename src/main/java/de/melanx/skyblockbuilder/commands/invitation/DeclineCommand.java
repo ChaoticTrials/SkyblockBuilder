@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.LibXConfigHandler;
+import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -20,7 +21,7 @@ public class DeclineCommand {
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Declines an invitation
         return Commands.literal("decline")
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(AcceptCommand.SUGGEST_TEAMS)
+                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.INVITE_TEAMS)
                         .executes(context -> declineTeam(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

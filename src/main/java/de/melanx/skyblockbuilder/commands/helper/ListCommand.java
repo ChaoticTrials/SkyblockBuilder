@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
+import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -29,7 +29,7 @@ public class ListCommand {
         return Commands.literal("list")
                 .executes(context -> listTeams(context.getSource()))
                 // Lists all members in team
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(ManageCommand.SUGGEST_TEAMS)
+                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
                         .executes(context -> listPlayers(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

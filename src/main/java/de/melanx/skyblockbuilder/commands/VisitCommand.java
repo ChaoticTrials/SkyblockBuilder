@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -11,23 +10,17 @@ import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.stream.Collectors;
-
 public class VisitCommand {
-
-    public static final SuggestionProvider<CommandSource> SUGGEST_VISIT_TEAMS = (context, builder) -> ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
-            .getTeams().stream().filter(Team::allowsVisits).map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Let the player visit another team
         return Commands.literal("visit")
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_VISIT_TEAMS)
+                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.VISIT_TEAMS)
                         .executes(context -> visit(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

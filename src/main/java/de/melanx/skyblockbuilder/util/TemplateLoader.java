@@ -84,6 +84,12 @@ public class TemplateLoader {
                 template.read(nbt);
                 TEMPLATES.put(file.getName(), template);
             }
+
+            File schematic = new File(SCHEMATIC_FILE.toUri());
+            CompoundNBT nbt = CompressedStreamTools.readCompressed(new FileInputStream(schematic));
+            Template defaultTemplate = new Template();
+            defaultTemplate.read(nbt);
+            TEMPLATES.put("template.nbt", defaultTemplate);
         } catch (IOException e) {
             throw new RuntimeException("Cannot load templates.", e);
         }

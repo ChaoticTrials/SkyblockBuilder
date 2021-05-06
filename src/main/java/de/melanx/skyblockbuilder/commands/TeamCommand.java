@@ -4,9 +4,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.LibXConfigHandler;
-import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
@@ -19,7 +17,6 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.BlockPosArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
@@ -29,36 +26,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.eventbus.api.Event;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Set;
-import java.util.UUID;
-
 public class TeamCommand {
-
-    public static final SuggestionProvider<CommandSource> SUGGEST_POSITIONS = (context, builder) -> {
-        Team team = SkyblockSavedData.get(context.getSource().getWorld()).getTeamFromPlayer(context.getSource().asPlayer());
-        if (team != null) {
-            Set<BlockPos> possibleSpawns = team.getPossibleSpawns();
-            possibleSpawns.forEach(spawn -> builder.suggest(String.format("%s %s %s", spawn.getX(), spawn.getY(), spawn.getZ())));
-        }
-
-        return BlockPosArgument.blockPos().listSuggestions(context, builder);
-    };
-
-    public static final SuggestionProvider<CommandSource> SUGGEST_PLAYERS = (context, builder) -> {
-        Team team = SkyblockSavedData.get(context.getSource().getWorld()).getTeamFromPlayer(context.getSource().asPlayer());
-        if (team != null) {
-            Set<UUID> players = team.getJoinRequests();
-            PlayerList playerList = context.getSource().getServer().getPlayerList();
-            players.forEach(id -> {
-                ServerPlayerEntity player = playerList.getPlayerByUUID(id);
-                if (player != null) {
-                    builder.suggest(player.getDisplayName().getString());
-                }
-            });
-        }
-
-        return EntityArgument.entity().listSuggestions(context, builder);
-    };
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("team")
@@ -70,18 +38,18 @@ public class TeamCommand {
                                         .executes(context -> addSpawn(context.getSource(), BlockPosArgument.getBlockPos(context, "pos")))))
                         .then(Commands.literal("remove")
                                 .executes(context -> removeSpawn(context.getSource(), new BlockPos(context.getSource().getPos())))
-                                .then(Commands.argument("pos", BlockPosArgument.blockPos()).suggests(SUGGEST_POSITIONS)
+                                .then(Commands.argument("pos", BlockPosArgument.blockPos()).suggests(Suggestions.SPAWN_POSITIONS)
                                         .executes(context -> removeSpawn(context.getSource(), BlockPosArgument.getBlockPos(context, "pos")))))
                         .then(Commands.literal("reset")
                                 .executes(context -> resetSpawns(context.getSource(), null))
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(ManageCommand.SUGGEST_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> resetSpawns(context.getSource(), StringArgumentType.getString(context, "team"))))))
 
                 // Renaming a team
                 .then(Commands.literal("rename")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(context -> renameTeam(context.getSource(), StringArgumentType.getString(context, "name"), null))
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(ManageCommand.SUGGEST_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> renameTeam(context.getSource(), StringArgumentType.getString(context, "name"), StringArgumentType.getString(context, "team"))))))
 
                 // Toggle permission to visit the teams island
@@ -98,12 +66,12 @@ public class TeamCommand {
 
                 // Accept a join request
                 .then(Commands.literal("accept")
-                        .then(Commands.argument("player", EntityArgument.player()).suggests(SUGGEST_PLAYERS)
+                        .then(Commands.argument("player", EntityArgument.player()).suggests(Suggestions.INVITED_PLAYERS_OF_PLAYERS_TEAM)
                                 .executes(context -> acceptRequest(context.getSource(), EntityArgument.getPlayer(context, "player")))))
 
                 // Deny a join request
                 .then(Commands.literal("deny")
-                        .then(Commands.argument("player", EntityArgument.player()).suggests(SUGGEST_PLAYERS)
+                        .then(Commands.argument("player", EntityArgument.player()).suggests(Suggestions.INVITED_PLAYERS_OF_PLAYERS_TEAM)
                                 .executes(context -> denyRequest(context.getSource(), EntityArgument.getPlayer(context, "player")))));
     }
 

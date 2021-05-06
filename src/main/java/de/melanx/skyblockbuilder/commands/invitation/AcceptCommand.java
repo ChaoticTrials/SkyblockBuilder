@@ -3,43 +3,25 @@ package de.melanx.skyblockbuilder.commands.invitation;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.LibXConfigHandler;
+import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class AcceptCommand {
-
-    // Lists all teams except spawn
-    protected static final SuggestionProvider<CommandSource> SUGGEST_TEAMS = (context, builder) -> {
-        CommandSource source = context.getSource();
-        ServerWorld world = source.getWorld();
-        SkyblockSavedData data = SkyblockSavedData.get(world);
-
-        List<Team> teams = data.getInvites(source.asPlayer());
-        if (teams != null && teams.size() != 0) {
-            return ISuggestionProvider.suggest(teams.stream()
-                    .map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
-        }
-        return ISuggestionProvider.suggest(new String[]{""}, builder);
-    };
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         // Accepts an invitation
         return Commands.literal("accept")
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(SUGGEST_TEAMS)
+                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.INVITE_TEAMS)
                         .executes(context -> acceptTeam(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

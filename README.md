@@ -17,24 +17,37 @@ You can simply set `level-type` in `server.properties` to `skyblockbuilder:custo
 1. Build an island.
 2. Use the vanilla Structure Block if your island is smaller or equals 48x48x48 blocks to save it as a `.nbt` file.
    Otherwise, you can use the Structure Saver item to generate this file.
-3. Copy the generated file from `saves/<world>/generated/minecraft/structures/<name>.nbt` to `config/skyblockbuilder/template.nbt`.
+3. Copy the generated file from `saves/<world>/generated/minecraft/structures/<name>.nbt`
+   to `config/skyblockbuilder/template.nbt`.
 4. Set the possible spawns in `config/skyblockbuilder/spawns.json`. There can be multiple spawns, each one is an array
    with `[x, y, z]`
    relative to the 0, 0, 0 from the template structure. You can also [modify existing spawns](#modify-spawns) and export
    them with
    `/skyblock spawns EXPORT`.
-5. To view your current spawns, you need to use the `/reload` command to reload the config. After that, you need to use the 
-`/skyblock spawns true` command to view all possible spawn points.
+5. To view your current spawns, you need to use the `/reload` command to reload the config. After that, you need to use
+   the
+   `/skyblock spawns true` command to view all possible spawn points.
 6. Repeat step 4 and 5 until everything is correct.
 
+### Setting multiple templates
+
+You can set multiple schematics by putting them into `config/skyblockbuilder/templates/`. These schematics can the user
+use by pressing the `Customize` button in world options screen or changing the schematic with
+command `/skyblock manage islandShape <template>`.
+**IMPORTANT**: DO NOT name any of these schematic files `template.nbt` because it would be overwritten by the default
+schematic in `config/skyblockbuilder/template.nbt`.
+
 ### Possible spawns
+
 Possible spawns are set in `config/skyblockbuilder/spawns.json`. For each player, the game will choose a random position
 and places the player on that position. Good on big islands when adding a lot of players at once at one team. You can
 also export your current spawn points with command `/skyblock spawns EXPORT`. For this, you should first
 [modify spawns](#modify-spawns). You will find your exported spawns in `skyblock_exports/spawns.json`.
 
 ### Loot chests on island
-If you want a loot chest on an island, you need to set the NBT data to the chest with the `/data merge block x y z {LootTable: modid:path/to/loot_table}`
+
+If you want a loot chest on an island, you need to set the NBT data to the chest with
+the `/data merge block x y z {LootTable: modid:path/to/loot_table}`
 command to set it as loot chest. WARNING! Do not open that chest after merging this data into the chest.
 
 ### Starting inventory
