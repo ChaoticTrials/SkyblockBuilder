@@ -39,6 +39,7 @@ import java.util.List;
 public class ItemStructureSaver extends Item {
 
     private static final IFormattableTextComponent TOOLTIP_INFO = new TranslationTextComponent("skyblockbuilder.item.structure_saver.info.tooltip").mergeStyle(TextFormatting.GOLD);
+    private static final IFormattableTextComponent TOOLTIP_SAVE = new TranslationTextComponent("skyblockbuilder.item.structure_saver.save.tooltip").mergeStyle(TextFormatting.GOLD);
 
     public ItemStructureSaver() {
         super(new Properties().group(ItemGroup.TOOLS));
@@ -109,7 +110,11 @@ public class ItemStructureSaver extends Item {
             tooltip.add(new TranslationTextComponent("skyblockbuilder.item.structure_saver.position.tooltip", 2, pos2.getX(), pos2.getY(), pos2.getZ()).mergeStyle(TextFormatting.DARK_GRAY));
         }
 
-        tooltip.add(TOOLTIP_INFO);
+        if (nbt.contains("CanSave")) {
+            tooltip.add(TOOLTIP_SAVE);
+        } else {
+            tooltip.add(TOOLTIP_INFO);
+        }
     }
 
     @Nullable
