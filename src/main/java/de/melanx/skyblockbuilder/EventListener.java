@@ -1,7 +1,5 @@
 package de.melanx.skyblockbuilder;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import de.melanx.skyblockbuilder.commands.*;
 import de.melanx.skyblockbuilder.commands.helper.ListCommand;
 import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
@@ -13,52 +11,40 @@ import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
-import de.melanx.skyblockbuilder.item.ItemStructureSaver;
 import de.melanx.skyblockbuilder.util.*;
 import io.github.noeppi_noeppi.libx.event.DatapacksReloadedEvent;
-import io.github.noeppi_noeppi.libx.render.RenderHelperWorld;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.gui.screen.WorldSelectionScreen;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 
+@Mod.EventBusSubscriber(modid = "skyblockbuilder")
 public class EventListener {
 
     private static final String SPAWNED_TAG = "alreadySpawned";
 
     @SubscribeEvent
-    public void resourcesReload(DatapacksReloadedEvent event) {
+    public static void resourcesReload(DatapacksReloadedEvent event) {
         SkyPaths.generateDefaultFiles();
         TemplateLoader.updateTemplates();
     }
 
     @SubscribeEvent
-    public void onRegisterCommands(RegisterCommandsEvent event) {
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("skyblock")
                 .requires(source -> CompatHelper.teamManagementEnabled())
                 .then(AcceptCommand.register())
@@ -81,7 +67,7 @@ public class EventListener {
      * Mainly taken from Botania
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         World world = event.getPlayer().world;
         if (world instanceof ServerWorld && WorldUtil.isSkyblock(world) && CompatHelper.isSpawnTeleportEnabled()) {
             if (LibXConfigHandler._reminder) {
@@ -127,7 +113,7 @@ public class EventListener {
     }
 
     @SubscribeEvent
-    public void clonePlayer(PlayerEvent.Clone event) {
+    public static void clonePlayer(PlayerEvent.Clone event) {
         PlayerEntity newPlayer = event.getPlayer();
         CompoundNBT newData = newPlayer.getPersistentData();
 
@@ -138,7 +124,7 @@ public class EventListener {
     }
 
     @SubscribeEvent
-    public void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!event.getPlayer().world.isRemote) {
             ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
             BlockPos pos = player.func_241140_K_();
@@ -153,7 +139,7 @@ public class EventListener {
     }
 
     @SubscribeEvent
-    public void onServerStarted(FMLServerStartedEvent event) {
+    public static void onServerStarted(FMLServerStartedEvent event) {
         RandomUtility.dynamicRegistries = event.getServer().func_244267_aX();
         if (WorldUtil.isSkyblock(event.getServer().func_241755_D_())) {
             SkyPaths.generateDefaultFiles();
@@ -161,39 +147,6 @@ public class EventListener {
             TemplateData.get(event.getServer().func_241755_D_());
 
             SkyblockSavedData.get(event.getServer().func_241755_D_()).getSpawn();
-        }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public void renderBoundingBox(RenderWorldLastEvent event) {
-        ClientPlayerEntity player = Minecraft.getInstance().player;
-        if (player == null || !(player.getHeldItemMainhand().getItem() instanceof ItemStructureSaver)) {
-            return;
-        }
-
-        ItemStack stack = player.getHeldItemMainhand();
-        MutableBoundingBox area = ItemStructureSaver.getArea(stack);
-        if (area == null) {
-            return;
-        }
-
-        MatrixStack matrixStack = event.getMatrixStack();
-        matrixStack.push();
-        RenderHelperWorld.loadProjection(matrixStack, area.minX, area.minY, area.minZ);
-
-        IRenderTypeBuffer.Impl source = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        IVertexBuilder buffer = source.getBuffer(RenderType.LINES);
-
-        WorldRenderer.drawBoundingBox(matrixStack, buffer, 0, 0, 0, area.maxX - area.minX + 1, area.maxY - area.minY + 1, area.maxZ - area.minZ + 1, 0.9F, 0.9F, 0.9F, 1.0F);
-        source.finish(RenderType.LINES);
-        matrixStack.pop();
-    }
-
-    @SubscribeEvent
-    public void onChangeScreen(GuiScreenEvent.DrawScreenEvent event) {
-        if (event.getGui() instanceof WorldSelectionScreen) {
-            TemplateLoader.loadSchematic();
         }
     }
 }
