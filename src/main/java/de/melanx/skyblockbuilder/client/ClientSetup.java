@@ -10,7 +10,6 @@ import net.minecraftforge.client.ForgeWorldTypeScreens;
 public class ClientSetup {
 
     public static void clientSetup() {
-        TemplateLoader.loadSchematic();
         ForgeWorldTypeScreens.registerFactory(Registration.customSkyblock, (parent, settings) -> new ScreenCustomizeSkyblock(parent, TemplateLoader.getTemplate()));
     }
 }

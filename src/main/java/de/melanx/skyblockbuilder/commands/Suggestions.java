@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 public class Suggestions {
 
+    // Lists all spawn positions of users team
     public static final SuggestionProvider<CommandSource> SPAWN_POSITIONS = (context, builder) -> {
         Team team = SkyblockSavedData.get(context.getSource().getWorld()).getTeamFromPlayer(context.getSource().asPlayer());
         if (team != null) {
@@ -30,6 +31,7 @@ public class Suggestions {
         return BlockPosArgument.blockPos().listSuggestions(context, builder);
     };
 
+    // Lists all players invited by players team
     public static final SuggestionProvider<CommandSource> INVITED_PLAYERS_OF_PLAYERS_TEAM = (context, builder) -> {
         Team team = SkyblockSavedData.get(context.getSource().getWorld()).getTeamFromPlayer(context.getSource().asPlayer());
         if (team != null) {
@@ -46,18 +48,25 @@ public class Suggestions {
         return EntityArgument.entity().listSuggestions(context, builder);
     };
 
+    // Lists all templates
     public static final SuggestionProvider<CommandSource> TEMPLATES = ((context, builder) -> ISuggestionProvider.suggest(TemplateLoader.getTemplates().keySet(), builder));
 
+    // Lists all teams except spawn
     public static final SuggestionProvider<CommandSource> ALL_TEAMS = (context, builder) -> ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
             .getTeams().stream()
             .map(Team::getName)
             .filter(name -> !name.equalsIgnoreCase("spawn"))
             .collect(Collectors.toSet()), builder);
 
+    // Lists all teams which allow visiting
     public static final SuggestionProvider<CommandSource> VISIT_TEAMS = (context, builder) -> ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
-            .getTeams().stream().filter(Team::allowsVisits).map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
+            .getTeams().stream()
+            .filter(Team::allowsVisits)
+            .map(Team::getName)
+            .filter(name -> !name.equalsIgnoreCase("spawn"))
+            .collect(Collectors.toSet()), builder);
 
-    // Lists all teams except spawn
+    // Lists all teams for a player which invited the player
     public static final SuggestionProvider<CommandSource> INVITE_TEAMS = (context, builder) -> {
         CommandSource source = context.getSource();
         ServerWorld world = source.getWorld();
@@ -66,8 +75,11 @@ public class Suggestions {
         List<Team> teams = data.getInvites(source.asPlayer());
         if (teams != null && teams.size() != 0) {
             return ISuggestionProvider.suggest(teams.stream()
-                    .map(Team::getName).filter(name -> !name.equalsIgnoreCase("spawn")).collect(Collectors.toSet()), builder);
+                    .map(Team::getName)
+                    .filter(name -> !name.equalsIgnoreCase("spawn"))
+                    .collect(Collectors.toSet()), builder);
         }
+
         return ISuggestionProvider.suggest(new String[]{""}, builder);
     };
 }
