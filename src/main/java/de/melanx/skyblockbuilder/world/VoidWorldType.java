@@ -40,7 +40,8 @@ public class VoidWorldType extends ForgeWorldType {
 
     @Override
     public ChunkGenerator createChunkGenerator(Registry<Biome> biomeRegistry, Registry<DimensionSettings> dimensionSettingsRegistry, long seed, String generatorSettings) {
-        return overworldChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed);
+        return LibXConfigHandler.Dimensions.Overworld.Default ? DimensionGeneratorSettings.func_242750_a(biomeRegistry, dimensionSettingsRegistry, seed)
+                : overworldChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed);
     }
 
     @Override
@@ -66,7 +67,9 @@ public class VoidWorldType extends ForgeWorldType {
     public static SimpleRegistry<Dimension> voidDimensions(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         SimpleRegistry<Dimension> registry = new SimpleRegistry<>(Registry.DIMENSION_KEY, Lifecycle.experimental());
         LazyBiomeRegistryWrapper biomes = new LazyBiomeRegistryWrapper(biomeRegistry);
-        registry.register(Dimension.OVERWORLD, new Dimension(() -> DimensionType.OVERWORLD_TYPE, overworldChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
+        registry.register(Dimension.OVERWORLD, new Dimension(() -> DimensionType.OVERWORLD_TYPE,
+                LibXConfigHandler.Dimensions.Overworld.Default ? DimensionGeneratorSettings.func_242750_a(biomeRegistry, dimensionSettingsRegistry, seed)
+                        : overworldChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         registry.register(Dimension.THE_NETHER, new Dimension(() -> DimensionType.NETHER_TYPE,
                 LibXConfigHandler.Dimensions.Nether.Default ? DimensionType.getNetherChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
                         : netherChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());

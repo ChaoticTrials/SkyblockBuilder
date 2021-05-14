@@ -6,6 +6,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.LibXConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
+import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.block.Block;
 import net.minecraft.command.CommandSource;
@@ -41,8 +43,25 @@ public class WorldUtil {
     }
 
     public static boolean isSkyblock(World world) {
-        return world instanceof ServerWorld &&
-                ((ServerWorld) world).getServer().func_241755_D_().getChunkProvider().getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
+        if (!(world instanceof ServerWorld)) return false;
+
+        MinecraftServer server = ((ServerWorld) world).getServer();
+
+        if (!LibXConfigHandler.Dimensions.Overworld.Default) {
+            return server.func_241755_D_().getChunkProvider().getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
+        }
+
+        if (!LibXConfigHandler.Dimensions.Nether.Default) {
+            ServerWorld nether = server.getWorld(World.THE_NETHER);
+            return nether != null && nether.getChunkProvider().getChunkGenerator() instanceof SkyblockNetherChunkGenerator;
+        }
+
+        if (!LibXConfigHandler.Dimensions.End.Default) {
+            ServerWorld end = server.getWorld(World.THE_END);
+            return end != null && end.getChunkProvider().getChunkGenerator() instanceof SkyblockEndChunkGenerator;
+        }
+
+        return false;
     }
 
     public static void checkSkyblock(CommandSource source) throws CommandSyntaxException {

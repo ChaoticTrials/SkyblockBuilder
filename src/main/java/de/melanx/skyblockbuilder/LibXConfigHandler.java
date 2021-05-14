@@ -34,6 +34,12 @@ public class LibXConfigHandler {
 
     public static class Dimensions {
 
+        public static class Overworld {
+
+            @Config("Should overworld generate as in default world type? [default: false]")
+            public static boolean Default = false;
+        }
+
         public static class Nether {
 
             @Config("Should nether generate as in default world type? [default: false]")
@@ -93,7 +99,7 @@ public class LibXConfigHandler {
 
         @Config({"The dimension the islands will be generated in. Vanilla dimensions:",
                 "minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"})
-        public static ResourceLocation dimension = new ResourceLocation("minecraft", "the_nether");
+        public static ResourceLocation dimension = new ResourceLocation("minecraft", "overworld");
 
         @Config("Direction the player should look at initial spawn")
         public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
