@@ -83,11 +83,14 @@ public class LibXConfigHandler {
         public static class SingleBiome {
 
             @Config("Specifies the biome for the whole world")
-            public static ResourceLocation biome = new ResourceLocation("minecraft", "plains");
+            public static ResourceLocation biome = new ResourceLocation("minecraft", "ocean");
+
+            @Config("The dimension where the single biome should be applied. Use \"default\" for spawn dimension")
+            public static WorldUtil.SingleBiomeDimension singleBiomeDimension = WorldUtil.SingleBiomeDimension.DEFAULT;
 
             @Config({"Should only one biome be generated? [default: false]",
                     "WARNING: Some structures need a special biome, e.g. Mansion needs Dark Oak Forest! These structures will not be generated if you have only one biome!"})
-            public static boolean enabled = false;
+            public static boolean enabled = true;
         }
     }
 
@@ -99,7 +102,7 @@ public class LibXConfigHandler {
 
         @Config({"The dimension the islands will be generated in. Vanilla dimensions:",
                 "minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"})
-        public static ResourceLocation dimension = new ResourceLocation("minecraft", "overworld");
+        public static ResourceLocation dimension = new ResourceLocation("minecraft", "the_nether");
 
         @Config("Direction the player should look at initial spawn")
         public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;

@@ -4,15 +4,18 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.biome.provider.NetherBiomeProvider;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class SkyblockNetherBiomeProvider extends BiomeProvider {
 
@@ -54,7 +57,15 @@ public class SkyblockNetherBiomeProvider extends BiomeProvider {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        int range = LibXConfigHandler.World.biomeRange / 8;
-        return this.parent.getNoiseBiome(((((x << 2) - range / 2) % range) + range) % range, y, ((((z << 2) - range / 2) % range) + range) % range);
+        if (LibXConfigHandler.World.SingleBiome.enabled && LibXConfigHandler.World.SingleBiome.singleBiomeDimension.getDimension().equals(WorldUtil.SingleBiomeDimension.THE_NETHER.getDimension())) {
+            Biome biome = this.lookupRegistry.getOrDefault(WorldUtil.SINGLE_BIOME);
+            if (biome == null) {
+                biome = this.lookupRegistry.getOrDefault(Biomes.NETHER_WASTES.getLocation());
+            }
+            return Objects.requireNonNull(biome);
+        } else {
+            int range = LibXConfigHandler.World.biomeRange / 8;
+            return this.parent.getNoiseBiome(((((x << 2) - range / 2) % range) + range) % range, y, ((((z << 2) - range / 2) % range) + range) % range);
+        }
     }
 }

@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
-import net.minecraft.util.ResourceLocation;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryLookupCodec;
 import net.minecraft.world.biome.Biome;
@@ -27,7 +27,6 @@ public class SkyblockBiomeProvider extends BiomeProvider {
             ).apply(instance, instance.stable((seed, lookupRegistry) -> new SkyblockBiomeProvider(
                     new OverworldBiomeProvider(seed, false, false, new LazyBiomeRegistryWrapper(lookupRegistry)))
             )));
-    public static final ResourceLocation SINGLE_BIOME = LibXConfigHandler.World.SingleBiome.biome;
 
     private final OverworldBiomeProvider parent;
     public final long seed;
@@ -56,8 +55,8 @@ public class SkyblockBiomeProvider extends BiomeProvider {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        if (LibXConfigHandler.World.SingleBiome.enabled) {
-            Biome biome = this.lookupRegistry.getOrDefault(SINGLE_BIOME);
+        if (LibXConfigHandler.World.SingleBiome.enabled && LibXConfigHandler.World.SingleBiome.singleBiomeDimension.getDimension() == WorldUtil.SingleBiomeDimension.OVERWORLD.getDimension()) {
+            Biome biome = this.lookupRegistry.getOrDefault(WorldUtil.SINGLE_BIOME);
             if (biome == null) {
                 biome = this.lookupRegistry.getOrDefault(Biomes.PLAINS.getLocation());
             }

@@ -32,6 +32,8 @@ import java.util.Random;
 
 public class WorldUtil {
 
+    public static final ResourceLocation SINGLE_BIOME = LibXConfigHandler.World.SingleBiome.biome;
+
     public static void teleportToIsland(ServerPlayerEntity player, Team team) {
         MinecraftServer server = player.getServer();
         //noinspection ConstantConditions
@@ -187,6 +189,27 @@ public class WorldUtil {
 
         public int getYaw() {
             return this.yaw;
+        }
+    }
+
+    public enum SingleBiomeDimension {
+        DEFAULT(null),
+        OVERWORLD(World.OVERWORLD.getLocation()),
+        THE_NETHER(World.THE_NETHER.getLocation()),
+        THE_END(World.THE_END.getLocation());
+
+        private final ResourceLocation singleBiomeDimension;
+
+        SingleBiomeDimension(ResourceLocation dimension) {
+            if (dimension == null) {
+                this.singleBiomeDimension = LibXConfigHandler.Spawn.dimension;
+            } else {
+                this.singleBiomeDimension = dimension;
+            }
+        }
+
+        public ResourceLocation getDimension() {
+            return this.singleBiomeDimension;
         }
     }
 }
