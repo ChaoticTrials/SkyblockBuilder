@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
-import de.melanx.skyblockbuilder.LibXConfigHandler;
+import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.DynamicRegistries;

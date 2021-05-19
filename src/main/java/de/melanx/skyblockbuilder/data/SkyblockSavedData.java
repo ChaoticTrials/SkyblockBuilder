@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.data;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
@@ -61,6 +62,7 @@ public class SkyblockSavedData extends WorldSavedData {
             return this.skyblocks.get("spawn");
         }
 
+        SkyblockBuilder.getLogger().info("Successfully generated spawn.");
         Team team = this.createTeam("Spawn");
         assert team != null;
         team.addPlayer(Util.DUMMY_UUID);

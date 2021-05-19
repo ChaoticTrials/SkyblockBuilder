@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.world;
 
-import de.melanx.skyblockbuilder.LibXConfigHandler;
+import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 

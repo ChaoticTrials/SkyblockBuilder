@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder;
+package de.melanx.skyblockbuilder.config;
 
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.config.Config;

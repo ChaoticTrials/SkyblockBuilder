@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.world.dimensions.nether;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.LibXConfigHandler;
+import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
