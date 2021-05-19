@@ -10,6 +10,7 @@ import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
+import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
@@ -162,7 +163,9 @@ public class EventListener {
             TemplateLoader.updateTemplates();
             TemplateData.get(event.getServer().func_241755_D_());
 
-            SkyblockSavedData.get(event.getServer().func_241755_D_()).getSpawn();
+            if (CompatHelper.isSpawnTeleportEnabled()) {
+                SkyblockSavedData.get(event.getServer().func_241755_D_()).getSpawn();
+            }
         }
     }
 
