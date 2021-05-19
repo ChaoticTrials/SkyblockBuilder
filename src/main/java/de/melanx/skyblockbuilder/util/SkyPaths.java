@@ -55,7 +55,7 @@ public class SkyPaths {
         }
     }
 
-    private static void copyTemplateFile() throws IOException {
+    public static void copyTemplateFile() throws IOException {
         if (Files.isRegularFile(SCHEMATIC_FILE)) {
             return;
         }

@@ -73,6 +73,7 @@ public class TemplateLoader {
     public static void updateTemplates() {
         try {
             TEMPLATES.clear();
+            SkyPaths.copyTemplateFile();
 
             //noinspection ConstantConditions
             for (File file : SkyPaths.TEMPLATES_DIR.toFile().listFiles()) {
