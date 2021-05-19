@@ -76,6 +76,9 @@ public class TemplateLoader {
 
             //noinspection ConstantConditions
             for (File file : SkyPaths.TEMPLATES_DIR.toFile().listFiles()) {
+                if (!file.getName().endsWith(".nbt")) {
+                    continue;
+                }
                 CompoundNBT nbt;
                 try {
                     nbt = CompressedStreamTools.readCompressed(new FileInputStream(file));
