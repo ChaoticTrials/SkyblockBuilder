@@ -40,7 +40,7 @@ public class WorldUtil {
         ServerWorld world = getConfiguredWorld(server);
 
         BlockPos spawn = validPosition(world, team);
-        player.teleport(world, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, LibXConfigHandler.Spawn.direction.getYaw(), 0);
+        player.teleport(world, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, LibXConfigHandler.Spawn.direction.getYaw(), 0);
         player.func_242111_a(world.getDimensionKey(), spawn, 0, true, false);
     }
 
