@@ -125,7 +125,7 @@ public class EventListener {
             });
 
             data.addPlayerToTeam(spawn, player);
-            ((ServerWorld) world).func_241124_a__(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
+            ((ServerWorld) world).setSpawnLocation(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
             WorldUtil.teleportToIsland(player, spawn);
         }
     }
@@ -145,10 +145,10 @@ public class EventListener {
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!event.getPlayer().world.isRemote) {
             ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-            BlockPos pos = player.func_241140_K_();
+            BlockPos pos = player.getSpawnPointPos();
 
             ServerWorld world = player.getServerWorld();
-            if (pos == null || !world.getBlockState(pos).isIn(BlockTags.BEDS) && !world.getBlockState(pos).isIn(Blocks.RESPAWN_ANCHOR)) {
+            if (pos == null || !world.getBlockState(pos).isIn(BlockTags.BEDS) && !world.getBlockState(pos).matchesBlock(Blocks.RESPAWN_ANCHOR)) {
                 SkyblockSavedData data = SkyblockSavedData.get(world);
                 Team team = data.getTeamFromPlayer(player);
                 WorldUtil.teleportToIsland(player, team == null ? data.getSpawn() : team);
@@ -158,14 +158,14 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onServerStarted(FMLServerStartedEvent event) {
-        RandomUtility.dynamicRegistries = event.getServer().func_244267_aX();
-        if (WorldUtil.isSkyblock(event.getServer().func_241755_D_())) {
+        RandomUtility.dynamicRegistries = event.getServer().getDynamicRegistries();
+        if (WorldUtil.isSkyblock(event.getServer().getOverworld())) {
             SkyPaths.generateDefaultFiles();
             TemplateLoader.updateTemplates();
-            TemplateData.get(event.getServer().func_241755_D_());
+            TemplateData.get(event.getServer().getOverworld());
 
             if (CompatHelper.isSpawnTeleportEnabled()) {
-                SkyblockSavedData.get(event.getServer().func_241755_D_()).getSpawn();
+                SkyblockSavedData.get(event.getServer().getOverworld()).getSpawn();
             }
         }
     }

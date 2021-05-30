@@ -71,11 +71,11 @@ public class InviteCommand {
         data.addInvite(team, event.getInvitor(), invitePlayer);
 
         IFormattableTextComponent invite = new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team0", player.getDisplayName().getString(), team.getName()).mergeStyle(TextFormatting.GOLD);
-        invite.append(new StringTextComponent("/skyblock accept " + team.getName()).setStyle(Style.EMPTY
+        invite.appendSibling(new StringTextComponent("/skyblock accept " + team.getName()).setStyle(Style.EMPTY
                 .setHoverEvent(COPY_TEXT)
                 .setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock accept " + team.getName()))
                 .applyFormatting(TextFormatting.UNDERLINE).applyFormatting(TextFormatting.GOLD)));
-        invite.append(new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team1").mergeStyle(TextFormatting.GOLD));
+        invite.appendSibling(new TranslationTextComponent("skyblockbuilder.command.info.invited_to_team1").mergeStyle(TextFormatting.GOLD));
         invitePlayer.sendStatusMessage(invite, false);
 
         return 1;

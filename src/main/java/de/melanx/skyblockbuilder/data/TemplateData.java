@@ -22,7 +22,7 @@ public class TemplateData extends WorldSavedData {
     }
 
     public static TemplateData get(ServerWorld world) {
-        DimensionSavedDataManager storage = world.getServer().func_241755_D_().getSavedData();
+        DimensionSavedDataManager storage = world.getServer().getOverworld().getSavedData();
         Template template = TemplateLoader.getTemplate();
         return storage.getOrCreate(() -> new TemplateData(template), NAME);
     }

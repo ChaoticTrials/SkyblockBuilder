@@ -53,7 +53,7 @@ public class SkyblockSavedData extends WorldSavedData {
         MinecraftServer server = world.getServer();
         ServerWorld configuredWorld = WorldUtil.getConfiguredWorld(server);
 
-        DimensionSavedDataManager storage = server.func_241755_D_().getSavedData();
+        DimensionSavedDataManager storage = server.getOverworld().getSavedData();
         return storage.getOrCreate(() -> new SkyblockSavedData(configuredWorld), NAME);
     }
 

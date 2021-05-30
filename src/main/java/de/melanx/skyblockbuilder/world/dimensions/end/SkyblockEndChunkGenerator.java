@@ -30,7 +30,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
             (instance) -> instance.group(
                     BiomeProvider.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeProvider),
                     Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
-                    DimensionSettings.field_236098_b_.fieldOf("settings").forGetter((gen) -> gen.settings)
+                    DimensionSettings.DIMENSION_SETTINGS_CODEC.fieldOf("settings").forGetter((gen) -> gen.settings)
             ).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
 
     protected final long seed;
@@ -46,7 +46,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Nonnull
     @Override
-    protected Codec<? extends ChunkGenerator> func_230347_a_() {
+    protected Codec<? extends ChunkGenerator> getChunkGeneratorCodec() {
         return CODEC;
     }
 
@@ -57,7 +57,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Nonnull
     @Override
-    public ChunkGenerator func_230349_a_(long newSeed) {
+    public ChunkGenerator createForSeed(long newSeed) {
         return new SkyblockEndChunkGenerator(this.biomeProvider.getBiomeProvider(newSeed), newSeed, this.settings);
     }
 
@@ -75,17 +75,17 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void func_230352_b_(@Nonnull IWorld world, @Nonnull StructureManager manager, @Nonnull IChunk chunk) {
+    public void generateStructures(@Nonnull IWorld world, @Nonnull StructureManager manager, @Nonnull IChunk chunk) {
         if (LibXConfigHandler.Dimensions.End.mainIsland) {
-            this.parent.func_230352_b_(world, manager, chunk);
+            this.parent.generateStructures(world, manager, chunk);
         }
     }
 
     @Nullable
     @Override
-    public BlockPos func_235956_a_(@Nonnull ServerWorld world, Structure<?> structure, @Nonnull BlockPos startPos, int radius, boolean skipExistingChunks) {
+    public BlockPos findStructure(@Nonnull ServerWorld world, Structure<?> structure, @Nonnull BlockPos startPos, int radius, boolean skipExistingChunks) {
         boolean shouldSearch = RandomUtility.isStructureGenerated(structure.getRegistryName());
-        return shouldSearch ? super.func_235956_a_(world, structure, startPos, radius, skipExistingChunks) : null;
+        return shouldSearch ? super.findStructure(world, structure, startPos, radius, skipExistingChunks) : null;
     }
 
     @Override
@@ -94,11 +94,11 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void func_230350_a_(long seed, @Nonnull BiomeManager manager, @Nonnull IChunk chunk, @Nonnull GenerationStage.Carving carving) {
+    public void generateCarvings(long seed, @Nonnull BiomeManager manager, @Nonnull IChunk chunk, @Nonnull GenerationStage.Carving carving) {
         ChunkPos pos = chunk.getPos();
         int value = 10 * 16;
         if (pos.getXStart() < value && pos.getXStart() > -value && pos.getZStart() < value && pos.getZStart() > -value) {
-            super.func_230350_a_(seed, manager, chunk, carving);
+            super.generateCarvings(seed, manager, chunk, carving);
         }
     }
 

@@ -41,7 +41,7 @@ public class WorldUtil {
 
         BlockPos spawn = validPosition(world, team);
         player.teleport(world, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, LibXConfigHandler.Spawn.direction.getYaw(), 0);
-        player.func_242111_a(world.getDimensionKey(), spawn, 0, true, false);
+        player.setSpawnPoint(world.getDimensionKey(), spawn, 0, true, false);
     }
 
     public static boolean isSkyblock(World world) {
@@ -50,7 +50,7 @@ public class WorldUtil {
         MinecraftServer server = ((ServerWorld) world).getServer();
 
         if (!LibXConfigHandler.Dimensions.Overworld.Default) {
-            return server.func_241755_D_().getChunkProvider().getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
+            return server.getOverworld().getChunkProvider().getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
         }
 
         if (!LibXConfigHandler.Dimensions.Nether.Default) {
@@ -67,7 +67,7 @@ public class WorldUtil {
     }
 
     public static void checkSkyblock(CommandSource source) throws CommandSyntaxException {
-        if (!isSkyblock(source.getServer().func_241755_D_())) {
+        if (!isSkyblock(source.getServer().getOverworld())) {
             throw new SimpleCommandExceptionType(new TranslationTextComponent("skyblockbuilder.error.no_skyblock")).create();
         }
     }
@@ -81,7 +81,7 @@ public class WorldUtil {
             SkyblockBuilder.getLogger().warn("Configured dimension for spawn does not exist: " + location);
         }
 
-        return configWorld != null ? configWorld : server.func_241755_D_();
+        return configWorld != null ? configWorld : server.getOverworld();
     }
 
     private static BlockPos validPosition(ServerWorld world, Team team) {

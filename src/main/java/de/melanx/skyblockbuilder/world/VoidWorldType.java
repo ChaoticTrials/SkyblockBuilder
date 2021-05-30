@@ -85,7 +85,7 @@ public class VoidWorldType extends ForgeWorldType {
     public static ChunkGenerator overworldChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         OverworldBiomeProvider overworld = new OverworldBiomeProvider(seed, false, false, biomeRegistry);
         BiomeProvider provider = new SkyblockBiomeProvider(overworld);
-        DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242734_c);
+        DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.OVERWORLD);
 
         return new SkyblockOverworldChunkGenerator(provider, seed, () -> settings);
     }
@@ -94,7 +94,7 @@ public class VoidWorldType extends ForgeWorldType {
         NetherBiomeProvider nether = NetherBiomeProvider.Preset.DEFAULT_NETHER_PROVIDER_PRESET.build(biomeRegistry, seed);
         SkyblockNetherBiomeProvider provider = new SkyblockNetherBiomeProvider(nether, biomeRegistry);
 
-        DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242736_e);
+        DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.NETHER);
 
         return new SkyblockNetherChunkGenerator(provider, seed, () -> settings);
     }
@@ -102,7 +102,7 @@ public class VoidWorldType extends ForgeWorldType {
     private static ChunkGenerator endChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<DimensionSettings> dimensionSettingsRegistry, long seed) {
         SkyblockEndBiomeProvider provider = new SkyblockEndBiomeProvider(new EndBiomeProvider(biomeRegistry, seed));
 
-        DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.field_242737_f);
+        DimensionSettings settings = dimensionSettingsRegistry.getOrThrow(DimensionSettings.END);
 
         return new SkyblockEndChunkGenerator(provider, seed, () -> settings);
     }

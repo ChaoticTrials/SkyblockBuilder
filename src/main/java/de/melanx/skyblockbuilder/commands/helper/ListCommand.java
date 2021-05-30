@@ -50,7 +50,7 @@ public class ListCommand {
                 IFormattableTextComponent list = (new StringTextComponent("- " + team.getName()));
                 if (team.isEmpty()) {
                     list.appendString(" (");
-                    list.append(new TranslationTextComponent("skyblockbuilder.command.argument.empty"));
+                    list.appendSibling(new TranslationTextComponent("skyblockbuilder.command.argument.empty"));
                     list.appendString(")");
                     list.mergeStyle(TextFormatting.RED);
                 } else {

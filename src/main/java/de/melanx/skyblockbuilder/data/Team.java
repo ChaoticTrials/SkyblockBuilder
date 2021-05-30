@@ -227,11 +227,11 @@ public class Team {
     public void sendJoinRequest(PlayerEntity requestingPlayer) {
         this.addJoinRequest(requestingPlayer.getGameProfile().getId());
         TranslationTextComponent component = new TranslationTextComponent("skyblockbuilder.event.join_request0", requestingPlayer.getDisplayName());
-        component.append(new StringTextComponent("/skyblock team accept " + requestingPlayer.getDisplayName().getString()).setStyle(Style.EMPTY
+        component.appendSibling(new StringTextComponent("/skyblock team accept " + requestingPlayer.getDisplayName().getString()).setStyle(Style.EMPTY
                 .setHoverEvent(InviteCommand.COPY_TEXT)
                 .setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock team accept " + requestingPlayer.getDisplayName().getString()))
-                .createStyleFromFormattings(TextFormatting.UNDERLINE, TextFormatting.GOLD)));
-        component.append(new TranslationTextComponent("skyblockbuilder.event.join_request1"));
+                .mergeWithFormatting(TextFormatting.UNDERLINE, TextFormatting.GOLD)));
+        component.appendSibling(new TranslationTextComponent("skyblockbuilder.event.join_request1"));
         this.broadcast(component, Style.EMPTY.applyFormatting(TextFormatting.GOLD));
     }
 
@@ -246,7 +246,7 @@ public class Team {
             ServerPlayerEntity player = playerList.getPlayerByUUID(uuid);
             if (player != null) {
                 IFormattableTextComponent component = new StringTextComponent("[" + this.name + "] ").setStyle(Style.EMPTY);
-                player.sendMessage(component.append(msg.mergeStyle(style)), uuid);
+                player.sendMessage(component.appendSibling(msg.mergeStyle(style)), uuid);
             }
         });
     }

@@ -65,7 +65,7 @@ public class ScreenStructureSaver extends Screen {
 
         this.name.render(ms, mouseX, mouseY, partialTicks);
         super.render(ms, mouseX, mouseY, partialTicks);
-        this.font.func_243248_b(ms, this.title, this.relX + 10, this.relY + 8, Color.DARK_GRAY.getRGB());
+        this.font.drawText(ms, this.title, this.relX + 10, this.relY + 8, Color.DARK_GRAY.getRGB());
         for (Button button : Button.values()) {
             this.renderTitle(ms, button);
             if (hoveredButton == button && button.tooltip != null) {
@@ -87,7 +87,7 @@ public class ScreenStructureSaver extends Screen {
         int xButton = this.relX + button.x;
         int yButton = this.relY + button.y;
         int stringLength = this.font.getStringWidth(button.title.getString());
-        this.font.func_243246_a(ms, button.title, xButton + ((float) button.width / 2) - ((float) stringLength / 2), yButton + ((float) (button.height - 8) / 2), Color.WHITE.getRGB());
+        this.font.drawTextWithShadow(ms, button.title, xButton + ((float) button.width / 2) - ((float) stringLength / 2), yButton + ((float) (button.height - 8) / 2), Color.WHITE.getRGB());
     }
 
     @Override

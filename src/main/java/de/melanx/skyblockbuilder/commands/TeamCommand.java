@@ -238,7 +238,7 @@ public class TeamCommand {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         // check for overworld
-        if (world != source.getServer().func_241755_D_()) {
+        if (world != source.getServer().getOverworld()) {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.wrong_position").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
@@ -289,7 +289,7 @@ public class TeamCommand {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         // check for overworld
-        if (world != source.getServer().func_241755_D_()) {
+        if (world != source.getServer().getOverworld()) {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.wrong_position").mergeStyle(TextFormatting.RED), true);
             return 0;
         }
@@ -318,7 +318,7 @@ public class TeamCommand {
         if (!team.removePossibleSpawn(pos)) {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.remove_spawn0",
                     (team.getPossibleSpawns().size() <= 1
-                            ? new StringTextComponent(" ").append(new TranslationTextComponent("skyblockbuilder.command.error.remove_spawn1"))
+                            ? new StringTextComponent(" ").appendSibling(new TranslationTextComponent("skyblockbuilder.command.error.remove_spawn1"))
                             : "")
             ).mergeStyle(TextFormatting.RED), true);
             return 0;

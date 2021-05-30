@@ -89,7 +89,7 @@ public class ItemStructureSaver extends Item {
                 ClientUtility.openItemScreen(stack);
             }
 
-            return ActionResult.func_233538_a_(stack, false);
+            return ActionResult.successOrConsume(stack, false);
         }
 
         return ActionResult.resultPass(stack);
