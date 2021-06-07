@@ -26,9 +26,9 @@ public class ConfigParser {
 
     public static void deleteOldConfigFile() {
         try {
-            Files.delete(SkyPaths.MOD_CONFIG.resolve("config.toml"));
+            Files.deleteIfExists(SkyPaths.MOD_CONFIG.resolve("config.toml"));
         } catch (IOException e) {
-            throw new IllegalStateException("config/skyblockbuilder/config.toml not available");
+            SkyblockBuilder.getLogger().error("config/skyblockbuilder/config.toml could not be deleted");
         }
     }
 

@@ -143,7 +143,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Nonnull
     @Override
-    public IBlockReader func_230348_a_(int posX, int posY) {
+    public IBlockReader func_230348_a_(int posX, int posZ) {
         return new Blockreader(new BlockState[0]);
     }
 }
