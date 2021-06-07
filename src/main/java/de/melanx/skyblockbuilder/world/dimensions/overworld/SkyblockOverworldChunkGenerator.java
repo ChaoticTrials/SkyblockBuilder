@@ -129,21 +129,21 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     // Vanilla copy
     @Override
-    public void func_242707_a(@Nonnull DynamicRegistries dynamicRegistries, @Nonnull StructureManager structureManager, @Nonnull IChunk chunk, @Nonnull TemplateManager templateManager, long seed) {
+    public void addStructureStarts(@Nonnull DynamicRegistries dynamicRegistries, @Nonnull StructureManager structureManager, @Nonnull IChunk chunk, @Nonnull TemplateManager templateManager, long seed) {
         ChunkPos chunkpos = chunk.getPos();
         Biome biome = this.biomeProvider.getNoiseBiome((chunkpos.x << 2) + 2, 0, (chunkpos.z << 2) + 2);
         if (RandomUtility.isStructureGenerated(Structure.STRONGHOLD.getRegistryName())) {
-            this.func_242705_a(StructureFeatures.STRONGHOLD, dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
+            this.addStructureStart(StructureFeatures.STRONGHOLD, dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
         }
 
         for (Supplier<StructureFeature<?, ?>> supplier : biome.getGenerationSettings().getStructures()) {
-            this.func_242705_a(supplier.get(), dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
+            this.addStructureStart(supplier.get(), dynamicRegistries, structureManager, chunk, templateManager, seed, chunkpos, biome);
         }
     }
 
     @Nonnull
     @Override
-    public IBlockReader func_230348_a_(int posX, int posZ) {
+    public IBlockReader generateNoiseMap(int posX, int posZ) {
         return new Blockreader(new BlockState[0]);
     }
 }

@@ -104,7 +104,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Nonnull
     @Override
-    public IBlockReader func_230348_a_(int posX, int posY) {
+    public IBlockReader generateNoiseMap(int posX, int posZ) {
         return new Blockreader(new BlockState[0]);
     }
 }
