@@ -102,7 +102,7 @@ public class LibXConfigHandler {
 
         @Config({"The dimension the islands will be generated in. Vanilla dimensions:",
                 "minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"})
-        public static ResourceLocation dimension = new ResourceLocation("minecraft", "the_nether");
+        public static ResourceLocation dimension = new ResourceLocation("minecraft", "overworld");
 
         @Config("Direction the player should look at initial spawn")
         public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
