@@ -34,23 +34,23 @@ public class JoinCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         if (data.hasPlayerTeam(player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         SkyblockJoinRequestEvent.SendRequest event = SkyblockHooks.onSendJoinRequest(player, team);
         switch (event.getResult()) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.join_request").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.join_request").mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.join_request").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.join_request").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 break;

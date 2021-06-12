@@ -83,12 +83,12 @@ public class TeamCommand {
         ServerPlayerEntity commandPlayer = source.asPlayer();
         Team team = data.getTeamFromPlayer(commandPlayer);
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         if (data.hasPlayerTeam(player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team"), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team"), false);
             team.removeJoinRequest(player);
             return 0;
         }
@@ -96,11 +96,11 @@ public class TeamCommand {
         SkyblockJoinRequestEvent.AcceptRequest event = SkyblockHooks.onAcceptJoinRequest(commandPlayer, player, team);
         switch (event.getResult()) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.accept_join_request").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.accept_join_request").mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.accept_join_request").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.accept_join_request").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -124,12 +124,12 @@ public class TeamCommand {
         ServerPlayerEntity commandPlayer = source.asPlayer();
         Team team = data.getTeamFromPlayer(commandPlayer);
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         if (data.hasPlayerTeam(player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team"), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team"), false);
             team.removeJoinRequest(player);
             return 0;
         }
@@ -137,11 +137,11 @@ public class TeamCommand {
         SkyblockJoinRequestEvent.DenyRequest event = SkyblockHooks.onDenyJoinRequest(commandPlayer, player, team);
         switch (event.getResult()) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.deny_join_request").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.deny_join_request").mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.deny_join_request").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.deny_join_request").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -162,12 +162,12 @@ public class TeamCommand {
 
         Team team = data.getTeamFromPlayer(source.asPlayer());
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         boolean enabled = team.allowsVisits();
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.visit_status", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.visit_status", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), false);
         return 1;
     }
 
@@ -179,17 +179,17 @@ public class TeamCommand {
 
         Team team = data.getTeamFromPlayer(player);
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         Pair<Event.Result, Boolean> result = SkyblockHooks.onToggleVisits(player, team, enabled);
         if (result.getLeft() == Event.Result.DENY) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.toggle_request", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))).mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.toggle_request", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))).mergeStyle(TextFormatting.RED), false);
             return 0;
         } else {
             team.setAllowVisit(result.getRight());
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.toggle_visit", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.toggle_visit", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), false);
             return 1;
         }
     }
@@ -200,12 +200,12 @@ public class TeamCommand {
 
         Team team = data.getTeamFromPlayer(source.asPlayer());
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         boolean enabled = team.allowsVisits();
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.visit_status", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.visit_status", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), false);
         return 1;
     }
 
@@ -217,17 +217,17 @@ public class TeamCommand {
 
         Team team = data.getTeamFromPlayer(player);
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         Pair<Event.Result, Boolean> result = SkyblockHooks.onToggleRequests(player, team, enabled);
         if (result.getLeft() == Event.Result.DENY) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.toggle_request", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))).mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.toggle_request", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))).mergeStyle(TextFormatting.RED), false);
             return 0;
         } else {
             team.setAllowJoinRequest(result.getRight());
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.toggle_request", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.toggle_request", new TranslationTextComponent("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).mergeStyle(TextFormatting.GOLD), false);
             return 1;
         }
     }
@@ -239,7 +239,7 @@ public class TeamCommand {
 
         // check for overworld
         if (world != source.getServer().getOverworld()) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.wrong_position").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.wrong_position").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
@@ -248,29 +248,29 @@ public class TeamCommand {
 
         if (team == null) {
             if (!source.hasPermissionLevel(2)) {
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
                 return 0;
             }
 
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.warning.edit_spawn_spawns").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.warning.edit_spawn_spawns").mergeStyle(TextFormatting.RED), false);
             team = data.getSpawn();
         }
 
         Pair<Event.Result, BlockPos> result = SkyblockHooks.onAddSpawn(player, team, pos);
         switch (result.getLeft()) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_spawn").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_spawn").mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 BlockPos templateSize = TemplateData.get(world).getTemplate().getSize();
                 BlockPos center = team.getIsland().getCenter().toMutable();
                 center.add(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
                 if (!pos.withinDistance(center, LibXConfigHandler.Utility.Spawns.range)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.position_too_far_away").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.position_too_far_away").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -279,7 +279,7 @@ public class TeamCommand {
         }
 
         team.addPossibleSpawn(pos);
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.spawn_added", pos.getX(), pos.getY(), pos.getZ()).mergeStyle(TextFormatting.GOLD), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.spawn_added", pos.getX(), pos.getY(), pos.getZ()).mergeStyle(TextFormatting.GOLD), false);
         return 1;
     }
 
@@ -290,7 +290,7 @@ public class TeamCommand {
 
         // check for overworld
         if (world != source.getServer().getOverworld()) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.wrong_position").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.wrong_position").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
@@ -298,17 +298,21 @@ public class TeamCommand {
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onRemoveSpawn(player, team, pos)) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("You can't remove this spawn point. " + (team.getPossibleSpawns().size() <= 1 ? "There are too less spawn points left." : "")).mergeStyle(TextFormatting.RED), true);
+                TranslationTextComponent component = new TranslationTextComponent("skyblockbuilder.command.denied.modify_spawns0");
+                if (team.getPossibleSpawns().size() <= 1) {
+                    component.appendString(" ").appendSibling(new TranslationTextComponent("skyblockbuilder.command.denied.modify_spawns1"));
+                }
+                source.sendFeedback(component.mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
             case ALLOW:
@@ -320,11 +324,11 @@ public class TeamCommand {
                     (team.getPossibleSpawns().size() <= 1
                             ? new StringTextComponent(" ").appendSibling(new TranslationTextComponent("skyblockbuilder.command.error.remove_spawn1"))
                             : "")
-            ).mergeStyle(TextFormatting.RED), true);
+            ).mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.spawn_removed", pos.getX(), pos.getY(), pos.getZ()).mergeStyle(TextFormatting.GOLD), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.spawn_removed", pos.getX(), pos.getY(), pos.getZ()).mergeStyle(TextFormatting.GOLD), false);
         return 1;
     }
 
@@ -338,7 +342,7 @@ public class TeamCommand {
         ServerPlayerEntity player = null;
         if (name == null) {
             if (!(source.getEntity() instanceof ServerPlayerEntity)) {
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_no_player").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_no_player").mergeStyle(TextFormatting.RED), false);
                 return 0;
             }
 
@@ -346,14 +350,14 @@ public class TeamCommand {
             team = data.getTeamFromPlayer(player);
 
             if (team == null) {
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
                 return 0;
             }
         } else {
             team = data.getTeam(name);
 
             if (team == null) {
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), false);
                 return 0;
             }
         }
@@ -361,11 +365,11 @@ public class TeamCommand {
         Event.Result result = SkyblockHooks.onResetSpawns(player, team);
         switch (result) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.reset_spawns").mergeStyle(TextFormatting.GOLD), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.reset_spawns").mergeStyle(TextFormatting.GOLD), false);
                 return 0;
             case DEFAULT:
                 if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -387,18 +391,18 @@ public class TeamCommand {
         if (oldName != null) {
             Team team = data.getTeam(oldName);
             if (team == null) {
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), false);
                 return 0;
             }
 
             SkyblockManageTeamEvent.Rename event = SkyblockHooks.onRename(null, team, newName);
             switch (event.getResult()) {
                 case DENY:
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.denied_rename_team").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.denied_rename_team").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 case DEFAULT:
                     if (!source.hasPermissionLevel(2)) {
-                        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.rename_team").mergeStyle(TextFormatting.RED), true);
+                        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.rename_team").mergeStyle(TextFormatting.RED), false);
                         return 0;
                     }
                     break;
@@ -412,14 +416,14 @@ public class TeamCommand {
             Team team = data.getTeamFromPlayer(player);
 
             if (team == null) {
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
                 return 0;
             }
 
             SkyblockManageTeamEvent.Rename event = SkyblockHooks.onRename(player, team, newName);
             switch (event.getResult()) {
                 case DENY:
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.denied_rename_team").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.denied_rename_team").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 case DEFAULT:
                 case ALLOW:

@@ -36,19 +36,19 @@ public class InviteCommand {
 
         Team team = data.getTeamFromPlayer(player);
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         Team invitedPlayersTeam = data.getTeamFromPlayer(invitePlayer);
         if (invitedPlayersTeam != null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         if (data.hasInvites(invitePlayer)) {
             if (data.hasInviteFrom(team, invitePlayer)) {
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_already_invited").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_already_invited").mergeStyle(TextFormatting.RED), false);
                 return 0;
             }
         }
@@ -56,11 +56,11 @@ public class InviteCommand {
         SkyblockInvitationEvent.Invite event = SkyblockHooks.onInvite(invitePlayer, team, player);
         switch (event.getResult()) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.invite_player").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.invite_player").mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.send_invitations").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.send_invitations").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 break;

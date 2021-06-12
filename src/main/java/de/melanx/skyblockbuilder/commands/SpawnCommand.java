@@ -28,7 +28,7 @@ public class SpawnCommand {
         ServerPlayerEntity player = source.asPlayer();
         Team team = data.getSpawn();
 
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.teleport_to_spawn"), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.teleport_to_spawn"), false);
         WorldUtil.teleportToIsland(player, team);
         return 1;
     }

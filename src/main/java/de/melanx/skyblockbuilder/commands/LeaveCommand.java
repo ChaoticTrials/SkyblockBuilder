@@ -28,17 +28,17 @@ public class LeaveCommand {
         ServerPlayerEntity player = source.asPlayer();
 
         if (!data.hasPlayerTeam(player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onLeave(player, data.getTeamFromPlayer(player))) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.leave_team").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.leave_team").mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.manage_teams").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.manage_teams").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 break;

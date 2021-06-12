@@ -33,22 +33,22 @@ public class DeclineCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         if (!data.hasInvites(player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.no_invitations").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.no_invitations").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onDecline(player, team)) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.decline_invitations").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.decline_invitations").mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.decline_invitations").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.decline_invitations").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -57,7 +57,7 @@ public class DeclineCommand {
         }
 
         if (!data.declineInvite(team, player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.decline_invitations").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.decline_invitations").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 

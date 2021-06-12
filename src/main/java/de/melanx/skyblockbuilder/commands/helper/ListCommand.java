@@ -43,7 +43,7 @@ public class ListCommand {
                 teams.size(),
                 teams.stream().filter(Team::isEmpty).count());
         info.mergeStyle(TextFormatting.GOLD);
-        source.sendFeedback(info, true);
+        source.sendFeedback(info, false);
 
         for (Team team : teams) {
             if (!team.isSpawn()) {
@@ -57,7 +57,7 @@ public class ListCommand {
                     list.mergeStyle(TextFormatting.GREEN);
                 }
 
-                source.sendFeedback(list, true);
+                source.sendFeedback(list, false);
             }
         }
 
@@ -71,18 +71,18 @@ public class ListCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         PlayerProfileCache profileCache = source.getServer().getPlayerProfileCache();
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.team_detailed", team.getName(), team.getPlayers().size()).mergeStyle(TextFormatting.GOLD), true);
+        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.team_detailed", team.getName(), team.getPlayers().size()).mergeStyle(TextFormatting.GOLD), false);
         team.getPlayers().forEach(id -> {
             GameProfile profile = profileCache.getProfileByUUID(id);
             if (profile != null) {
                 String name = profile.getName();
                 if (!StringUtils.isNullOrEmpty(name)) {
-                    source.sendFeedback(new StringTextComponent("- " + name), true);
+                    source.sendFeedback(new StringTextComponent("- " + name), false);
                 }
             }
         });

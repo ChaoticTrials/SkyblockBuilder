@@ -33,26 +33,26 @@ public class VisitCommand {
         Team team = data.getTeam(name);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onVisit(player, team)) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.visit_team").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.visit_team").mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (team.hasPlayer(player)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.visit_own_team").mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.visit_own_team").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
                 if (!player.hasPermissionLevel(2)) {
                     if (!LibXConfigHandler.Utility.Teleports.allowVisits) {
-                        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.team_visit").mergeStyle(TextFormatting.RED), true);
+                        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.team_visit").mergeStyle(TextFormatting.RED), false);
                         return 0;
                     }
                     if (!team.allowsVisits()) {
-                        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.visit_team").mergeStyle(TextFormatting.RED), true);
+                        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.visit_team").mergeStyle(TextFormatting.RED), false);
                         return 0;
                     }
                 }

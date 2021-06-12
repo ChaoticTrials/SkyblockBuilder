@@ -47,19 +47,19 @@ public class CreateCommand {
         }
 
         if (SkyblockHooks.onCreateTeam(name)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         if (players.isEmpty() && source.getEntity() instanceof ServerPlayerEntity && data.hasPlayerTeam((ServerPlayerEntity) source.getEntity())) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_team").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_team").mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
         Team team = data.createTeam(name);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_already_exist", name).mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_already_exist", name).mergeStyle(TextFormatting.RED), false);
             return 0;
         }
 
@@ -70,7 +70,7 @@ public class CreateCommand {
         } else {
             players.forEach(player -> {
                 if (data.getTeamFromPlayer(player) != null) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).mergeStyle(TextFormatting.RED), true);
+                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).mergeStyle(TextFormatting.RED), false);
                 } else {
                     data.addPlayerToTeam(team, player);
                     WorldUtil.teleportToIsland(player, team);
