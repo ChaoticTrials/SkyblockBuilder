@@ -39,6 +39,10 @@ public class Team {
         this.allowVisits = false;
     }
 
+    public boolean isSpawn() {
+        return this.name.equals("spawn");
+    }
+
     public String getName() {
         return this.name;
     }

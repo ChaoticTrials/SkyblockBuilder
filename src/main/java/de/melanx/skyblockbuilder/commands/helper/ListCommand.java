@@ -46,7 +46,7 @@ public class ListCommand {
         source.sendFeedback(info, true);
 
         for (Team team : teams) {
-            if (!team.getName().equalsIgnoreCase("spawn")) {
+            if (!team.isSpawn()) {
                 IFormattableTextComponent list = (new StringTextComponent("- " + team.getName()));
                 if (team.isEmpty()) {
                     list.appendString(" (");

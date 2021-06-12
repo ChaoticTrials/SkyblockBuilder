@@ -182,7 +182,7 @@ public class SkyblockSavedData extends WorldSavedData {
 
     public boolean hasPlayerTeam(UUID player) {
         Team team = this.getTeamFromPlayer(player);
-        return team != null && team != this.getTeam("spawn");
+        return team != null && !team.isSpawn();
     }
 
     public boolean addPlayerToTeam(String teamName, PlayerEntity player) {
@@ -204,7 +204,9 @@ public class SkyblockSavedData extends WorldSavedData {
     }
 
     public boolean addPlayerToTeam(Team team, UUID player) {
-        team.broadcast(new TranslationTextComponent("skyblockbuilder.event.player_joined", RandomUtility.getDisplayNameByUuid(this.world, player)), Style.EMPTY.applyFormatting(TextFormatting.GOLD));
+        if (team.getIsland() != SPAWN_ISLAND) {
+            team.broadcast(new TranslationTextComponent("skyblockbuilder.event.player_joined", RandomUtility.getDisplayNameByUuid(this.world, player)), Style.EMPTY.applyFormatting(TextFormatting.GOLD));
+        }
         this.getSpawn().removePlayer(player);
         team.addPlayer(player);
         this.markDirty();
@@ -254,7 +256,7 @@ public class SkyblockSavedData extends WorldSavedData {
     public boolean removePlayerFromTeam(UUID player) {
         for (Map.Entry<String, Team> entry : this.skyblocks.entrySet()) {
             Team team = entry.getValue();
-            if (team.getName().equalsIgnoreCase("spawn")) continue;
+            if (team.isSpawn()) continue;
             if (team.hasPlayer(player)) {
                 boolean removed = team.removePlayer(player);
                 if (removed) {
@@ -311,9 +313,8 @@ public class SkyblockSavedData extends WorldSavedData {
 
     @Nullable
     public Team getTeamFromPlayer(UUID player) {
-        Team spawn = this.getTeam("spawn");
         for (Team team : this.skyblocks.values()) {
-            if (team == spawn) continue;
+            if (team.isSpawn()) continue;
             if (team.getPlayers().contains(player)) {
                 return team;
             }

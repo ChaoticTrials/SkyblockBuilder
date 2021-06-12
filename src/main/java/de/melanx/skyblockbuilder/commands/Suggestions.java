@@ -54,16 +54,16 @@ public class Suggestions {
     // Lists all teams except spawn
     public static final SuggestionProvider<CommandSource> ALL_TEAMS = (context, builder) -> ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
             .getTeams().stream()
+            .filter(team -> !team.isSpawn())
             .map(Team::getName)
-            .filter(name -> !name.equalsIgnoreCase("spawn"))
             .collect(Collectors.toSet()), builder);
 
     // Lists all teams which allow visiting
     public static final SuggestionProvider<CommandSource> VISIT_TEAMS = (context, builder) -> ISuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().asPlayer().getServerWorld())
             .getTeams().stream()
             .filter(Team::allowsVisits)
+            .filter(team -> !team.isSpawn())
             .map(Team::getName)
-            .filter(name -> !name.equalsIgnoreCase("spawn"))
             .collect(Collectors.toSet()), builder);
 
     // Lists all teams for a player which invited the player
@@ -75,8 +75,8 @@ public class Suggestions {
         List<Team> teams = data.getInvites(source.asPlayer());
         if (teams != null && teams.size() != 0) {
             return ISuggestionProvider.suggest(teams.stream()
+                    .filter(team -> !team.isSpawn())
                     .map(Team::getName)
-                    .filter(name -> !name.equalsIgnoreCase("spawn"))
                     .collect(Collectors.toSet()), builder);
         }
 
