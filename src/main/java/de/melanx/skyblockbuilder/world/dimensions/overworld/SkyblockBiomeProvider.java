@@ -55,7 +55,7 @@ public class SkyblockBiomeProvider extends BiomeProvider {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        if (LibXConfigHandler.World.SingleBiome.enabled && LibXConfigHandler.World.SingleBiome.singleBiomeDimension.getDimension() == WorldUtil.SingleBiomeDimension.OVERWORLD.getDimension()) {
+        if (LibXConfigHandler.World.SingleBiome.enabled && LibXConfigHandler.World.SingleBiome.singleBiomeDimension.getDimension().equals(WorldUtil.SingleBiomeDimension.OVERWORLD.getDimension())) {
             Biome biome = this.lookupRegistry.getOrDefault(WorldUtil.SINGLE_BIOME);
             if (biome == null) {
                 biome = this.lookupRegistry.getOrDefault(Biomes.PLAINS.getLocation());
