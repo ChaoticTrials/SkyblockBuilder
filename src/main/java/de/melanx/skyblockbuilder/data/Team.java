@@ -40,7 +40,7 @@ public class Team {
     }
 
     public boolean isSpawn() {
-        return this.name.equals("spawn");
+        return this.name.equalsIgnoreCase("spawn");
     }
 
     public String getName() {
