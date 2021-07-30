@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.events;
 
 import de.melanx.skyblockbuilder.data.Team;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -16,10 +16,10 @@ import javax.annotation.Nonnull;
  */
 public class SkyblockVisitEvent extends Event {
 
-    private final ServerPlayerEntity player;
+    private final ServerPlayer player;
     private final Team team;
 
-    public SkyblockVisitEvent(@Nonnull ServerPlayerEntity player, Team team) {
+    public SkyblockVisitEvent(@Nonnull ServerPlayer player, Team team) {
         this.player = player;
         this.team = team;
     }
@@ -28,7 +28,7 @@ public class SkyblockVisitEvent extends Event {
      * @return Visiting player
      */
     @Nonnull
-    public ServerPlayerEntity getPlayer() {
+    public ServerPlayer getPlayer() {
         return this.player;
     }
 

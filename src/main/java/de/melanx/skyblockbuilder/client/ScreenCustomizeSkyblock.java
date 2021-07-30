@@ -1,18 +1,17 @@
 package de.melanx.skyblockbuilder.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyblockbuilder.Registration;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.DialogTexts;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.gui.widget.list.AbstractList;
-import net.minecraft.client.gui.widget.list.ExtendedList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,13 +23,13 @@ import java.util.function.Consumer;
 public class ScreenCustomizeSkyblock extends Screen {
 
     private final Screen parent;
-    private final Map<String, Template> templateMap;
-    private final Consumer<Template> applyTemplate;
+    private final Map<String, StructureTemplate> templateMap;
+    private final Consumer<StructureTemplate> applyTemplate;
     private TemplateList list;
     private Button doneButton;
-    private Template template;
+    private StructureTemplate template;
 
-    public ScreenCustomizeSkyblock(Screen parent, Template template) {
+    public ScreenCustomizeSkyblock(Screen parent, StructureTemplate template) {
         super(Registration.customSkyblock.getDisplayName());
         this.parent = parent;
         this.template = template;
@@ -42,18 +41,18 @@ public class ScreenCustomizeSkyblock extends Screen {
     @Override
     protected void init() {
         //noinspection ConstantConditions
-        this.minecraft.keyboardListener.enableRepeatEvents(true);
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.list = new TemplateList();
-        this.children.add(this.list);
+        this.addWidget(this.list);
 
-        this.doneButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, DialogTexts.GUI_DONE, (p_241579_1_) -> {
+        this.doneButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (p_241579_1_) -> {
             this.applyTemplate.accept(this.template);
-            this.minecraft.displayGuiScreen(this.parent);
+            this.minecraft.setScreen(this.parent);
         }));
-        this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, DialogTexts.GUI_CANCEL, (p_213015_1_) -> {
-            this.minecraft.displayGuiScreen(this.parent);
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, (p_213015_1_) -> {
+            this.minecraft.setScreen(this.parent);
         }));
-        this.list.setSelected(this.list.getEventListeners().stream()
+        this.list.setSelected(this.list.children().stream()
                 .filter(entry -> Objects.equals(entry.template, this.template))
                 .findFirst()
                 .orElse(null));
@@ -64,15 +63,15 @@ public class ScreenCustomizeSkyblock extends Screen {
     }
 
     @Override
-    public void render(@Nonnull MatrixStack ms, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         this.renderDirtBackground(0);
-        this.list.render(ms, mouseX, mouseY, partialTicks);
-        drawCenteredString(ms, this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
-        drawCenteredString(ms, this.font, new TranslationTextComponent("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
-        super.render(ms, mouseX, mouseY, partialTicks);
+        this.list.render(matrixStack, mouseX, mouseY, partialTicks);
+        drawCenteredString(matrixStack, this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
+        drawCenteredString(matrixStack, this.font, new TranslatableComponent("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
+        super.render(matrixStack, mouseX, mouseY, partialTicks);
     }
 
-    private class TemplateList extends ExtendedList<TemplateList.TemplateEntry> {
+    private class TemplateList extends ObjectSelectionList<TemplateList.TemplateEntry> {
 
         public TemplateList() {
             super(Objects.requireNonNull(ScreenCustomizeSkyblock.this.minecraft), ScreenCustomizeSkyblock.this.width, ScreenCustomizeSkyblock.this.height, 40, ScreenCustomizeSkyblock.this.height - 37, 16);
@@ -83,7 +82,7 @@ public class ScreenCustomizeSkyblock extends Screen {
 
         @Override
         protected boolean isFocused() {
-            return ScreenCustomizeSkyblock.this.getListener() == this;
+            return ScreenCustomizeSkyblock.this.getFocused() == this;
         }
 
         @Override
@@ -97,19 +96,19 @@ public class ScreenCustomizeSkyblock extends Screen {
             ScreenCustomizeSkyblock.this.updateButtonValidity();
         }
 
-        private class TemplateEntry extends AbstractList.AbstractListEntry<TemplateEntry> {
+        private class TemplateEntry extends ObjectSelectionList.Entry<TemplateEntry> {
 
-            private final ITextComponent name;
-            private final Template template;
+            private final Component name;
+            private final StructureTemplate template;
 
-            public TemplateEntry(String name, Template template) {
-                this.name = new StringTextComponent(name.replace(".nbt", ""));
+            public TemplateEntry(String name, StructureTemplate template) {
+                this.name = new TextComponent(name.replace(".nbt", ""));
                 this.template = template;
             }
 
             @Override
-            public void render(@Nonnull MatrixStack ms, int p_230432_2_, int y, int x, int p_230432_5_, int p_230432_6_, int p_230432_7_, int p_230432_8_, boolean p_230432_9_, float partialTicks) {
-                AbstractGui.drawString(ms, ScreenCustomizeSkyblock.this.font, this.name, x + 5, y + 2, Color.WHITE.getRGB());
+            public void render(@Nonnull PoseStack matrixStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
+                GuiComponent.drawString(matrixStack, ScreenCustomizeSkyblock.this.font, this.name, left + 5, top + 2, Color.WHITE.getRGB());
             }
 
             @Override
@@ -120,6 +119,12 @@ public class ScreenCustomizeSkyblock extends Screen {
                 } else {
                     return false;
                 }
+            }
+
+            @Nonnull
+            @Override
+            public Component getNarration() {
+                return this.name;
             }
         }
     }

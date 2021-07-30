@@ -1,8 +1,8 @@
 package de.melanx.skyblockbuilder.events;
 
 import de.melanx.skyblockbuilder.data.Team;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -18,20 +18,20 @@ import javax.annotation.Nullable;
  */
 public abstract class SkyblockManageTeamEvent extends Event {
 
-    private final ServerPlayerEntity player;
+    private final ServerPlayer player;
     private final Team team;
 
     /**
      * @param player Player who manages the team
      * @param team   Managed team
      */
-    private SkyblockManageTeamEvent(@Nullable ServerPlayerEntity player, Team team) {
+    private SkyblockManageTeamEvent(@Nullable ServerPlayer player, Team team) {
         this.player = player;
         this.team = team;
     }
 
     @Nullable
-    public ServerPlayerEntity getPlayer() {
+    public ServerPlayer getPlayer() {
         return this.player;
     }
 
@@ -51,7 +51,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
 
         private boolean allowVisits;
 
-        public ToggleVisits(@Nonnull ServerPlayerEntity player, Team team, boolean allowVisits) {
+        public ToggleVisits(@Nonnull ServerPlayer player, Team team, boolean allowVisits) {
             super(player, team);
             this.allowVisits = allowVisits;
         }
@@ -61,7 +61,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
          */
         @Nonnull
         @Override
-        public ServerPlayerEntity getPlayer() {
+        public ServerPlayer getPlayer() {
             //noinspection ConstantConditions
             return super.getPlayer();
         }
@@ -88,7 +88,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
 
         private boolean allowRequests;
 
-        public ToggleRequests(@Nonnull ServerPlayerEntity player, Team team, boolean allowRequests) {
+        public ToggleRequests(@Nonnull ServerPlayer player, Team team, boolean allowRequests) {
             super(player, team);
             this.allowRequests = allowRequests;
         }
@@ -115,7 +115,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
 
         private BlockPos pos;
 
-        public AddSpawn(@Nonnull ServerPlayerEntity player, Team team, BlockPos pos) {
+        public AddSpawn(@Nonnull ServerPlayer player, Team team, BlockPos pos) {
             super(player, team);
             this.pos = pos;
         }
@@ -125,7 +125,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
          */
         @Nonnull
         @Override
-        public ServerPlayerEntity getPlayer() {
+        public ServerPlayer getPlayer() {
             //noinspection ConstantConditions
             return super.getPlayer();
         }
@@ -154,7 +154,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
 
         private final BlockPos pos;
 
-        public RemoveSpawn(@Nonnull ServerPlayerEntity player, Team team, BlockPos pos) {
+        public RemoveSpawn(@Nonnull ServerPlayer player, Team team, BlockPos pos) {
             super(player, team);
             this.pos = pos;
         }
@@ -164,7 +164,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
          */
         @Nonnull
         @Override
-        public ServerPlayerEntity getPlayer() {
+        public ServerPlayer getPlayer() {
             //noinspection ConstantConditions
             return super.getPlayer();
         }
@@ -182,7 +182,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
      */
     public static class ResetSpawns extends SkyblockManageTeamEvent {
 
-        public ResetSpawns(ServerPlayerEntity player, Team team) {
+        public ResetSpawns(ServerPlayer player, Team team) {
             super(player, team);
         }
     }
@@ -194,7 +194,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
 
         private String newName;
 
-        public Rename(ServerPlayerEntity player, Team team, String newName) {
+        public Rename(ServerPlayer player, Team team, String newName) {
             super(player, team);
             this.newName = newName;
         }
@@ -221,7 +221,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
      */
     public static class Leave extends SkyblockManageTeamEvent {
 
-        public Leave(@Nonnull ServerPlayerEntity player, Team team) {
+        public Leave(@Nonnull ServerPlayer player, Team team) {
             super(player, team);
         }
 
@@ -230,7 +230,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
          */
         @Nonnull
         @Override
-        public ServerPlayerEntity getPlayer() {
+        public ServerPlayer getPlayer() {
             //noinspection ConstantConditions
             return super.getPlayer();
         }

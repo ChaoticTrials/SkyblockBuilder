@@ -6,39 +6,39 @@ import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public class LeaveCommand {
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Let the player leave a team
         return Commands.literal("leave")
                 .executes(context -> leaveTeam(context.getSource()));
     }
 
-    private static int leaveTeam(CommandSource source) throws CommandSyntaxException {
+    private static int leaveTeam(CommandSourceStack source) throws CommandSyntaxException {
         WorldUtil.checkSkyblock(source);
-        ServerWorld world = source.getWorld();
-        SkyblockSavedData data = SkyblockSavedData.get(world);
-        ServerPlayerEntity player = source.asPlayer();
+        ServerLevel level = source.getLevel();
+        SkyblockSavedData data = SkyblockSavedData.get(level);
+        ServerPlayer player = source.getPlayerOrException();
 
         if (!data.hasPlayerTeam(player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
+            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onLeave(player, data.getTeamFromPlayer(player))) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.leave_team").mergeStyle(TextFormatting.RED), false);
+                source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.leave_team").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.manage_teams").mergeStyle(TextFormatting.RED), false);
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                    source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.manage_teams").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -47,10 +47,10 @@ public class LeaveCommand {
         }
 
         if (LibXConfigHandler.Inventory.dropItems) {
-            player.inventory.dropAllItems();
+            player.getInventory().dropAll();
         }
         data.removePlayerFromTeam(player);
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.left_team").mergeStyle(TextFormatting.GOLD), true);
+        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.left_team").withStyle(ChatFormatting.GOLD), true);
         WorldUtil.teleportToIsland(player, data.getSpawn());
         return 1;
     }

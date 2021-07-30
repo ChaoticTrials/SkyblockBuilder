@@ -4,8 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -114,7 +114,7 @@ public class SkyPaths {
     public static void generateStructureInformation() throws IOException {
         BufferedWriter w = Files.newBufferedWriter(STRUCTURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        for (Structure<?> feature : ForgeRegistries.STRUCTURE_FEATURES.getValues()) {
+        for (StructureFeature<?> feature : ForgeRegistries.STRUCTURE_FEATURES.getValues()) {
             if (feature.getRegistryName() != null) {
                 w.write(feature.getRegistryName().toString() + "\n");
             }

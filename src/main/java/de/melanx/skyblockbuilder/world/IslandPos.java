@@ -1,8 +1,8 @@
 package de.melanx.skyblockbuilder.world;
 
 import de.melanx.skyblockbuilder.config.LibXConfigHandler;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 
 /*
  * Credits go to Botania authors
@@ -21,12 +21,12 @@ public final class IslandPos {
         return new BlockPos(this.x * LibXConfigHandler.World.islandDistance + LibXConfigHandler.World.offset, LibXConfigHandler.Spawn.height, this.z * LibXConfigHandler.World.islandDistance + LibXConfigHandler.World.offset);
     }
 
-    public static IslandPos fromTag(CompoundNBT tag) {
+    public static IslandPos fromTag(CompoundTag tag) {
         return new IslandPos(tag.getInt("IslandX"), tag.getInt("IslandZ"));
     }
 
-    public CompoundNBT toTag() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
         tag.putInt("IslandX", this.x);
         tag.putInt("IslandZ", this.z);
         return tag;

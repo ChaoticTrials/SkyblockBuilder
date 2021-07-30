@@ -1,51 +1,51 @@
 package de.melanx.skyblockbuilder.data;
 
 import de.melanx.skyblockbuilder.util.TemplateLoader;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.gen.feature.template.Template;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.DimensionSavedDataManager;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 
 import javax.annotation.Nonnull;
 
-public class TemplateData extends WorldSavedData {
+public class TemplateData extends SavedData {
 
     private static final String NAME = "skyblock_template";
 
-    private final Template template;
+    private final StructureTemplate template;
 
-    public TemplateData(Template template) {
-        super(NAME);
+    public TemplateData(StructureTemplate template) {
         this.template = template;
-        this.markDirty();
+        this.setDirty();
     }
 
-    public static TemplateData get(ServerWorld world) {
-        DimensionSavedDataManager storage = world.getServer().getOverworld().getSavedData();
-        Template template = TemplateLoader.getTemplate();
-        return storage.getOrCreate(() -> new TemplateData(template), NAME);
+    public static TemplateData get(ServerLevel level) {
+        DimensionDataStorage storage = level.getServer().overworld().getDataStorage();
+        StructureTemplate template = TemplateLoader.getTemplate();
+        return storage.computeIfAbsent(nbt -> new TemplateData(template).load(nbt), () -> new TemplateData(template), NAME);
     }
 
-    @Override
-    public void read(@Nonnull CompoundNBT nbt) {
-        this.template.read(nbt);
+    public TemplateData load(@Nonnull CompoundTag nbt) {
+        this.template.load(nbt);
+
+         return this;
     }
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbt) {
-        return this.template.writeToNBT(nbt);
+    public CompoundTag save(@Nonnull CompoundTag compound) {
+        return this.template.save(compound);
     }
 
     public void refreshTemplate() {
-        this.template.read(TemplateLoader.getTemplate().writeToNBT(new CompoundNBT()));
-        this.markDirty();
+        this.template.load(TemplateLoader.getTemplate().save(new CompoundTag()));
+        this.setDirty();
     }
 
-    public Template getTemplate() {
+    public StructureTemplate getTemplate() {
         // TODO 1.17 delete because it's only because of a bug in 1.5.1-1.5.3
-        if (this.template.blocks.isEmpty() && !TemplateLoader.getTemplate().blocks.isEmpty()) {
+        if (this.template.palettes.isEmpty() && !TemplateLoader.getTemplate().palettes.isEmpty()) {
             this.refreshTemplate();
         }
 

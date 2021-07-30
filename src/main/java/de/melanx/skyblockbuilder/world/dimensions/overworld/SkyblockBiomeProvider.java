@@ -5,60 +5,60 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryLookupCodec;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
-import net.minecraft.world.biome.provider.BiomeProvider;
-import net.minecraft.world.biome.provider.OverworldBiomeProvider;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.OverworldBiomeSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class SkyblockBiomeProvider extends BiomeProvider {
+public class SkyblockBiomeProvider extends BiomeSource {
 
     // [VanillaCopy] overworld biome provider codec
     public static final Codec<SkyblockBiomeProvider> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
                     Codec.LONG.fieldOf("seed").stable().forGetter(provider -> provider.seed),
-                    RegistryLookupCodec.getLookUpCodec(Registry.BIOME_KEY).forGetter(provider -> provider.lookupRegistry)
+                    RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(provider -> provider.lookupRegistry)
             ).apply(instance, instance.stable((seed, lookupRegistry) -> new SkyblockBiomeProvider(
-                    new OverworldBiomeProvider(seed, false, false, new LazyBiomeRegistryWrapper(lookupRegistry)))
+                    new OverworldBiomeSource(seed, false, false, new LazyBiomeRegistryWrapper(lookupRegistry)))
             )));
 
-    private final OverworldBiomeProvider parent;
+    private final OverworldBiomeSource parent;
     public final long seed;
     public final Registry<Biome> lookupRegistry;
 
-    public SkyblockBiomeProvider(OverworldBiomeProvider parent) {
-        super(parent.getBiomes());
+    public SkyblockBiomeProvider(OverworldBiomeSource parent) {
+        super(parent.possibleBiomes());
         this.parent = parent;
         this.seed = parent.seed;
-        this.lookupRegistry = parent.lookupRegistry;
+        this.lookupRegistry = parent.biomes;
     }
 
     @Nonnull
     @Override
-    protected Codec<? extends BiomeProvider> getBiomeProviderCodec() {
+    protected Codec<? extends BiomeSource> codec() {
         return CODEC;
     }
 
     @Override
     @Nonnull
     @OnlyIn(Dist.CLIENT)
-    public BiomeProvider getBiomeProvider(long seed) {
-        return new SkyblockBiomeProvider((OverworldBiomeProvider) this.parent.getBiomeProvider(seed));
+    public BiomeSource withSeed(long seed) {
+        return new SkyblockBiomeProvider((OverworldBiomeSource) this.parent.withSeed(seed));
     }
 
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
         if (LibXConfigHandler.World.SingleBiome.enabled && LibXConfigHandler.World.SingleBiome.singleBiomeDimension.getDimension().equals(WorldUtil.SingleBiomeDimension.OVERWORLD.getDimension())) {
-            Biome biome = this.lookupRegistry.getOrDefault(WorldUtil.SINGLE_BIOME);
+            Biome biome = this.lookupRegistry.get(WorldUtil.SINGLE_BIOME);
             if (biome == null) {
-                biome = this.lookupRegistry.getOrDefault(Biomes.PLAINS.getLocation());
+                biome = this.lookupRegistry.get(Biomes.PLAINS.location());
             }
             return Objects.requireNonNull(biome);
         } else {

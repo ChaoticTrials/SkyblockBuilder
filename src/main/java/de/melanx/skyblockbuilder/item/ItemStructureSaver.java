@@ -4,26 +4,26 @@ import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import io.github.noeppi_noeppi.libx.util.NBTX;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.apache.commons.compress.utils.IOUtils;
 
 import javax.annotation.Nonnull;
@@ -38,76 +38,76 @@ import java.util.List;
 
 public class ItemStructureSaver extends Item {
 
-    private static final IFormattableTextComponent TOOLTIP_INFO = new TranslationTextComponent("skyblockbuilder.item.structure_saver.info.tooltip").mergeStyle(TextFormatting.GOLD);
-    private static final IFormattableTextComponent TOOLTIP_SAVE = new TranslationTextComponent("skyblockbuilder.item.structure_saver.save.tooltip").mergeStyle(TextFormatting.GOLD);
+    private static final MutableComponent TOOLTIP_INFO = new TranslatableComponent("skyblockbuilder.item.structure_saver.info.tooltip").withStyle(ChatFormatting.GOLD);
+    private static final MutableComponent TOOLTIP_SAVE = new TranslatableComponent("skyblockbuilder.item.structure_saver.save.tooltip").withStyle(ChatFormatting.GOLD);
 
     public ItemStructureSaver() {
-        super(new Properties().group(ItemGroup.TOOLS));
+        super(new Properties().tab(CreativeModeTab.TAB_TOOLS));
     }
 
     @Nonnull
     @Override
-    public ActionResultType onItemUse(@Nonnull ItemUseContext context) {
-        BlockPos pos = context.getPos();
-        PlayerEntity player = context.getPlayer();
+    public InteractionResult useOn(@Nonnull UseOnContext context) {
+        BlockPos pos = context.getClickedPos();
+        Player player = context.getPlayer();
 
-        if (!context.getWorld().isRemote && player != null && player.isSneaking()) {
-            ItemStack stack = context.getItem();
-            CompoundNBT tag = stack.getOrCreateTag();
+        if (!context.getLevel().isClientSide && player != null && player.isShiftKeyDown()) {
+            ItemStack stack = context.getItemInHand();
+            CompoundTag tag = stack.getOrCreateTag();
 
             if (!tag.contains("Position1")) {
                 NBTX.putPos(tag, "Position1", pos);
-                player.sendStatusMessage(new TranslationTextComponent("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
-                return ActionResultType.SUCCESS;
+                player.displayClientMessage(new TranslatableComponent("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
+                return InteractionResult.SUCCESS;
             }
 
             if (!tag.contains("Position2")) {
                 NBTX.putPos(tag, "Position2", pos);
-                player.sendStatusMessage(new TranslationTextComponent("skyblockbuilder.structure_saver.pos", 2, pos.getX(), pos.getY(), pos.getZ()), false);
-                return ActionResultType.SUCCESS;
+                player.displayClientMessage(new TranslatableComponent("skyblockbuilder.structure_saver.pos", 2, pos.getX(), pos.getY(), pos.getZ()), false);
+                return InteractionResult.SUCCESS;
             }
         }
 
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     @Nonnull
     @Override
-    public ActionResult<ItemStack> onItemRightClick(@Nonnull World world, @Nonnull PlayerEntity player, @Nonnull Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
-        CompoundNBT tag = stack.getOrCreateTag();
+    public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        CompoundTag tag = stack.getOrCreateTag();
 
         if (tag.contains("Position1") && tag.contains("Position2")) {
 
             // prevent instant save
             if (!tag.contains("CanSave")) {
                 tag.putBoolean("CanSave", true);
-                return ActionResult.resultPass(stack);
+                return InteractionResultHolder.pass(stack);
             }
 
-            if (world.isRemote) {
+            if (level.isClientSide) {
                 ClientUtility.openItemScreen(stack);
             }
 
-            return ActionResult.successOrConsume(stack, false);
+            return InteractionResultHolder.sidedSuccess(stack, false);
         }
 
-        return ActionResult.resultPass(stack);
+        return InteractionResultHolder.pass(stack);
     }
 
     @Override
-    public void addInformation(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<ITextComponent> tooltip, @Nonnull ITooltipFlag flag) {
-        super.addInformation(stack, world, tooltip, flag);
-        CompoundNBT nbt = stack.getOrCreateTag();
+    public void appendHoverText(@Nonnull ItemStack stack, @Nullable Level level, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
+        super.appendHoverText(stack, level, tooltip, flag);
+        CompoundTag nbt = stack.getOrCreateTag();
         BlockPos pos1 = NBTX.getPos(nbt, "Position1");
         BlockPos pos2 = NBTX.getPos(nbt, "Position2");
 
         if (pos1 != null) {
-            tooltip.add(new TranslationTextComponent("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos1.getX(), pos1.getY(), pos1.getZ()).mergeStyle(TextFormatting.DARK_GRAY));
+            tooltip.add(new TranslatableComponent("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos1.getX(), pos1.getY(), pos1.getZ()).withStyle(ChatFormatting.DARK_GRAY));
         }
 
         if (pos2 != null) {
-            tooltip.add(new TranslationTextComponent("skyblockbuilder.item.structure_saver.position.tooltip", 2, pos2.getX(), pos2.getY(), pos2.getZ()).mergeStyle(TextFormatting.DARK_GRAY));
+            tooltip.add(new TranslatableComponent("skyblockbuilder.item.structure_saver.position.tooltip", 2, pos2.getX(), pos2.getY(), pos2.getZ()).withStyle(ChatFormatting.DARK_GRAY));
         }
 
         if (nbt.contains("CanSave")) {
@@ -118,8 +118,8 @@ public class ItemStructureSaver extends Item {
     }
 
     @Nullable
-    public static MutableBoundingBox getArea(ItemStack stack) {
-        CompoundNBT nbt = stack.getOrCreateTag();
+    public static BoundingBox getArea(ItemStack stack) {
+        CompoundTag nbt = stack.getOrCreateTag();
         if (!nbt.contains("Position1") || !nbt.contains("Position2")) {
             return null;
         }
@@ -128,32 +128,32 @@ public class ItemStructureSaver extends Item {
         BlockPos pos2 = NBTX.getPos(nbt, "Position2");
 
         //noinspection ConstantConditions
-        return new MutableBoundingBox(pos1, pos2);
+        return new BoundingBox(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX(), pos2.getY(), pos2.getZ());
     }
 
-    public static String saveSchematic(World world, ItemStack stack) {
-        return saveSchematic(world, stack, null);
+    public static String saveSchematic(Level level, ItemStack stack) {
+        return saveSchematic(level, stack, null);
     }
 
-    public static String saveSchematic(World world, ItemStack stack, @Nullable String name) {
-        Template template = new Template();
-        MutableBoundingBox boundingBox = getArea(stack);
+    public static String saveSchematic(Level level, ItemStack stack, @Nullable String name) {
+        StructureTemplate template = new StructureTemplate();
+        BoundingBox boundingBox = getArea(stack);
 
         if (boundingBox == null) {
             return null;
         }
 
-        BlockPos origin = new BlockPos(boundingBox.minX, boundingBox.minY, boundingBox.minZ);
-        BlockPos bounds = new BlockPos(boundingBox.getXSize(), boundingBox.getYSize(), boundingBox.getZSize());
+        BlockPos origin = new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
+        BlockPos bounds = new BlockPos(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
 
-        template.takeBlocksFromWorld(world, origin, bounds, true, Blocks.STRUCTURE_VOID);
+        template.fillFromWorld(level, origin, bounds, true, Blocks.STRUCTURE_VOID);
 
         Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name));
         OutputStream outputStream = null;
         try {
             outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE);
-            CompoundNBT nbttagcompound = template.writeToNBT(new CompoundNBT());
-            CompressedStreamTools.writeCompressed(nbttagcompound, outputStream);
+            CompoundTag nbttagcompound = template.save(new CompoundTag());
+            NbtIo.writeCompressed(nbttagcompound, outputStream);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -167,7 +167,7 @@ public class ItemStructureSaver extends Item {
     }
 
     public static ItemStack removeTags(ItemStack stack) {
-        CompoundNBT tag = stack.getOrCreateTag();
+        CompoundTag tag = stack.getOrCreateTag();
         tag.remove("Position1");
         tag.remove("Position2");
         tag.remove("CanSave");

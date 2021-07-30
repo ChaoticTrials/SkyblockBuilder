@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.config;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import io.github.noeppi_noeppi.libx.util.ResourceList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
 import java.nio.file.Files;

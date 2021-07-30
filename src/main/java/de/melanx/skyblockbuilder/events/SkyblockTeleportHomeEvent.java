@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.events;
 
 import de.melanx.skyblockbuilder.data.Team;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.Event;
 
 /**
@@ -15,10 +15,10 @@ import net.minecraftforge.eventbus.api.Event;
  */
 public class SkyblockTeleportHomeEvent extends Event {
 
-    private final ServerPlayerEntity player;
+    private final ServerPlayer player;
     private final Team team;
 
-    public SkyblockTeleportHomeEvent(ServerPlayerEntity player, Team team) {
+    public SkyblockTeleportHomeEvent(ServerPlayer player, Team team) {
         this.player = player;
         this.team = team;
     }
@@ -26,7 +26,7 @@ public class SkyblockTeleportHomeEvent extends Event {
     /**
      * @return Teleporting player
      */
-    public ServerPlayerEntity getPlayer() {
+    public ServerPlayer getPlayer() {
         return this.player;
     }
 

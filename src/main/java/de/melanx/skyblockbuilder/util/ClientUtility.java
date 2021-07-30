@@ -1,12 +1,12 @@
 package de.melanx.skyblockbuilder.util;
 
 import de.melanx.skyblockbuilder.client.ScreenStructureSaver;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -19,7 +19,7 @@ public class ClientUtility {
 
     @OnlyIn(Dist.CLIENT)
     public static void playSound(SoundEvent sound) {
-        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(sound, 1));
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(sound, 1));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -27,15 +27,15 @@ public class ClientUtility {
         try {
             Path dir = Paths.get(path);
             Files.createDirectories(dir);
-            Util.getOSType().openURI(dir.toUri());
+            Util.getPlatform().openUri(dir.toUri());
         } catch (IOException e) {
             //noinspection ConstantConditions
-            Minecraft.getInstance().player.sendStatusMessage(new TranslationTextComponent("skyblockbuilder.", path), false);
+            Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("skyblockbuilder.", path), false);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void openItemScreen(ItemStack stack) {
-        Minecraft.getInstance().displayGuiScreen(new ScreenStructureSaver(stack, new TranslationTextComponent("screen.skyblockbuilder.structure_saver")));
+        Minecraft.getInstance().setScreen(new ScreenStructureSaver(stack, new TranslatableComponent("screen.skyblockbuilder.structure_saver")));
     }
 }

@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.events;
 
 import de.melanx.skyblockbuilder.data.Team;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -14,14 +14,14 @@ import net.minecraftforge.eventbus.api.Event;
  */
 public class SkyblockJoinRequestEvent extends Event {
 
-    private final ServerPlayerEntity requestingPlayer;
+    private final ServerPlayer requestingPlayer;
     private final Team team;
 
     /**
      * @param requestingPlayer The player who requests joining
      * @param team             The team the player wants to join to
      */
-    private SkyblockJoinRequestEvent(ServerPlayerEntity requestingPlayer, Team team) {
+    private SkyblockJoinRequestEvent(ServerPlayer requestingPlayer, Team team) {
         this.requestingPlayer = requestingPlayer;
         this.team = team;
     }
@@ -29,7 +29,7 @@ public class SkyblockJoinRequestEvent extends Event {
     /**
      * @return Requesting player
      */
-    public ServerPlayerEntity getRequestingPlayer() {
+    public ServerPlayer getRequestingPlayer() {
         return this.requestingPlayer;
     }
 
@@ -50,7 +50,7 @@ public class SkyblockJoinRequestEvent extends Event {
      */
     public static class SendRequest extends SkyblockJoinRequestEvent {
 
-        public SendRequest(ServerPlayerEntity requestingPlayer, Team team) {
+        public SendRequest(ServerPlayer requestingPlayer, Team team) {
             super(requestingPlayer, team);
         }
     }
@@ -60,9 +60,9 @@ public class SkyblockJoinRequestEvent extends Event {
      */
     public static class AcceptRequest extends SkyblockJoinRequestEvent {
 
-        private final ServerPlayerEntity acceptingPlayer;
+        private final ServerPlayer acceptingPlayer;
 
-        public AcceptRequest(ServerPlayerEntity acceptingPlayer, ServerPlayerEntity requestingPlayer, Team team) {
+        public AcceptRequest(ServerPlayer acceptingPlayer, ServerPlayer requestingPlayer, Team team) {
             super(requestingPlayer, team);
             this.acceptingPlayer = acceptingPlayer;
         }
@@ -70,7 +70,7 @@ public class SkyblockJoinRequestEvent extends Event {
         /**
          * @return Player who accepts the request
          */
-        public ServerPlayerEntity getAcceptingPlayer() {
+        public ServerPlayer getAcceptingPlayer() {
             return this.acceptingPlayer;
         }
     }
@@ -80,9 +80,9 @@ public class SkyblockJoinRequestEvent extends Event {
      */
     public static class DenyRequest extends SkyblockJoinRequestEvent {
 
-        private final ServerPlayerEntity denyingPlayer;
+        private final ServerPlayer denyingPlayer;
 
-        public DenyRequest(ServerPlayerEntity denyingPlayer, ServerPlayerEntity requestingPlayer, Team team) {
+        public DenyRequest(ServerPlayer denyingPlayer, ServerPlayer requestingPlayer, Team team) {
             super(requestingPlayer, team);
             this.denyingPlayer = denyingPlayer;
         }
@@ -90,7 +90,7 @@ public class SkyblockJoinRequestEvent extends Event {
         /**
          * @return Player who denies the request
          */
-        public ServerPlayerEntity getDenyingPlayer() {
+        public ServerPlayer getDenyingPlayer() {
             return this.denyingPlayer;
         }
     }

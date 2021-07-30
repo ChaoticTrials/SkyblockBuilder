@@ -8,23 +8,24 @@ import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.StringUtils;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.util.StringUtil;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ListCommand {
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Lists all teams
         return Commands.literal("list")
                 .executes(context -> listTeams(context.getSource()))
@@ -33,56 +34,56 @@ public class ListCommand {
                         .executes(context -> listPlayers(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 
-    private static int listTeams(CommandSource source) throws CommandSyntaxException {
+    private static int listTeams(CommandSourceStack source) throws CommandSyntaxException {
         WorldUtil.checkSkyblock(source);
-        ServerWorld world = source.getWorld();
-        SkyblockSavedData data = SkyblockSavedData.get(world);
+        ServerLevel level = source.getLevel();
+        SkyblockSavedData data = SkyblockSavedData.get(level);
 
         List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).filter(team -> !team.getName().equalsIgnoreCase("spawn")).collect(Collectors.toList());
-        IFormattableTextComponent info = new TranslationTextComponent("skyblockbuilder.command.info.teams",
+        MutableComponent info = new TranslatableComponent("skyblockbuilder.command.info.teams",
                 teams.size(),
                 teams.stream().filter(Team::isEmpty).count());
-        info.mergeStyle(TextFormatting.GOLD);
-        source.sendFeedback(info, false);
+        info.withStyle(ChatFormatting.GOLD);
+        source.sendSuccess(info, false);
 
         for (Team team : teams) {
             if (!team.isSpawn()) {
-                IFormattableTextComponent list = (new StringTextComponent("- " + team.getName()));
+                MutableComponent list = (new TextComponent("- " + team.getName()));
                 if (team.isEmpty()) {
-                    list.appendString(" (");
-                    list.appendSibling(new TranslationTextComponent("skyblockbuilder.command.argument.empty"));
-                    list.appendString(")");
-                    list.mergeStyle(TextFormatting.RED);
+                    list.append(" (");
+                    list.append(new TranslatableComponent("skyblockbuilder.command.argument.empty"));
+                    list.append(")");
+                    list.withStyle(ChatFormatting.RED);
                 } else {
-                    list.mergeStyle(TextFormatting.GREEN);
+                    list.withStyle(ChatFormatting.GREEN);
                 }
 
-                source.sendFeedback(list, false);
+                source.sendSuccess(list, false);
             }
         }
 
         return 1;
     }
 
-    private static int listPlayers(CommandSource source, String teamName) throws CommandSyntaxException {
+    private static int listPlayers(CommandSourceStack source, String teamName) throws CommandSyntaxException {
         WorldUtil.checkSkyblock(source);
-        ServerWorld world = source.getWorld();
-        SkyblockSavedData data = SkyblockSavedData.get(world);
+        ServerLevel level = source.getLevel();
+        SkyblockSavedData data = SkyblockSavedData.get(level);
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), false);
+            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
-        PlayerProfileCache profileCache = source.getServer().getPlayerProfileCache();
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.info.team_detailed", team.getName(), team.getPlayers().size()).mergeStyle(TextFormatting.GOLD), false);
+        GameProfileCache profileCache = source.getServer().getProfileCache();
+        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.info.team_detailed", team.getName(), team.getPlayers().size()).withStyle(ChatFormatting.GOLD), false);
         team.getPlayers().forEach(id -> {
-            GameProfile profile = profileCache.getProfileByUUID(id);
-            if (profile != null) {
-                String name = profile.getName();
-                if (!StringUtils.isNullOrEmpty(name)) {
-                    source.sendFeedback(new StringTextComponent("- " + name), false);
+            Optional<GameProfile> profile = profileCache.get(id);
+            if (profile.isPresent()) {
+                String name = profile.get().getName();
+                if (!StringUtil.isNullOrEmpty(name)) {
+                    source.sendSuccess(new TextComponent("- " + name), false);
                 }
             }
         });

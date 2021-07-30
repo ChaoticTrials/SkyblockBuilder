@@ -3,14 +3,14 @@ package de.melanx.skyblockbuilder.network;
 import de.melanx.skyblockbuilder.client.ScreenStructureSaver;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
 import io.github.noeppi_noeppi.libx.network.PacketSerializer;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Hand;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -18,22 +18,22 @@ public class ClickScreenButtonHandler {
 
     public static void handle(ClickScreenButtonHandler.Message msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            ServerPlayerEntity player = ctx.get().getSender();
+            ServerPlayer player = ctx.get().getSender();
             if (player == null)
                 return;
-            ServerWorld world = player.getServerWorld();
+            ServerLevel level = player.getLevel();
             ItemStack stack;
             switch (msg.button) {
                 case SAVE:
-                    String name = ItemStructureSaver.saveSchematic(world, msg.stack, msg.name);
+                    String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.name);
                     stack = ItemStructureSaver.removeTags(msg.stack);
-                    player.setHeldItem(Hand.MAIN_HAND, stack);
-                    IFormattableTextComponent component = new TranslationTextComponent("skyblockbuilder.schematic.saved", name);
-                    player.sendStatusMessage(component, true);
+                    player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+                    MutableComponent component = new TranslatableComponent("skyblockbuilder.schematic.saved", name);
+                    player.displayClientMessage(component, true);
                     break;
                 case DELETE:
                     stack = ItemStructureSaver.removeTags(msg.stack);
-                    player.setHeldItem(Hand.MAIN_HAND, stack);
+                    player.setItemInHand(InteractionHand.MAIN_HAND, stack);
                     break;
             }
         });
@@ -48,15 +48,15 @@ public class ClickScreenButtonHandler {
         }
 
         @Override
-        public void encode(Message msg, PacketBuffer buffer) {
-            buffer.writeItemStack(msg.stack);
-            buffer.writeEnumValue(msg.button);
-            buffer.writeString(msg.name);
+        public void encode(Message msg, FriendlyByteBuf buffer) {
+            buffer.writeItem(msg.stack);
+            buffer.writeEnum(msg.button);
+            buffer.writeUtf(msg.name);
         }
 
         @Override
-        public Message decode(PacketBuffer buffer) {
-            return new Message(buffer.readItemStack(), buffer.readEnumValue(ScreenStructureSaver.Button.class), buffer.readString(32767));
+        public Message decode(FriendlyByteBuf buffer) {
+            return new Message(buffer.readItem(), buffer.readEnum(ScreenStructureSaver.Button.class), buffer.readUtf(32767));
         }
     }
 

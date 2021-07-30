@@ -8,9 +8,9 @@ import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import org.apache.commons.io.IOUtils;
@@ -28,7 +28,7 @@ public class ConfigHandler {
 
     public static final ForgeConfigSpec COMMON_CONFIG;
     private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
-    private static final List<Pair<EquipmentSlotType, ItemStack>> STARTER_ITEMS = new ArrayList<>();
+    private static final List<Pair<EquipmentSlot, ItemStack>> STARTER_ITEMS = new ArrayList<>();
 
     static {
         init(COMMON_BUILDER);
@@ -160,16 +160,16 @@ public class ConfigHandler {
         File spawns = new File(SkyPaths.ITEMS_FILE.toUri());
 
         String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
-        JsonObject json = JSONUtils.fromJson(s);
+        JsonObject json = GsonHelper.parse(s);
 
         if (json.has("items")) {
             JsonArray items = json.getAsJsonArray("items");
-            Set<EquipmentSlotType> usedTypes = new HashSet<>();
+            Set<EquipmentSlot> usedTypes = new HashSet<>();
             int slotsUsedInMainInventory = 0;
             for (JsonElement item : items) {
                 ItemStack stack = CraftingHelper.getItemStack((JsonObject) item, true);
-                EquipmentSlotType slot = ((JsonObject) item).has("Slot") ? EquipmentSlotType.fromString(JSONUtils.getString(item, "Slot")) : EquipmentSlotType.MAINHAND;
-                if (slot == EquipmentSlotType.MAINHAND) {
+                EquipmentSlot slot = ((JsonObject) item).has("Slot") ? EquipmentSlot.byName(GsonHelper.convertToString(item, "Slot")) : EquipmentSlot.MAINHAND;
+                if (slot == EquipmentSlot.MAINHAND) {
                     if (slotsUsedInMainInventory >= 36) {
                         throw new IllegalStateException("Too many starting items in main inventory. Not more than 36 are allowed.");
                     } else {
@@ -187,7 +187,7 @@ public class ConfigHandler {
         }
     }
 
-    public static List<Pair<EquipmentSlotType, ItemStack>> getStarterItems() {
+    public static List<Pair<EquipmentSlot, ItemStack>> getStarterItems() {
         return STARTER_ITEMS;
     }
 }

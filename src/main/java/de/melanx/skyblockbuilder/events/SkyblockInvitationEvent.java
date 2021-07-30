@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.events;
 
 import de.melanx.skyblockbuilder.data.Team;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -16,14 +16,14 @@ import javax.annotation.Nonnull;
  */
 public abstract class SkyblockInvitationEvent extends Event {
 
-    private final ServerPlayerEntity invitedPlayer;
+    private final ServerPlayer invitedPlayer;
     private final Team team;
 
     /**
      * @param invitedPlayer The player who is invited
      * @param team          The team the player is invited to
      */
-    private SkyblockInvitationEvent(ServerPlayerEntity invitedPlayer, Team team) {
+    private SkyblockInvitationEvent(ServerPlayer invitedPlayer, Team team) {
         this.invitedPlayer = invitedPlayer;
         this.team = team;
     }
@@ -31,7 +31,7 @@ public abstract class SkyblockInvitationEvent extends Event {
     /**
      * @return Invited player
      */
-    public ServerPlayerEntity getInvitedPlayer() {
+    public ServerPlayer getInvitedPlayer() {
         return this.invitedPlayer;
     }
 
@@ -52,9 +52,9 @@ public abstract class SkyblockInvitationEvent extends Event {
      */
     public static class Invite extends SkyblockInvitationEvent {
 
-        private final ServerPlayerEntity invitor;
+        private final ServerPlayer invitor;
 
-        public Invite(ServerPlayerEntity invitedPlayer, Team team, @Nonnull ServerPlayerEntity invitor) {
+        public Invite(ServerPlayer invitedPlayer, Team team, @Nonnull ServerPlayer invitor) {
             super(invitedPlayer, team);
             this.invitor = invitor;
         }
@@ -63,7 +63,7 @@ public abstract class SkyblockInvitationEvent extends Event {
          * @return Inviting player
          */
         @Nonnull
-        public ServerPlayerEntity getInvitor() {
+        public ServerPlayer getInvitor() {
             return this.invitor;
         }
     }
@@ -73,7 +73,7 @@ public abstract class SkyblockInvitationEvent extends Event {
      */
     public static class Accept extends SkyblockInvitationEvent {
 
-        public Accept(ServerPlayerEntity invitedPlayer, Team team) {
+        public Accept(ServerPlayer invitedPlayer, Team team) {
             super(invitedPlayer, team);
         }
     }
@@ -83,7 +83,7 @@ public abstract class SkyblockInvitationEvent extends Event {
      */
     public static class Decline extends SkyblockInvitationEvent {
 
-        public Decline(ServerPlayerEntity invitedPlayer, Team team) {
+        public Decline(ServerPlayer invitedPlayer, Team team) {
             super(invitedPlayer, team);
         }
     }

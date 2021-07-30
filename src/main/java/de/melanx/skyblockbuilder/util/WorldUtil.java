@@ -9,19 +9,19 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
-import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.FlatLayerInfo;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
@@ -34,63 +34,63 @@ public class WorldUtil {
 
     public static final ResourceLocation SINGLE_BIOME = LibXConfigHandler.World.SingleBiome.biome;
 
-    public static void teleportToIsland(ServerPlayerEntity player, Team team) {
+    public static void teleportToIsland(ServerPlayer player, Team team) {
         MinecraftServer server = player.getServer();
         //noinspection ConstantConditions
-        ServerWorld world = getConfiguredWorld(server);
+        ServerLevel level = getConfiguredLevel(server);
 
-        BlockPos spawn = validPosition(world, team);
-        player.teleport(world, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, LibXConfigHandler.Spawn.direction.getYaw(), 0);
-        player.setSpawnPoint(world.getDimensionKey(), spawn, 0, true, false);
+        BlockPos spawn = validPosition(level, team);
+        player.teleportTo(level, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, LibXConfigHandler.Spawn.direction.getYRot(), 0);
+        player.setRespawnPosition(level.dimension(), spawn, 0, true, false);
     }
 
-    public static boolean isSkyblock(World world) {
-        if (!(world instanceof ServerWorld)) return false;
+    public static boolean isSkyblock(Level level) {
+        if (!(level instanceof ServerLevel)) return false;
 
-        MinecraftServer server = ((ServerWorld) world).getServer();
+        MinecraftServer server = ((ServerLevel) level).getServer();
 
         if (!LibXConfigHandler.Dimensions.Overworld.Default) {
-            return server.getOverworld().getChunkProvider().getChunkGenerator() instanceof SkyblockOverworldChunkGenerator;
+            return server.overworld().getChunkSource().getGenerator() instanceof SkyblockOverworldChunkGenerator;
         }
 
         if (!LibXConfigHandler.Dimensions.Nether.Default) {
-            ServerWorld nether = server.getWorld(World.THE_NETHER);
-            return nether != null && nether.getChunkProvider().getChunkGenerator() instanceof SkyblockNetherChunkGenerator;
+            ServerLevel nether = server.getLevel(Level.NETHER);
+            return nether != null && nether.getChunkSource().getGenerator() instanceof SkyblockNetherChunkGenerator;
         }
 
         if (!LibXConfigHandler.Dimensions.End.Default) {
-            ServerWorld end = server.getWorld(World.THE_END);
-            return end != null && end.getChunkProvider().getChunkGenerator() instanceof SkyblockEndChunkGenerator;
+            ServerLevel end = server.getLevel(Level.END);
+            return end != null && end.getChunkSource().getGenerator() instanceof SkyblockEndChunkGenerator;
         }
 
         return false;
     }
 
-    public static void checkSkyblock(CommandSource source) throws CommandSyntaxException {
-        if (!isSkyblock(source.getServer().getOverworld())) {
-            throw new SimpleCommandExceptionType(new TranslationTextComponent("skyblockbuilder.error.no_skyblock")).create();
+    public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {
+        if (!isSkyblock(source.getServer().overworld())) {
+            throw new SimpleCommandExceptionType(new TranslatableComponent("skyblockbuilder.error.no_skyblock")).create();
         }
     }
 
-    public static ServerWorld getConfiguredWorld(MinecraftServer server) {
+    public static ServerLevel getConfiguredLevel(MinecraftServer server) {
         ResourceLocation location = LibXConfigHandler.Spawn.dimension;
-        RegistryKey<World> worldKey = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, location);
-        ServerWorld configWorld = server.getWorld(worldKey);
+        ResourceKey<Level> worldKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, location);
+        ServerLevel configLevel = server.getLevel(worldKey);
 
-        if (configWorld == null) {
+        if (configLevel == null) {
             SkyblockBuilder.getLogger().warn("Configured dimension for spawn does not exist: " + location);
         }
 
-        return configWorld != null ? configWorld : server.getOverworld();
+        return configLevel != null ? configLevel : server.overworld();
     }
 
-    private static BlockPos validPosition(ServerWorld world, Team team) {
+    private static BlockPos validPosition(ServerLevel level, Team team) {
 
         List<BlockPos> spawns = new ArrayList<>(team.getPossibleSpawns());
         Random random = new Random();
         while (!spawns.isEmpty()) {
             BlockPos pos = spawns.get(random.nextInt(spawns.size()));
-            if (!world.getBlockState(pos.down()).getCollisionShape(world, pos.down()).isEmpty()) {
+            if (!level.getBlockState(pos.below()).getBlockSupportShape(level, pos.below()).isEmpty()) {
                 return pos;
             }
 
@@ -98,9 +98,9 @@ public class WorldUtil {
         }
 
         BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(BlockPos.ZERO);
-        BlockPos.Mutable mpos = new BlockPos.Mutable(pos.getX(), world.getHeight(), pos.getZ());
+        BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos(pos.getX(), level.getMaxBuildHeight(), pos.getZ());
         Spiral spiral = new Spiral();
-        while (world.getBlockState(mpos.down()).getCollisionShape(world, mpos.down()).isEmpty()) {
+        while (level.getBlockState(mpos.below()).getBlockSupportShape(level, mpos.below()).isEmpty()) {
             if (mpos.getY() <= 0) {
                 if (spiral.getX() > LibXConfigHandler.Spawn.radius || spiral.getY() > LibXConfigHandler.Spawn.radius) {
                     return pos;
@@ -108,7 +108,7 @@ public class WorldUtil {
                 spiral.next();
 
                 mpos.setX(pos.getX() + spiral.getX());
-                mpos.setY(world.getHeight());
+                mpos.setY(level.getMaxBuildHeight());
                 mpos.setZ(pos.getZ() + spiral.getY());
             }
 
@@ -131,7 +131,7 @@ public class WorldUtil {
             }
 
             list.add(flatlayerinfo);
-            i += flatlayerinfo.getLayerCount();
+            i += flatlayerinfo.getHeight();
         }
 
         return list;
@@ -170,7 +170,7 @@ public class WorldUtil {
             return null;
         } else {
             FlatLayerInfo layerInfo = new FlatLayerInfo(height, block);
-            layerInfo.setMinY(currentLayers);
+//            layerInfo.setStart(currentLayers); // TODO check vanilla code
             return layerInfo;
         }
     }
@@ -181,22 +181,22 @@ public class WorldUtil {
         SOUTH(0),
         WEST(90);
 
-        private final int yaw;
+        private final int yRot;
 
         Directions(int yaw) {
-            this.yaw = yaw;
+            this.yRot = yaw;
         }
 
-        public int getYaw() {
-            return this.yaw;
+        public int getYRot() {
+            return this.yRot;
         }
     }
 
     public enum SingleBiomeDimension {
         DEFAULT(null),
-        OVERWORLD(World.OVERWORLD.getLocation()),
-        THE_NETHER(World.THE_NETHER.getLocation()),
-        THE_END(World.THE_END.getLocation());
+        OVERWORLD(Level.OVERWORLD.location()),
+        THE_NETHER(Level.NETHER.location()),
+        THE_END(Level.END.location());
 
         private final ResourceLocation singleBiomeDimension;
 

@@ -4,11 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
@@ -26,15 +26,15 @@ public class TemplateLoader {
 
     private static final Path SCHEMATIC_FILE = SkyPaths.MOD_CONFIG.resolve("template.nbt");
     private static final Path SPAWNS_FILE = SkyPaths.MOD_CONFIG.resolve("spawns.json");
-    private static final Map<String, Template> TEMPLATES = new HashMap<>();
-    private static Template TEMPLATE = new Template();
+    private static final Map<String, StructureTemplate> TEMPLATES = new HashMap<>();
+    private static StructureTemplate TEMPLATE = new StructureTemplate();
     private static final List<BlockPos> SPAWNS = new ArrayList<>();
 
     public static void loadSchematic() {
         try {
             File schematic = new File(SCHEMATIC_FILE.toUri());
-            CompoundNBT nbt = CompressedStreamTools.readCompressed(new FileInputStream(schematic));
-            TEMPLATE.read(nbt);
+            CompoundTag nbt = NbtIo.readCompressed(new FileInputStream(schematic));
+            TEMPLATE.load(nbt);
         } catch (IOException e) {
             throw new IllegalStateException("Unable to load template", e);
         }
@@ -58,9 +58,9 @@ public class TemplateLoader {
                     }
 
                     JsonArray positions = (JsonArray) element;
-                    int posX = JSONUtils.getInt(positions.get(0), "x");
-                    int posY = JSONUtils.getInt(positions.get(1), "y");
-                    int posZ = JSONUtils.getInt(positions.get(2), "z");
+                    int posX = GsonHelper.convertToInt(positions.get(0), "x");
+                    int posY = GsonHelper.convertToInt(positions.get(1), "y");
+                    int posZ = GsonHelper.convertToInt(positions.get(2), "z");
 
                     SPAWNS.add(new BlockPos(posX, posY, posZ));
                 }
@@ -80,36 +80,36 @@ public class TemplateLoader {
                 if (!file.getName().endsWith(".nbt")) {
                     continue;
                 }
-                CompoundNBT nbt;
+                CompoundTag nbt;
                 try {
-                    nbt = CompressedStreamTools.readCompressed(new FileInputStream(file));
+                    nbt = NbtIo.readCompressed(new FileInputStream(file));
                 } catch (ZipException e) {
                     continue;
                 }
-                Template template = new Template();
-                template.read(nbt);
+                StructureTemplate template = new StructureTemplate();
+                template.load(nbt);
                 TEMPLATES.put(file.getName(), template);
             }
 
             File schematic = new File(SCHEMATIC_FILE.toUri());
-            CompoundNBT nbt = CompressedStreamTools.readCompressed(new FileInputStream(schematic));
-            Template defaultTemplate = new Template();
-            defaultTemplate.read(nbt);
+            CompoundTag nbt = NbtIo.readCompressed(new FileInputStream(schematic));
+            StructureTemplate defaultTemplate = new StructureTemplate();
+            defaultTemplate.load(nbt);
             TEMPLATES.put("template.nbt", defaultTemplate);
         } catch (IOException e) {
             throw new RuntimeException("Cannot load templates.", e);
         }
     }
 
-    public static Map<String, Template> getTemplates() {
+    public static Map<String, StructureTemplate> getTemplates() {
         return TEMPLATES;
     }
 
-    public static void setTemplate(Template template) {
+    public static void setTemplate(StructureTemplate template) {
         TEMPLATE = template;
     }
 
-    public static Template getTemplate() {
+    public static StructureTemplate getTemplate() {
         return TEMPLATE;
     }
 

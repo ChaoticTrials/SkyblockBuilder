@@ -7,41 +7,41 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public class HomeCommand {
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Teleports the player back home
         return Commands.literal("home")
                 .executes(context -> home(context.getSource()));
     }
 
-    private static int home(CommandSource source) throws CommandSyntaxException {
+    private static int home(CommandSourceStack source) throws CommandSyntaxException {
         WorldUtil.checkSkyblock(source);
-        ServerWorld world = source.getWorld();
-        SkyblockSavedData data = SkyblockSavedData.get(world);
+        ServerLevel level = source.getLevel();
+        SkyblockSavedData data = SkyblockSavedData.get(level);
 
-        ServerPlayerEntity player = source.asPlayer();
+        ServerPlayer player = source.getPlayerOrException();
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.user_has_no_team").mergeStyle(TextFormatting.RED), false);
+            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onHome(player, team)) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.teleport_home").mergeStyle(TextFormatting.RED), false);
+                source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.teleport_home").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.Teleports.home && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.teleport_home").mergeStyle(TextFormatting.RED), false);
+                if (!LibXConfigHandler.Utility.Teleports.home && !source.hasPermission(2)) {
+                    source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.teleport_home").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -49,7 +49,7 @@ public class HomeCommand {
                 break;
         }
 
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.teleport_home").mergeStyle(TextFormatting.GOLD), true);
+        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.teleport_home").withStyle(ChatFormatting.GOLD), true);
         WorldUtil.teleportToIsland(player, team);
         return 1;
     }

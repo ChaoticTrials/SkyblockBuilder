@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.melanx.skyblockbuilder.commands.*;
 import de.melanx.skyblockbuilder.commands.helper.ListCommand;
 import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
@@ -17,28 +17,28 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
 import de.melanx.skyblockbuilder.util.*;
-import io.github.noeppi_noeppi.libx.event.DatapacksReloadedEvent;
-import io.github.noeppi_noeppi.libx.render.RenderHelperWorld;
-import net.minecraft.block.Blocks;
+import io.github.noeppi_noeppi.libx.event.DataPacksReloadedEvent;
+import io.github.noeppi_noeppi.libx.render.RenderHelperLevel;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.gui.screen.WorldSelectionScreen;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -48,7 +48,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
+import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
 
 @Mod.EventBusSubscriber(modid = "skyblockbuilder")
 public class EventListener {
@@ -56,7 +56,7 @@ public class EventListener {
     private static final String SPAWNED_TAG = "alreadySpawned";
 
     @SubscribeEvent
-    public static void resourcesReload(DatapacksReloadedEvent event) {
+    public static void resourcesReload(DataPacksReloadedEvent event) {
         SkyPaths.generateDefaultFiles();
         TemplateLoader.updateTemplates();
     }
@@ -86,22 +86,22 @@ public class EventListener {
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        World world = event.getPlayer().world;
-        if (world instanceof ServerWorld && WorldUtil.isSkyblock(world) && CompatHelper.isSpawnTeleportEnabled()) {
+        Level level = event.getPlayer().level;
+        if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && CompatHelper.isSpawnTeleportEnabled()) {
             if (LibXConfigHandler._reminder) {
-                event.getPlayer().sendStatusMessage(new StringTextComponent("[Skyblock Builder] The config system for this mod changed. " +
+                event.getPlayer().displayClientMessage(new TextComponent("[Skyblock Builder] The config system for this mod changed. " +
                         "It now uses LibX and its config system. All your current configs were transferred to the new one. " +
                         "You should only change the new config from now. You find it at config/skyblockbuilder/common-config.json5. " +
-                        "You can disable this annoying message in the config.").mergeStyle(TextFormatting.RED), false);
+                        "You can disable this annoying message in the config.").withStyle(ChatFormatting.RED), false);
             }
 
-            SkyblockSavedData data = SkyblockSavedData.get((ServerWorld) world);
-            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+            SkyblockSavedData data = SkyblockSavedData.get((ServerLevel) level);
+            ServerPlayer player = (ServerPlayer) event.getPlayer();
             Team spawn = data.getSpawn();
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
                 if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
                     if (ConfigHandler.dropItems.get()) {
-                        player.inventory.dropAllItems();
+                        player.getInventory().dropAll();
                     }
 
                     WorldUtil.teleportToIsland(player, spawn);
@@ -113,43 +113,43 @@ public class EventListener {
             player.getPersistentData().putBoolean(SPAWNED_TAG, true);
 
             if (ConfigHandler.clearInv.get()) {
-                player.inventory.clear();
+                player.getInventory().clearContent();
             }
 
             ConfigHandler.getStarterItems().forEach(entry -> {
-                if (entry.getLeft() == EquipmentSlotType.MAINHAND) {
-                    player.inventory.addItemStackToInventory(entry.getRight().copy());
+                if (entry.getLeft() == EquipmentSlot.MAINHAND) {
+                    player.getInventory().add(entry.getRight().copy());
                 } else {
-                    player.setItemStackToSlot(entry.getLeft(), entry.getRight().copy());
+                    player.setItemSlot(entry.getLeft(), entry.getRight().copy());
                 }
             });
 
             data.addPlayerToTeam(spawn, player);
-            ((ServerWorld) world).setSpawnLocation(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
+            ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYRot());
             WorldUtil.teleportToIsland(player, spawn);
         }
     }
 
     @SubscribeEvent
     public static void clonePlayer(PlayerEvent.Clone event) {
-        PlayerEntity newPlayer = event.getPlayer();
-        CompoundNBT newData = newPlayer.getPersistentData();
+        Player newPlayer = event.getPlayer();
+        CompoundTag newData = newPlayer.getPersistentData();
 
-        PlayerEntity oldPlayer = event.getOriginal();
-        CompoundNBT oldData = oldPlayer.getPersistentData();
+        Player oldPlayer = event.getOriginal();
+        CompoundTag oldData = oldPlayer.getPersistentData();
 
         newData.putBoolean(SPAWNED_TAG, oldData.getBoolean(SPAWNED_TAG));
     }
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (!event.getPlayer().world.isRemote) {
-            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-            BlockPos pos = player.getSpawnPointPos();
+        if (!event.getPlayer().level.isClientSide) {
+            ServerPlayer player = (ServerPlayer) event.getPlayer();
+            BlockPos pos = player.getRespawnPosition();
 
-            ServerWorld world = player.getServerWorld();
-            if (pos == null || !world.getBlockState(pos).isIn(BlockTags.BEDS) && !world.getBlockState(pos).matchesBlock(Blocks.RESPAWN_ANCHOR)) {
-                SkyblockSavedData data = SkyblockSavedData.get(world);
+            ServerLevel level = player.getLevel();
+            if (pos == null || !level.getBlockState(pos).is(BlockTags.BEDS) && !level.getBlockState(pos).is(Blocks.RESPAWN_ANCHOR)) {
+                SkyblockSavedData data = SkyblockSavedData.get(level);
                 Team team = data.getTeamFromPlayer(player);
                 WorldUtil.teleportToIsland(player, team == null ? data.getSpawn() : team);
             }
@@ -158,14 +158,14 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onServerStarted(FMLServerStartedEvent event) {
-        RandomUtility.dynamicRegistries = event.getServer().getDynamicRegistries();
-        if (WorldUtil.isSkyblock(event.getServer().getOverworld())) {
+        RandomUtility.dynamicRegistries = event.getServer().registryAccess();
+        if (WorldUtil.isSkyblock(event.getServer().overworld())) {
             SkyPaths.generateDefaultFiles();
             TemplateLoader.updateTemplates();
-            TemplateData.get(event.getServer().getOverworld());
+            TemplateData.get(event.getServer().overworld());
 
             if (CompatHelper.isSpawnTeleportEnabled()) {
-                SkyblockSavedData.get(event.getServer().getOverworld()).getSpawn();
+                SkyblockSavedData.get(event.getServer().overworld()).getSpawn();
             }
         }
     }
@@ -173,33 +173,33 @@ public class EventListener {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void renderBoundingBox(RenderWorldLastEvent event) {
-        ClientPlayerEntity player = Minecraft.getInstance().player;
-        if (player == null || !(player.getHeldItemMainhand().getItem() instanceof ItemStructureSaver)) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null || !(player.getMainHandItem().getItem() instanceof ItemStructureSaver)) {
             return;
         }
 
-        ItemStack stack = player.getHeldItemMainhand();
-        MutableBoundingBox area = ItemStructureSaver.getArea(stack);
+        ItemStack stack = player.getMainHandItem();
+        BoundingBox area = ItemStructureSaver.getArea(stack);
         if (area == null) {
             return;
         }
 
-        MatrixStack matrixStack = event.getMatrixStack();
-        matrixStack.push();
-        RenderHelperWorld.loadProjection(matrixStack, area.minX, area.minY, area.minZ);
+        PoseStack poseStack = event.getMatrixStack();
+        poseStack.pushPose();
+        RenderHelperLevel.loadProjection(poseStack, area.minX(), area.minY(), area.minZ());
 
-        IRenderTypeBuffer.Impl source = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        IVertexBuilder buffer = source.getBuffer(RenderType.LINES);
+        MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
+        VertexConsumer buffer = source.getBuffer(RenderType.LINES);
 
-        WorldRenderer.drawBoundingBox(matrixStack, buffer, 0, 0, 0, area.maxX - area.minX + 1, area.maxY - area.minY + 1, area.maxZ - area.minZ + 1, 0.9F, 0.9F, 0.9F, 1.0F);
-        source.finish(RenderType.LINES);
-        matrixStack.pop();
+        LevelRenderer.renderLineBox(poseStack, buffer, 0, 0, 0, area.maxX() - area.minX() + 1, area.maxY() - area.minY() + 1, area.maxZ() - area.minZ() + 1, 0.9F, 0.9F, 0.9F, 1.0F);
+        source.endBatch(RenderType.LINES);
+        poseStack.popPose();
     }
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void onChangeScreen(GuiScreenEvent.DrawScreenEvent event) {
-        if (event.getGui() instanceof WorldSelectionScreen) {
+        if (event.getGui() instanceof SelectWorldScreen) {
             TemplateLoader.loadSchematic();
         }
     }

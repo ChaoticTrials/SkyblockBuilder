@@ -2,17 +2,17 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
 import de.melanx.skyblockbuilder.config.LibXConfigHandler;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeGenerationSettings;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,17 +23,17 @@ import java.util.function.Supplier;
 
 public class RandomUtility {
 
-    public static final ITextComponent UNKNOWN_PLAYER = new TranslationTextComponent("skyblockbuilder.unknown_player");
+    public static final Component UNKNOWN_PLAYER = new TranslatableComponent("skyblockbuilder.unknown_player");
 
-    public static DynamicRegistries dynamicRegistries = null;
+    public static RegistryAccess dynamicRegistries = null;
 
-    public static ITextComponent getDisplayNameByUuid(World world, UUID id) {
-        PlayerEntity player = world.getPlayerByUuid(id);
+    public static Component getDisplayNameByUuid(Level level, UUID id) {
+        Player player = level.getPlayerByUUID(id);
         return player != null ? player.getDisplayName() : UNKNOWN_PLAYER;
     }
 
     public static Biome modifyCopyBiome(Biome biome) {
-        Biome newBiome = new Biome(biome.climate, biome.getCategory(), biome.getDepth(), biome.getScale(), biome.getAmbience(), modifyCopyGeneration(biome.getGenerationSettings()), biome.getMobSpawnInfo());
+        Biome newBiome = new Biome(biome.climateSettings, biome.getBiomeCategory(), biome.getDepth(), biome.getScale(), biome.getSpecialEffects(), modifyCopyGeneration(biome.getGenerationSettings()), biome.getMobSettings());
         if (biome.getRegistryName() != null) {
             newBiome.setRegistryName(biome.getRegistryName());
         }
@@ -42,10 +42,10 @@ public class RandomUtility {
 
     public static BiomeGenerationSettings modifyCopyGeneration(BiomeGenerationSettings settings) {
         // Remove non-whitelisted structures
-        ImmutableList.Builder<Supplier<StructureFeature<?, ?>>> structures = ImmutableList.builder();
+        ImmutableList.Builder<Supplier<ConfiguredStructureFeature<?, ?>>> structures = ImmutableList.builder();
 
-        for (Supplier<StructureFeature<?, ?>> structure : settings.getStructures()) {
-            ResourceLocation location = structure.get().field_236268_b_.getRegistryName();
+        for (Supplier<ConfiguredStructureFeature<?, ?>> structure : settings.structures()) {
+            ResourceLocation location = structure.get().feature.getRegistryName();
             if (location != null) {
                 if (LibXConfigHandler.Structures.generationStructures.test(location)) {
                     structures.add(structure);
@@ -56,7 +56,7 @@ public class RandomUtility {
         // Remove non-whitelisted features
         ImmutableList.Builder<List<Supplier<ConfiguredFeature<?, ?>>>> featureList = ImmutableList.builder();
 
-        settings.getFeatures().forEach(list -> {
+        settings.features().forEach(list -> {
             ImmutableList.Builder<Supplier<ConfiguredFeature<?, ?>>> features = ImmutableList.builder();
             for (Supplier<ConfiguredFeature<?, ?>> feature : list) {
                 ResourceLocation location = feature.get().feature.getRegistryName();
@@ -74,8 +74,8 @@ public class RandomUtility {
 
     public static int validateBiome(Biome biome) {
         if (dynamicRegistries != null) {
-            Registry<Biome> lookup = dynamicRegistries.getRegistry(Registry.BIOME_KEY);
-            return lookup.getId(lookup.getOrDefault(biome.getRegistryName()));
+            Registry<Biome> lookup = dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY);
+            return lookup.getId(lookup.get(biome.getRegistryName()));
         } else {
             return -1;
         }

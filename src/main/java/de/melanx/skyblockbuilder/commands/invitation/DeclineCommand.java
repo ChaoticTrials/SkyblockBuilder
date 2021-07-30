@@ -9,46 +9,46 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public class DeclineCommand {
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Declines an invitation
         return Commands.literal("decline")
                 .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.INVITE_TEAMS)
                         .executes(context -> declineTeam(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 
-    private static int declineTeam(CommandSource source, String teamName) throws CommandSyntaxException {
+    private static int declineTeam(CommandSourceStack source, String teamName) throws CommandSyntaxException {
         WorldUtil.checkSkyblock(source);
-        ServerWorld world = source.getWorld();
-        SkyblockSavedData data = SkyblockSavedData.get(world);
-        ServerPlayerEntity player = source.asPlayer();
+        ServerLevel level = source.getLevel();
+        SkyblockSavedData data = SkyblockSavedData.get(level);
+        ServerPlayer player = source.getPlayerOrException();
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.team_not_exist").mergeStyle(TextFormatting.RED), false);
+            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         if (!data.hasInvites(player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.no_invitations").mergeStyle(TextFormatting.RED), false);
+            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.no_invitations").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onDecline(player, team)) {
             case DENY:
-                source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.decline_invitations").mergeStyle(TextFormatting.RED), false);
+                source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.decline_invitations").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
-                    source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.decline_invitations").mergeStyle(TextFormatting.RED), false);
+                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                    source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.decline_invitations").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -57,11 +57,11 @@ public class DeclineCommand {
         }
 
         if (!data.declineInvite(team, player)) {
-            source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.error.decline_invitations").mergeStyle(TextFormatting.RED), false);
+            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.decline_invitations").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
-        source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.success.declined_invitation", team.getName()).mergeStyle(TextFormatting.GOLD), true);
+        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.declined_invitation", team.getName()).withStyle(ChatFormatting.GOLD), true);
         return 1;
     }
 }

@@ -1,8 +1,8 @@
 package de.melanx.skyblockbuilder.events;
 
 import de.melanx.skyblockbuilder.data.Team;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -20,16 +20,16 @@ import java.util.Set;
  */
 public abstract class SkyblockOpManageEvent extends Event {
 
-    private final CommandSource source;
+    private final CommandSourceStack source;
 
-    private SkyblockOpManageEvent(CommandSource source) {
+    private SkyblockOpManageEvent(CommandSourceStack source) {
         this.source = source;
     }
 
     /**
      * @return {@link CommandSource}
      */
-    public CommandSource getSource() {
+    public CommandSourceStack getSource() {
         return this.source;
     }
 
@@ -45,7 +45,7 @@ public abstract class SkyblockOpManageEvent extends Event {
 
         private final Team team;
 
-        public DeleteTeam(CommandSource source, Team team) {
+        public DeleteTeam(CommandSourceStack source, Team team) {
             super(source);
             this.team = team;
         }
@@ -65,7 +65,7 @@ public abstract class SkyblockOpManageEvent extends Event {
 
         private final Team team;
 
-        public ClearTeam(CommandSource source, Team team) {
+        public ClearTeam(CommandSourceStack source, Team team) {
             super(source);
             this.team = team;
         }
@@ -86,7 +86,7 @@ public abstract class SkyblockOpManageEvent extends Event {
         private String name;
         private final boolean join;
 
-        public CreateTeam(CommandSource source, String name, boolean join) {
+        public CreateTeam(CommandSourceStack source, String name, boolean join) {
             super(source);
             this.name = name;
             this.join = join;
@@ -122,9 +122,9 @@ public abstract class SkyblockOpManageEvent extends Event {
     public static class AddToTeam extends SkyblockOpManageEvent {
 
         private final Team team;
-        private final Set<ServerPlayerEntity> players;
+        private final Set<ServerPlayer> players;
 
-        public AddToTeam(CommandSource source, Team team, HashSet<ServerPlayerEntity> players) {
+        public AddToTeam(CommandSourceStack source, Team team, HashSet<ServerPlayer> players) {
             super(source);
             this.team = team;
             this.players = players;
@@ -142,7 +142,7 @@ public abstract class SkyblockOpManageEvent extends Event {
          *
          * @return The players which will be added
          */
-        public Set<ServerPlayerEntity> getPlayers() {
+        public Set<ServerPlayer> getPlayers() {
             return this.players;
         }
     }
@@ -153,9 +153,9 @@ public abstract class SkyblockOpManageEvent extends Event {
     public static class RemoveFromTeam extends SkyblockOpManageEvent {
 
         private final Team team;
-        private final Set<ServerPlayerEntity> players;
+        private final Set<ServerPlayer> players;
 
-        public RemoveFromTeam(CommandSource source, Team team, HashSet<ServerPlayerEntity> players) {
+        public RemoveFromTeam(CommandSourceStack source, Team team, HashSet<ServerPlayer> players) {
             super(source);
             this.team = team;
             this.players = players;
@@ -173,7 +173,7 @@ public abstract class SkyblockOpManageEvent extends Event {
          *
          * @return The players which will be removed
          */
-        public Set<ServerPlayerEntity> getPlayers() {
+        public Set<ServerPlayer> getPlayers() {
             return this.players;
         }
     }

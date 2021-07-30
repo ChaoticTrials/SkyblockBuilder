@@ -12,8 +12,9 @@ import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateLoader;
 import io.github.noeppi_noeppi.libx.config.ConfigManager;
 import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
+import io.github.noeppi_noeppi.libx.mod.registration.RegistrationBuilder;
+import net.minecraft.Util;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -41,7 +42,7 @@ public class SkyblockBuilder extends ModXRegistration {
 
     public SkyblockBuilder() {
         super("skyblockbuilder", null);
-        oldConfig = Files.exists(SkyPaths.MOD_CONFIG.resolve("config.toml")); // remove 1.17
+        oldConfig = Files.exists(SkyPaths.MOD_CONFIG.resolve("config.toml")); // TODO remove 1.17
         instance = this;
         network = new SkyNetwork(this);
 
@@ -85,5 +86,10 @@ public class SkyblockBuilder extends ModXRegistration {
 
     public static boolean oldConfigExists() {
         return oldConfig;
+    }
+
+    @Override
+    protected void initRegistration(RegistrationBuilder builder) {
+        builder.setVersion(1);
     }
 }
