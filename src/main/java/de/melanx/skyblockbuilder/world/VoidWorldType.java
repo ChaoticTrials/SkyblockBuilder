@@ -54,11 +54,6 @@ public class VoidWorldType extends ForgeWorldType {
         return new WorldGenSettings(seed, generateStructures, generateLoot, dimensions);
     }
 
-    @Deprecated // use without DynamicRegistries instead
-    public static MappedRegistry<LevelStem> voidDimensions(RegistryAccess dynamicRegistries, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
-        return voidDimensions(biomeRegistry, dimensionSettingsRegistry, seed);
-    }
-
     public static MappedRegistry<LevelStem> voidDimensions(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
         MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
         LazyBiomeRegistryWrapper biomes = new LazyBiomeRegistryWrapper(biomeRegistry);

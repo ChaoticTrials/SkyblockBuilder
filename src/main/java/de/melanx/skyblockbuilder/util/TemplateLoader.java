@@ -91,7 +91,7 @@ public class TemplateLoader {
             CompoundTag nbt = NbtIo.readCompressed(new FileInputStream(schematic));
             StructureTemplate defaultTemplate = new StructureTemplate();
             defaultTemplate.load(nbt);
-            TEMPLATES.put("template.nbt", defaultTemplate);
+            TEMPLATES.put("default.nbt", defaultTemplate);
         } catch (IOException e) {
             throw new RuntimeException("Cannot load templates.", e);
         }

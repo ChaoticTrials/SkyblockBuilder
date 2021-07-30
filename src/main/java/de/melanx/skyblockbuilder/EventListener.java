@@ -77,9 +77,7 @@ public class EventListener {
         );
     }
 
-    /*
-     * Mainly taken from Botania
-     */
+    // Mainly taken from Botania
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         Level level = event.getPlayer().level;
