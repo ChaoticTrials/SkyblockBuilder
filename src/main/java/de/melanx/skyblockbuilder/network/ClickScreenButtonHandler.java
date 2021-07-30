@@ -24,17 +24,17 @@ public class ClickScreenButtonHandler {
             ServerLevel level = player.getLevel();
             ItemStack stack;
             switch (msg.button) {
-                case SAVE:
+                case SAVE -> {
                     String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.name);
                     stack = ItemStructureSaver.removeTags(msg.stack);
                     player.setItemInHand(InteractionHand.MAIN_HAND, stack);
                     MutableComponent component = new TranslatableComponent("skyblockbuilder.schematic.saved", name);
                     player.displayClientMessage(component, true);
-                    break;
-                case DELETE:
+                }
+                case DELETE -> {
                     stack = ItemStructureSaver.removeTags(msg.stack);
                     player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-                    break;
+                }
             }
         });
         ctx.get().setPacketHandled(true);
@@ -60,16 +60,7 @@ public class ClickScreenButtonHandler {
         }
     }
 
-    public static class Message {
-
-        public final ItemStack stack;
-        public final ScreenStructureSaver.Button button;
-        public final String name;
-
-        public Message(ItemStack stack, ScreenStructureSaver.Button button, String name) {
-            this.stack = stack;
-            this.button = button;
-            this.name = name;
-        }
+    public record Message(ItemStack stack, ScreenStructureSaver.Button button, String name) {
+        // empty
     }
 }

@@ -107,7 +107,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
     @Nonnull
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull StructureFeatureManager manager, @Nonnull ChunkAccess chunk) {
-return        CompletableFuture.completedFuture(chunk);
+        return CompletableFuture.completedFuture(chunk);
     }
 
     @Nullable

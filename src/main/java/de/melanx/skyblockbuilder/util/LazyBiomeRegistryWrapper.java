@@ -86,7 +86,7 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
     @Override
     public Iterator<Biome> iterator() {
         Iterator<Biome> itr = this.parent.iterator();
-        return new Iterator<Biome>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return itr.hasNext();

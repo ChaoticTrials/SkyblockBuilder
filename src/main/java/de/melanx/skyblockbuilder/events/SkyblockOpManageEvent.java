@@ -27,7 +27,7 @@ public abstract class SkyblockOpManageEvent extends Event {
     }
 
     /**
-     * @return {@link CommandSource}
+     * @return {@link CommandSourceStack}
      */
     public CommandSourceStack getSource() {
         return this.source;
@@ -138,7 +138,7 @@ public abstract class SkyblockOpManageEvent extends Event {
         }
 
         /**
-         * This {@link Set} of {@link ServerPlayerEntity} can be modified
+         * This {@link Set} of {@link ServerPlayer} can be modified
          *
          * @return The players which will be added
          */
@@ -169,7 +169,7 @@ public abstract class SkyblockOpManageEvent extends Event {
         }
 
         /**
-         * This {@link Set} of {@link ServerPlayerEntity} can be modified
+         * This {@link Set} of {@link ServerPlayer} can be modified
          *
          * @return The players which will be removed
          */

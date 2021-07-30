@@ -263,7 +263,7 @@ public class TeamCommand {
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.create_spawn").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if ((!ConfigHandler.Utility.selfManage || !ConfigHandler.Utility.Spawns.modifySpawns) && !source.hasPermission(2)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -312,7 +312,7 @@ public class TeamCommand {
                 source.sendSuccess(component.withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if ((!ConfigHandler.Utility.selfManage || !ConfigHandler.Utility.Spawns.modifySpawns) && !source.hasPermission(2)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -369,7 +369,7 @@ public class TeamCommand {
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.reset_spawns").withStyle(ChatFormatting.GOLD), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if ((!ConfigHandler.Utility.selfManage || !ConfigHandler.Utility.Spawns.modifySpawns) && !source.hasPermission(2)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }

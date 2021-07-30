@@ -32,7 +32,7 @@ public class SkyblockBuilder extends ModXRegistration {
     public SkyblockBuilder() {
         super("skyblockbuilder", null);
         instance = this;
-        network = new SkyNetwork(this);
+        network = new SkyNetwork();
 
         SkyPaths.createDirectories();
     }

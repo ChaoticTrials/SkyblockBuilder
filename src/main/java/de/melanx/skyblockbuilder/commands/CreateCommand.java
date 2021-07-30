@@ -63,8 +63,7 @@ public class CreateCommand {
             return 0;
         }
 
-        if (players.isEmpty() && source.getEntity() instanceof ServerPlayer) {
-            ServerPlayer player = (ServerPlayer) source.getEntity();
+        if (players.isEmpty() && source.getEntity() instanceof ServerPlayer player) {
             data.addPlayerToTeam(team, player);
             WorldUtil.teleportToIsland(player, team);
         } else {

@@ -17,14 +17,16 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class Team {
 
     private final SkyblockSavedData data;
     private final Set<UUID> players;
     private final Set<BlockPos> possibleSpawns;
-    private final Random random = new Random();
     private final Set<UUID> joinRequests = new HashSet<>();
     private IslandPos island;
     private String name;
@@ -132,7 +134,6 @@ public class Team {
 
     public boolean addPlayers(Collection<UUID> players) {
         boolean added = this.players.addAll(players);
-        PlayerList playerList = this.getLevel().getServer().getPlayerList();
         if (ModList.get().isLoaded("minemention")) {
             for (UUID id : players) {
                 MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(id));
@@ -156,7 +157,6 @@ public class Team {
     }
 
     public void removePlayers(Collection<UUID> players) {
-        PlayerList playerList = this.getLevel().getServer().getPlayerList();
         for (UUID id : players) {
             this.players.remove(id);
             if (ModList.get().isLoaded("minemention")) {
