@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
@@ -47,7 +47,7 @@ public class RandomUtility {
         for (Supplier<ConfiguredStructureFeature<?, ?>> structure : settings.structures()) {
             ResourceLocation location = structure.get().feature.getRegistryName();
             if (location != null) {
-                if (LibXConfigHandler.Structures.generationStructures.test(location)) {
+                if (ConfigHandler.Structures.generationStructures.test(location)) {
                     structures.add(structure);
                 }
             }
@@ -61,7 +61,7 @@ public class RandomUtility {
             for (Supplier<ConfiguredFeature<?, ?>> feature : list) {
                 ResourceLocation location = feature.get().feature.getRegistryName();
                 if (location != null) {
-                    if (LibXConfigHandler.Structures.generationFeatures.test(location)) {
+                    if (ConfigHandler.Structures.generationFeatures.test(location)) {
                         features.add(feature);
                     }
                 }
@@ -82,7 +82,7 @@ public class RandomUtility {
     }
 
     public static boolean isStructureGenerated(ResourceLocation registryName) {
-        return LibXConfigHandler.Structures.generationStructures.test(registryName) || LibXConfigHandler.Structures.generationFeatures.test(registryName);
+        return ConfigHandler.Structures.generationStructures.test(registryName) || ConfigHandler.Structures.generationFeatures.test(registryName);
     }
 
     public static String normalize(String s) {

@@ -1,16 +1,36 @@
-package de.melanx.skyblockbuilder.config;
+package de.melanx.skyblockbuilder;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
+import io.github.noeppi_noeppi.libx.annotation.config.RegisterConfig;
 import io.github.noeppi_noeppi.libx.config.Config;
 import io.github.noeppi_noeppi.libx.config.Group;
 import io.github.noeppi_noeppi.libx.config.validator.IntRange;
 import io.github.noeppi_noeppi.libx.util.ResourceList;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
-public class LibXConfigHandler {
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-    @Config("Setting this to false will disable the reminder to use the new config")
-    public static boolean _reminder = true;
+@RegisterConfig("common-config")
+public class ConfigHandler {
+
+    private static final List<Pair<EquipmentSlot, ItemStack>> STARTER_ITEMS = new ArrayList<>();
 
     @Group(value = {"With this you can configure the structures and features which are generated.",
             "INFO: You can also just use the modid as wildcard for all features/structures from this mod.",
@@ -150,5 +170,42 @@ public class LibXConfigHandler {
             @Config("Should players be able to modify their spawn positions? [default: false]")
             public static boolean modifySpawns = false;
         }
+    }
+
+    public static void loadStarterItems() throws IOException {
+        ConfigHandler.STARTER_ITEMS.clear();
+
+        File spawns = new File(SkyPaths.ITEMS_FILE.toUri());
+
+        String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
+        JsonObject json = GsonHelper.parse(s);
+
+        if (json.has("items")) {
+            JsonArray items = json.getAsJsonArray("items");
+            Set<EquipmentSlot> usedTypes = new HashSet<>();
+            int slotsUsedInMainInventory = 0;
+            for (JsonElement item : items) {
+                ItemStack stack = CraftingHelper.getItemStack((JsonObject) item, true);
+                EquipmentSlot slot = ((JsonObject) item).has("Slot") ? EquipmentSlot.byName(GsonHelper.convertToString(item, "Slot")) : EquipmentSlot.MAINHAND;
+                if (slot == EquipmentSlot.MAINHAND) {
+                    if (slotsUsedInMainInventory >= 36) {
+                        throw new IllegalStateException("Too many starting items in main inventory. Not more than 36 are allowed.");
+                    } else {
+                        slotsUsedInMainInventory += 1;
+                    }
+                } else {
+                    if (usedTypes.contains(slot)) {
+                        throw new IllegalStateException("Slot type that is not 'mainhand' was used multiple times for starting inventory.");
+                    } else {
+                        usedTypes.add(slot);
+                    }
+                }
+                ConfigHandler.STARTER_ITEMS.add(Pair.of(slot, stack));
+            }
+        }
+    }
+
+    public static List<Pair<EquipmentSlot, ItemStack>> getStarterItems() {
+        return ConfigHandler.STARTER_ITEMS;
     }
 }

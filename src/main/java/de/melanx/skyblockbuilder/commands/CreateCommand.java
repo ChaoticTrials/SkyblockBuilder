@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -25,7 +25,7 @@ public class CreateCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Let a player create a team if enabled in config
-        return Commands.literal("create").requires(source -> LibXConfigHandler.Utility.createOwnTeam)
+        return Commands.literal("create").requires(source -> ConfigHandler.Utility.createOwnTeam)
                 .executes(context -> create(context.getSource(), null, Collections.emptyList()))
                 .then(Commands.argument("name", StringArgumentType.word())
                         .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), Collections.emptyList()))

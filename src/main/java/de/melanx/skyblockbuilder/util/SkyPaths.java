@@ -2,8 +2,8 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.fml.loading.FMLPaths;

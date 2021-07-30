@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.world.dimensions.end;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -58,7 +58,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return LibXConfigHandler.World.seaHeight;
+        return ConfigHandler.World.seaHeight;
     }
 
     @Nonnull
@@ -69,7 +69,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Override
     public void buildSurfaceAndBedrock(@Nonnull WorldGenRegion level, @Nonnull ChunkAccess chunk) {
-        if (LibXConfigHandler.Dimensions.End.mainIsland) {
+        if (ConfigHandler.Dimensions.End.mainIsland) {
             this.parent.buildSurfaceAndBedrock(level, chunk);
             return;
         }
@@ -83,7 +83,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     @Nonnull
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull StructureFeatureManager manager, @Nonnull ChunkAccess chunk) {
-        if (LibXConfigHandler.Dimensions.End.mainIsland) {
+        if (ConfigHandler.Dimensions.End.mainIsland) {
             return this.parent.fillFromNoise(executor, manager, chunk);
         }
 

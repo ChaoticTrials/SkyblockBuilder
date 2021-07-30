@@ -10,8 +10,6 @@ import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
@@ -19,7 +17,6 @@ import de.melanx.skyblockbuilder.item.ItemStructureSaver;
 import de.melanx.skyblockbuilder.util.*;
 import io.github.noeppi_noeppi.libx.event.DataPacksReloadedEvent;
 import io.github.noeppi_noeppi.libx.render.RenderHelperLevel;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -29,7 +26,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -88,19 +84,13 @@ public class EventListener {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         Level level = event.getPlayer().level;
         if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && CompatHelper.isSpawnTeleportEnabled()) {
-            if (LibXConfigHandler._reminder) {
-                event.getPlayer().displayClientMessage(new TextComponent("[Skyblock Builder] The config system for this mod changed. " +
-                        "It now uses LibX and its config system. All your current configs were transferred to the new one. " +
-                        "You should only change the new config from now. You find it at config/skyblockbuilder/common-config.json5. " +
-                        "You can disable this annoying message in the config.").withStyle(ChatFormatting.RED), false);
-            }
 
             SkyblockSavedData data = SkyblockSavedData.get((ServerLevel) level);
             ServerPlayer player = (ServerPlayer) event.getPlayer();
             Team spawn = data.getSpawn();
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
                 if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
-                    if (ConfigHandler.dropItems.get()) {
+                    if (ConfigHandler.Inventory.dropItems) {
                         player.getInventory().dropAll();
                     }
 
@@ -112,7 +102,7 @@ public class EventListener {
             }
             player.getPersistentData().putBoolean(SPAWNED_TAG, true);
 
-            if (ConfigHandler.clearInv.get()) {
+            if (ConfigHandler.Inventory.clearInv) {
                 player.getInventory().clearContent();
             }
 
@@ -125,7 +115,7 @@ public class EventListener {
             });
 
             data.addPlayerToTeam(spawn, player);
-            ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYRot());
+            ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), ConfigHandler.Spawn.direction.getYRot());
             WorldUtil.teleportToIsland(player, spawn);
         }
     }

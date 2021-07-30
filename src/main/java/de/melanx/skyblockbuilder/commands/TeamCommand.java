@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
@@ -100,7 +100,7 @@ public class TeamCommand {
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.accept_join_request").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.accept_join_request").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -141,7 +141,7 @@ public class TeamCommand {
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.deny_join_request").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.deny_join_request").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -263,14 +263,14 @@ public class TeamCommand {
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.create_spawn").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 Vec3i templateSize = TemplateData.get(level).getTemplate().getSize();
                 BlockPos center = team.getIsland().getCenter().mutable();
                 center.offset(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
-                if (!pos.closerThan(center, LibXConfigHandler.Utility.Spawns.range)) {
+                if (!pos.closerThan(center, ConfigHandler.Utility.Spawns.range)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.position_too_far_away").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -312,7 +312,7 @@ public class TeamCommand {
                 source.sendSuccess(component.withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -369,7 +369,7 @@ public class TeamCommand {
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.reset_spawns").withStyle(ChatFormatting.GOLD), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }

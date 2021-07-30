@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.world.dimensions.end;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.Registry;
@@ -54,7 +54,7 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        if (LibXConfigHandler.World.SingleBiome.enabled && LibXConfigHandler.World.SingleBiome.singleBiomeDimension.getDimension().equals(WorldUtil.SingleBiomeDimension.THE_END.getDimension())) {
+        if (ConfigHandler.World.SingleBiome.enabled && ConfigHandler.World.SingleBiome.singleBiomeDimension.getDimension().equals(WorldUtil.SingleBiomeDimension.THE_END.getDimension())) {
             Biome biome = this.lookupRegistry.get(WorldUtil.SINGLE_BIOME);
             if (biome == null) {
                 biome = this.lookupRegistry.get(Biomes.THE_END.location());

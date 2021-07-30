@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -40,7 +40,7 @@ public class HomeCommand {
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.teleport_home").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.Teleports.home && !source.hasPermission(2)) {
+                if (!ConfigHandler.Utility.Teleports.home && !source.hasPermission(2)) {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.teleport_home").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }

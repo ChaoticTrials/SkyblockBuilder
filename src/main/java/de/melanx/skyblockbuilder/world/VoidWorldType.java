@@ -1,8 +1,8 @@
 package de.melanx.skyblockbuilder.world;
 
 import com.mojang.serialization.Lifecycle;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeProvider;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
@@ -65,16 +65,16 @@ public class VoidWorldType extends ForgeWorldType {
         registry.register(LevelStem.OVERWORLD, new LevelStem(() -> DimensionType.DEFAULT_OVERWORLD,
                 configuredOverworldChunkGenerator(biomeRegistry, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         registry.register(LevelStem.NETHER, new LevelStem(() -> DimensionType.DEFAULT_NETHER,
-                LibXConfigHandler.Dimensions.Nether.Default ? DimensionType.defaultNetherGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
+                ConfigHandler.Dimensions.Nether.Default ? DimensionType.defaultNetherGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
                         : netherChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         registry.register(LevelStem.END, new LevelStem(() -> DimensionType.DEFAULT_END,
-                LibXConfigHandler.Dimensions.End.Default ? DimensionType.defaultEndGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
+                ConfigHandler.Dimensions.End.Default ? DimensionType.defaultEndGenerator(biomeRegistry, dimensionSettingsRegistry, seed)
                         : endChunkGenerator(biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
         return registry;
     }
 
     public static ChunkGenerator configuredOverworldChunkGenerator(@Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
-        return LibXConfigHandler.Dimensions.Overworld.Default ? WorldGenSettings.makeDefaultOverworld(biomeRegistry, dimensionSettingsRegistry, seed)
+        return ConfigHandler.Dimensions.Overworld.Default ? WorldGenSettings.makeDefaultOverworld(biomeRegistry, dimensionSettingsRegistry, seed)
                 : overworldChunkGenerator(new LazyBiomeRegistryWrapper(biomeRegistry), dimensionSettingsRegistry, seed);
     }
 

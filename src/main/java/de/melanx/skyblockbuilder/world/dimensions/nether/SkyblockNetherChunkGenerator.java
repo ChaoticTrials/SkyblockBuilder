@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.world.dimensions.nether;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -53,7 +53,7 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return LibXConfigHandler.World.seaHeight;
+        return ConfigHandler.World.seaHeight;
     }
 
     @Nonnull

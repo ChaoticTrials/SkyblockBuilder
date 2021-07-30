@@ -5,8 +5,8 @@ import com.google.gson.JsonObject;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.RandomUtility;
@@ -70,9 +70,9 @@ public class SpawnsCommand {
             Set<BlockPos> possibleSpawns = team.getPossibleSpawns();
             for (BlockPos pos : possibleSpawns) {
                 JsonArray arr = new JsonArray();
-                arr.add(pos.getX() % LibXConfigHandler.World.islandDistance);
-                arr.add(pos.getY() - LibXConfigHandler.Spawn.height);
-                arr.add(pos.getZ() % LibXConfigHandler.World.islandDistance);
+                arr.add(pos.getX() % ConfigHandler.World.islandDistance);
+                arr.add(pos.getY() - ConfigHandler.Spawn.height);
+                arr.add(pos.getZ() % ConfigHandler.World.islandDistance);
                 spawns.add(arr);
             }
 

@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.world;
 
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 
@@ -18,7 +18,7 @@ public final class IslandPos {
     }
 
     public BlockPos getCenter() {
-        return new BlockPos(this.x * LibXConfigHandler.World.islandDistance + LibXConfigHandler.World.offset, LibXConfigHandler.Spawn.height, this.z * LibXConfigHandler.World.islandDistance + LibXConfigHandler.World.offset);
+        return new BlockPos(this.x * ConfigHandler.World.islandDistance + ConfigHandler.World.offset, ConfigHandler.Spawn.height, this.z * ConfigHandler.World.islandDistance + ConfigHandler.World.offset);
     }
 
     public static IslandPos fromTag(CompoundTag tag) {

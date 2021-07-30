@@ -3,8 +3,8 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGenerator;
@@ -32,7 +32,7 @@ import java.util.Random;
 
 public class WorldUtil {
 
-    public static final ResourceLocation SINGLE_BIOME = LibXConfigHandler.World.SingleBiome.biome;
+    public static final ResourceLocation SINGLE_BIOME = ConfigHandler.World.SingleBiome.biome;
 
     public static void teleportToIsland(ServerPlayer player, Team team) {
         MinecraftServer server = player.getServer();
@@ -40,7 +40,7 @@ public class WorldUtil {
         ServerLevel level = getConfiguredLevel(server);
 
         BlockPos spawn = validPosition(level, team);
-        player.teleportTo(level, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, LibXConfigHandler.Spawn.direction.getYRot(), 0);
+        player.teleportTo(level, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, ConfigHandler.Spawn.direction.getYRot(), 0);
         player.setRespawnPosition(level.dimension(), spawn, 0, true, false);
     }
 
@@ -49,16 +49,16 @@ public class WorldUtil {
 
         MinecraftServer server = ((ServerLevel) level).getServer();
 
-        if (!LibXConfigHandler.Dimensions.Overworld.Default) {
+        if (!ConfigHandler.Dimensions.Overworld.Default) {
             return server.overworld().getChunkSource().getGenerator() instanceof SkyblockOverworldChunkGenerator;
         }
 
-        if (!LibXConfigHandler.Dimensions.Nether.Default) {
+        if (!ConfigHandler.Dimensions.Nether.Default) {
             ServerLevel nether = server.getLevel(Level.NETHER);
             return nether != null && nether.getChunkSource().getGenerator() instanceof SkyblockNetherChunkGenerator;
         }
 
-        if (!LibXConfigHandler.Dimensions.End.Default) {
+        if (!ConfigHandler.Dimensions.End.Default) {
             ServerLevel end = server.getLevel(Level.END);
             return end != null && end.getChunkSource().getGenerator() instanceof SkyblockEndChunkGenerator;
         }
@@ -73,7 +73,7 @@ public class WorldUtil {
     }
 
     public static ServerLevel getConfiguredLevel(MinecraftServer server) {
-        ResourceLocation location = LibXConfigHandler.Spawn.dimension;
+        ResourceLocation location = ConfigHandler.Spawn.dimension;
         ResourceKey<Level> worldKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, location);
         ServerLevel configLevel = server.getLevel(worldKey);
 
@@ -102,7 +102,7 @@ public class WorldUtil {
         Spiral spiral = new Spiral();
         while (level.getBlockState(mpos.below()).getBlockSupportShape(level, mpos.below()).isEmpty()) {
             if (mpos.getY() <= 0) {
-                if (spiral.getX() > LibXConfigHandler.Spawn.radius || spiral.getY() > LibXConfigHandler.Spawn.radius) {
+                if (spiral.getX() > ConfigHandler.Spawn.radius || spiral.getY() > ConfigHandler.Spawn.radius) {
                     return pos;
                 }
                 spiral.next();
@@ -202,7 +202,7 @@ public class WorldUtil {
 
         SingleBiomeDimension(ResourceLocation dimension) {
             if (dimension == null) {
-                this.singleBiomeDimension = LibXConfigHandler.Spawn.dimension;
+                this.singleBiomeDimension = ConfigHandler.Spawn.dimension;
             } else {
                 this.singleBiomeDimension = dimension;
             }

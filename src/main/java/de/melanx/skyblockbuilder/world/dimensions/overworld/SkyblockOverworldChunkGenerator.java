@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.world.dimensions.overworld;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.config.LibXConfigHandler;
+import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
@@ -57,7 +57,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
         this.seed = seed;
         this.settings = settings;
         this.parent = new NoiseBasedChunkGenerator(provider, seed, settings);
-        this.layerInfos = LibXConfigHandler.World.surface ? WorldUtil.layersInfoFromString(LibXConfigHandler.World.surfaceSettings) : new ArrayList<>();
+        this.layerInfos = ConfigHandler.World.surface ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings) : new ArrayList<>();
     }
 
     @Nonnull
@@ -68,7 +68,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return LibXConfigHandler.World.seaHeight;
+        return ConfigHandler.World.seaHeight;
     }
 
     @Nonnull
@@ -79,7 +79,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
 
     @Override
     public void buildSurfaceAndBedrock(@Nonnull WorldGenRegion level, @Nonnull ChunkAccess chunk) {
-        if (LibXConfigHandler.World.surface) {
+        if (ConfigHandler.World.surface) {
             ChunkPos cp = chunk.getPos();
             int xs = cp.getMinBlockX();
             int zs = cp.getMinBlockZ();
@@ -119,7 +119,7 @@ return        CompletableFuture.completedFuture(chunk);
 
     @Override
     public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level) {
-        if (LibXConfigHandler.World.surface) {
+        if (ConfigHandler.World.surface) {
             int i = 0;
             for (FlatLayerInfo info : this.layerInfos) {
                 i += info.getHeight();
