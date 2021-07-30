@@ -314,15 +314,6 @@ public class Team {
             CompoundTag posTag = (CompoundTag) pos;
             this.possibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
         }
-
-        if (nbt.contains("JoinRequests")) { // TODO 1.17 remove this check
-            ListTag joinRequests = nbt.getList("JoinRequests", Constants.NBT.TAG_COMPOUND);
-            this.joinRequests.clear();
-            for (Tag id : joinRequests) {
-                CompoundTag idTag = (CompoundTag) id;
-                this.joinRequests.add(idTag.getUUID("Id"));
-            }
-        }
     }
 
     @Override

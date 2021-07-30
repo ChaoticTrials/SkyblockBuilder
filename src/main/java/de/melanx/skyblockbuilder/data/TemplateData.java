@@ -44,11 +44,6 @@ public class TemplateData extends SavedData {
     }
 
     public StructureTemplate getTemplate() {
-        // TODO 1.17 delete because it's only because of a bug in 1.5.1-1.5.3
-        if (this.template.palettes.isEmpty() && !TemplateLoader.getTemplate().palettes.isEmpty()) {
-            this.refreshTemplate();
-        }
-
         return this.template;
     }
 }
