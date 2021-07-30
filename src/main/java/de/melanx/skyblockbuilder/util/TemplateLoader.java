@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,15 +23,13 @@ import java.util.zip.ZipException;
 
 public class TemplateLoader {
 
-    private static final Path SCHEMATIC_FILE = SkyPaths.MOD_CONFIG.resolve("template.nbt");
-    private static final Path SPAWNS_FILE = SkyPaths.MOD_CONFIG.resolve("spawns.json");
     private static final Map<String, StructureTemplate> TEMPLATES = new HashMap<>();
     private static StructureTemplate TEMPLATE = new StructureTemplate();
     private static final List<BlockPos> SPAWNS = new ArrayList<>();
 
     public static void loadSchematic() {
         try {
-            File schematic = new File(SCHEMATIC_FILE.toUri());
+            File schematic = new File(SkyPaths.SCHEMATIC_FILE.toUri());
             CompoundTag nbt = NbtIo.readCompressed(new FileInputStream(schematic));
             TEMPLATE.load(nbt);
         } catch (IOException e) {
@@ -41,7 +38,7 @@ public class TemplateLoader {
 
         try {
             SPAWNS.clear();
-            File spawns = new File(SPAWNS_FILE.toUri());
+            File spawns = new File(SkyPaths.SPAWNS_FILE.toUri());
             JsonParser parser = new JsonParser();
 
             String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
@@ -53,11 +50,10 @@ public class TemplateLoader {
             if (((JsonObject) obj).has("islandSpawns")) {
                 JsonArray array = ((JsonObject) obj).getAsJsonArray("islandSpawns");
                 for (JsonElement element : array) {
-                    if (!(element instanceof JsonArray)) {
+                    if (!(element instanceof JsonArray positions)) {
                         throw new IllegalStateException("Positions need to be written in a json array.");
                     }
 
-                    JsonArray positions = (JsonArray) element;
                     int posX = GsonHelper.convertToInt(positions.get(0), "x");
                     int posY = GsonHelper.convertToInt(positions.get(1), "y");
                     int posZ = GsonHelper.convertToInt(positions.get(2), "z");
@@ -91,7 +87,7 @@ public class TemplateLoader {
                 TEMPLATES.put(file.getName(), template);
             }
 
-            File schematic = new File(SCHEMATIC_FILE.toUri());
+            File schematic = new File(SkyPaths.SCHEMATIC_FILE.toUri());
             CompoundTag nbt = NbtIo.readCompressed(new FileInputStream(schematic));
             StructureTemplate defaultTemplate = new StructureTemplate();
             defaultTemplate.load(nbt);

@@ -39,12 +39,12 @@ public class ConfigHandler {
             "WARNING: This only works for vanilla dimensions (Overworld, Nether, End)"})
     public static class Structures {
 
-        @Config({"All the structures that should be generated.", "A list with all possible structures can be found in config/skyblockbuilder/structures.txt"})
+        @Config({"All the structures that should be generated.", "A list with all possible structures can be found in config/skyblockbuilder/data/structures.txt"})
         public static ResourceList generationStructures = new ResourceList(true, b -> {
             b.simple(new ResourceLocation("minecraft", "fortress"));
         });
 
-        @Config({"All the features that should be generated.", "A list with all possible structures can be found in config/skyblockbuilder/features.txt",
+        @Config({"All the features that should be generated.", "A list with all possible structures can be found in config/skyblockbuilder/data/features.txt",
                 "INFO: The two default values are required for the obsidian towers in end. If this is missing, they will be first generated when respawning the dragon."})
         public static ResourceList generationFeatures = new ResourceList(true, b -> {
             b.simple(new ResourceLocation("minecraft", "end_spike"));
@@ -102,7 +102,7 @@ public class ConfigHandler {
 
         public static class SingleBiome {
 
-            @Config("Specifies the biome for the whole world")
+            @Config({"Specifies the biome for the whole world", "A list with all possible structures can be found in config/skyblockbuilder/data/biomes.txt"})
             public static ResourceLocation biome = new ResourceLocation("minecraft", "plains");
 
             @Config("The dimension where the single biome should be applied. Use \"default\" for spawn dimension")

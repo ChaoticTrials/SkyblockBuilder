@@ -169,9 +169,7 @@ public class WorldUtil {
             SkyblockBuilder.getLogger().error("Error while parsing surface settings string => Unknown block, {}", blockName);
             return null;
         } else {
-            FlatLayerInfo layerInfo = new FlatLayerInfo(height, block);
-//            layerInfo.setStart(currentLayers); // TODO check vanilla code
-            return layerInfo;
+            return new FlatLayerInfo(height, block);
         }
     }
 
