@@ -262,7 +262,7 @@ public class TeamCommand {
                 source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.create_spawn").mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
+                if ((!LibXConfigHandler.Utility.selfManage || !LibXConfigHandler.Utility.Spawns.modifySpawns) && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
@@ -311,7 +311,7 @@ public class TeamCommand {
                 source.sendFeedback(component.mergeStyle(TextFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!LibXConfigHandler.Utility.selfManage && !source.hasPermissionLevel(2)) {
+                if ((!LibXConfigHandler.Utility.selfManage || !LibXConfigHandler.Utility.Spawns.modifySpawns) && !source.hasPermissionLevel(2)) {
                     source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.disabled.modify_spawns").mergeStyle(TextFormatting.RED), false);
                     return 0;
                 }
