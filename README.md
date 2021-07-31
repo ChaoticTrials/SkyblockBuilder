@@ -172,3 +172,7 @@ removed player will be teleported back to spawn after dropping all the items in 
 
 If you're not op and want to leave your team, you can simply type in `/skyblock leave`. You will drop all your items and
 be teleported to spawn.
+
+## MineMention compatability
+This mod is compatible with [MineMention](https://www.curseforge.com/minecraft/mc-mods/minemention). To write in the
+teams chat, you can use `skyblockbuilder:sky_team` in MineMention config file.
