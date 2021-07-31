@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.data;
 
-import de.melanx.skyblockbuilder.util.TemplateLoader;
+import de.melanx.skyblockbuilder.template.TemplateLoader;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -29,7 +29,7 @@ public class TemplateData extends SavedData {
     public TemplateData load(@Nonnull CompoundTag nbt) {
         this.template.load(nbt);
 
-         return this;
+        return this;
     }
 
     @Nonnull

@@ -4,14 +4,14 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.commands.Suggestions;
+import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.NameGenerator;
-import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -71,7 +71,7 @@ public class ManageCommand {
     }
 
     private static int refreshIsland(CommandSourceStack source, String name) {
-        TemplateLoader.setTemplate(TemplateLoader.getTemplates().get(name));
+        TemplateLoader.setTemplate(TemplateLoader.getConfiguredTemplate(name));
         TemplateData.get(source.getLevel()).refreshTemplate();
         source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.reset_island", name), true);
 

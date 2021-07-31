@@ -2,8 +2,8 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import de.melanx.skyblockbuilder.ConfigHandler;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.config.ConfigHandler;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -83,7 +83,7 @@ public class SkyPaths {
         defaultSpawn.add(5);
         spawns.add(defaultSpawn);
 
-        object.add("islandSpawns", spawns);
+        object.add("default", spawns);
 
         BufferedWriter w = Files.newBufferedWriter(SPAWNS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
         w.write(SkyblockBuilder.PRETTY_GSON.toJson(object));

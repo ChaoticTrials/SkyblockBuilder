@@ -10,11 +10,16 @@ import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
+import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
-import de.melanx.skyblockbuilder.util.*;
+import de.melanx.skyblockbuilder.template.TemplateLoader;
+import de.melanx.skyblockbuilder.util.CompatHelper;
+import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyPaths;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.event.DataPacksReloadedEvent;
 import io.github.noeppi_noeppi.libx.render.RenderHelperLevel;
 import net.minecraft.client.Minecraft;
@@ -188,7 +193,6 @@ public class EventListener {
     @SubscribeEvent
     public static void onChangeScreen(GuiScreenEvent.DrawScreenEvent event) {
         if (event.getGui() instanceof SelectWorldScreen) {
-            TemplateLoader.loadSchematic();
         }
     }
 }

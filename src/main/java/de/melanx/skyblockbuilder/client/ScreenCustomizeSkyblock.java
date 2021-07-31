@@ -2,7 +2,8 @@ package de.melanx.skyblockbuilder.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyblockbuilder.Registration;
-import de.melanx.skyblockbuilder.util.TemplateLoader;
+import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
+import de.melanx.skyblockbuilder.template.TemplateLoader;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -11,30 +12,30 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
-import java.util.Map;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ScreenCustomizeSkyblock extends Screen {
 
     private final Screen parent;
-    private final Map<String, StructureTemplate> templateMap;
-    private final Consumer<StructureTemplate> applyTemplate;
+    private final List<ConfiguredTemplate> templateMap;
+    private final Consumer<ConfiguredTemplate> applyTemplate;
     private TemplateList list;
     private Button doneButton;
-    private StructureTemplate template;
+    private ConfiguredTemplate template;
 
-    public ScreenCustomizeSkyblock(Screen parent, StructureTemplate template) {
+    public ScreenCustomizeSkyblock(Screen parent, ConfiguredTemplate template) {
         super(Registration.customSkyblock.getDisplayName());
         this.parent = parent;
         this.template = template;
         TemplateLoader.updateTemplates();
-        this.templateMap = TemplateLoader.getTemplates();
+        this.templateMap = TemplateLoader.getConfiguredTemplates();
         this.applyTemplate = TemplateLoader::setTemplate;
     }
 
@@ -53,7 +54,7 @@ public class ScreenCustomizeSkyblock extends Screen {
             this.minecraft.setScreen(this.parent);
         }));
         this.list.setSelected(this.list.children().stream()
-                .filter(entry -> Objects.equals(entry.template, this.template))
+                .filter(entry -> Objects.equals(entry.template.getTemplate(), this.template.getTemplate()))
                 .findFirst()
                 .orElse(null));
     }
@@ -75,8 +76,8 @@ public class ScreenCustomizeSkyblock extends Screen {
 
         public TemplateList() {
             super(Objects.requireNonNull(ScreenCustomizeSkyblock.this.minecraft), ScreenCustomizeSkyblock.this.width, ScreenCustomizeSkyblock.this.height, 40, ScreenCustomizeSkyblock.this.height - 37, 16);
-            ScreenCustomizeSkyblock.this.templateMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
-                this.addEntry(new TemplateEntry(entry.getKey(), entry.getValue()));
+            ScreenCustomizeSkyblock.this.templateMap.stream().sorted(Comparator.comparing(ConfiguredTemplate::getName)).forEach(entry -> {
+                this.addEntry(new TemplateEntry(entry));
             });
         }
 
@@ -99,10 +100,10 @@ public class ScreenCustomizeSkyblock extends Screen {
         private class TemplateEntry extends ObjectSelectionList.Entry<TemplateEntry> {
 
             private final Component name;
-            private final StructureTemplate template;
+            private final ConfiguredTemplate template;
 
-            public TemplateEntry(String name, StructureTemplate template) {
-                this.name = new TextComponent(name.replace(".nbt", ""));
+            public TemplateEntry(ConfiguredTemplate template) {
+                this.name = new TextComponent(template.getName().replace(".nbt", ""));
                 this.template = template;
             }
 

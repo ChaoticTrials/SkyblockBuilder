@@ -18,12 +18,10 @@ You can simply set `level-type` in `server.properties` to `skyblockbuilder:custo
 2. Use the vanilla Structure Block if your island is smaller or equals 48x48x48 blocks to save it as a `.nbt` file.
    Otherwise, you can use the Structure Saver item to generate this file.
 3. Copy the generated file from `saves/<world>/generated/minecraft/structures/<name>.nbt`
-   to `config/skyblockbuilder/templates/default.nbt`.
-4. Set the possible spawns in `config/skyblockbuilder/spawns.json`. There can be multiple spawns, each one is an array
-   with `[x, y, z]`
-   relative to the 0, 0, 0 from the template structure. You can also [modify existing spawns](#modify-spawns) and export
-   them with
-   `/skyblock spawns EXPORT`.
+   to `config/skyblockbuilder/templates/<name>.nbt`.
+4. Configure the template with a better readable name and spawns in `config/skyblockbuilder/templates.json5`. There can
+   be multiple spawns, each one is an array with `[x, y, z]` relative to the 0, 0, 0 from the template structure. You
+   can also [modify existing spawns](#modify-spawns) and export them with `/skyblock spawns EXPORT`.
 5. To view your current spawns, you need to use the `/reload` command to reload the config. After that, you need to use
    the
    `/skyblock spawns true` command to view all possible spawn points.

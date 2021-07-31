@@ -6,7 +6,6 @@ import de.melanx.skyblockbuilder.client.ClientSetup;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.network.SkyNetwork;
 import de.melanx.skyblockbuilder.util.SkyPaths;
-import de.melanx.skyblockbuilder.util.TemplateLoader;
 import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
 import io.github.noeppi_noeppi.libx.mod.registration.RegistrationBuilder;
 import net.minecraft.Util;
@@ -45,7 +44,6 @@ public class SkyblockBuilder extends ModXRegistration {
 
         Registration.registerCodecs();
         SkyPaths.generateDefaultFiles();
-        TemplateLoader.loadSchematic();
     }
 
     @Override

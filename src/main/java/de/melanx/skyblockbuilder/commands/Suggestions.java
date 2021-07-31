@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
-import de.melanx.skyblockbuilder.util.TemplateLoader;
+import de.melanx.skyblockbuilder.template.TemplateLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;

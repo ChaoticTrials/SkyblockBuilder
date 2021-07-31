@@ -3,9 +3,9 @@ package de.melanx.skyblockbuilder.data;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.Spiral;
-import de.melanx.skyblockbuilder.util.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.ChatFormatting;
@@ -444,7 +444,7 @@ public class SkyblockSavedData extends SavedData {
 
     public static Set<BlockPos> initialPossibleSpawns(BlockPos center) {
         Set<BlockPos> positions = new HashSet<>();
-        for (BlockPos pos : TemplateLoader.getSpawns()) {
+        for (BlockPos pos : TemplateLoader.getCurrentSpawns()) {
             positions.add(center.offset(pos.immutable()));
         }
 
