@@ -100,7 +100,7 @@ public class EventListener {
             Team spawn = data.getSpawn();
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
                 if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
-                    if (ConfigHandler.dropItems.get()) {
+                    if (LibXConfigHandler.Inventory.dropItems) {
                         player.inventory.dropAllItems();
                     }
 
@@ -112,7 +112,7 @@ public class EventListener {
             }
             player.getPersistentData().putBoolean(SPAWNED_TAG, true);
 
-            if (ConfigHandler.clearInv.get()) {
+            if (LibXConfigHandler.Inventory.clearInv) {
                 player.inventory.clear();
             }
 
@@ -125,7 +125,7 @@ public class EventListener {
             });
 
             data.addPlayerToTeam(spawn, player);
-            ((ServerWorld) world).setSpawnLocation(spawn.getIsland().getCenter(), ConfigHandler.direction.get().getYaw());
+            ((ServerWorld) world).setSpawnLocation(spawn.getIsland().getCenter(), LibXConfigHandler.Spawn.direction.getYaw());
             WorldUtil.teleportToIsland(player, spawn);
         }
     }
