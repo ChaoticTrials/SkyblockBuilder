@@ -23,6 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraftforge.common.util.Constants;
@@ -219,6 +220,11 @@ public class SkyblockSavedData extends SavedData {
 
     @Nullable
     public Team createTeam(String teamName) {
+        return this.createTeam(teamName, TemplateData.get(this.level).getTemplate());
+    }
+
+    @Nullable
+    public Team createTeam(String teamName, StructureTemplate template) {
         if (this.teamExists(teamName)) {
             return null;
         }
@@ -230,7 +236,7 @@ public class SkyblockSavedData extends SavedData {
 
         StructurePlaceSettings settings = new StructurePlaceSettings();
         BlockPos center = team.getIsland().getCenter();
-        TemplateData.get(this.level).getTemplate().placeInWorld(this.level, center, center, settings, new Random(), 2);
+        template.placeInWorld(this.level, center, center, settings, new Random(), 2);
 
         this.skyblocks.put(team.getName().toLowerCase(), team);
         this.skyblockPositions.put(team.getName().toLowerCase(), team.getIsland());

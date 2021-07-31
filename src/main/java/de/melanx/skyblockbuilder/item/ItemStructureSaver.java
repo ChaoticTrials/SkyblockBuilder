@@ -89,7 +89,7 @@ public class ItemStructureSaver extends Item {
                 ClientUtility.openItemScreen(stack);
             }
 
-            return InteractionResultHolder.sidedSuccess(stack, false);
+            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
         }
 
         return InteractionResultHolder.pass(stack);
