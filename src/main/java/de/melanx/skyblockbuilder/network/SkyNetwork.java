@@ -19,7 +19,7 @@ public class SkyNetwork extends NetworkX {
 
     @Override
     protected String getProtocolVersion() {
-        return "1";
+        return "2";
     }
 
     @Override

@@ -226,15 +226,15 @@ public class SkyblockSavedData extends SavedData {
 
     @Nullable
     public Team createTeam(String teamName) {
-        if (this.level.isClientSide) {
+        if (this.level == null) {
             return null;
         }
-        return this.createTeam(teamName, TemplateData.get((ServerLevel) this.level).getTemplate());
+        return this.createTeam(teamName, TemplateData.get(this.level).getTemplate());
     }
 
     @Nullable
     public Team createTeam(String teamName, StructureTemplate template) {
-        if (this.teamExists(teamName) || this.level.isClientSide) {
+        if (this.teamExists(teamName) || this.level == null) {
             return null;
         }
 
@@ -245,7 +245,7 @@ public class SkyblockSavedData extends SavedData {
 
         StructurePlaceSettings settings = new StructurePlaceSettings();
         BlockPos center = team.getIsland().getCenter();
-        template.placeInWorld((ServerLevel) this.level, center, center, settings, new Random(), 2);
+        template.placeInWorld(this.level, center, center, settings, new Random(), 2);
 
         this.skyblocks.put(team.getName().toLowerCase(), team);
         this.skyblockPositions.put(team.getName().toLowerCase(), team.getIsland());
@@ -360,7 +360,6 @@ public class SkyblockSavedData extends SavedData {
 
         if (!teams.contains(team)) {
             teams.add(team);
-            Player player = team.getLevel().getPlayerByUUID(id);
             team.broadcast(new TranslatableComponent("skyblockbuilder.event.invite_player", invitor.getDisplayName(), RandomUtility.getDisplayNameByUuid(this.level, id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         }
 
@@ -466,8 +465,16 @@ public class SkyblockSavedData extends SavedData {
         return positions;
     }
 
+    @Override
+    public void setDirty() {
+        super.setDirty();
+        if (this.level != null) {
+            SkyblockBuilder.getNetwork().updateData(this.level);
+        }
+    }
+
     @Nullable
     public ServerLevel getLevel() {
-        return this.level.isClientSide ? null : (ServerLevel) this.level;
+        return this.level;
     }
 }
