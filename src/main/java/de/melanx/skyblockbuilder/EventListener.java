@@ -82,13 +82,13 @@ public class EventListener {
         );
     }
 
-    // Mainly taken from Botania
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        SkyblockBuilder.getNetwork().updateData(event.getPlayer());
         Level level = event.getPlayer().level;
         if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && CompatHelper.isSpawnTeleportEnabled()) {
 
-            SkyblockSavedData data = SkyblockSavedData.get((ServerLevel) level);
+            SkyblockSavedData data = SkyblockSavedData.get(level);
             ServerPlayer player = (ServerPlayer) event.getPlayer();
             Team spawn = data.getSpawn();
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {

@@ -22,6 +22,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -40,25 +41,30 @@ import java.util.*;
 public class SkyblockSavedData extends SavedData {
 
     private static final String NAME = "skyblock_builder";
-
+    private static SkyblockSavedData clientInstance;
     public static final IslandPos SPAWN_ISLAND = new IslandPos(0, 0);
 
-    private final ServerLevel level;
+    private ServerLevel level;
     private Map<UUID, List<Team>> invites = new HashMap<>();
     private Map<String, Team> skyblocks = new HashMap<>();
     private BiMap<String, IslandPos> skyblockPositions = HashBiMap.create();
     private Spiral spiral = new Spiral();
 
-    public SkyblockSavedData(ServerLevel level) {
-        this.level = WorldUtil.getConfiguredLevel(level.getServer());
+    public static SkyblockSavedData get(Level level) {
+        if (!level.isClientSide) {
+            MinecraftServer server = ((ServerLevel) level).getServer();
+
+            DimensionDataStorage storage = server.overworld().getDataStorage();
+            SkyblockSavedData data = storage.computeIfAbsent(nbt -> new SkyblockSavedData().load(nbt), SkyblockSavedData::new, NAME);
+            data.level = WorldUtil.getConfiguredLevel(server);
+            return data;
+        } else {
+            return clientInstance == null ? new SkyblockSavedData() : clientInstance;
+        }
     }
 
-    public static SkyblockSavedData get(ServerLevel level) {
-        MinecraftServer server = level.getServer();
-        ServerLevel configuredLevel = WorldUtil.getConfiguredLevel(server);
-
-        DimensionDataStorage storage = server.overworld().getDataStorage();
-        return storage.computeIfAbsent(nbt -> new SkyblockSavedData(configuredLevel).load(nbt), () -> new SkyblockSavedData(configuredLevel), NAME);
+    public static void updateClient(SkyblockSavedData data) {
+        clientInstance = data;
     }
 
     public Team getSpawn() {
@@ -220,12 +226,15 @@ public class SkyblockSavedData extends SavedData {
 
     @Nullable
     public Team createTeam(String teamName) {
-        return this.createTeam(teamName, TemplateData.get(this.level).getTemplate());
+        if (this.level.isClientSide) {
+            return null;
+        }
+        return this.createTeam(teamName, TemplateData.get((ServerLevel) this.level).getTemplate());
     }
 
     @Nullable
     public Team createTeam(String teamName, StructureTemplate template) {
-        if (this.teamExists(teamName)) {
+        if (this.teamExists(teamName) || this.level.isClientSide) {
             return null;
         }
 
@@ -236,7 +245,7 @@ public class SkyblockSavedData extends SavedData {
 
         StructurePlaceSettings settings = new StructurePlaceSettings();
         BlockPos center = team.getIsland().getCenter();
-        template.placeInWorld(this.level, center, center, settings, new Random(), 2);
+        template.placeInWorld((ServerLevel) this.level, center, center, settings, new Random(), 2);
 
         this.skyblocks.put(team.getName().toLowerCase(), team);
         this.skyblockPositions.put(team.getName().toLowerCase(), team.getIsland());
@@ -457,7 +466,8 @@ public class SkyblockSavedData extends SavedData {
         return positions;
     }
 
+    @Nullable
     public ServerLevel getLevel() {
-        return this.level;
+        return this.level.isClientSide ? null : (ServerLevel) this.level;
     }
 }
