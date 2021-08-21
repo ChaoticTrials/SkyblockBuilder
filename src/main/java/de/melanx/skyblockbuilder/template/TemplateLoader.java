@@ -8,10 +8,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class TemplateLoader {
 
@@ -27,6 +24,8 @@ public class TemplateLoader {
             for (TemplateInfo info : TemplateConfig.templates) {
                 TEMPLATES.add(new ConfiguredTemplate(info));
             }
+
+            TEMPLATES.sort(Comparator.comparing(ConfiguredTemplate::getName));
         } catch (IOException e) {
             throw new RuntimeException("Cannot load templates.", e);
         }
