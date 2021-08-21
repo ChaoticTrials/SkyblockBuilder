@@ -275,7 +275,7 @@ public class ManageCommand {
             if (team.hasPlayer(target)) {
                 data.removePlayerFromTeam(target);
                 if (LibXConfigHandler.Inventory.dropItems) {
-                    RandomUtility.dropInventories(player);
+                    RandomUtility.dropInventories(target);
                 }
                 WorldUtil.teleportToIsland(target, spawn);
                 i += 1;
