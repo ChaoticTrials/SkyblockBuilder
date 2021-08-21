@@ -94,7 +94,7 @@ public class EventListener {
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
                 if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
                     if (ConfigHandler.Inventory.dropItems) {
-                        player.getInventory().dropAll();
+                        RandomUtility.dropInventories(player);
                     }
 
                     WorldUtil.teleportToIsland(player, spawn);

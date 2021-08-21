@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
+import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -13,6 +14,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraftforge.fml.ModList;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -78,6 +80,13 @@ public class RandomUtility {
             return lookup.getId(lookup.get(biome.getRegistryName()));
         } else {
             return -1;
+        }
+    }
+
+    public static void dropInventories(Player player) {
+        player.getInventory().dropAll();
+        if (ModList.get().isLoaded("curios")) {
+            CuriosCompat.dropInventory(player);
         }
     }
 

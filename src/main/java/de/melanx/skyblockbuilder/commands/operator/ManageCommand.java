@@ -12,6 +12,7 @@ import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.NameGenerator;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -197,7 +198,7 @@ public class ManageCommand {
             ServerPlayer player = playerList.getPlayer(id);
             if (player != null) {
                 if (ConfigHandler.Inventory.dropItems) {
-                    player.getInventory().dropAll();
+                    RandomUtility.dropInventories(player);
                 }
                 WorldUtil.teleportToIsland(player, spawn);
             }
@@ -274,7 +275,7 @@ public class ManageCommand {
             if (team.hasPlayer(target)) {
                 data.removePlayerFromTeam(target);
                 if (ConfigHandler.Inventory.dropItems) {
-                    target.getInventory().dropAll();
+                    RandomUtility.dropInventories(target);
                 }
                 WorldUtil.teleportToIsland(target, spawn);
                 i += 1;

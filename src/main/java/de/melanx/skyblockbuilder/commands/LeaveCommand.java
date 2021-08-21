@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -47,7 +48,7 @@ public class LeaveCommand {
         }
 
         if (ConfigHandler.Inventory.dropItems) {
-            player.getInventory().dropAll();
+            RandomUtility.dropInventories(player);
         }
         data.removePlayerFromTeam(player);
         source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.left_team").withStyle(ChatFormatting.GOLD), true);

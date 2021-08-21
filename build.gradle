@@ -13,6 +13,10 @@ repositories {
         name = "MelanX Maven"
         url = "https://maven.melanx.de/"
     }
+    maven {
+        name "Curios"
+        url "https://maven.theillusivec4.top/"
+    }
 
     // for testing with other mods
     maven {
@@ -27,6 +31,7 @@ dependencies {
 //    runtimeOnly fg.deobf("mezz.jei:jei-1.16.4:7.6.0.58")
     implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.17.1-2.0.3")
     implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.17.1-1.0.1")
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.0.1")
 
 //    runtimeOnly fg.deobf("curse.maven:good-nights-sleep-61461:3208812")
 }
