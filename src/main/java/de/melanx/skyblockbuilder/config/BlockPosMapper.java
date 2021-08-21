@@ -32,6 +32,4 @@ public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
     public Class<JsonArray> element() {
         return JsonArray.class;
     }
-
-
 }

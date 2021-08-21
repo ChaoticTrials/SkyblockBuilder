@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.config;
 
+import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -14,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,10 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RegisterConfig("common-config")
 public class ConfigHandler {
@@ -78,11 +77,11 @@ public class ConfigHandler {
 
     public static class World {
 
-        @Config("Should a surface be generated in overworld? [default: false]")
+        @Config("Should a surface be generated in the dimensions? [default: false]")
         public static boolean surface = false;
 
-        @Config({"The block settings for generating the surface.", "Same format as flat world generation settings (blocks only)"})
-        public static String surfaceSettings = "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block";
+        @Config({"The block settings for generating the different dimensions surfaces.", "Same format as flat world generation settings (blocks only)"})
+        public static Map<String, String> surfaceSettings = initSurfaceSettingsMap(Maps.newHashMap());
 
         @Config("Sea level in world [default: 63]")
         @IntRange(min = 0, max = 256)
@@ -99,6 +98,13 @@ public class ConfigHandler {
 
         @Config({"The offset from 0, 0 to generate the islands", "Can be used to generate them in the middle of .mca files"})
         public static int offset = 0;
+
+        private static Map<String, String> initSurfaceSettingsMap(Map<String, String> map) {
+            map.put(Level.OVERWORLD.location().toString(), "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block");
+            map.put(Level.NETHER.location().toString(), "");
+            map.put(Level.END.location().toString(), "");
+            return map;
+        }
 
         public static class SingleBiome {
 

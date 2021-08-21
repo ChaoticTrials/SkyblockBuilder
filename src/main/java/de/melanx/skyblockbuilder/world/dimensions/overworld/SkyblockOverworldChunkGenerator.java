@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.world.dimensions.overworld;
 
+import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
@@ -10,10 +11,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.NoiseColumn;
-import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -31,7 +29,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -57,7 +54,9 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
         this.seed = seed;
         this.settings = settings;
         this.parent = new NoiseBasedChunkGenerator(provider, seed, settings);
-        this.layerInfos = ConfigHandler.World.surface ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings) : new ArrayList<>();
+        this.layerInfos = ConfigHandler.World.surface
+                ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(Level.NETHER.location().toString()))
+                : Lists.newArrayList();
     }
 
     @Nonnull

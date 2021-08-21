@@ -120,6 +120,10 @@ public class WorldUtil {
 
     // [Vanilla copy] Get flat world info on servers
     public static List<FlatLayerInfo> layersInfoFromString(String settings) {
+        if (settings == null) {
+            return Lists.newArrayList();
+        }
+
         List<FlatLayerInfo> list = Lists.newArrayList();
         String[] astring = settings.split(",");
         int i = 0;
