@@ -84,6 +84,10 @@ public class RandomUtility {
     }
 
     public static void dropInventories(Player player) {
+        if (player.isSpectator() || player.isCreative()) {
+            return;
+        }
+
         player.getInventory().dropAll();
         if (ModList.get().isLoaded("curios")) {
             CuriosCompat.dropInventory(player);
