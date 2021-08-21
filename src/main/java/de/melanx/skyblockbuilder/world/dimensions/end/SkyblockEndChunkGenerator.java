@@ -128,6 +128,14 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level) {
+        if (ConfigHandler.World.surface) {
+            int i = 0;
+            for (FlatLayerInfo info : this.layerInfos) {
+                i += info.getHeight();
+            }
+            return i;
+        }
+
         return this.parent.getBaseHeight(x, z, heightmapType, level);
     }
 
