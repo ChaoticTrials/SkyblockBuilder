@@ -21,7 +21,7 @@ public class DeclineCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Declines an invitation
         return Commands.literal("decline")
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.INVITE_TEAMS)
+                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.INVITE_TEAMS)
                         .executes(context -> declineTeam(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

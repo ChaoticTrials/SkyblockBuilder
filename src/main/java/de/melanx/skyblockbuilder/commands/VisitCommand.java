@@ -20,7 +20,7 @@ public class VisitCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Let the player visit another team
         return Commands.literal("visit")
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.VISIT_TEAMS)
+                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.VISIT_TEAMS)
                         .executes(context -> visit(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

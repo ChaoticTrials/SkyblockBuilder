@@ -38,6 +38,7 @@ import java.util.*;
  * Credits go to Botania authors
  * https://github.com/Vazkii/Botania/blob/master/src/main/java/vazkii/botania/common/world/SkyblockSavedData.java
  */
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public class SkyblockSavedData extends SavedData {
 
     private static final String NAME = "skyblock_builder";
@@ -290,7 +291,7 @@ public class SkyblockSavedData extends SavedData {
         return false;
     }
 
-    public void removeAllPlayersFromTeam(Team team) {
+    public void removeAllPlayersFromTeam(@Nonnull Team team) {
         Set<UUID> players = new HashSet<>(team.getPlayers());
         team.removeAllPlayers();
         Team spawn = this.getSpawn();

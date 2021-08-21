@@ -30,7 +30,7 @@ public class ListCommand {
         return Commands.literal("list")
                 .executes(context -> listTeams(context.getSource()))
                 // Lists all members in team
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
+                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.ALL_TEAMS)
                         .executes(context -> listPlayers(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

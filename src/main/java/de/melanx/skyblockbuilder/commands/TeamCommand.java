@@ -43,14 +43,14 @@ public class TeamCommand {
                                         .executes(context -> removeSpawn(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos")))))
                         .then(Commands.literal("reset")
                                 .executes(context -> resetSpawns(context.getSource(), null))
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> resetSpawns(context.getSource(), StringArgumentType.getString(context, "team"))))))
 
                 // Renaming a team
                 .then(Commands.literal("rename")
-                        .then(Commands.argument("name", StringArgumentType.word())
+                        .then(Commands.argument("name", StringArgumentType.string())
                                 .executes(context -> renameTeam(context.getSource(), StringArgumentType.getString(context, "name"), null))
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> renameTeam(context.getSource(), StringArgumentType.getString(context, "name"), StringArgumentType.getString(context, "team"))))))
 
                 // Toggle permission to visit the teams island

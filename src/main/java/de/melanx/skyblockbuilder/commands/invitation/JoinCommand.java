@@ -22,7 +22,7 @@ public class JoinCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Invites the given player
         return Commands.literal("join")
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
+                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.ALL_TEAMS)
                         .executes(context -> sendJoinRequest(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

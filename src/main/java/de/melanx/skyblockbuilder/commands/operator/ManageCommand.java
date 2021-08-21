@@ -33,37 +33,37 @@ public class ManageCommand {
                 // refreshes the island shape
                 .then(Commands.literal("islandShape")
                         .requires(source -> source.hasPermission(3))
-                        .then(Commands.argument("template", StringArgumentType.word()).suggests(Suggestions.TEMPLATES)
+                        .then(Commands.argument("template", StringArgumentType.string()).suggests(Suggestions.TEMPLATES)
                                 .executes(context -> refreshIsland(context.getSource(), StringArgumentType.getString(context, "template")))))
 
                 .then(Commands.literal("teams")
                         // Removes all empty teams in the world
                         .then(Commands.literal("clear")
                                 .executes(context -> deleteEmptyTeams(context.getSource()))
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> clearTeam(context.getSource(), StringArgumentType.getString(context, "team")))))
 
                         // Creates a team
                         .then(Commands.literal("create")
                                 .executes(context -> createTeam(context.getSource(), false))
-                                .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("name", StringArgumentType.string())
                                         .executes(context -> createTeam(context.getSource(), StringArgumentType.getString(context, "name"), false))))
 
                         // Creates a team and the player executing the command joins
                         .then(Commands.literal("createAndJoin")
                                 .executes(context -> createTeam(context.getSource(), true))
-                                .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("name", StringArgumentType.string())
                                         .executes(context -> createTeam(context.getSource(), StringArgumentType.getString(context, "name"), true))))
 
                         // Deletes the team with the given name
                         .then(Commands.literal("delete")
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> deleteTeam(context.getSource(), StringArgumentType.getString(context, "team"))))))
 
                 // Adds player(s) to a given team
                 .then(Commands.literal("addPlayer")
                         .then(Commands.argument("players", EntityArgument.players())
-                                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.ALL_TEAMS)
+                                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.ALL_TEAMS)
                                         .executes(context -> addToTeam(context.getSource(), StringArgumentType.getString(context, "team"), EntityArgument.getPlayers(context, "players"))))))
                 // Kicks player from its current team
                 .then(Commands.literal("kickPlayer")

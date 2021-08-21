@@ -21,7 +21,7 @@ public class AcceptCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Accepts an invitation
         return Commands.literal("accept")
-                .then(Commands.argument("team", StringArgumentType.word()).suggests(Suggestions.INVITE_TEAMS)
+                .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.INVITE_TEAMS)
                         .executes(context -> acceptTeam(context.getSource(), StringArgumentType.getString(context, "team"))));
     }
 

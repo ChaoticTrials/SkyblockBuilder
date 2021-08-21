@@ -27,7 +27,7 @@ public class CreateCommand {
         // Let a player create a team if enabled in config
         return Commands.literal("create").requires(source -> ConfigHandler.Utility.createOwnTeam)
                 .executes(context -> create(context.getSource(), null, Collections.emptyList()))
-                .then(Commands.argument("name", StringArgumentType.word())
+                .then(Commands.argument("name", StringArgumentType.string())
                         .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), Collections.emptyList()))
                         .then(Commands.argument("players", EntityArgument.players())
                                 .requires(commandSource -> commandSource.hasPermission(2))

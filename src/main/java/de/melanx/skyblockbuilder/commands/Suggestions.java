@@ -55,7 +55,7 @@ public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> ALL_TEAMS = (context, builder) -> SharedSuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().getLevel())
             .getTeams().stream()
             .filter(team -> !team.isSpawn())
-            .map(Team::getName)
+            .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
             .collect(Collectors.toSet()), builder);
 
     // Lists all teams which allow visiting
@@ -63,7 +63,7 @@ public class Suggestions {
             .getTeams().stream()
             .filter(Team::allowsVisits)
             .filter(team -> !team.isSpawn())
-            .map(Team::getName)
+            .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
             .collect(Collectors.toSet()), builder);
 
     // Lists all teams for a player which invited the player
@@ -76,7 +76,7 @@ public class Suggestions {
         if (teams != null && teams.size() != 0) {
             return SharedSuggestionProvider.suggest(teams.stream()
                     .filter(team -> !team.isSpawn())
-                    .map(Team::getName)
+                    .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
                     .collect(Collectors.toSet()), builder);
         }
 
