@@ -64,12 +64,12 @@ public class ScreenCustomizeSkyblock extends Screen {
     }
 
     @Override
-    public void render(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         this.renderDirtBackground(0);
-        this.list.render(matrixStack, mouseX, mouseY, partialTicks);
-        drawCenteredString(matrixStack, this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
-        drawCenteredString(matrixStack, this.font, new TranslatableComponent("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+        this.list.render(poseStack, mouseX, mouseY, partialTicks);
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
+        drawCenteredString(poseStack, this.font, new TranslatableComponent("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
+        super.render(poseStack, mouseX, mouseY, partialTicks);
     }
 
     private class TemplateList extends ObjectSelectionList<TemplateList.TemplateEntry> {
@@ -108,8 +108,8 @@ public class ScreenCustomizeSkyblock extends Screen {
             }
 
             @Override
-            public void render(@Nonnull PoseStack matrixStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
-                GuiComponent.drawString(matrixStack, ScreenCustomizeSkyblock.this.font, this.name, left + 5, top + 2, Color.WHITE.getRGB());
+            public void render(@Nonnull PoseStack poseStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
+                GuiComponent.drawString(poseStack, ScreenCustomizeSkyblock.this.font, this.name, left + 5, top + 2, Color.WHITE.getRGB());
             }
 
             @Override

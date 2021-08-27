@@ -17,6 +17,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,19 +27,24 @@ public class Team {
 
     private final SkyblockSavedData data;
     private final Set<UUID> players;
+    private final Set<UUID> joinRequests;
     private final Set<BlockPos> possibleSpawns;
-    private final Set<UUID> joinRequests = new HashSet<>();
     private IslandPos island;
     private String name;
     private boolean allowVisits;
     private boolean allowJoinRequests;
+    private long createdAt;
+    private long lastChanged;
 
     public Team(SkyblockSavedData data, IslandPos island) {
         this.data = data;
         this.island = island;
         this.players = new HashSet<>();
         this.possibleSpawns = new HashSet<>();
+        this.joinRequests = new HashSet<>();
         this.allowVisits = false;
+        this.createdAt = System.currentTimeMillis();
+        this.lastChanged = System.currentTimeMillis();
     }
 
     public boolean isSpawn() {
@@ -51,6 +57,7 @@ public class Team {
 
     public void setName(String name) {
         this.name = name;
+        this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
     }
 
@@ -60,6 +67,7 @@ public class Team {
 
     public void setIsland(IslandPos island) {
         this.island = island;
+        this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
     }
 
@@ -69,6 +77,7 @@ public class Team {
 
     public void setPlayers(Collection<UUID> players) {
         this.players.clear();
+        //noinspection ConstantConditions
         PlayerList playerList = this.getLevel().getServer().getPlayerList();
         if (ModList.get().isLoaded("minemention")) {
             for (UUID id : players) {
@@ -76,6 +85,7 @@ public class Team {
             }
         }
         this.players.addAll(players);
+        this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
     }
 
@@ -86,12 +96,15 @@ public class Team {
     public void setPossibleSpawns(Collection<BlockPos> spawns) {
         this.possibleSpawns.clear();
         this.possibleSpawns.addAll(spawns);
+        this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
     }
 
     public void addPossibleSpawn(BlockPos pos) {
-        this.possibleSpawns.add(pos);
-        this.data.setDirty();
+        if (this.possibleSpawns.add(pos)) {
+            this.lastChanged = System.currentTimeMillis();
+            this.data.setDirty();
+        }
     }
 
     public boolean removePossibleSpawn(BlockPos pos) {
@@ -100,7 +113,11 @@ public class Team {
         }
 
         boolean remove = this.possibleSpawns.remove(pos);
-        this.data.setDirty();
+        if (remove) {
+            this.lastChanged = System.currentTimeMillis();
+            this.data.setDirty();
+        }
+
         return remove;
     }
 
@@ -110,21 +127,29 @@ public class Team {
 
     public boolean toggleAllowVisits() {
         this.allowVisits = !this.allowVisits;
+        this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
         return this.allowVisits;
     }
 
     public void setAllowVisit(boolean enabled) {
-        this.allowVisits = enabled;
-        this.data.setDirty();
+        if (this.allowVisits != enabled) {
+            this.allowVisits = enabled;
+            this.lastChanged = System.currentTimeMillis();
+            this.data.setDirty();
+        }
     }
 
     public boolean addPlayer(UUID player) {
         boolean added = this.players.add(player);
-        if (ModList.get().isLoaded("minemention")) {
-            MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(player));
+        if (added) {
+            if (ModList.get().isLoaded("minemention")) {
+                //noinspection ConstantConditions
+                MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(player));
+            }
+            this.lastChanged = System.currentTimeMillis();
+            this.data.setDirty();
         }
-        this.data.setDirty();
         return added;
     }
 
@@ -134,12 +159,17 @@ public class Team {
 
     public boolean addPlayers(Collection<UUID> players) {
         boolean added = this.players.addAll(players);
-        if (ModList.get().isLoaded("minemention")) {
-            for (UUID id : players) {
-                MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(id));
+        if (added) {
+            if (ModList.get().isLoaded("minemention")) {
+                for (UUID id : players) {
+                    //noinspection ConstantConditions
+                    MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(id));
+                }
             }
+            this.lastChanged = System.currentTimeMillis();
+            this.data.setDirty();
         }
-        this.data.setDirty();
+
         return added;
     }
 
@@ -149,33 +179,49 @@ public class Team {
 
     public boolean removePlayer(UUID player) {
         boolean removed = this.players.remove(player);
-        if (ModList.get().isLoaded("minemention")) {
-            MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(player));
+        if (removed) {
+            if (ModList.get().isLoaded("minemention")) {
+                //noinspection ConstantConditions
+                MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(player));
+            }
+            this.lastChanged = System.currentTimeMillis();
+            this.data.setDirty();
         }
-        this.data.setDirty();
+
         return removed;
     }
 
     public void removePlayers(Collection<UUID> players) {
+        boolean done = false;
         for (UUID id : players) {
-            this.players.remove(id);
+            if (this.players.remove(id)) {
+                done = true;
+            }
             if (ModList.get().isLoaded("minemention")) {
+                //noinspection ConstantConditions
                 MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(id));
             }
+        }
+        if (done) {
+            this.lastChanged = System.currentTimeMillis();
         }
         this.data.setDirty();
     }
 
     public void removeAllPlayers() {
         HashSet<UUID> uuids = new HashSet<>(this.players);
-        this.players.clear();
-        PlayerList playerList = this.getLevel().getServer().getPlayerList();
-        if (ModList.get().isLoaded("minemention")) {
-            for (UUID id : uuids) {
-                MineMentionCompat.updateMentions(playerList.getPlayer(id));
+        if (!uuids.isEmpty()) {
+            this.players.clear();
+            //noinspection ConstantConditions
+            PlayerList playerList = this.getLevel().getServer().getPlayerList();
+            if (ModList.get().isLoaded("minemention")) {
+                for (UUID id : uuids) {
+                    MineMentionCompat.updateMentions(playerList.getPlayer(id));
+                }
             }
+            this.lastChanged = System.currentTimeMillis();
+            this.data.setDirty();
         }
-        this.data.setDirty();
     }
 
     public boolean hasPlayer(UUID player) {
@@ -192,13 +238,17 @@ public class Team {
 
     public boolean toggleAllowJoinRequest() {
         this.allowJoinRequests = !this.allowJoinRequests;
+        this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
         return this.allowJoinRequests;
     }
 
     public void setAllowJoinRequest(boolean enabled) {
-        this.allowJoinRequests = enabled;
-        this.data.setDirty();
+        if (this.allowJoinRequests != enabled) {
+            this.allowJoinRequests = enabled;
+            this.lastChanged = System.currentTimeMillis();
+            this.data.setDirty();
+        }
     }
 
     public Set<UUID> getJoinRequests() {
@@ -210,7 +260,9 @@ public class Team {
     }
 
     public void addJoinRequest(UUID id) {
-        this.joinRequests.add(id);
+        if (this.joinRequests.add(id)) {
+            this.lastChanged = System.currentTimeMillis();
+        }
         this.data.setDirty();
     }
 
@@ -219,11 +271,16 @@ public class Team {
     }
 
     public void removeJoinRequest(UUID id) {
-        this.joinRequests.remove(id);
+        if (this.joinRequests.remove(id)) {
+            this.lastChanged = System.currentTimeMillis();
+        }
         this.data.setDirty();
     }
 
     public void resetJoinRequests() {
+        if (!this.joinRequests.isEmpty()) {
+            this.lastChanged = System.currentTimeMillis();
+        }
         this.joinRequests.clear();
         this.data.setDirty();
     }
@@ -239,12 +296,29 @@ public class Team {
         this.broadcast(component, Style.EMPTY.applyFormat(ChatFormatting.GOLD));
     }
 
-    @Nonnull
+    public long getCreatedAt() {
+        return this.createdAt;
+    }
+
+    public long getLastChanged() {
+        return this.lastChanged;
+    }
+
+    public void updateLastChanged() {
+        this.lastChanged = System.currentTimeMillis();
+        this.data.setDirty();
+    }
+
+    @Nullable
     public ServerLevel getLevel() {
         return this.data.getLevel();
     }
 
     public void broadcast(MutableComponent msg, Style style) {
+        if (this.getLevel() == null || this.getLevel().isClientSide) {
+            return;
+        }
+
         PlayerList playerList = this.getLevel().getServer().getPlayerList();
         this.players.forEach(uuid -> {
             ServerPlayer player = playerList.getPlayer(uuid);
@@ -263,6 +337,8 @@ public class Team {
         nbt.putString("Name", this.name != null ? this.name : "");
         nbt.putBoolean("Visits", this.allowVisits);
         nbt.putBoolean("AllowJoinRequests", this.allowJoinRequests);
+        nbt.putLong("CreatedAt", this.createdAt);
+        nbt.putLong("LastChanged", this.lastChanged);
 
         ListTag players = new ListTag();
         for (UUID player : this.players) {
@@ -301,6 +377,8 @@ public class Team {
         this.name = nbt.getString("Name");
         this.allowVisits = nbt.getBoolean("Visits");
         this.allowJoinRequests = nbt.getBoolean("AllowJoinRequests");
+        this.createdAt = nbt.getLong("CreatedAt");
+        this.lastChanged = nbt.getLong("LastChanged");
 
         ListTag players = nbt.getList("Players", Constants.NBT.TAG_COMPOUND);
         this.players.clear();
