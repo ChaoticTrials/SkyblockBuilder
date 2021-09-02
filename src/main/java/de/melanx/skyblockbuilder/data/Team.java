@@ -226,6 +226,10 @@ public class Team {
         return this.players.isEmpty();
     }
 
+    public boolean allowsJoinRequests() {
+        return this.allowJoinRequests;
+    }
+
     public boolean toggleAllowJoinRequest() {
         this.allowJoinRequests = !this.allowJoinRequests;
         this.lastChanged = System.currentTimeMillis();

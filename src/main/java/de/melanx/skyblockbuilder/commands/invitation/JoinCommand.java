@@ -49,9 +49,15 @@ public class JoinCommand {
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.join_request").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
-                    source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED), false);
-                    return 0;
+                if (!source.hasPermission(2)) {
+                    if (!ConfigHandler.Utility.selfManage) {
+                        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED), false);
+                        return 0;
+                    }
+                    if (!team.allowsJoinRequests()) {
+                        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED), false);
+                        return 0;
+                    }
                 }
                 break;
             case ALLOW:
