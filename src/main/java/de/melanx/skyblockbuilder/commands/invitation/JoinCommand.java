@@ -55,7 +55,7 @@ public class JoinCommand {
                         return 0;
                     }
                     if (!team.allowsJoinRequests()) {
-                        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED), false);
+                        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.team_join_request").withStyle(ChatFormatting.RED), false);
                         return 0;
                     }
                 }

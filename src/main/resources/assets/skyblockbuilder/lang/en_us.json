@@ -58,6 +58,7 @@
   "skyblockbuilder.command.disabled.accept_invitations": "You are not allowed to accept invitations!",
   "skyblockbuilder.command.disabled.decline_invitations": "You are not allowed to decline invitations!",
   "skyblockbuilder.command.disabled.join_request": "You are not allowed to send a join request!",
+  "skyblockbuilder.command.disabled.team_join_request": "This team doesn't want any new member, sorry.",
   "skyblockbuilder.command.disabled.accept_join_request": "You are not allowed to accept requests.",
   "skyblockbuilder.command.disabled.deny_join_request": "You are not allowed to deny requests.",
   "skyblockbuilder.command.disabled.visit_team": "This team doesn't want any visitors, sorry.",
