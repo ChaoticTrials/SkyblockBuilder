@@ -86,6 +86,7 @@ public class EventListener {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         SkyblockBuilder.getNetwork().updateData(event.getPlayer());
         Level level = event.getPlayer().level;
+        SkyblockBuilder.getNetwork().updateProfiles(level);
         if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && CompatHelper.isSpawnTeleportEnabled()) {
 
             SkyblockSavedData data = SkyblockSavedData.get(level);

@@ -58,6 +58,7 @@
   "skyblockbuilder.command.disabled.accept_invitations": "Du darfst keine Einladungen akzeptieren!",
   "skyblockbuilder.command.disabled.decline_invitations": "Du darfst keine Einladungen ablehnen!",
   "skyblockbuilder.command.disabled.join_request": "Du darfst keine Beitrittsanfrage schicken!",
+  "skyblockbuilder.command.disabled.team_join_request": "Dieses Team möchte keine neuen Mitglieder, entschuldige.",
   "skyblockbuilder.command.disabled.accept_join_request": "Du darfst keine Anfragen akzeptieren.",
   "skyblockbuilder.command.disabled.deny_join_request": "Du darfst keine Anfragen ablehnen.",
   "skyblockbuilder.command.disabled.visit_team": "Dieses Team möchte keine Besucher, entschuldige.",
@@ -123,7 +124,6 @@
   "skyblockbuilder.schematic.saved": "Schema gespeichert in skyblock_exports/%s",
   "skyblockbuilder.structure_saver.pos": "Position %s gesetzt an x %s, y %s, z %s",
 
-  "skyblockbuilder.unknown_player": "Unbekannter Spieler",
   "skyblockbuilder.compat.disabled_management": "Diese und andere Teamverwaltungsfunktionen sind aktuell durch %s deaktiviert.",
 
   "minemention.skyblockbuilder.team": "Erwähne jeden Spieler in deinem Team"

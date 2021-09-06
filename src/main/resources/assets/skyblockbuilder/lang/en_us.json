@@ -124,7 +124,6 @@
   "skyblockbuilder.schematic.saved": "Schematic saved in skyblock_exports/%s",
   "skyblockbuilder.structure_saver.pos": "Position %s set at x %s, y %s, z %s",
 
-  "skyblockbuilder.unknown_player": "Unknown Player",
   "skyblockbuilder.compat.disabled_management": "This and all other team management is disabled by %s.",
 
   "minemention.skyblockbuilder.team": "Mention every player in your team"

@@ -19,8 +19,10 @@ public class ClickScreenButtonHandler {
     public static void handle(ClickScreenButtonHandler.Message msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
-            if (player == null)
+            if (player == null) {
                 return;
+            }
+
             ServerLevel level = player.getLevel();
             ItemStack stack;
             switch (msg.button) {

@@ -5,11 +5,8 @@ import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -20,19 +17,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public class RandomUtility {
 
-    public static final Component UNKNOWN_PLAYER = new TranslatableComponent("skyblockbuilder.unknown_player");
-
     public static RegistryAccess dynamicRegistries = null;
-
-    public static Component getDisplayNameByUuid(Level level, UUID id) {
-        Player player = level.getPlayerByUUID(id);
-        return player != null ? player.getDisplayName() : UNKNOWN_PLAYER;
-    }
 
     public static Biome modifyCopyBiome(Biome biome) {
         Biome newBiome = new Biome(biome.climateSettings, biome.getBiomeCategory(), biome.getDepth(), biome.getScale(), biome.getSpecialEffects(), modifyCopyGeneration(biome.getGenerationSettings()), biome.getMobSettings());

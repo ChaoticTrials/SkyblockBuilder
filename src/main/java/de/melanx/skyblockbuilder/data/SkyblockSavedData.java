@@ -3,8 +3,8 @@ package de.melanx.skyblockbuilder.data;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
-import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
@@ -217,7 +217,7 @@ public class SkyblockSavedData extends SavedData {
 
     public boolean addPlayerToTeam(Team team, UUID player) {
         if (team.getIsland() != SPAWN_ISLAND) {
-            team.broadcast(new TranslatableComponent("skyblockbuilder.event.player_joined", RandomUtility.getDisplayNameByUuid(this.level, player)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
+            team.broadcast(new TranslatableComponent("skyblockbuilder.event.player_joined", GameProfileCache.getName(player)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         }
         this.getSpawn().removePlayer(player);
         team.addPlayer(player);
@@ -281,7 +281,7 @@ public class SkyblockSavedData extends SavedData {
             if (team.hasPlayer(player)) {
                 boolean removed = team.removePlayer(player);
                 if (removed) {
-                    team.broadcast(new TranslatableComponent("skyblockbuilder.event.remove_player", RandomUtility.getDisplayNameByUuid(this.level, player)), Style.EMPTY.applyFormat(ChatFormatting.RED));
+                    team.broadcast(new TranslatableComponent("skyblockbuilder.event.remove_player", GameProfileCache.getName(player)), Style.EMPTY.applyFormat(ChatFormatting.RED));
                     //noinspection ConstantConditions
                     this.getTeam("spawn").addPlayer(player);
                 }
@@ -361,7 +361,7 @@ public class SkyblockSavedData extends SavedData {
 
         if (!teams.contains(team)) {
             teams.add(team);
-            team.broadcast(new TranslatableComponent("skyblockbuilder.event.invite_player", invitor.getDisplayName(), RandomUtility.getDisplayNameByUuid(this.level, id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
+            team.broadcast(new TranslatableComponent("skyblockbuilder.event.invite_player", invitor.getDisplayName(), GameProfileCache.getName(id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         }
 
         this.setDirty();
@@ -403,7 +403,7 @@ public class SkyblockSavedData extends SavedData {
         }
 
         if (teams.contains(team)) {
-            team.broadcast(new TranslatableComponent("skyblockbuilder.event.accept_invite", RandomUtility.getDisplayNameByUuid(this.level, id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
+            team.broadcast(new TranslatableComponent("skyblockbuilder.event.accept_invite", GameProfileCache.getName(id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
 
             this.addPlayerToTeam(team.getName(), id);
             this.invites.remove(id);
