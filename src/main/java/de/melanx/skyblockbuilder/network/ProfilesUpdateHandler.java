@@ -6,7 +6,6 @@ import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.HashSet;
@@ -18,11 +17,6 @@ public class ProfilesUpdateHandler {
 
     public static void handle(ProfilesUpdateHandler.Message msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
-            if (player == null) {
-                return;
-            }
-
             Set<GameProfile> profiles = new HashSet<>();
             for (Tag tag : msg.profiles.getList("Profiles", Tag.TAG_COMPOUND)) {
                 CompoundTag nbt = (CompoundTag) tag;

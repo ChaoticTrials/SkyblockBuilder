@@ -29,13 +29,14 @@ public class SkyNetwork extends NetworkX {
 
     @Override
     protected String getProtocolVersion() {
-        return "2";
+        return "3";
     }
 
     @Override
     protected void registerPackets() {
         this.register(new ClickScreenButtonHandler.ClickScreenButtonSerializer(), () -> ClickScreenButtonHandler::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new SkyblockDataUpdateHandler.Serializer(), () -> SkyblockDataUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
+        this.register(new ProfilesUpdateHandler.ProfilesUpdateSerializer(), () -> ProfilesUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     public void updateData(Level level) {
@@ -59,7 +60,7 @@ public class SkyNetwork extends NetworkX {
             return;
         }
 
-        this.instance.send(PacketDistributor.ALL.noArg(), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) player.getCommandSenderWorld())));
+        this.instance.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) player.getCommandSenderWorld())));
     }
 
     public void updateProfiles(Level level) {
