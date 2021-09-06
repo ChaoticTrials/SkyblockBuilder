@@ -86,6 +86,12 @@ public class SkyNetwork extends NetworkX {
                     tag.putString("Name", gameProfile.get().getName());
                 } else {
                     GameProfile profile = server.getSessionService().fillProfileProperties(new GameProfile(id, null), true);
+
+                    if (profile.getName() == null) {
+                        tag.putString("Name", "Unknown");
+                        continue;
+                    }
+
                     profileCache.add(profile);
                     tag.putString("Name", profile.getName());
                 }
