@@ -90,11 +90,10 @@ public class SkyNetwork extends NetworkX {
 
                     if (profile.getName() == null) {
                         tag.putString("Name", "Unknown");
-                        continue;
+                    } else {
+                        profileCache.add(profile);
+                        tag.putString("Name", profile.getName());
                     }
-
-                    profileCache.add(profile);
-                    tag.putString("Name", profile.getName());
                 }
 
                 tags.add(tag);
