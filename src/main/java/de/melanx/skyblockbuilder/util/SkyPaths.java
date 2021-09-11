@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 
 public class SkyPaths {
 
@@ -61,7 +62,9 @@ public class SkyPaths {
     }
 
     public static void copyTemplateFile() throws IOException {
-        if (Files.isRegularFile(SCHEMATIC_FILE)) {
+        //noinspection ConstantConditions
+        if (Arrays.stream(TEMPLATES_DIR.toFile().listFiles())
+                .anyMatch(file -> file.isFile() && file.getName().endsWith(".nbt"))) {
             return;
         }
 
