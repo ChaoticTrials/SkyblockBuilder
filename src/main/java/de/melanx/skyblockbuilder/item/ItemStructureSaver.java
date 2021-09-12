@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.item;
 
+import com.google.common.collect.Sets;
 import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
@@ -21,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -34,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.HashSet;
 import java.util.List;
 
 public class ItemStructureSaver extends Item {
@@ -128,14 +131,21 @@ public class ItemStructureSaver extends Item {
         BlockPos pos2 = NBTX.getPos(nbt, "Position2");
 
         //noinspection ConstantConditions
-        return new BoundingBox(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX(), pos2.getY(), pos2.getZ());
+        int minX = Math.min(pos1.getX(), pos2.getX());
+        int minY = Math.min(pos1.getY(), pos2.getY());
+        int minZ = Math.min(pos1.getZ(), pos2.getZ());
+        int maxX = Math.max(pos1.getX(), pos2.getX());
+        int maxY = Math.max(pos1.getY(), pos2.getY());
+        int maxZ = Math.max(pos1.getZ(), pos2.getZ());
+
+        return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    public static String saveSchematic(Level level, ItemStack stack) {
-        return saveSchematic(level, stack, null);
+    public static String saveSchematic(Level level, ItemStack stack, boolean ignoreAir) {
+        return saveSchematic(level, stack, ignoreAir, null);
     }
 
-    public static String saveSchematic(Level level, ItemStack stack, @Nullable String name) {
+    public static String saveSchematic(Level level, ItemStack stack, boolean ignoreAir, @Nullable String name) {
         StructureTemplate template = new StructureTemplate();
         BoundingBox boundingBox = getArea(stack);
 
@@ -146,7 +156,11 @@ public class ItemStructureSaver extends Item {
         BlockPos origin = new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
         BlockPos bounds = new BlockPos(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
 
-        template.fillFromWorld(level, origin, bounds, true, Blocks.STRUCTURE_VOID);
+        HashSet<Block> toIgnore = Sets.newHashSet(Blocks.STRUCTURE_VOID);
+        if (ignoreAir) {
+            toIgnore.add(Blocks.AIR);
+        }
+        RandomUtility.fillTemplateFromWorld(template, level, origin, bounds, true, toIgnore);
 
         Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name));
         OutputStream outputStream = null;

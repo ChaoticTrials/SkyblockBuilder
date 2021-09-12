@@ -116,8 +116,6 @@
   "skyblockbuilder.item.structure_saver.save.tooltip": "Clic droit pour sauvegarder le schéma",
   "skyblockbuilder.item.structure_saver.position.tooltip": "Position %s: x %s, y %s, z %s",
   "skyblockbuilder.screen.button.save": "sauvegarder",
-  "skyblockbuilder.screen.button.abort": "Abandonner",
-  "skyblockbuilder.screen.button.delete.tooltip": "Supprimer les positions",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Dossier ouvert",
   "skyblockbuilder.screen.widget.structure_name": "Nom de la structure",
   "skyblockbuilder.screen.open_folder.error": "Impossible d'ouvrir le dossier : %s",

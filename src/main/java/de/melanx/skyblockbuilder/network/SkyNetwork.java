@@ -2,7 +2,6 @@ package de.melanx.skyblockbuilder.network;
 
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.client.ScreenStructureSaver;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import io.github.noeppi_noeppi.libx.network.NetworkX;
@@ -29,12 +28,13 @@ public class SkyNetwork extends NetworkX {
 
     @Override
     protected String getProtocolVersion() {
-        return "3";
+        return "4";
     }
 
     @Override
     protected void registerPackets() {
-        this.register(new ClickScreenButtonHandler.ClickScreenButtonSerializer(), () -> ClickScreenButtonHandler::handle, NetworkDirection.PLAY_TO_SERVER);
+        this.register(new SaveStructureHandler.Serializer(), () -> SaveStructureHandler::handle, NetworkDirection.PLAY_TO_SERVER);
+        this.register(new DeleteTagsHandler.Serializer(), () -> DeleteTagsHandler::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new SkyblockDataUpdateHandler.Serializer(), () -> SkyblockDataUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
         this.register(new ProfilesUpdateHandler.ProfilesUpdateSerializer(), () -> ProfilesUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
     }
@@ -51,8 +51,12 @@ public class SkyNetwork extends NetworkX {
         }
     }
 
-    public void handleButtonClick(ItemStack stack, ScreenStructureSaver.Button button, String name) {
-        this.instance.sendToServer(new ClickScreenButtonHandler.Message(stack, button, name));
+    public void deleteTags(ItemStack stack) {
+        this.instance.sendToServer(new DeleteTagsHandler.Message(stack));
+    }
+
+    public void saveStructure(ItemStack stack, String name, boolean ignoreAir) {
+        this.instance.sendToServer(new SaveStructureHandler.Message(stack, name, ignoreAir));
     }
 
     public void updateProfiles(Player player) {
