@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import de.melanx.skyblockbuilder.api.SkyblockBuilderAPI;
 import de.melanx.skyblockbuilder.commands.*;
 import de.melanx.skyblockbuilder.commands.helper.ListCommand;
 import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
@@ -10,7 +11,6 @@ import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
-import de.melanx.skyblockbuilder.compat.CompatHelper;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
@@ -65,7 +65,7 @@ public class EventListener {
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("skyblock")
-                .requires(source -> CompatHelper.teamManagementEnabled())
+                .requires(source -> SkyblockBuilderAPI.teamManagementEnabled())
                 .then(AcceptCommand.register())
                 .then(CreateCommand.register())
                 .then(DeclineCommand.register())
@@ -87,7 +87,7 @@ public class EventListener {
         SkyblockBuilder.getNetwork().updateData(event.getPlayer());
         Level level = event.getPlayer().level;
         SkyblockBuilder.getNetwork().updateProfiles(level);
-        if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && CompatHelper.isSpawnTeleportEnabled()) {
+        if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
 
             SkyblockSavedData data = SkyblockSavedData.get(level);
             ServerPlayer player = (ServerPlayer) event.getPlayer();
@@ -158,7 +158,7 @@ public class EventListener {
             TemplateLoader.updateTemplates();
             TemplateData.get(event.getServer().overworld());
 
-            if (CompatHelper.isSpawnTeleportEnabled()) {
+            if (SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
                 SkyblockSavedData.get(event.getServer().overworld()).getSpawn();
             }
         }

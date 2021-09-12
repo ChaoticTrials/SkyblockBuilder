@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.compat;
+package de.melanx.skyblockbuilder.api;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class CompatHelper {
+public class SkyblockBuilderAPI {
 
     private static final List<String> teamManagementDisablingMods = new ArrayList<>();
     private static boolean spawnTeleportEnabled = true;
