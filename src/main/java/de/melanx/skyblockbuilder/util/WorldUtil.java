@@ -85,7 +85,6 @@ public class WorldUtil {
     }
 
     private static BlockPos validPosition(ServerLevel level, Team team) {
-
         List<BlockPos> spawns = new ArrayList<>(team.getPossibleSpawns());
         Random random = new Random();
         while (!spawns.isEmpty()) {
@@ -183,6 +182,10 @@ public class WorldUtil {
             i += info.getHeight();
         }
         return i;
+    }
+
+    public static boolean isStructureGenerated(ResourceLocation registryName) {
+        return ConfigHandler.Structures.generationStructures.test(registryName) || ConfigHandler.Structures.generationFeatures.test(registryName);
     }
 
     public enum Directions {

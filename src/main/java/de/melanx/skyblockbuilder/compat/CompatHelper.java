@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.util;
+package de.melanx.skyblockbuilder.compat;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;

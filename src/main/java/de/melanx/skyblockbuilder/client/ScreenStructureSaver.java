@@ -15,8 +15,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,12 +36,12 @@ public class ScreenStructureSaver extends Screen {
         this.xSize = 176;
         this.ySize = 85;
         this.stack = stack;
-        MinecraftForge.EVENT_BUS.addListener(this::onGuiInit);
     }
 
-    private void onGuiInit(GuiScreenEvent.InitGuiEvent event) {
-        this.relX = (event.getGui().width - this.xSize) / 2;
-        this.relY = (event.getGui().height - this.ySize) / 2;
+    @Override
+    protected void init() {
+        this.relX = (this.width - this.xSize) / 2;
+        this.relY = (this.height - this.ySize) / 2;
         this.name = new EditBox(this.font, this.relX + 11, this.relY + 25, 125, 17, new TranslatableComponent("skyblockbuilder.screen.widget.structure_name"));
         this.name.setMaxLength(32767);
         this.name.changeFocus(true);
@@ -106,6 +104,7 @@ public class ScreenStructureSaver extends Screen {
                 SkyblockBuilder.getNetwork().handleButtonClick(this.stack, pressed, this.name.getValue().isEmpty() ? "template" : this.name.getValue());
             }
         }
+
         return super.mouseClicked(mouseX, mouseY, button);
     }
 

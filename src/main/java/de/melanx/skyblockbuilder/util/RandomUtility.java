@@ -28,6 +28,7 @@ public class RandomUtility {
         if (biome.getRegistryName() != null) {
             newBiome.setRegistryName(biome.getRegistryName());
         }
+
         return newBiome;
     }
 
@@ -81,10 +82,6 @@ public class RandomUtility {
         if (ModList.get().isLoaded("curios")) {
             CuriosCompat.dropInventory(player);
         }
-    }
-
-    public static boolean isStructureGenerated(ResourceLocation registryName) {
-        return ConfigHandler.Structures.generationStructures.test(registryName) || ConfigHandler.Structures.generationFeatures.test(registryName);
     }
 
     public static String normalize(String s) {

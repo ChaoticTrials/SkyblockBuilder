@@ -21,7 +21,6 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
     public LazyBiomeRegistryWrapper(Registry<Biome> parent) {
         super(parent.key(), Lifecycle.experimental());
         this.parent = parent;
-
     }
 
     @Nonnull

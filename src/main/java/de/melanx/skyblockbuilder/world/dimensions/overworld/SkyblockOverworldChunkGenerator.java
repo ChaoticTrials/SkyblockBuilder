@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
-import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
@@ -114,7 +113,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
     @Nullable
     @Override
     public BlockPos findNearestMapFeature(@Nonnull ServerLevel level, StructureFeature<?> structure, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
-        boolean shouldSearch = RandomUtility.isStructureGenerated(structure.getRegistryName());
+        boolean shouldSearch = WorldUtil.isStructureGenerated(structure.getRegistryName());
         return shouldSearch ? super.findNearestMapFeature(level, structure, pos, searchRadius, skipKnownStructures) : null;
     }
 
@@ -137,7 +136,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
     public void createStructures(@Nonnull RegistryAccess registry, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull StructureManager templateManager, long seed) {
         ChunkPos chunkpos = chunk.getPos();
         Biome biome = this.biomeSource.getNoiseBiome((chunkpos.x << 2) + 2, 0, (chunkpos.z << 2) + 2);
-        if (RandomUtility.isStructureGenerated(StructureFeature.STRONGHOLD.getRegistryName())) {
+        if (WorldUtil.isStructureGenerated(StructureFeature.STRONGHOLD.getRegistryName())) {
             this.createStructure(StructureFeatures.STRONGHOLD, registry, structureManager, chunk, templateManager, seed, biome);
         }
 
