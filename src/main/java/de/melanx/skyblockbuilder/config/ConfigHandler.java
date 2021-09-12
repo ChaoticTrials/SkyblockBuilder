@@ -111,8 +111,9 @@ public class ConfigHandler {
             @Config({"Specifies the biome for the whole world", "A list with all possible structures can be found in config/skyblockbuilder/data/biomes.txt"})
             public static ResourceLocation biome = new ResourceLocation("minecraft", "plains");
 
-            @Config("The dimension where the single biome should be applied. Use \"default\" for spawn dimension")
-            public static WorldUtil.SingleBiomeDimension singleBiomeDimension = WorldUtil.SingleBiomeDimension.DEFAULT;
+            @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+            @Config("The dimension where the single biome should be applied. Use \"null\" for spawn dimension")
+            public static Optional<WorldUtil.Dimension> singleBiomeDimension = Optional.empty();
 
             @Config({"Should only one biome be generated? [default: false]",
                     "WARNING: Some structures need a special biome, e.g. Mansion needs Dark Oak Forest! These structures will not be generated if you have only one biome!"})
@@ -126,9 +127,8 @@ public class ConfigHandler {
         @IntRange(min = 0)
         public static int radius = 50;
 
-        @Config({"The dimension the islands will be generated in. Vanilla dimensions:",
-                "minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"})
-        public static ResourceLocation dimension = new ResourceLocation("minecraft", "overworld");
+        @Config({"The dimension the islands will be generated in."})
+        public static WorldUtil.Dimension dimension = WorldUtil.Dimension.OVERWORLD;
 
         @Config("Direction the player should look at initial spawn")
         public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;

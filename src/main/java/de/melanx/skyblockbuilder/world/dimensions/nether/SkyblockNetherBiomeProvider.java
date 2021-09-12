@@ -32,6 +32,7 @@ public class SkyblockNetherBiomeProvider extends BiomeSource {
 
     private final MultiNoiseBiomeSource parent;
     private final long seed;
+    private final boolean isSingleBiomeLevel;
     public final Registry<Biome> lookupRegistry;
 
     public SkyblockNetherBiomeProvider(MultiNoiseBiomeSource parent, Registry<Biome> lookupRegistry) {
@@ -39,6 +40,10 @@ public class SkyblockNetherBiomeProvider extends BiomeSource {
         this.parent = parent;
         this.seed = parent.seed;
         this.lookupRegistry = lookupRegistry;
+        this.isSingleBiomeLevel = ConfigHandler.World.SingleBiome.enabled &&
+                ConfigHandler.World.SingleBiome.singleBiomeDimension.isPresent()
+                ? ConfigHandler.World.SingleBiome.singleBiomeDimension.get().getLocation().equals(WorldUtil.Dimension.THE_NETHER.getLocation())
+                : ConfigHandler.Spawn.dimension.getLocation().equals(WorldUtil.Dimension.THE_NETHER.getLocation());
     }
 
     @Nonnull
@@ -57,7 +62,7 @@ public class SkyblockNetherBiomeProvider extends BiomeSource {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        if (ConfigHandler.World.SingleBiome.enabled && ConfigHandler.World.SingleBiome.singleBiomeDimension.getDimension().equals(WorldUtil.SingleBiomeDimension.THE_NETHER.getDimension())) {
+        if (this.isSingleBiomeLevel) {
             Biome biome = this.lookupRegistry.get(WorldUtil.SINGLE_BIOME);
             if (biome == null) {
                 biome = this.lookupRegistry.get(Biomes.NETHER_WASTES.location());

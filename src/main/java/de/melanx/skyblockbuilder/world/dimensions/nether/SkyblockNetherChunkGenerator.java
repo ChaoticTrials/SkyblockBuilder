@@ -41,6 +41,7 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
     protected final long seed;
     protected final Supplier<NoiseGeneratorSettings> settings;
     protected final List<FlatLayerInfo> layerInfos;
+    private final int layerHeight;
 
     public SkyblockNetherChunkGenerator(BiomeSource provider, long seed, Supplier<NoiseGeneratorSettings> settings) {
         super(provider, provider, settings.get().structureSettings(), seed);
@@ -49,6 +50,7 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
         this.layerInfos = ConfigHandler.World.surface
                 ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(Level.NETHER.location().toString()))
                 : Lists.newArrayList();
+        this.layerHeight = WorldUtil.calculateHeightFromLayers(this.layerInfos);
     }
 
     @Nonnull
@@ -111,11 +113,7 @@ public class SkyblockNetherChunkGenerator extends ChunkGenerator {
     @Override
     public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level) {
         if (ConfigHandler.World.surface) {
-            int i = 0;
-            for (FlatLayerInfo info : this.layerInfos) {
-                i += info.getHeight();
-            }
-            return i;
+            return this.layerHeight;
         }
 
         return 0;

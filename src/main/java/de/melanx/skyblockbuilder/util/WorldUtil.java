@@ -73,7 +73,7 @@ public class WorldUtil {
     }
 
     public static ServerLevel getConfiguredLevel(MinecraftServer server) {
-        ResourceLocation location = ConfigHandler.Spawn.dimension;
+        ResourceLocation location = ConfigHandler.Spawn.dimension.getLocation();
         ResourceKey<Level> worldKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, location);
         ServerLevel configLevel = server.getLevel(worldKey);
 
@@ -177,6 +177,14 @@ public class WorldUtil {
         }
     }
 
+    public static int calculateHeightFromLayers(List<FlatLayerInfo> layerInfos) {
+        int i = 0;
+        for (FlatLayerInfo info : layerInfos) {
+            i += info.getHeight();
+        }
+        return i;
+    }
+
     public enum Directions {
         NORTH(180),
         EAST(270),
@@ -194,24 +202,25 @@ public class WorldUtil {
         }
     }
 
-    public enum SingleBiomeDimension {
-        DEFAULT(null),
-        OVERWORLD(Level.OVERWORLD.location()),
-        THE_NETHER(Level.NETHER.location()),
-        THE_END(Level.END.location());
+    public enum Dimension {
+        OVERWORLD(Level.OVERWORLD),
+        THE_NETHER(Level.NETHER),
+        THE_END(Level.END);
 
-        private final ResourceLocation singleBiomeDimension;
+        private final ResourceKey<Level> resourceKey;
+        private final ResourceLocation location;
 
-        SingleBiomeDimension(ResourceLocation dimension) {
-            if (dimension == null) {
-                this.singleBiomeDimension = ConfigHandler.Spawn.dimension;
-            } else {
-                this.singleBiomeDimension = dimension;
-            }
+        Dimension(ResourceKey<Level> dimension) {
+            this.resourceKey = dimension;
+            this.location = dimension.location();
         }
 
-        public ResourceLocation getDimension() {
-            return this.singleBiomeDimension;
+        public ResourceKey<Level> getResourceKey() {
+            return this.resourceKey;
+        }
+
+        public ResourceLocation getLocation() {
+            return this.location;
         }
     }
 }

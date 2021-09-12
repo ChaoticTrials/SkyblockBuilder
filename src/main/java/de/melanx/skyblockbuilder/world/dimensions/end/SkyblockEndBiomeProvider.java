@@ -29,6 +29,7 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
 
     private final TheEndBiomeSource parent;
     private final long seed;
+    private final boolean isSingleBiomeLevel;
     public final Registry<Biome> lookupRegistry;
 
     public SkyblockEndBiomeProvider(TheEndBiomeSource parent) {
@@ -36,6 +37,10 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
         this.parent = parent;
         this.seed = parent.seed;
         this.lookupRegistry = parent.biomes;
+        this.isSingleBiomeLevel = ConfigHandler.World.SingleBiome.enabled &&
+                ConfigHandler.World.SingleBiome.singleBiomeDimension.isPresent()
+                ? ConfigHandler.World.SingleBiome.singleBiomeDimension.get().getLocation().equals(WorldUtil.Dimension.THE_END.getLocation())
+                : ConfigHandler.Spawn.dimension.getLocation().equals(WorldUtil.Dimension.THE_END.getLocation());
     }
 
     @Nonnull
@@ -54,7 +59,7 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
     @Nonnull
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        if (ConfigHandler.World.SingleBiome.enabled && ConfigHandler.World.SingleBiome.singleBiomeDimension.getDimension().equals(WorldUtil.SingleBiomeDimension.THE_END.getDimension())) {
+        if (this.isSingleBiomeLevel) {
             Biome biome = this.lookupRegistry.get(WorldUtil.SINGLE_BIOME);
             if (biome == null) {
                 biome = this.lookupRegistry.get(Biomes.THE_END.location());
