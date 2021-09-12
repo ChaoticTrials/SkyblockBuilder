@@ -167,8 +167,9 @@ public class ConfigHandler {
             Set<EquipmentSlotType> usedTypes = new HashSet<>();
             int slotsUsedInMainInventory = 0;
             for (JsonElement item : items) {
-                ItemStack stack = CraftingHelper.getItemStack((JsonObject) item, true);
-                EquipmentSlotType slot = ((JsonObject) item).has("Slot") ? EquipmentSlotType.fromString(JSONUtils.getString(item, "Slot")) : EquipmentSlotType.MAINHAND;
+                JsonObject itemObj = (JsonObject) item;
+                ItemStack stack = CraftingHelper.getItemStack(itemObj, true);
+                EquipmentSlotType slot = itemObj.has("Slot") ? EquipmentSlotType.fromString(JSONUtils.getString(itemObj, "Slot")) : EquipmentSlotType.MAINHAND;
                 if (slot == EquipmentSlotType.MAINHAND) {
                     if (slotsUsedInMainInventory >= 36) {
                         throw new IllegalStateException("Too many starting items in main inventory. Not more than 36 are allowed.");
