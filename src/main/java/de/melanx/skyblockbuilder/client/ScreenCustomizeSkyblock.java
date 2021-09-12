@@ -15,7 +15,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.awt.*;
+import java.awt.Color;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -103,7 +103,7 @@ public class ScreenCustomizeSkyblock extends Screen {
             private final ConfiguredTemplate template;
 
             public TemplateEntry(ConfiguredTemplate template) {
-                this.name = new TextComponent(template.getName().replace(".nbt", ""));
+                this.name = new TextComponent(template.getName());
                 this.template = template;
             }
 
