@@ -115,6 +115,7 @@
   "skyblockbuilder.item.structure_saver.info.tooltip": "Shift-right click a block to set corner",
   "skyblockbuilder.item.structure_saver.save.tooltip": "Right click to save schematic",
   "skyblockbuilder.item.structure_saver.position.tooltip": "Position %s: x %s, y %s, z %s",
+  "skyblockbuilder.item.structure_saver.ignore_air.tooltip": "Ignore Air",
   "skyblockbuilder.screen.button.save": "Save",
   "skyblockbuilder.screen.button.delete": "Delete",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Open Folder",

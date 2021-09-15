@@ -115,6 +115,7 @@
   "skyblockbuilder.item.structure_saver.info.tooltip": "Setze Ecken durch Shift-Rechtsklick",
   "skyblockbuilder.item.structure_saver.save.tooltip": "Rechtsklicke, um das Schema zu speichern",
   "skyblockbuilder.item.structure_saver.position.tooltip": "Position %s: x %s, y %s, z %s",
+  "skyblockbuilder.item.structure_saver.ignore_air.tooltip": "Ignoriere Luft",
   "skyblockbuilder.screen.button.save": "Sichern",
   "skyblockbuilder.screen.button.delete": "Löschen",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Öffne Ordner",

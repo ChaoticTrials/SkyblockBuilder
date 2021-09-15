@@ -80,7 +80,7 @@ public class ScreenStructureSaver extends Screen {
         this.blit(poseStack, this.relX + 147, this.relY + 25, 0, this.ySize, 14, 14);
 
         if (Math2.isInBounds(this.relX + 144, this.relY + 50, 19, 19, mouseX, mouseY)) {
-            this.renderTooltip(poseStack, new TranslatableComponent("Ignore air"), mouseX, mouseY);
+            this.renderTooltip(poseStack, new TranslatableComponent("skyblockbuilder.item.structure_saver.ignore_air.tooltip"), mouseX, mouseY);
         }
     }
 
