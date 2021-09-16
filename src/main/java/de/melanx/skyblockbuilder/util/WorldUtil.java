@@ -89,7 +89,7 @@ public class WorldUtil {
         Random random = new Random();
         while (!spawns.isEmpty()) {
             BlockPos pos = spawns.get(random.nextInt(spawns.size()));
-            if (!level.getBlockState(pos.below()).getBlockSupportShape(level, pos.below()).isEmpty()) {
+            if (isValidSpawn(level, pos)) {
                 return pos;
             }
 
@@ -99,7 +99,7 @@ public class WorldUtil {
         BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(BlockPos.ZERO);
         BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos(pos.getX(), level.getMaxBuildHeight(), pos.getZ());
         Spiral spiral = new Spiral();
-        while (level.getBlockState(mpos.below()).getBlockSupportShape(level, mpos.below()).isEmpty()) {
+        while (!isValidSpawn(level, mpos)) {
             if (mpos.getY() <= 0) {
                 if (spiral.getX() > ConfigHandler.Spawn.radius || spiral.getY() > ConfigHandler.Spawn.radius) {
                     return pos;
@@ -115,6 +115,12 @@ public class WorldUtil {
         }
 
         return mpos;
+    }
+
+    public static boolean isValidSpawn(Level level, BlockPos pos) {
+        return !level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty()
+                && level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()
+                && level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty();
     }
 
     // [Vanilla copy] Get flat world info on servers
