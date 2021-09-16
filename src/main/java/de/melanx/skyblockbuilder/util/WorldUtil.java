@@ -85,12 +85,11 @@ public class WorldUtil {
     }
 
     private static BlockPos validPosition(ServerWorld world, Team team) {
-
         List<BlockPos> spawns = new ArrayList<>(team.getPossibleSpawns());
         Random random = new Random();
         while (!spawns.isEmpty()) {
             BlockPos pos = spawns.get(random.nextInt(spawns.size()));
-            if (!world.getBlockState(pos.down()).getCollisionShape(world, pos.down()).isEmpty()) {
+            if (isValidSpawn(world, pos)) {
                 return pos;
             }
 
@@ -100,7 +99,7 @@ public class WorldUtil {
         BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(BlockPos.ZERO);
         BlockPos.Mutable mpos = new BlockPos.Mutable(pos.getX(), world.getHeight(), pos.getZ());
         Spiral spiral = new Spiral();
-        while (world.getBlockState(mpos.down()).getCollisionShape(world, mpos.down()).isEmpty()) {
+        while (!isValidSpawn(world, mpos)) {
             if (mpos.getY() <= 0) {
                 if (spiral.getX() > LibXConfigHandler.Spawn.radius || spiral.getY() > LibXConfigHandler.Spawn.radius) {
                     return pos;
@@ -116,6 +115,12 @@ public class WorldUtil {
         }
 
         return mpos;
+    }
+
+    public static boolean isValidSpawn(World world, BlockPos pos) {
+        return !world.getBlockState(pos.down()).getCollisionShape(world, pos.down()).isEmpty()
+                && world.getBlockState(pos).getCollisionShape(world, pos).isEmpty()
+                && world.getBlockState(pos.up()).getCollisionShape(world, pos.up()).isEmpty();
     }
 
     // [Vanilla copy] Get flat world info on servers
