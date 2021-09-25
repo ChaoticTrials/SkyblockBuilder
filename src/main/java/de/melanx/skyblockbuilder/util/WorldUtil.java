@@ -101,7 +101,9 @@ public class WorldUtil {
     }
 
     public static boolean isValidSpawn(Level level, BlockPos pos) {
-        return !level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty()
+        return pos.getY() >= level.getMinBuildHeight()
+                && pos.getY() <= level.getMaxBuildHeight()
+                && !level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty()
                 && level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()
                 && level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty();
     }
