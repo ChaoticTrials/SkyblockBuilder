@@ -13,7 +13,6 @@ import net.minecraft.block.Block;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Direction;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -97,28 +96,14 @@ public class WorldUtil {
         }
 
         BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(BlockPos.ZERO);
-        BlockPos.Mutable mpos = new BlockPos.Mutable(pos.getX(), world.getHeight(), pos.getZ());
-        Spiral spiral = new Spiral();
-        while (!isValidSpawn(world, mpos)) {
-            if (mpos.getY() <= 0) {
-                if (spiral.getX() > LibXConfigHandler.Spawn.radius || spiral.getY() > LibXConfigHandler.Spawn.radius) {
-                    return pos;
-                }
-                spiral.next();
 
-                mpos.setX(pos.getX() + spiral.getX());
-                mpos.setY(world.getHeight());
-                mpos.setZ(pos.getZ() + spiral.getY());
-            }
-
-            mpos.move(Direction.DOWN);
-        }
-
-        return mpos;
+        return PositionHelper.findPos(pos, blockPos -> isValidSpawn(world, blockPos), LibXConfigHandler.Spawn.radius);
     }
 
     public static boolean isValidSpawn(World world, BlockPos pos) {
-        return !world.getBlockState(pos.down()).getCollisionShape(world, pos.down()).isEmpty()
+        return pos.getY() >= 0
+                && pos.getY() <= world.getHeight()
+                && !world.getBlockState(pos.down()).getCollisionShape(world, pos.down()).isEmpty()
                 && world.getBlockState(pos).getCollisionShape(world, pos).isEmpty()
                 && world.getBlockState(pos.up()).getCollisionShape(world, pos.up()).isEmpty();
     }
