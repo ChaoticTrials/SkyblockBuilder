@@ -11,7 +11,6 @@ import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGene
 import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -97,24 +96,8 @@ public class WorldUtil {
         }
 
         BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(BlockPos.ZERO);
-        BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos(pos.getX(), level.getMaxBuildHeight(), pos.getZ());
-        Spiral spiral = new Spiral();
-        while (!isValidSpawn(level, mpos)) {
-            if (mpos.getY() <= 0) {
-                if (spiral.getX() > ConfigHandler.Spawn.radius || spiral.getY() > ConfigHandler.Spawn.radius) {
-                    return pos;
-                }
-                spiral.next();
 
-                mpos.setX(pos.getX() + spiral.getX());
-                mpos.setY(level.getMaxBuildHeight());
-                mpos.setZ(pos.getZ() + spiral.getY());
-            }
-
-            mpos.move(Direction.DOWN);
-        }
-
-        return mpos;
+        return PositionHelper.findPos(pos, blockPos -> isValidSpawn(level, blockPos), ConfigHandler.Spawn.radius);
     }
 
     public static boolean isValidSpawn(Level level, BlockPos pos) {
