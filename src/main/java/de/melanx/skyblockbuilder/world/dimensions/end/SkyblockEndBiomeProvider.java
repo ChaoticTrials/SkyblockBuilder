@@ -38,9 +38,9 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
         this.seed = parent.seed;
         this.lookupRegistry = parent.biomes;
         this.isSingleBiomeLevel = ConfigHandler.World.SingleBiome.enabled &&
-                ConfigHandler.World.SingleBiome.singleBiomeDimension.isPresent()
-                ? ConfigHandler.World.SingleBiome.singleBiomeDimension.get().getLocation().equals(WorldUtil.Dimension.THE_END.getLocation())
-                : ConfigHandler.Spawn.dimension.getLocation().equals(WorldUtil.Dimension.THE_END.getLocation());
+                ConfigHandler.World.SingleBiome.singleBiomeDimension
+                        .map(dimension -> dimension.getLocation().equals(WorldUtil.Dimension.THE_END.getLocation()))
+                        .orElseGet(() -> ConfigHandler.Spawn.dimension.getLocation().equals(WorldUtil.Dimension.THE_END.getLocation()));
     }
 
     @Nonnull

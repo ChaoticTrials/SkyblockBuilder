@@ -41,9 +41,9 @@ public class SkyblockNetherBiomeProvider extends BiomeSource {
         this.seed = parent.seed;
         this.lookupRegistry = lookupRegistry;
         this.isSingleBiomeLevel = ConfigHandler.World.SingleBiome.enabled &&
-                ConfigHandler.World.SingleBiome.singleBiomeDimension.isPresent()
-                ? ConfigHandler.World.SingleBiome.singleBiomeDimension.get().getLocation().equals(WorldUtil.Dimension.THE_NETHER.getLocation())
-                : ConfigHandler.Spawn.dimension.getLocation().equals(WorldUtil.Dimension.THE_NETHER.getLocation());
+                ConfigHandler.World.SingleBiome.singleBiomeDimension
+                        .map(dimension -> dimension.getLocation().equals(WorldUtil.Dimension.THE_NETHER.getLocation()))
+                        .orElseGet(() -> ConfigHandler.Spawn.dimension.getLocation().equals(WorldUtil.Dimension.THE_NETHER.getLocation()));
     }
 
     @Nonnull
