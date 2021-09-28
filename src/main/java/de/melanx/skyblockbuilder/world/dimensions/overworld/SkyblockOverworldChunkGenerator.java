@@ -55,7 +55,7 @@ public class SkyblockOverworldChunkGenerator extends ChunkGenerator {
         this.settings = settings;
         this.parent = new NoiseBasedChunkGenerator(provider, seed, settings);
         this.layerInfos = ConfigHandler.World.surface
-                ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(Level.NETHER.location().toString()))
+                ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(Level.OVERWORLD.location().toString()))
                 : Lists.newArrayList();
         this.layerHeight = WorldUtil.calculateHeightFromLayers(this.layerInfos);
     }
