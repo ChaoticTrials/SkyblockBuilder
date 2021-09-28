@@ -3,6 +3,7 @@ buildscript {
 }
 
 apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v2/mod.gradle'
+apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.cursedep'
 
 repositories {
     maven {
@@ -14,8 +15,8 @@ repositories {
         url = "https://maven.melanx.de/"
     }
     maven {
-        name "Curios"
-        url "https://maven.theillusivec4.top/"
+        name = "Curios"
+        url = "https://maven.theillusivec4.top/"
     }
 
     // for testing with other mods
@@ -32,6 +33,9 @@ dependencies {
     implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.17.1-2.0.15")
     implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.17.1-1.0.1")
     implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.0.1")
+
+//    runtimeOnly curse.mod(291874, 3433685)
+//    runtimeOnly curse.mod(353942, 3455374)
 
 //    runtimeOnly fg.deobf("curse.maven:good-nights-sleep-61461:3208812")
 }

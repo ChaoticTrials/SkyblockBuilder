@@ -16,7 +16,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.logging.log4j.Logger;
 
 @Mod("skyblockbuilder")
-public class SkyblockBuilder extends ModXRegistration {
+public final class SkyblockBuilder extends ModXRegistration {
 
     private static SkyblockBuilder instance;
     private static SkyNetwork network;
