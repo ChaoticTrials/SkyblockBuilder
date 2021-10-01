@@ -27,8 +27,8 @@ public class SkyNetwork extends NetworkX {
     }
 
     @Override
-    protected String getProtocolVersion() {
-        return "4";
+    protected Protocol getProtocol() {
+        return Protocol.of("5");
     }
 
     @Override
@@ -41,22 +41,22 @@ public class SkyNetwork extends NetworkX {
 
     public void updateData(Level level) {
         if (!level.isClientSide) {
-            this.instance.send(PacketDistributor.ALL.noArg(), new SkyblockDataUpdateHandler.Message(SkyblockSavedData.get(level)));
+            this.channel.send(PacketDistributor.ALL.noArg(), new SkyblockDataUpdateHandler.Message(SkyblockSavedData.get(level)));
         }
     }
 
     public void updateData(Player player) {
         if (!player.getCommandSenderWorld().isClientSide) {
-            this.instance.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new SkyblockDataUpdateHandler.Message(SkyblockSavedData.get(player.getCommandSenderWorld())));
+            this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new SkyblockDataUpdateHandler.Message(SkyblockSavedData.get(player.getCommandSenderWorld())));
         }
     }
 
     public void deleteTags(ItemStack stack) {
-        this.instance.sendToServer(new DeleteTagsHandler.Message(stack));
+        this.channel.sendToServer(new DeleteTagsHandler.Message(stack));
     }
 
     public void saveStructure(ItemStack stack, String name, boolean ignoreAir) {
-        this.instance.sendToServer(new SaveStructureHandler.Message(stack, name, ignoreAir));
+        this.channel.sendToServer(new SaveStructureHandler.Message(stack, name, ignoreAir));
     }
 
     public void updateProfiles(Player player) {
@@ -64,7 +64,7 @@ public class SkyNetwork extends NetworkX {
             return;
         }
 
-        this.instance.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) player.getCommandSenderWorld())));
+        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) player.getCommandSenderWorld())));
     }
 
     public void updateProfiles(Level level) {
@@ -72,7 +72,7 @@ public class SkyNetwork extends NetworkX {
             return;
         }
 
-        this.instance.send(PacketDistributor.ALL.noArg(), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) level)));
+        this.channel.send(PacketDistributor.ALL.noArg(), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) level)));
     }
 
     private CompoundTag getProfilesTag(ServerLevel level) {
