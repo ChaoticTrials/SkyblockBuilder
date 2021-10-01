@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.config;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.config.Config;
 import io.github.noeppi_noeppi.libx.config.Group;
+import io.github.noeppi_noeppi.libx.config.validator.DoubleRange;
 import io.github.noeppi_noeppi.libx.config.validator.IntRange;
 import io.github.noeppi_noeppi.libx.util.ResourceList;
 import net.minecraft.util.ResourceLocation;
@@ -79,6 +80,11 @@ public class LibXConfigHandler {
 
         @Config({"The offset from 0, 0 to generate the islands", "Can be used to generate them in the middle of .mca files"})
         public static int offset = 0;
+
+        @Config({"The modifier for spacing and separation of structures. These values can be defined by a data pack. However, this is a multiplier to change these values.",
+                "Minimal spacing is 1", "Minimal separation is 0"})
+        @DoubleRange(min = 0, max = 1000)
+        public static double structureModifier = 1;
 
         public static class SingleBiome {
 

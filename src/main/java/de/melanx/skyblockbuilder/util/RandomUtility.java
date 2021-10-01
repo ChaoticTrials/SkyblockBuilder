@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.config.LibXConfigHandler;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,13 +15,14 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeGenerationSettings;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.world.gen.settings.DimensionStructuresSettings;
+import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraftforge.fml.ModList;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class RandomUtility {
@@ -81,6 +83,29 @@ public class RandomUtility {
         } else {
             return -1;
         }
+    }
+
+    public static DimensionStructuresSettings modifiedStructureSettings(DimensionStructuresSettings settings) {
+        if (settings.separationSettings == null) {
+            SkyblockBuilder.getLogger().error("StructureSettings could not be modified.");
+            return settings;
+        }
+
+        Map<Structure<?>, StructureSeparationSettings> structureConfig = new HashMap<>();
+        for (Map.Entry<Structure<?>, StructureSeparationSettings> entry : settings.separationSettings.entrySet()) {
+            Structure<?> structureFeature = entry.getKey();
+            StructureSeparationSettings config = entry.getValue();
+            StructureSeparationSettings newConfig = new StructureSeparationSettings(
+                    Math.max(1, (int) (config.getSpacing() * LibXConfigHandler.World.structureModifier)),
+                    Math.max(0, (int) (config.getSeparation() * LibXConfigHandler.World.structureModifier)),
+                    config.getSalt()
+            );
+
+            structureConfig.put(structureFeature, newConfig);
+        }
+        settings.separationSettings = structureConfig;
+
+        return settings;
     }
 
     public static void dropInventories(PlayerEntity player) {
