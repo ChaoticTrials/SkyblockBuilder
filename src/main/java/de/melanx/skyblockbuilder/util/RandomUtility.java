@@ -95,9 +95,20 @@ public class RandomUtility {
         for (Map.Entry<Structure<?>, StructureSeparationSettings> entry : settings.separationSettings.entrySet()) {
             Structure<?> structureFeature = entry.getKey();
             StructureSeparationSettings config = entry.getValue();
+            int spacing = Math.max(1, (int) (config.getSpacing() * LibXConfigHandler.World.structureModifier));
+            int separation = Math.max(0, (int) (config.getSeparation() * LibXConfigHandler.World.structureModifier));
+
+            if (spacing <= separation) {
+                if (separation > 0) {
+                    separation--;
+                }
+
+                spacing = separation + 1;
+            }
+
             StructureSeparationSettings newConfig = new StructureSeparationSettings(
-                    Math.max(1, (int) (config.getSpacing() * LibXConfigHandler.World.structureModifier)),
-                    Math.max(0, (int) (config.getSeparation() * LibXConfigHandler.World.structureModifier)),
+                    spacing,
+                    separation,
                     config.getSalt()
             );
 
