@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:the_nether",
+  "generator": {
+    "biome_source": {
+      "seed": 0,
+      "type": "skyblockbuilder:skyblock_nether_provider"
+    },
+    "seed": 0,
+    "settings": "minecraft:nether",
+    "type": "skyblockbuilder:skyblock_nether"
+  }
+}
