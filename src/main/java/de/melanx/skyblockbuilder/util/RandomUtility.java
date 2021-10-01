@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import net.minecraft.core.BlockPos;
@@ -17,16 +18,17 @@ import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.fml.ModList;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class RandomUtility {
@@ -81,6 +83,32 @@ public class RandomUtility {
         } else {
             return -1;
         }
+    }
+
+    public static StructureSettings modifiedStructureSettings(StructureSettings settings) {
+        if (settings.structureConfig == null) {
+            SkyblockBuilder.getLogger().error("StructureSettings could not be modified.");
+            return settings;
+        }
+
+        Map<StructureFeature<?>, StructureFeatureConfiguration> structureConfig = new HashMap<>();
+        Iterator<Map.Entry<StructureFeature<?>, StructureFeatureConfiguration>> itr = settings.structureConfig.entrySet().iterator();
+        int i = 0;
+        while (itr.hasNext()) {
+            Map.Entry<StructureFeature<?>, StructureFeatureConfiguration> entry = itr.next();
+            StructureFeature<?> structureFeature = entry.getKey();
+            StructureFeatureConfiguration config = entry.getValue();
+            StructureFeatureConfiguration newConfig = new StructureFeatureConfiguration(
+                    Math.max(1, (int) (config.spacing() * ConfigHandler.World.structureModifier)),
+                    Math.max(0, (int) (config.separation() * ConfigHandler.World.structureModifier)),
+                    config.salt()
+            );
+
+            structureConfig.put(structureFeature, newConfig);
+        }
+        settings.structureConfig = structureConfig;
+
+        return settings;
     }
 
     public static void dropInventories(Player player) {

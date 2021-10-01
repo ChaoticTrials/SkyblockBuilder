@@ -22,6 +22,8 @@ public class Registration {
     public static final Item structureSaver = new ItemStructureSaver();
 
     public static void registerCodecs() {
+        // TODO 1.18 add "overworld"
+        // TODO 1.18 provider -> source
         Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skyblock"), SkyblockOverworldChunkGenerator.CODEC);
         Registry.register(Registry.BIOME_SOURCE, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skyblock_provider"), SkyblockBiomeProvider.CODEC);
 
