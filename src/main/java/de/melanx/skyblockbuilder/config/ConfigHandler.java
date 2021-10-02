@@ -93,7 +93,7 @@ public class ConfigHandler {
         public static int islandDistance = 8192;
 
         @Config({"The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes",
-                "WARNING: Too small biome range will prevent some structures to generate, if structures are enabled, because some need a special biome!"})
+                "WARNING: Too small biome range will prevent some structures to generate, if structures are enabled, because some need a special biome! You may fix this by decreasing the \"structureModifier\""})
         @IntRange(min = 64, max = 29999900)
         public static int biomeRange = 8192;
 
@@ -102,7 +102,7 @@ public class ConfigHandler {
 
         @Config({"The modifier for spacing and separation of structures. These values can be defined by a data pack. However, this is a multiplier to change these values.",
                 "Minimal spacing is 1", "Minimal separation is 0"})
-        @DoubleRange(min = 0, max = 1000)
+        @DoubleRange(min = 0, max = 10)
         public static double structureModifier = 1;
 
         private static Map<String, String> initSurfaceSettingsMap(Map<String, String> map) {

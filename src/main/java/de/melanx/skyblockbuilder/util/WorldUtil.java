@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.Team;
@@ -103,7 +104,7 @@ public class WorldUtil {
     public static boolean isValidSpawn(Level level, BlockPos pos) {
         return pos.getY() >= level.getMinBuildHeight()
                 && pos.getY() <= level.getMaxBuildHeight()
-                && !level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty()
+                && !level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty() || level.getBlockState(pos.below()).is(ModBlockTags.ADDITIONAL_VALID_SPAWN)
                 && level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()
                 && level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty();
     }

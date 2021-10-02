@@ -41,7 +41,8 @@ command `/skyblock manage islandShape <template>`.
 Possible spawns are set in `config/skyblockbuilder/spawns.json`. For each player, the game will choose a random position
 and places the player on that position. Good on big islands when adding a lot of players at once at one team. You can
 also export your current spawn points with command `/skyblock spawns EXPORT`. For this, you should first
-[modify spawns](#modify-spawns). You will find your exported spawns in `skyblock_exports/spawns.json`.
+[modify spawns](#modify-spawns). You will find your exported spawns in `skyblock_exports/spawns.json`. If you spawn
+inside a block, you could add this block to the block tag `#skyblockbuilder:additional_valid_spawns`.
 
 ### Loot chests on island
 
