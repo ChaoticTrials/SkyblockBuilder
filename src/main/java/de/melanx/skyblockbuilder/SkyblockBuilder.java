@@ -29,7 +29,7 @@ public final class SkyblockBuilder extends ModXRegistration {
     });
 
     public SkyblockBuilder() {
-        super("skyblockbuilder", null);
+        super(null);
         instance = this;
         network = new SkyNetwork();
 

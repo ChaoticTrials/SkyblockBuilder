@@ -7,7 +7,7 @@ issueTrackerURL="https://www.github.com/MelanX/SkyblockBuilder/issues/"
 modId="skyblockbuilder"
 version="${file.jarVersion}"
 displayName="Skyblock Builder"
-updateJSONURL="https://raw.githubusercontent.com/MelanX/mod-updatechecker-files/master/skyblockbuilder.json"
+updateJSONURL="https://assets.melanx.de/updates/skyblock-builder.json"
 displayURL="www.curseforge.com/members/melanx/"
 #logoFile="skyblockbuilder.png"
 credits=""
@@ -19,7 +19,7 @@ Let you create a custom skyblock island via config
 [[dependencies.skyblockbuilder]]
     modId = "forge"
     mandatory = true
-    versionRange = "[37.0.53,)"
+    versionRange = "[37.0.95,)"
     ordering = "NONE"
     side = "BOTH"
 
@@ -33,13 +33,13 @@ Let you create a custom skyblock island via config
 [[dependencies.skyblockbuilder]]
     modId = "libx"
     mandatory = true
-    versionRange = "[1.17.1-2.1.2,)"
+    versionRange = "[1.17.1-2.1.13,)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.skyblockbuilder]]
     modId = "minemention"
     mandatory = false
-    versionRange = "[1.17.1-1.0.4,)"
+    versionRange = "[1.17.1-1.0.6,)"
     ordering = "NONE"
     side = "BOTH"

@@ -68,9 +68,11 @@ public class SkyblockNetherBiomeProvider extends BiomeSource {
                 biome = this.lookupRegistry.get(Biomes.NETHER_WASTES.location());
             }
             return Objects.requireNonNull(biome);
-        } else {
+        } else if (ConfigHandler.World.biomeRangeEnabled) {
             int range = ConfigHandler.World.biomeRange / 8;
             return this.parent.getNoiseBiome(((((x << 2) - range / 2) % range) + range) % range, y, ((((z << 2) - range / 2) % range) + range) % range);
+        } else {
+            return this.parent.getNoiseBiome(x, y, z);
         }
     }
 }

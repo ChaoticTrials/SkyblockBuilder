@@ -66,9 +66,11 @@ public class SkyblockBiomeProvider extends BiomeSource {
                 biome = this.lookupRegistry.get(Biomes.PLAINS.location());
             }
             return Objects.requireNonNull(biome);
-        } else {
+        } else if (ConfigHandler.World.biomeRangeEnabled) {
             int range = ConfigHandler.World.biomeRange;
             return this.parent.getNoiseBiome(((((x << 2) - range / 2) % range) + range) % range, y, ((((z << 2) - range / 2) % range) + range) % range);
+        } else {
+            return this.parent.getNoiseBiome(x, y, z);
         }
     }
 }

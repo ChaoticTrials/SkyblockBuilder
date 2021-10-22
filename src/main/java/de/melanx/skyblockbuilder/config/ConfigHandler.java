@@ -96,6 +96,9 @@ public class ConfigHandler {
                 "WARNING: Too small biome range will prevent some structures to generate, if structures are enabled, because some need a special biome! You may fix this by decreasing the \"structureModifier\""})
         @IntRange(min = 64, max = 29999900)
         public static int biomeRange = 8192;
+        // TODO 1.18 merge above and below with Optional<Integer>
+        @Config("Should the biomes repeat each x blocks? Disable to have normal vanilla biome generation. [default: true]")
+        public static boolean biomeRangeEnabled = true;
 
         @Config({"The offset from 0, 0 to generate the islands", "Can be used to generate them in the middle of .mca files"})
         public static int offset = 0;
