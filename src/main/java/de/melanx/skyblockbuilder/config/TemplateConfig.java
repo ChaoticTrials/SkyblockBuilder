@@ -11,7 +11,7 @@ import java.util.Map;
 @RegisterConfig("templates")
 public class TemplateConfig {
 
-    @Config
+    @Config("The list of templates being available. The first entry is the default template.")
     public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", "default"));
 
     @Config

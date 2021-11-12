@@ -20,10 +20,30 @@ public class TemplateLoader {
         try {
             TEMPLATES.clear();
             SkyPaths.copyTemplateFile();
+            Set<String> takenNames = new HashSet<>();
 
             for (TemplateInfo info : TemplateConfig.templates) {
+                if (!TemplateConfig.spawns.containsKey(info.spawns())) {
+                    throw new IllegalArgumentException("Spawn configuration \"" + info.spawns() + "\" is not defined: " + info.name());
+                }
+
+                if (!SkyPaths.TEMPLATES_DIR.resolve(info.file()).toFile().exists()) {
+                    throw new IllegalArgumentException("Template file \"" + info.file() + "\" does not exist: " + info.name());
+                }
+
+                if (takenNames.contains(info.name().toLowerCase(Locale.ROOT))) {
+                    throw new IllegalArgumentException("Template name \"" + info.name() + "\" is defined too many times.");
+                }
+
+                takenNames.add(info.name().toLowerCase(Locale.ROOT));
                 TEMPLATES.add(new ConfiguredTemplate(info));
             }
+
+            if (TEMPLATES.size() == 0) {
+                throw new IllegalStateException("You need at least one configured template.");
+            }
+
+            TEMPLATE = TEMPLATES.get(0);
 
             TEMPLATES.sort(Comparator.comparing(ConfiguredTemplate::getName));
         } catch (IOException e) {
