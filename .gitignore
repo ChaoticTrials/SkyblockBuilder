@@ -18,10 +18,13 @@ build
 .gradle
 
 # other
-.cache
 eclipse
-run*
-docs
+/run*
 
 # Files from Forge MDK
 forge*changelog.txt
+src/generated/resources/.cache
+
+# CoreMods
+*.d.ts
+**/tsconfig.json

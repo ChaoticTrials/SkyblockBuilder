@@ -1,9 +1,9 @@
 buildscript {
-    apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v2/buildscript.gradle', to: buildscript
+    apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v3/buildscript.gradle', to: buildscript
 }
 
-apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v2/mod.gradle'
-apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.cursedep'
+apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v3/mod.gradle'
+apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.coremods'
 
 repositories {
     maven {
@@ -34,6 +34,8 @@ dependencies {
     implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.0.1")
 
     runtimeOnly fg.deobf("mezz.jei:jei-1.17.1:8.0.0.14")
+
+    coremods "io.github.noeppi_noeppi.misc:CoreModTypes:5.0.1-2"
 
 //    runtimeOnly curse.mod(291874, 3433685)
 //    runtimeOnly curse.mod(353942, 3455374)
