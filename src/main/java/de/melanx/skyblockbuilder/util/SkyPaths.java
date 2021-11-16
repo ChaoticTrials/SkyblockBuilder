@@ -27,7 +27,6 @@ public class SkyPaths {
 
     // files
     public static final Path ITEMS_FILE = MOD_CONFIG.resolve("starter_item.json");
-    public static final Path SPAWNS_FILE = MOD_CONFIG.resolve("spawns.json");
     public static final Path SCHEMATIC_FILE = TEMPLATES_DIR.resolve("default.nbt");
     private static final Path FEATURES_FILE = DATA_DIR.resolve("features.txt");
     private static final Path STRUCTURES_FILE = DATA_DIR.resolve("structures.txt");
@@ -49,7 +48,6 @@ public class SkyPaths {
             createDirectories();
 
             copyTemplateFile();
-            generateSpawnsFile();
             generateStarterItemsFile();
             generateFeatureInformation();
             generateStructureInformation();
@@ -70,27 +68,6 @@ public class SkyPaths {
 
         //noinspection ConstantConditions
         Files.copy(SkyblockBuilder.class.getResourceAsStream("/skyblockbuilder-template.nbt"), SCHEMATIC_FILE);
-    }
-
-    private static void generateSpawnsFile() throws IOException {
-        if (Files.isRegularFile(SPAWNS_FILE)) {
-            return;
-        }
-
-        JsonObject object = new JsonObject();
-
-        JsonArray spawns = new JsonArray();
-        JsonArray defaultSpawn = new JsonArray();
-        defaultSpawn.add(6);
-        defaultSpawn.add(3);
-        defaultSpawn.add(5);
-        spawns.add(defaultSpawn);
-
-        object.add("default", spawns);
-
-        BufferedWriter w = Files.newBufferedWriter(SPAWNS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        w.write(SkyblockBuilder.PRETTY_GSON.toJson(object));
-        w.close();
     }
 
     private static void generateStarterItemsFile() throws IOException {
