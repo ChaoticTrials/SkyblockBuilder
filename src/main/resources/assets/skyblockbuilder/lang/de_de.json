@@ -79,6 +79,7 @@
 
   "skyblockbuilder.command.success.reset_island": "Insel-Vorlage erfolgreich gesetzt zu %s",
   "skyblockbuilder.command.success.export_spawns": "Spawns erfolgreich exportiert nach %s",
+  "skyblockbuilder.command.success.export_inventory": "Inventar erfolgreich exportiert nach %s",
   "skyblockbuilder.command.success.joined_team": "Erfolgreich Team %s beigetreten.",
   "skyblockbuilder.command.success.declined_invitation": "Erfolgreich die Einladung von Team %s zerrissen.",
   "skyblockbuilder.command.success.left_team": "Du hast erfolgreich deine Teamkameraden alleine gelassen.",

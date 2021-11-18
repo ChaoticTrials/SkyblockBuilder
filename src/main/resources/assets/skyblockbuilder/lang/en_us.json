@@ -79,6 +79,7 @@
 
   "skyblockbuilder.command.success.reset_island": "Successfully set island shape to %s",
   "skyblockbuilder.command.success.export_spawns": "Successfully exported current spawns to %s",
+  "skyblockbuilder.command.success.export_inventory": "Successfully exported current inventory to %s",
   "skyblockbuilder.command.success.joined_team": "Successfully joined team %s.",
   "skyblockbuilder.command.success.declined_invitation": "Successfully destroyed the invitation of team %s.",
   "skyblockbuilder.command.success.left_team": "Successfully left your teammates alone.",

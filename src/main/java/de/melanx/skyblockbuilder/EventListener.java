@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.melanx.skyblockbuilder.api.SkyblockBuilderAPI;
 import de.melanx.skyblockbuilder.commands.*;
+import de.melanx.skyblockbuilder.commands.helper.InventoryCommand;
 import de.melanx.skyblockbuilder.commands.helper.ListCommand;
 import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
 import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
@@ -70,6 +71,7 @@ public class EventListener {
                 .then(CreateCommand.register())
                 .then(DeclineCommand.register())
                 .then(HomeCommand.register())
+                .then(InventoryCommand.register())
                 .then(InviteCommand.register())
                 .then(JoinCommand.register())
                 .then(LeaveCommand.register())
