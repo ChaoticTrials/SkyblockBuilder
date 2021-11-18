@@ -91,6 +91,7 @@ public class TemplateLoader {
         return TEMPLATE.getDefaultSpawns();
     }
 
+    @Deprecated(forRemoval = true)
     @RemoveIn(minecraft = "1.18")
     public static Set<BlockPos> getDefaultSpawns() {
         return new HashSet<>();
