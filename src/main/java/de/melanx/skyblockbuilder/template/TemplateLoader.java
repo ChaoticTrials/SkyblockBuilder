@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.template;
 import com.google.common.collect.ImmutableMap;
 import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
+import io.github.noeppi_noeppi.libx.annotation.meta.RemoveIn;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -13,8 +14,7 @@ import java.util.*;
 public class TemplateLoader {
 
     private static final List<ConfiguredTemplate> TEMPLATES = new ArrayList<>();
-    private static final ConfiguredTemplate DEFAULT_TEMPLATE = new ConfiguredTemplate(new TemplateInfo("default", "default.nbt", "default"));
-    private static ConfiguredTemplate TEMPLATE = new ConfiguredTemplate(new TemplateInfo("default", "default.nbt", "default"));
+    private static ConfiguredTemplate TEMPLATE;
 
     public static void updateTemplates() {
         try {
@@ -65,6 +65,10 @@ public class TemplateLoader {
     }
 
     public static StructureTemplate getTemplate() {
+        if (TEMPLATE == null) {
+            throw new IllegalStateException("Tried to access template before set.");
+        }
+
         return TEMPLATE.getTemplate();
     }
 
@@ -87,7 +91,8 @@ public class TemplateLoader {
         return TEMPLATE.getDefaultSpawns();
     }
 
+    @RemoveIn(minecraft = "1.18")
     public static Set<BlockPos> getDefaultSpawns() {
-        return DEFAULT_TEMPLATE.getDefaultSpawns();
+        return new HashSet<>();
     }
 }
