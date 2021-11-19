@@ -1,7 +1,6 @@
 package de.melanx.skyblockbuilder.client;
 
 import de.melanx.skyblockbuilder.Registration;
-import de.melanx.skyblockbuilder.template.TemplateLoader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeWorldTypeScreens;
@@ -10,6 +9,6 @@ import net.minecraftforge.client.ForgeWorldTypeScreens;
 public class ClientSetup {
 
     public static void clientSetup() {
-        ForgeWorldTypeScreens.registerFactory(Registration.customSkyblock, (parent, settings) -> new ScreenCustomizeSkyblock(parent, TemplateLoader.getConfiguredTemplate()));
+        ForgeWorldTypeScreens.registerFactory(Registration.customSkyblock, (parent, settings) -> new ScreenCustomizeSkyblock(parent));
     }
 }

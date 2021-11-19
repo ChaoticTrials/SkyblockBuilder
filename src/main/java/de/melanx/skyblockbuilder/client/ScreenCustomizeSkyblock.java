@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyblockbuilder.Registration;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
+import io.github.noeppi_noeppi.libx.annotation.meta.RemoveIn;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -30,11 +31,17 @@ public class ScreenCustomizeSkyblock extends Screen {
     private Button doneButton;
     private ConfiguredTemplate template;
 
-    public ScreenCustomizeSkyblock(Screen parent, ConfiguredTemplate template) {
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.18")
+    public ScreenCustomizeSkyblock(Screen parent, ConfiguredTemplate unused) {
+        this(parent);
+    }
+
+    public ScreenCustomizeSkyblock(Screen parent) {
         super(Registration.customSkyblock.getDisplayName());
         this.parent = parent;
-        this.template = template;
         TemplateLoader.updateTemplates();
+        this.template = TemplateLoader.getConfiguredTemplate();
         this.templateMap = TemplateLoader.getConfiguredTemplates();
         this.applyTemplate = TemplateLoader::setTemplate;
     }
@@ -53,10 +60,12 @@ public class ScreenCustomizeSkyblock extends Screen {
         this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, (p_213015_1_) -> {
             this.minecraft.setScreen(this.parent);
         }));
-        this.list.setSelected(this.list.children().stream()
-                .filter(entry -> Objects.equals(entry.template.getTemplate(), this.template.getTemplate()))
-                .findFirst()
-                .orElse(null));
+        if (this.template != null) {
+            this.list.setSelected(this.list.children().stream()
+                    .filter(entry -> Objects.equals(entry.template.getTemplate(), this.template.getTemplate()))
+                    .findFirst()
+                    .orElse(null));
+        }
     }
 
     private void updateButtonValidity() {
