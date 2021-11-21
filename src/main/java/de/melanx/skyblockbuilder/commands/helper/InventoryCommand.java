@@ -79,13 +79,6 @@ public class InventoryCommand {
                 };
                 tag.putString("Slot", slotName);
                 items.add(NbtToJson.getJson(tag, true));
-//                JsonObject item = new JsonObject();
-//                //noinspection ConstantConditions
-//                item.addProperty("item", stack.getItem().getRegistryName().toString());
-//                CompoundTag tag = stack.getTag();
-//                if (tag != null) {
-//                    item.add("nbt", NbtToJson.getJson(tag, true));
-//                }
             }
         }
 

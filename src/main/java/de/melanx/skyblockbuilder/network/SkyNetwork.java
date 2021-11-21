@@ -18,7 +18,6 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.fmllegacy.network.NetworkDirection;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -94,7 +93,7 @@ public class SkyNetwork extends NetworkX {
             if (profile.getId() != null && profile.getName() != null) {
                 CompoundTag tag = new CompoundTag();
                 tag.putUUID("Id", profile.getId());
-                tag.putString("Name", profile.getName().toLowerCase(Locale.ROOT));
+                tag.putString("Name", profile.getName());
                 tags.add(tag);
                 handledIds.add(profile.getId());
             }
