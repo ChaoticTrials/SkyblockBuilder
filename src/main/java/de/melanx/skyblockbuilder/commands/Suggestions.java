@@ -49,22 +49,26 @@ public class Suggestions {
     };
 
     // Lists all templates
-    public static final SuggestionProvider<CommandSourceStack> TEMPLATES = ((context, builder) -> SharedSuggestionProvider.suggest(TemplateLoader.getTemplateNames(), builder));
+    public static final SuggestionProvider<CommandSourceStack> TEMPLATES = ((context, builder) -> SharedSuggestionProvider
+            .suggest(TemplateLoader.getTemplateNames().stream()
+                    .map(s -> s.split(" ").length == 1 ? s : "\"" + s + "\""), builder));
 
     // Lists all teams except spawn
-    public static final SuggestionProvider<CommandSourceStack> ALL_TEAMS = (context, builder) -> SharedSuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().getLevel())
-            .getTeams().stream()
-            .filter(team -> !team.isSpawn())
-            .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
-            .collect(Collectors.toSet()), builder);
+    public static final SuggestionProvider<CommandSourceStack> ALL_TEAMS = (context, builder) -> SharedSuggestionProvider
+            .suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().getLevel())
+                    .getTeams().stream()
+                    .filter(team -> !team.isSpawn())
+                    .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
+                    .collect(Collectors.toSet()), builder);
 
     // Lists all teams which allow visiting
-    public static final SuggestionProvider<CommandSourceStack> VISIT_TEAMS = (context, builder) -> SharedSuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().getLevel())
-            .getTeams().stream()
-            .filter(Team::allowsVisits)
-            .filter(team -> !team.isSpawn())
-            .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
-            .collect(Collectors.toSet()), builder);
+    public static final SuggestionProvider<CommandSourceStack> VISIT_TEAMS = (context, builder) -> SharedSuggestionProvider
+            .suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().getLevel())
+                    .getTeams().stream()
+                    .filter(Team::allowsVisits)
+                    .filter(team -> !team.isSpawn())
+                    .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
+                    .collect(Collectors.toSet()), builder);
 
     // Lists all teams for a player which invited the player
     public static final SuggestionProvider<CommandSourceStack> INVITE_TEAMS = (context, builder) -> {
