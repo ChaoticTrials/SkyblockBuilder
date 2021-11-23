@@ -14,11 +14,13 @@ import java.util.*;
 public class TemplateLoader {
 
     private static final List<ConfiguredTemplate> TEMPLATES = new ArrayList<>();
+    private static final List<String> TEMPLATE_NAMES = new ArrayList<>();
     private static ConfiguredTemplate TEMPLATE;
 
     public static void updateTemplates() {
         try {
             TEMPLATES.clear();
+            TEMPLATE_NAMES.clear();
             SkyPaths.copyTemplateFile();
             Set<String> takenNames = new HashSet<>();
 
@@ -37,6 +39,7 @@ public class TemplateLoader {
 
                 takenNames.add(info.name().toLowerCase(Locale.ROOT));
                 TEMPLATES.add(new ConfiguredTemplate(info));
+                TEMPLATE_NAMES.add(info.name());
             }
 
             if (TEMPLATES.size() == 0) {
@@ -51,11 +54,28 @@ public class TemplateLoader {
         }
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.18")
     public static Map<String, StructureTemplate> getTemplates() {
         //noinspection UnstableApiUsage
         return TEMPLATES.stream().collect(ImmutableMap.toImmutableMap(ConfiguredTemplate::getName, ConfiguredTemplate::getTemplate));
     }
 
+    public static void updateTemplateNames(List<String> names) {
+        TEMPLATE_NAMES.clear();
+        TEMPLATE_NAMES.addAll(names);
+    }
+
+    public static List<String> getTemplateNames() {
+        return TEMPLATE_NAMES;
+    }
+
+    /**
+     * This provides a list with all the configured templates and its corresponding StructureTemplates.
+     * <br>
+     * Should mainly be used on server side. It's possible that there is too much data to sync all templates to the
+     * client. Use {@link TemplateLoader#getTemplateNames()} on client and send a packet to server to communicate.
+     */
     public static List<ConfiguredTemplate> getConfiguredTemplates() {
         return TEMPLATES;
     }

@@ -18,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.fmllegacy.network.NetworkDirection;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -37,8 +38,10 @@ public class SkyNetwork extends NetworkX {
     protected void registerPackets() {
         this.register(new SaveStructureHandler.Serializer(), () -> SaveStructureHandler::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new DeleteTagsHandler.Serializer(), () -> DeleteTagsHandler::handle, NetworkDirection.PLAY_TO_SERVER);
+
         this.register(new SkyblockDataUpdateHandler.Serializer(), () -> SkyblockDataUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
         this.register(new ProfilesUpdateHandler.ProfilesUpdateSerializer(), () -> ProfilesUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
+        this.register(new UpdateTemplateNamesHandler.Serializer(), () -> UpdateTemplateNamesHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     public void updateData(Level level) {
@@ -75,6 +78,10 @@ public class SkyNetwork extends NetworkX {
         }
 
         this.channel.send(PacketDistributor.ALL.noArg(), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) level)));
+    }
+
+    public void updateTemplateNames(List<String> names) {
+        this.channel.send(PacketDistributor.ALL.noArg(), new UpdateTemplateNamesHandler.Message(names));
     }
 
     private CompoundTag getProfilesTag(ServerLevel level) {

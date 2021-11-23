@@ -61,6 +61,7 @@ public class EventListener {
     public static void resourcesReload(DataPacksReloadedEvent event) {
         SkyPaths.generateDefaultFiles();
         TemplateLoader.updateTemplates();
+        SkyblockBuilder.getNetwork().updateTemplateNames(TemplateLoader.getTemplateNames());
     }
 
     @SubscribeEvent
@@ -158,6 +159,7 @@ public class EventListener {
         if (WorldUtil.isSkyblock(event.getServer().overworld())) {
             SkyPaths.generateDefaultFiles();
             TemplateLoader.updateTemplates();
+            SkyblockBuilder.getNetwork().updateTemplateNames(TemplateLoader.getTemplateNames());
             TemplateData.get(event.getServer().overworld());
 
             if (SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
@@ -194,7 +196,8 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onConfigChange(ConfigLoadedEvent event) {
-        if (event.getConfigClass() == TemplateConfig.class) {
+        if (event.getConfigClass() == TemplateConfig.class
+                && event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
             TemplateLoader.updateTemplates();
         }
     }

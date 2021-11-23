@@ -49,7 +49,7 @@ public class Suggestions {
     };
 
     // Lists all templates
-    public static final SuggestionProvider<CommandSourceStack> TEMPLATES = ((context, builder) -> SharedSuggestionProvider.suggest(TemplateLoader.getTemplates().keySet(), builder));
+    public static final SuggestionProvider<CommandSourceStack> TEMPLATES = ((context, builder) -> SharedSuggestionProvider.suggest(TemplateLoader.getTemplateNames(), builder));
 
     // Lists all teams except spawn
     public static final SuggestionProvider<CommandSourceStack> ALL_TEAMS = (context, builder) -> SharedSuggestionProvider.suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().getLevel())
