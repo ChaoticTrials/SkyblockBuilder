@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ public abstract class SkyblockOpManageEvent extends Event {
     /**
      * @return {@link CommandSourceStack}
      */
+    @Nullable
     public CommandSourceStack getSource() {
         return this.source;
     }

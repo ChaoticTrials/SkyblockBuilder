@@ -306,7 +306,7 @@ public class TeamCommand {
         switch (SkyblockHooks.onRemoveSpawn(player, team, pos)) {
             case DENY:
                 TranslatableComponent component = new TranslatableComponent("skyblockbuilder.command.denied.modify_spawns0");
-                if (team.getPossibleSpawns().size() <= 1) {
+                if (team.getPossibleSpawns().size() <= 1) { // TODO remove?
                     component.append(" ").append(new TranslatableComponent("skyblockbuilder.command.denied.modify_spawns1"));
                 }
                 source.sendSuccess(component.withStyle(ChatFormatting.RED), false);

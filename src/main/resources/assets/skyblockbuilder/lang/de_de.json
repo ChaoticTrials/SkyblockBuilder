@@ -50,6 +50,7 @@
   "skyblockbuilder.command.denied.modify_spawns1": "Es sind zu wenig Spawnpunkte übrig.",
   "skyblockbuilder.command.denied.rename_team": "Du kannst das Team nicht umbenennen.",
   "skyblockbuilder.command.denied.add_players_to_team": "Du kannst keine Spieler zu diesem Team hinzufügen.",
+  "skyblockbuilder.command.denied.remove_players_from_team": "Du kannst keine Spieler von diesem Team entfernen.",
   "skyblockbuilder.command.denied.toggle_visits": "Du kannst Besuche nicht %s.",
   "skyblockbuilder.command.denied.toggle_request": "Du kannst Beitrittsanfragen nicht %s.",
 
