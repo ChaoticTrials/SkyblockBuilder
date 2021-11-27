@@ -68,9 +68,9 @@ public class InviteCommand {
         data.addInvite(team, event.getInvitor(), invitePlayer);
 
         MutableComponent invite = new TranslatableComponent("skyblockbuilder.command.info.invited_to_team0", player.getDisplayName().getString(), team.getName()).withStyle(ChatFormatting.GOLD);
-        invite.append(new TextComponent("/skyblock accept " + team.getName()).setStyle(Style.EMPTY
+        invite.append(new TextComponent("/skyblock accept \"" + team.getName() + "\"").setStyle(Style.EMPTY
                 .withHoverEvent(COPY_TEXT)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock accept " + team.getName()))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock accept \"" + team.getName() + "\""))
                 .applyFormat(ChatFormatting.UNDERLINE).applyFormat(ChatFormatting.GOLD)));
         invite.append(new TranslatableComponent("skyblockbuilder.command.info.invited_to_team1").withStyle(ChatFormatting.GOLD));
         invitePlayer.displayClientMessage(invite, false);
