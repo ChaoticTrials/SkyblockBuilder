@@ -260,7 +260,7 @@ public class ManageCommand {
             return 0;
         }
 
-        Pair<Boolean, Set<ServerPlayerEntity>> result = SkyblockHooks.onManageAddToTeam(source, team, ImmutableSet.of(player));
+        Pair<Boolean, Set<ServerPlayerEntity>> result = SkyblockHooks.onManageRemoveFromTeam(source, team, ImmutableSet.of(player));
         if (result.getLeft()) {
             source.sendFeedback(new TranslationTextComponent("skyblockbuilder.command.denied.add_players_to_team"), false);
             return 0;
