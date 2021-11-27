@@ -1,17 +1,14 @@
 package de.melanx.skyblockbuilder.network;
 
-import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
-import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import io.github.noeppi_noeppi.libx.network.NetworkX;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -19,9 +16,7 @@ import net.minecraftforge.fmllegacy.network.NetworkDirection;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 public class SkyNetwork extends NetworkX {
 
@@ -94,54 +89,19 @@ public class SkyNetwork extends NetworkX {
     }
 
     private CompoundTag getProfilesTag(ServerLevel level) {
-        MinecraftServer server = level.getServer();
-
-        GameProfileCache profileCache = server.getProfileCache();
+        Set<GameProfile> profileCache = RandomUtility.getGameProfiles(level);
         CompoundTag profiles = new CompoundTag();
         ListTag tags = new ListTag();
 
-        Set<UUID> handledIds = Sets.newHashSet();
-
         // load the cache and look for all profiles
-        profileCache.load().forEach(profileInfo -> {
-            GameProfile profile = profileInfo.getProfile();
-
+        profileCache.forEach(profile -> {
             if (profile.getId() != null && profile.getName() != null) {
                 CompoundTag tag = new CompoundTag();
                 tag.putUUID("Id", profile.getId());
                 tag.putString("Name", profile.getName());
                 tags.add(tag);
-                handledIds.add(profile.getId());
             }
         });
-
-        // check if all the members were in the cache and add these tags if needed
-        for (Team team : SkyblockSavedData.get(level).getTeams()) {
-            for (UUID id : team.getPlayers()) {
-                if (handledIds.contains(id)) {
-                    continue;
-                }
-
-                CompoundTag tag = new CompoundTag();
-                tag.putUUID("Id", id);
-
-                Optional<GameProfile> gameProfile = profileCache.get(id);
-                if (gameProfile.isPresent()) {
-                    tag.putString("Name", gameProfile.get().getName());
-                } else {
-                    GameProfile profile = server.getSessionService().fillProfileProperties(new GameProfile(id, null), true);
-
-                    if (profile.getName() == null) {
-                        tag.putString("Name", "Unknown");
-                    } else {
-                        profileCache.add(profile);
-                        tag.putString("Name", profile.getName());
-                    }
-                }
-
-                tags.add(tag);
-            }
-        }
 
         profiles.put("Profiles", tags);
         return profiles;

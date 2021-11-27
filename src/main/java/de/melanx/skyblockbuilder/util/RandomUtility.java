@@ -2,15 +2,22 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -120,6 +127,48 @@ public class RandomUtility {
         if (ModList.get().isLoaded("curios")) {
             CuriosCompat.dropInventory(player);
         }
+    }
+
+    public static Set<GameProfile> getGameProfiles(ServerLevel level) {
+        MinecraftServer server = level.getServer();
+
+        net.minecraft.server.players.GameProfileCache profileCache = server.getProfileCache();
+        Set<GameProfile> profiles = Sets.newHashSet();
+        ListTag tags = new ListTag();
+
+        Set<UUID> handledIds = Sets.newHashSet();
+
+        // load the cache and look for all profiles
+        profileCache.load().forEach(profileInfo -> {
+            GameProfile profile = profileInfo.getProfile();
+            profiles.add(profile);
+            handledIds.add(profile.getId());
+        });
+
+        // check if all the members were in the cache and add these tags if needed
+        for (Team team : SkyblockSavedData.get(level).getTeams()) {
+            for (UUID id : team.getPlayers()) {
+                if (handledIds.contains(id)) {
+                    continue;
+                }
+
+                Optional<GameProfile> gameProfile = profileCache.get(id);
+                if (gameProfile.isPresent()) {
+                    profiles.add(gameProfile.get());
+                } else {
+                    GameProfile profile = server.getSessionService().fillProfileProperties(new GameProfile(id, null), true);
+
+                    if (profile.getName() != null) {
+                        profileCache.add(profile);
+                        profiles.add(profile);
+                    } else {
+                        profiles.add(new GameProfile(profile.getId(), "Unknown"));
+                    }
+                }
+            }
+        }
+
+        return profiles;
     }
 
     public static void fillTemplateFromWorld(StructureTemplate template, Level level, BlockPos pos, Vec3i box, boolean withEntities, Collection<Block> toIgnore) {

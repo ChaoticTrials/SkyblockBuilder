@@ -1,8 +1,10 @@
 package de.melanx.skyblockbuilder;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.melanx.skyblockbuilder.api.SkyblockBuilderAPI;
+import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.commands.*;
 import de.melanx.skyblockbuilder.commands.helper.InventoryCommand;
 import de.melanx.skyblockbuilder.commands.helper.ListCommand;
@@ -33,6 +35,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -51,6 +54,8 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
+
+import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = "skyblockbuilder")
 public class EventListener {
@@ -92,10 +97,10 @@ public class EventListener {
         SkyblockBuilder.getNetwork().updateProfiles(level);
         SkyblockBuilder.getNetwork().updateTemplateNames(event.getPlayer(), TemplateLoader.getTemplateNames());
         if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
-
             SkyblockSavedData data = SkyblockSavedData.get(level);
             ServerPlayer player = (ServerPlayer) event.getPlayer();
             Team spawn = data.getSpawn();
+            GameProfileCache.addProfiles(Set.of(player.getGameProfile()));
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
                 if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
                     if (ConfigHandler.Inventory.dropItems) {
@@ -156,15 +161,19 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onServerStarted(FMLServerStartedEvent event) {
-        RandomUtility.dynamicRegistries = event.getServer().registryAccess();
-        if (WorldUtil.isSkyblock(event.getServer().overworld())) {
+        MinecraftServer server = event.getServer();
+        RandomUtility.dynamicRegistries = server.registryAccess();
+        if (WorldUtil.isSkyblock(server.overworld())) {
             SkyPaths.generateDefaultFiles();
             TemplateLoader.updateTemplates();
             SkyblockBuilder.getNetwork().updateTemplateNames(TemplateLoader.getTemplateNames());
-            TemplateData.get(event.getServer().overworld());
+            TemplateData.get(server.overworld());
+
+            Set<GameProfile> profiles = RandomUtility.getGameProfiles(server.overworld());
+            GameProfileCache.addProfiles(profiles);
 
             if (SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
-                SkyblockSavedData.get(event.getServer().overworld()).getSpawn();
+                SkyblockSavedData.get(server.overworld()).getSpawn();
             }
         }
     }
