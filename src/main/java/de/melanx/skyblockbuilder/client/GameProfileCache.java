@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.client;
 
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.Util;
 
 import java.util.Locale;
 import java.util.Map;
@@ -29,10 +30,20 @@ public class GameProfileCache {
     }
 
     public static String getName(UUID id) {
-        return uuidProfiles.get(id).getName();
+        GameProfile profile = uuidProfiles.get(id);
+        if (profile == null) {
+            return "";
+        }
+
+        return profile.getName();
     }
 
     public static UUID getId(String name) {
-        return nameProfiles.get(name.toLowerCase(Locale.ROOT)).getId();
+        GameProfile profile = nameProfiles.get(name.toLowerCase(Locale.ROOT));
+        if (profile == null) {
+            return Util.NIL_UUID;
+        }
+
+        return profile.getId();
     }
 }
