@@ -45,11 +45,9 @@ public class InviteCommand {
             return 0;
         }
 
-        if (data.hasInvites(invitePlayer)) {
-            if (data.hasInviteFrom(team, invitePlayer)) {
-                source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.player_already_invited").withStyle(ChatFormatting.RED), false);
-                return 0;
-            }
+        if (data.hasInviteFrom(team, invitePlayer)) {
+            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.player_already_invited").withStyle(ChatFormatting.RED), false);
+            return 0;
         }
 
         SkyblockInvitationEvent.Invite event = SkyblockHooks.onInvite(invitePlayer, team, player);

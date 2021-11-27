@@ -380,7 +380,12 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public boolean hasInviteFrom(Team team, UUID player) {
-        return this.invites.get(player).contains(team);
+        List<Team> teams = this.invites.get(player);
+        if (teams == null) {
+            return false;
+        }
+
+        return teams.contains(team);
     }
 
     public List<Team> getInvites(Player player) {
