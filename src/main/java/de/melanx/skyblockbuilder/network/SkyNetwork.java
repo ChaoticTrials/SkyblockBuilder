@@ -81,6 +81,14 @@ public class SkyNetwork extends NetworkX {
         this.channel.send(PacketDistributor.ALL.noArg(), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) level)));
     }
 
+    public void updateTemplateNames(Player player, List<String> names) {
+        if (player.level.isClientSide) {
+            return;
+        }
+
+        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new UpdateTemplateNamesHandler.Message(names));
+    }
+
     public void updateTemplateNames(List<String> names) {
         this.channel.send(PacketDistributor.ALL.noArg(), new UpdateTemplateNamesHandler.Message(names));
     }

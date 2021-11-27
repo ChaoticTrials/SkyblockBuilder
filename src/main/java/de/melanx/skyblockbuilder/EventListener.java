@@ -90,6 +90,7 @@ public class EventListener {
         SkyblockBuilder.getNetwork().updateData(event.getPlayer());
         Level level = event.getPlayer().level;
         SkyblockBuilder.getNetwork().updateProfiles(level);
+        SkyblockBuilder.getNetwork().updateTemplateNames(event.getPlayer(), TemplateLoader.getTemplateNames());
         if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
 
             SkyblockSavedData data = SkyblockSavedData.get(level);
