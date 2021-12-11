@@ -3,9 +3,13 @@ package de.melanx.skyblockbuilder.core;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.core.IdMap;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.chunk.ChunkBiomeContainer;
+import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 
 public class BiomeFix {
+
+    public static BiomeGenerationSettingsBuilder rebuildSettingsBuilder(BiomeGenerationSettingsBuilder builder) {
+        return new BiomeGenerationSettingsBuilder(RandomUtility.modifyBiomeGenerationSettings(builder.build()));
+    }
 
     /**
      * Patched into {@link ChunkBiomeContainer#writeBiomes()} redirecting the call to

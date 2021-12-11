@@ -9,7 +9,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -82,7 +81,7 @@ public class ConfiguredTemplate {
         template.load(nbt.getCompound("Template"));
         this.template = template;
 
-        ListTag spawns = nbt.getList("Spawns", Constants.NBT.TAG_COMPOUND);
+        ListTag spawns = nbt.getList("Spawns", Tag.TAG_COMPOUND);
         this.defaultSpawns.clear();
         for (Tag pos : spawns) {
             CompoundTag posTag = (CompoundTag) pos;

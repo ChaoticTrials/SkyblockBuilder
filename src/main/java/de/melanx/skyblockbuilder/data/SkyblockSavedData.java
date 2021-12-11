@@ -27,7 +27,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraftforge.common.util.Constants;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -114,7 +113,7 @@ public class SkyblockSavedData extends SavedData {
         Map<UUID, List<Team>> invites = new HashMap<>();
         Map<String, Team> skyblocks = new HashMap<>();
         BiMap<String, IslandPos> skyblockPositions = HashBiMap.create();
-        for (Tag inbt : nbt.getList("Islands", Constants.NBT.TAG_COMPOUND)) {
+        for (Tag inbt : nbt.getList("Islands", Tag.TAG_COMPOUND)) {
             CompoundTag tag = (CompoundTag) inbt;
 
             IslandPos island = IslandPos.fromTag(tag.getCompound("Island"));
@@ -125,12 +124,12 @@ public class SkyblockSavedData extends SavedData {
             skyblockPositions.put(team.getName().toLowerCase(), island);
         }
 
-        for (Tag inbt : nbt.getList("Invitations", Constants.NBT.TAG_COMPOUND)) {
+        for (Tag inbt : nbt.getList("Invitations", Tag.TAG_COMPOUND)) {
             CompoundTag tag = (CompoundTag) inbt;
 
             UUID player = tag.getUUID("Player");
             List<Team> teams = new ArrayList<>();
-            for (Tag inbt1 : tag.getList("Teams", Constants.NBT.TAG_COMPOUND)) {
+            for (Tag inbt1 : tag.getList("Teams", Tag.TAG_COMPOUND)) {
                 CompoundTag teamTag = (CompoundTag) inbt1;
 
                 String teamName = teamTag.getString("Team");

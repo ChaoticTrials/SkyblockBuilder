@@ -59,12 +59,14 @@ public class ItemStructureSaver extends Item {
             CompoundTag tag = stack.getOrCreateTag();
 
             if (!tag.contains("Position1")) {
+                //noinspection UnstableApiUsage
                 NBTX.putPos(tag, "Position1", pos);
                 player.displayClientMessage(new TranslatableComponent("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
                 return InteractionResult.SUCCESS;
             }
 
             if (!tag.contains("Position2")) {
+                //noinspection UnstableApiUsage
                 NBTX.putPos(tag, "Position2", pos);
                 player.displayClientMessage(new TranslatableComponent("skyblockbuilder.structure_saver.pos", 2, pos.getX(), pos.getY(), pos.getZ()), false);
                 return InteractionResult.SUCCESS;
@@ -102,7 +104,9 @@ public class ItemStructureSaver extends Item {
     public void appendHoverText(@Nonnull ItemStack stack, @Nullable Level level, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         CompoundTag nbt = stack.getOrCreateTag();
+        //noinspection UnstableApiUsage
         BlockPos pos1 = NBTX.getPos(nbt, "Position1");
+        //noinspection UnstableApiUsage
         BlockPos pos2 = NBTX.getPos(nbt, "Position2");
 
         if (pos1 != null) {
@@ -127,7 +131,9 @@ public class ItemStructureSaver extends Item {
             return null;
         }
 
+        //noinspection UnstableApiUsage
         BlockPos pos1 = NBTX.getPos(nbt, "Position1");
+        //noinspection UnstableApiUsage
         BlockPos pos2 = NBTX.getPos(nbt, "Position2");
 
         //noinspection ConstantConditions

@@ -7,23 +7,21 @@ import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryLookupCodec;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.biome.TheEndBiomeSource;
+import net.minecraft.world.level.biome.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Objects;
 
 public class SkyblockEndBiomeProvider extends BiomeSource {
 
     public static final Codec<SkyblockEndBiomeProvider> CODEC = RecordCodecBuilder.create(
             (builder) -> builder.group(
-                    Codec.LONG.fieldOf("seed").stable().forGetter((provider) -> provider.seed),
-                    RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(provider -> provider.lookupRegistry)
-            ).apply(builder, builder.stable((seed, lookupRegistry) -> new SkyblockEndBiomeProvider(
+                    RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(provider -> provider.lookupRegistry),
+                    Codec.LONG.fieldOf("seed").stable().forGetter((provider) -> provider.seed)
+            ).apply(builder, builder.stable((lookupRegistry, seed) -> new SkyblockEndBiomeProvider(
                     new TheEndBiomeSource(new LazyBiomeRegistryWrapper(lookupRegistry), seed)
             ))));
 
@@ -33,7 +31,7 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
     public final Registry<Biome> lookupRegistry;
 
     public SkyblockEndBiomeProvider(TheEndBiomeSource parent) {
-        super(parent.possibleBiomes());
+        super(List.copyOf(parent.possibleBiomes()));
         this.parent = parent;
         this.seed = parent.seed;
         this.lookupRegistry = parent.biomes;
@@ -58,7 +56,7 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
 
     @Nonnull
     @Override
-    public Biome getNoiseBiome(int x, int y, int z) {
+    public Biome getNoiseBiome(int x, int y, int z, @Nonnull Climate.Sampler sampler) {
         if (this.isSingleBiomeLevel) {
             Biome biome = this.lookupRegistry.get(WorldUtil.SINGLE_BIOME);
             if (biome == null) {
@@ -66,7 +64,7 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
             }
             return Objects.requireNonNull(biome);
         } else {
-            return this.parent.getNoiseBiome(x, y, z);
+            return this.parent.getNoiseBiome(x, y, z, sampler);
         }
     }
 }

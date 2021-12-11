@@ -92,13 +92,13 @@ public class ConfigHandler {
         @IntRange(min = 64, max = 29999900)
         public static int islandDistance = 8192;
 
-        @Config({"The radius for the biomes to repeat [default: 8192]", "By default it's the perfect range that each team has the same biomes",
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        @Config({"WARNING: THIS IS CURRENTLY NOT USED!!! WILL BE FIXED IN FUTURE!", // TODO remove this line
+                "The radius for the biomes to repeat [default: 8192]", "By default, it's the perfect range that each team has the same biomes",
+                "Set to \"null\" to disable the range.",
                 "WARNING: Too small biome range will prevent some structures to generate, if structures are enabled, because some need a special biome! You may fix this by decreasing the \"structureModifier\""})
-        @IntRange(min = 64, max = 29999900)
-        public static int biomeRange = 8192;
-        // TODO 1.18 merge above and below with Optional<Integer>
-        @Config("Should the biomes repeat each x blocks? Disable to have normal vanilla biome generation. [default: true]")
-        public static boolean biomeRangeEnabled = true;
+//        @IntRange(min = 64, max = 29999900)
+        public static Optional<Integer> biomeRange = Optional.of(8192);
 
         @Config({"The offset from 0, 0 to generate the islands", "Can be used to generate them in the middle of .mca files"})
         public static int offset = 0;

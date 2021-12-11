@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.List;
 import java.util.function.Supplier;

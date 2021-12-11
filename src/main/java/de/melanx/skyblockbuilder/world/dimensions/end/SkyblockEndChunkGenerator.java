@@ -7,12 +7,11 @@ import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.*;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
@@ -20,12 +19,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.*;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,11 +31,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-public class SkyblockEndChunkGenerator extends ChunkGenerator {
+public class SkyblockEndChunkGenerator extends NoiseBasedChunkGenerator {
 
     // [VanillaCopy] overworld chunk generator codec
     public static final Codec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
+                    RegistryLookupCodec.create(Registry.NOISE_REGISTRY).forGetter(gen -> gen.noises),
                     BiomeSource.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeSource),
                     Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
                     NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter((gen) -> gen.generatorSettings)
@@ -51,12 +49,12 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     protected final List<FlatLayerInfo> layerInfos;
     private final int layerHeight;
 
-    public SkyblockEndChunkGenerator(BiomeSource provider, long seed, Supplier<NoiseGeneratorSettings> generatorSettings) {
-        super(provider, provider, generatorSettings.get().structureSettings(), seed);
+    public SkyblockEndChunkGenerator(Registry<NormalNoise.NoiseParameters> noises, BiomeSource provider, long seed, Supplier<NoiseGeneratorSettings> generatorSettings) {
+        super(noises, provider, seed, generatorSettings);
         this.seed = seed;
         this.generatorSettings = generatorSettings;
         this.settings = RandomUtility.modifiedStructureSettings(generatorSettings.get().structureSettings());
-        this.parent = new NoiseBasedChunkGenerator(provider, seed, generatorSettings);
+        this.parent = new NoiseBasedChunkGenerator(noises, provider, seed, generatorSettings);
         this.layerInfos = ConfigHandler.World.surface
                 ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(Level.END.location().toString()))
                 : Lists.newArrayList();
@@ -77,11 +75,11 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     @Nonnull
     @Override
     public ChunkGenerator withSeed(long seed) {
-        return new SkyblockEndChunkGenerator(this.biomeSource.withSeed(seed), seed, this.generatorSettings);
+        return new SkyblockEndChunkGenerator(this.noises, this.biomeSource.withSeed(seed), seed, this.generatorSettings);
     }
 
     @Override
-    public void buildSurfaceAndBedrock(@Nonnull WorldGenRegion level, @Nonnull ChunkAccess chunk) {
+    public void buildSurface(@Nonnull WorldGenRegion level, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk) {
         if (ConfigHandler.World.surface) {
             ChunkPos cp = chunk.getPos();
             int xs = cp.getMinBlockX();
@@ -107,7 +105,7 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
         }
 
         if (ConfigHandler.Dimensions.End.mainIsland) {
-            this.parent.buildSurfaceAndBedrock(level, chunk);
+            this.parent.buildSurface(level, structureManager, chunk);
             return;
         }
 
@@ -119,9 +117,9 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
 
     @Nonnull
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull StructureFeatureManager manager, @Nonnull ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull Blender blender, @Nonnull StructureFeatureManager manager, @Nonnull ChunkAccess chunk) {
         if (ConfigHandler.Dimensions.End.mainIsland) {
-            return this.parent.fillFromNoise(executor, manager, chunk);
+            return this.parent.fillFromNoise(executor, blender, manager, chunk);
         }
 
         return CompletableFuture.completedFuture(chunk);
@@ -144,26 +142,26 @@ public class SkyblockEndChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void applyCarvers(long seed, @Nonnull BiomeManager biomeManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving carving) {
+    public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull BiomeManager biomeManager, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving carving) {
         ChunkPos pos = chunk.getPos();
         int value = 10 * 16;
         if (pos.getMinBlockX() < value && pos.getMinBlockX() > -value && pos.getMinBlockZ() < value && pos.getMinBlockZ() > -value) {
-            super.applyCarvers(seed, biomeManager, chunk, carving);
+            super.applyCarvers(level, seed, biomeManager, structureManager, chunk, carving);
         }
     }
 
-    // Vanilla copy
-    @Override
-    protected void createStructure(@Nonnull ConfiguredStructureFeature<?, ?> feature, @Nonnull RegistryAccess registry, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull StructureManager templateManager, long seed, @Nonnull Biome biome) {
-        SectionPos sectionpos = SectionPos.bottomOf(chunk);
-        StructureStart<?> existingStart = structureManager.getStartForFeature(sectionpos, feature.feature, chunk);
-        int references = existingStart != null ? existingStart.getReferences() : 0;
-        StructureFeatureConfiguration structurefeatureconfiguration = this.settings.getConfig(feature.feature);
-        if (structurefeatureconfiguration != null) {
-            StructureStart<?> start = feature.generate(registry, this, this.biomeSource, templateManager, seed, chunk.getPos(), biome, references, structurefeatureconfiguration, chunk);
-            structureManager.setStartForFeature(sectionpos, feature.feature, start, chunk);
-        }
-    }
+//    // Vanilla copy
+//    @Override
+//    protected void createStructure(@Nonnull ConfiguredStructureFeature<?, ?> feature, @Nonnull RegistryAccess registry, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull StructureManager templateManager, long seed, @Nonnull Biome biome) {
+//        SectionPos sectionpos = SectionPos.bottomOf(chunk);
+//        StructureStart<?> existingStart = structureManager.getStartForFeature(sectionpos, feature.feature, chunk);
+//        int references = existingStart != null ? existingStart.getReferences() : 0;
+//        StructureFeatureConfiguration structurefeatureconfiguration = this.settings.getConfig(feature.feature);
+//        if (structurefeatureconfiguration != null) {
+//            StructureStart<?> start = feature.generate(registry, this, this.biomeSource, templateManager, seed, chunk.getPos(), biome, references, structurefeatureconfiguration, chunk);
+//            structureManager.setStartForFeature(sectionpos, feature.feature, start, chunk);
+//        }
+//    }
 
     @Nonnull
     @Override

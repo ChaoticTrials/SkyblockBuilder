@@ -12,25 +12,23 @@ import io.github.noeppi_noeppi.libx.annotation.registration.RegisterClass;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.world.ForgeWorldType;
+import net.minecraftforge.common.world.ForgeWorldPreset;
 
 @RegisterClass
 public class Registration {
 
-    public static final ForgeWorldType customSkyblock = new VoidWorldType();
+    public static final ForgeWorldPreset customSkyblock = new VoidWorldType();
 
     public static final Item structureSaver = new ItemStructureSaver();
 
     public static void registerCodecs() {
-        // TODO 1.18 add "overworld"
-        // TODO 1.18 provider -> source
-        Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skyblock"), SkyblockOverworldChunkGenerator.CODEC);
-        Registry.register(Registry.BIOME_SOURCE, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skyblock_provider"), SkyblockBiomeProvider.CODEC);
+        Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(SkyblockBuilder.getInstance().modid, "overworld"), SkyblockOverworldChunkGenerator.CODEC);
+        Registry.register(Registry.BIOME_SOURCE, new ResourceLocation(SkyblockBuilder.getInstance().modid, "overworld"), SkyblockBiomeProvider.CODEC);
 
-        Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skyblock_nether"), SkyblockNetherChunkGenerator.CODEC);
-        Registry.register(Registry.BIOME_SOURCE, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skyblock_nether_provider"), SkyblockNetherBiomeProvider.PACKET_CODEC);
+        Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(SkyblockBuilder.getInstance().modid, "the_nether"), SkyblockNetherChunkGenerator.CODEC);
+        Registry.register(Registry.BIOME_SOURCE, new ResourceLocation(SkyblockBuilder.getInstance().modid, "the_nether"), SkyblockNetherBiomeProvider.PACKET_CODEC);
 
-        Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skyblock_end"), SkyblockEndChunkGenerator.CODEC);
-        Registry.register(Registry.BIOME_SOURCE, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skyblock_end_provider"), SkyblockEndBiomeProvider.CODEC);
+        Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(SkyblockBuilder.getInstance().modid, "the_end"), SkyblockEndChunkGenerator.CODEC);
+        Registry.register(Registry.BIOME_SOURCE, new ResourceLocation(SkyblockBuilder.getInstance().modid, "the_end"), SkyblockEndBiomeProvider.CODEC);
     }
 }

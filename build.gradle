@@ -1,8 +1,8 @@
 buildscript {
-    apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v3/buildscript.gradle', to: buildscript
+    apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/buildscript.gradle', to: buildscript
 }
 
-apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v3/mod.gradle'
+apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/mod.gradle'
 apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.coremods'
 
 repositories {
@@ -27,13 +27,13 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.17.1-2.1.13"
+    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.18-3.0.0"
 
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.17.1-2.1.13")
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.17.1-1.0.6")
-    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.0.1")
+    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.18-3.0.0")
+    implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.18-1.1.0")
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.18-5.0.2.3")
 
-    runtimeOnly fg.deobf("mezz.jei:jei-1.17.1:8.0.0.14")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.18:9.0.0.40")
 
     coremods "io.github.noeppi_noeppi.misc:CoreModTypes:5.0.1-2"
 

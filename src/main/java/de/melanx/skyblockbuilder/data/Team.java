@@ -13,7 +13,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nonnull;
@@ -367,20 +366,20 @@ public class Team {
         this.createdAt = nbt.getLong("CreatedAt");
         this.lastChanged = nbt.getLong("LastChanged");
 
-        ListTag players = nbt.getList("Players", Constants.NBT.TAG_COMPOUND);
+        ListTag players = nbt.getList("Players", Tag.TAG_COMPOUND);
         this.players.clear();
         for (Tag player : players) {
             this.players.add(((CompoundTag) player).getUUID("Player"));
         }
 
-        ListTag spawns = nbt.getList("Spawns", Constants.NBT.TAG_COMPOUND);
+        ListTag spawns = nbt.getList("Spawns", Tag.TAG_COMPOUND);
         this.possibleSpawns.clear();
         for (Tag pos : spawns) {
             CompoundTag posTag = (CompoundTag) pos;
             this.possibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
         }
 
-        ListTag joinRequests = nbt.getList("JoinRequests", Constants.NBT.TAG_COMPOUND);
+        ListTag joinRequests = nbt.getList("JoinRequests", Tag.TAG_COMPOUND);
         this.joinRequests.clear();
         for (Tag id : joinRequests) {
             this.joinRequests.add(((CompoundTag) id).getUUID("Id"));

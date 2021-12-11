@@ -25,7 +25,6 @@ import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.event.ConfigLoadedEvent;
-import io.github.noeppi_noeppi.libx.event.DataPacksReloadedEvent;
 import io.github.noeppi_noeppi.libx.render.RenderHelperLevel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -47,13 +46,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
 
 import java.util.Set;
 
@@ -63,7 +64,11 @@ public class EventListener {
     private static final String SPAWNED_TAG = "alreadySpawned";
 
     @SubscribeEvent
-    public static void resourcesReload(DataPacksReloadedEvent event) {
+    public static void resourcesReload(OnDatapackSyncEvent event) {
+        if (event.getPlayer() != null) {
+            return;
+        }
+
         SkyPaths.generateDefaultFiles();
         TemplateLoader.updateTemplates();
         SkyblockBuilder.getNetwork().updateTemplateNames(TemplateLoader.getTemplateNames());
@@ -160,7 +165,7 @@ public class EventListener {
     }
 
     @SubscribeEvent
-    public static void onServerStarted(FMLServerStartedEvent event) {
+    public static void onServerStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
         RandomUtility.dynamicRegistries = server.registryAccess();
         if (WorldUtil.isSkyblock(server.overworld())) {
@@ -180,7 +185,7 @@ public class EventListener {
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void renderBoundingBox(RenderWorldLastEvent event) {
+    public static void renderBoundingBox(RenderLevelLastEvent event) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null || !(player.getMainHandItem().getItem() instanceof ItemStructureSaver)) {
             return;
@@ -192,7 +197,7 @@ public class EventListener {
             return;
         }
 
-        PoseStack poseStack = event.getMatrixStack();
+        PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
         RenderHelperLevel.loadProjection(poseStack, area.minX(), area.minY(), area.minZ());
 
@@ -210,5 +215,16 @@ public class EventListener {
                 && event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
             TemplateLoader.updateTemplates();
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onBiomeLoad(BiomeLoadingEvent event) {
+//        try {
+//            Field field = BiomeLoadingEvent.class.getDeclaredField("gen");
+//            field.setAccessible(true);
+//            field.set(event, BiomeFix.rebuildSettingsBuilder(event.getGeneration()));
+//        } catch (ReflectiveOperationException e) {
+//            //
+//        }
     }
 }

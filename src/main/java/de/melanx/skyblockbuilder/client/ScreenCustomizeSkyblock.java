@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyblockbuilder.Registration;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
-import io.github.noeppi_noeppi.libx.annotation.meta.RemoveIn;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -30,12 +29,6 @@ public class ScreenCustomizeSkyblock extends Screen {
     private TemplateList list;
     private Button doneButton;
     private ConfiguredTemplate template;
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.18")
-    public ScreenCustomizeSkyblock(Screen parent, ConfiguredTemplate unused) {
-        this(parent);
-    }
 
     public ScreenCustomizeSkyblock(Screen parent) {
         super(Registration.customSkyblock.getDisplayName());

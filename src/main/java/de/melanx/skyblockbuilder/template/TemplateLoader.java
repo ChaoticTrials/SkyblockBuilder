@@ -1,9 +1,7 @@
 package de.melanx.skyblockbuilder.template;
 
-import com.google.common.collect.ImmutableMap;
 import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
-import io.github.noeppi_noeppi.libx.annotation.meta.RemoveIn;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -54,13 +52,6 @@ public class TemplateLoader {
         }
     }
 
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.18")
-    public static Map<String, StructureTemplate> getTemplates() {
-        //noinspection UnstableApiUsage
-        return TEMPLATES.stream().collect(ImmutableMap.toImmutableMap(ConfiguredTemplate::getName, ConfiguredTemplate::getTemplate));
-    }
-
     public static void updateTemplateNames(List<String> names) {
         TEMPLATE_NAMES.clear();
         TEMPLATE_NAMES.addAll(names);
@@ -109,11 +100,5 @@ public class TemplateLoader {
 
     public static Set<BlockPos> getCurrentSpawns() {
         return TEMPLATE.getDefaultSpawns();
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.18")
-    public static Set<BlockPos> getDefaultSpawns() {
-        return new HashSet<>();
     }
 }
