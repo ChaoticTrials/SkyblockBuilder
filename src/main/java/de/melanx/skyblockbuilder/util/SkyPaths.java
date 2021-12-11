@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.StartingInventory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -53,7 +53,7 @@ public class SkyPaths {
             generateStructureInformation();
             generateBiomeInformation();
 
-            ConfigHandler.loadStarterItems();
+            StartingInventory.loadStarterItems();
         } catch (IOException e) {
             e.printStackTrace();
         }

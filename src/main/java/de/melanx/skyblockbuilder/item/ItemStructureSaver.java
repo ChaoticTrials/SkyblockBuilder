@@ -4,11 +4,11 @@ import com.google.common.collect.Sets;
 import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
-import io.github.noeppi_noeppi.libx.util.NBTX;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -59,15 +59,13 @@ public class ItemStructureSaver extends Item {
             CompoundTag tag = stack.getOrCreateTag();
 
             if (!tag.contains("Position1")) {
-                //noinspection UnstableApiUsage
-                NBTX.putPos(tag, "Position1", pos);
+                tag.put("Position1", NbtUtils.writeBlockPos(pos));
                 player.displayClientMessage(new TranslatableComponent("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
                 return InteractionResult.SUCCESS;
             }
 
             if (!tag.contains("Position2")) {
-                //noinspection UnstableApiUsage
-                NBTX.putPos(tag, "Position2", pos);
+                tag.put("Position2", NbtUtils.writeBlockPos(pos));
                 player.displayClientMessage(new TranslatableComponent("skyblockbuilder.structure_saver.pos", 2, pos.getX(), pos.getY(), pos.getZ()), false);
                 return InteractionResult.SUCCESS;
             }
@@ -104,17 +102,15 @@ public class ItemStructureSaver extends Item {
     public void appendHoverText(@Nonnull ItemStack stack, @Nullable Level level, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         CompoundTag nbt = stack.getOrCreateTag();
-        //noinspection UnstableApiUsage
-        BlockPos pos1 = NBTX.getPos(nbt, "Position1");
-        //noinspection UnstableApiUsage
-        BlockPos pos2 = NBTX.getPos(nbt, "Position2");
 
-        if (pos1 != null) {
-            tooltip.add(new TranslatableComponent("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos1.getX(), pos1.getY(), pos1.getZ()).withStyle(ChatFormatting.DARK_GRAY));
+        if (nbt.contains("Position1")) {
+            BlockPos pos = NbtUtils.readBlockPos(nbt.getCompound("Position1"));
+            tooltip.add(new TranslatableComponent("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.DARK_GRAY));
         }
 
-        if (pos2 != null) {
-            tooltip.add(new TranslatableComponent("skyblockbuilder.item.structure_saver.position.tooltip", 2, pos2.getX(), pos2.getY(), pos2.getZ()).withStyle(ChatFormatting.DARK_GRAY));
+        if (nbt.contains("Position2")) {
+            BlockPos pos = NbtUtils.readBlockPos(nbt.getCompound("Position1"));
+            tooltip.add(new TranslatableComponent("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.DARK_GRAY));
         }
 
         if (nbt.contains("CanSave")) {
@@ -131,12 +127,9 @@ public class ItemStructureSaver extends Item {
             return null;
         }
 
-        //noinspection UnstableApiUsage
-        BlockPos pos1 = NBTX.getPos(nbt, "Position1");
-        //noinspection UnstableApiUsage
-        BlockPos pos2 = NBTX.getPos(nbt, "Position2");
+        BlockPos pos1 = NbtUtils.readBlockPos(nbt.getCompound("Position1"));
+        BlockPos pos2 = NbtUtils.readBlockPos(nbt.getCompound("Position2"));
 
-        //noinspection ConstantConditions
         int minX = Math.min(pos1.getX(), pos2.getX());
         int minY = Math.min(pos1.getY(), pos2.getY());
         int minZ = Math.min(pos1.getZ(), pos2.getZ());

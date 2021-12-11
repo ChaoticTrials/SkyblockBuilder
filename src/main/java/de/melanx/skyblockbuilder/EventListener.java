@@ -15,6 +15,7 @@ import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -124,7 +125,7 @@ public class EventListener {
                 player.getInventory().clearContent();
             }
 
-            ConfigHandler.getStarterItems().forEach(entry -> {
+            StartingInventory.getStarterItems().forEach(entry -> {
                 if (entry.getLeft() == EquipmentSlot.MAINHAND) {
                     player.getInventory().add(entry.getRight().copy());
                 } else {

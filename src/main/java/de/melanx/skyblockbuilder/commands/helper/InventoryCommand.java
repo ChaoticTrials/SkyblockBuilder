@@ -6,14 +6,14 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.util.RandomUtility;
-import io.github.noeppi_noeppi.libx.util.NbtToJson;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -50,35 +50,27 @@ public class InventoryCommand {
 
         for (ItemStack stack : inventory.items) {
             if (!stack.isEmpty()) {
-                CompoundTag tag = stack.serializeNBT();
-                tag.putInt("Count", stack.getCount());
-                items.add(NbtToJson.getJson(tag, true));
+                items.add(StartingInventory.serializeItem(stack));
             }
         }
 
         for (ItemStack stack : inventory.offhand) {
             if (!stack.isEmpty()) {
-                CompoundTag tag = stack.serializeNBT();
-                tag.putInt("Count", stack.getCount());
-                tag.putString("Slot", "offhand");
-                items.add(NbtToJson.getJson(tag, true));
+                items.add(StartingInventory.serializeItem(stack, EquipmentSlot.OFFHAND));
             }
         }
 
         for (int slot : Inventory.ALL_ARMOR_SLOTS) {
             ItemStack stack = inventory.armor.get(slot);
             if (!stack.isEmpty()) {
-                CompoundTag tag = stack.serializeNBT();
-                tag.putInt("Count", stack.getCount());
-                String slotName = switch (slot) {
-                    case 0 -> "feet";
-                    case 1 -> "legs";
-                    case 2 -> "chest";
-                    case 3 -> "head";
-                    default -> "mainhand";
+                EquipmentSlot equipmentSlot = switch (slot) {
+                    case 0 -> EquipmentSlot.FEET;
+                    case 1 -> EquipmentSlot.LEGS;
+                    case 2 -> EquipmentSlot.CHEST;
+                    case 3 -> EquipmentSlot.HEAD;
+                    default -> EquipmentSlot.MAINHAND;
                 };
-                tag.putString("Slot", slotName);
-                items.add(NbtToJson.getJson(tag, true));
+                items.add(StartingInventory.serializeItem(stack, equipmentSlot));
             }
         }
 
