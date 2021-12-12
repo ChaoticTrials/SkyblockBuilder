@@ -41,7 +41,7 @@ public class RandomUtility {
 
     public static RegistryAccess dynamicRegistries = null;
 
-    public static Biome modifyCopyBiome(Biome biome) {
+    public static Biome modifyCopyBiome(Biome biome) { // TODO inject this in the correct place
         Biome newBiome = new Biome(biome.climateSettings, biome.getBiomeCategory(), biome.getSpecialEffects(), RandomUtility.modifyBiomeGenerationSettings(biome.getGenerationSettings()), biome.getMobSettings());
         if (biome.getRegistryName() != null) {
             newBiome.setRegistryName(biome.getRegistryName());

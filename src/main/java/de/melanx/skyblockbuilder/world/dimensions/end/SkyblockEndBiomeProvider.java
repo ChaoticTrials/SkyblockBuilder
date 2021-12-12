@@ -22,7 +22,7 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
                     RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(provider -> provider.lookupRegistry),
                     Codec.LONG.fieldOf("seed").stable().forGetter((provider) -> provider.seed)
             ).apply(builder, builder.stable((lookupRegistry, seed) -> new SkyblockEndBiomeProvider(
-                    new TheEndBiomeSource(new LazyBiomeRegistryWrapper(lookupRegistry), seed)
+                    new TheEndBiomeSource(LazyBiomeRegistryWrapper.get(lookupRegistry), seed)
             ))));
 
     private final TheEndBiomeSource parent;

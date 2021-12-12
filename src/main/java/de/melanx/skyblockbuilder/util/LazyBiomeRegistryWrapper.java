@@ -15,12 +15,21 @@ import java.util.stream.Collectors;
 
 public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
 
+    private static final HashMap<Registry<Biome>, LazyBiomeRegistryWrapper> cache = new HashMap<>();
     private final Registry<Biome> parent;
     private final Map<ResourceLocation, Biome> modifiedBiomes = new HashMap<>();
 
-    public LazyBiomeRegistryWrapper(Registry<Biome> parent) {
+    private LazyBiomeRegistryWrapper(Registry<Biome> parent) {
         super(parent.key(), Lifecycle.experimental());
         this.parent = parent;
+    }
+
+    public static LazyBiomeRegistryWrapper get(Registry<Biome> parent) {
+        if (parent instanceof LazyBiomeRegistryWrapper wrapper) {
+            return wrapper;
+        }
+
+        return cache.computeIfAbsent(parent, LazyBiomeRegistryWrapper::new);
     }
 
     @Nonnull

@@ -63,7 +63,7 @@ public class VoidWorldType extends ForgeWorldPreset {
         Registry<NormalNoise.NoiseParameters> noiseRegistry = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
 
         MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
-        LazyBiomeRegistryWrapper biomes = new LazyBiomeRegistryWrapper(dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY));
+        LazyBiomeRegistryWrapper biomes = LazyBiomeRegistryWrapper.get(dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY));
 
         registry.register(LevelStem.OVERWORLD, new LevelStem(() -> DimensionType.DEFAULT_OVERWORLD,
                 configuredOverworldChunkGenerator(dynamicRegistries, seed)), Lifecycle.stable());
@@ -79,11 +79,11 @@ public class VoidWorldType extends ForgeWorldPreset {
     }
 
     public static ChunkGenerator configuredOverworldChunkGenerator(RegistryAccess dynamicRegistries, long seed) {
-        LazyBiomeRegistryWrapper biomes = new LazyBiomeRegistryWrapper(dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY));
+        LazyBiomeRegistryWrapper biomes = LazyBiomeRegistryWrapper.get(dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY));
         Registry<NoiseGeneratorSettings> dimensionSettingsRegistry = dynamicRegistries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
         Registry<NormalNoise.NoiseParameters> noiseRegistry = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
         return ConfigHandler.Dimensions.Overworld.Default ? WorldGenSettings.makeDefaultOverworld(dynamicRegistries, seed)
-                : overworldChunkGenerator(noiseRegistry, new LazyBiomeRegistryWrapper(biomes), dimensionSettingsRegistry, seed);
+                : overworldChunkGenerator(noiseRegistry, biomes, dimensionSettingsRegistry, seed);
     }
 
     public static ChunkGenerator overworldChunkGenerator(@Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {

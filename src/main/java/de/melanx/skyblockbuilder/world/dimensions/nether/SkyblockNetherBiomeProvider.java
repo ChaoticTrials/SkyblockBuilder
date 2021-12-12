@@ -21,7 +21,7 @@ public class SkyblockNetherBiomeProvider extends BiomeSource {
             (builder) -> builder.group(
                     RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(provider -> provider.lookupRegistry)
             ).apply(builder, (lookupRegistry) -> {
-                LazyBiomeRegistryWrapper biomes = new LazyBiomeRegistryWrapper(lookupRegistry);
+                LazyBiomeRegistryWrapper biomes = LazyBiomeRegistryWrapper.get(lookupRegistry);
                 return new SkyblockNetherBiomeProvider(
                         MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomes), biomes
                 );

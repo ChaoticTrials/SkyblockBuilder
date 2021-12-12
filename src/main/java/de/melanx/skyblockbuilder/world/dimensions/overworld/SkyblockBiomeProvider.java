@@ -44,7 +44,7 @@ public class SkyblockBiomeProvider extends BiomeSource {
         super(List.copyOf(parent.possibleBiomes()));
         this.parent = parent;
         this.parameters = parent.parameters;
-        this.lookupRegistry = new LazyBiomeRegistryWrapper(lookupRegistry);
+        this.lookupRegistry = LazyBiomeRegistryWrapper.get(lookupRegistry);
         this.isSingleBiomeLevel = ConfigHandler.World.SingleBiome.enabled &&
                 ConfigHandler.World.SingleBiome.singleBiomeDimension
                         .map(value -> value.getLocation().equals(WorldUtil.Dimension.OVERWORLD.getLocation()))
