@@ -34,9 +34,6 @@ function initializeCoreMod() {
                 'methodDesc': '(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/ChunkAccess;)Lnet/minecraft/nbt/CompoundTag;'
             },
             'transformer': function (method) {
-                // const target = new InsnList();
-                // target.add();
-                // target.add();
                 for (var i = 0; i < method.instructions.size(); i++) {
                     var insn = method.instructions.get(i);
                     if (insn != null && insn.getOpcode() == coremods_1.Opcodes.INVOKESTATIC) {

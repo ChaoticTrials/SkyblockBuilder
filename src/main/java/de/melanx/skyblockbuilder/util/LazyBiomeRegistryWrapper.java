@@ -18,6 +18,7 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
     private static final HashMap<Registry<Biome>, LazyBiomeRegistryWrapper> cache = new HashMap<>();
     private final Registry<Biome> parent;
     private final Map<ResourceLocation, Biome> modifiedBiomes = new HashMap<>();
+    private final Map<ResourceLocation, ResourceKey<Biome>> keyCache = new HashMap<>();
 
     private LazyBiomeRegistryWrapper(Registry<Biome> parent) {
         super(parent.key(), Lifecycle.experimental());
@@ -130,6 +131,17 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
             Biome modified = RandomUtility.modifyCopyBiome(biome);
             this.modifiedBiomes.put(biome.getRegistryName(), modified);
             return modified;
+        }
+    }
+
+    @Nonnull
+    @Override
+    public Optional<ResourceKey<Biome>> getResourceKey(@Nonnull Biome biome) {
+        ResourceLocation id = this.getKey(biome);
+        if (id == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(this.keyCache.computeIfAbsent(id, k -> ResourceKey.create(Registry.BIOME_REGISTRY, k)));
         }
     }
 }
