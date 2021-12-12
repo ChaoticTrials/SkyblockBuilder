@@ -3,8 +3,8 @@ package de.melanx.skyblockbuilder.core;
 import com.mojang.serialization.Codec;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.RandomUtility;
-import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeProvider;
-import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockBiomeProvider;
+import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeSource;
+import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldBiomeSource;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -41,7 +41,7 @@ public class BiomeFix {
      */
     public static Codec<PalettedContainer<Biome>> modifiedCodec(Registry<Biome> biomeRegistry, ServerLevel level) {
         BiomeSource biomeSource = level.getChunkSource().getGenerator().getBiomeSource();
-        if (biomeSource instanceof SkyblockBiomeProvider || biomeSource instanceof SkyblockNetherBiomeProvider) {
+        if (biomeSource instanceof SkyblockOverworldBiomeSource || biomeSource instanceof SkyblockNetherBiomeSource) {
             return ChunkSerializer.makeBiomeCodec(LazyBiomeRegistryWrapper.get(biomeRegistry));
         }
 

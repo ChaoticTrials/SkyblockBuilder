@@ -15,13 +15,13 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 
-public class SkyblockEndBiomeProvider extends BiomeSource {
+public class SkyblockEndBiomeSource extends BiomeSource {
 
-    public static final Codec<SkyblockEndBiomeProvider> CODEC = RecordCodecBuilder.create(
+    public static final Codec<SkyblockEndBiomeSource> CODEC = RecordCodecBuilder.create(
             (builder) -> builder.group(
                     RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(provider -> provider.lookupRegistry),
                     Codec.LONG.fieldOf("seed").stable().forGetter((provider) -> provider.seed)
-            ).apply(builder, builder.stable((lookupRegistry, seed) -> new SkyblockEndBiomeProvider(
+            ).apply(builder, builder.stable((lookupRegistry, seed) -> new SkyblockEndBiomeSource(
                     new TheEndBiomeSource(LazyBiomeRegistryWrapper.get(lookupRegistry), seed)
             ))));
 
@@ -30,7 +30,7 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
     private final boolean isSingleBiomeLevel;
     public final Registry<Biome> lookupRegistry;
 
-    public SkyblockEndBiomeProvider(TheEndBiomeSource parent) {
+    public SkyblockEndBiomeSource(TheEndBiomeSource parent) {
         super(List.copyOf(parent.possibleBiomes()));
         this.parent = parent;
         this.seed = parent.seed;
@@ -51,7 +51,7 @@ public class SkyblockEndBiomeProvider extends BiomeSource {
     @Override
     @OnlyIn(Dist.CLIENT)
     public BiomeSource withSeed(long seed) {
-        return new SkyblockEndBiomeProvider((TheEndBiomeSource) this.parent.withSeed(seed));
+        return new SkyblockEndBiomeSource((TheEndBiomeSource) this.parent.withSeed(seed));
     }
 
     @Nonnull

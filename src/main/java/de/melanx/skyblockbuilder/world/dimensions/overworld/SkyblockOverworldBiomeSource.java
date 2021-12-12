@@ -18,10 +18,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class SkyblockBiomeProvider extends BiomeSource {
+public class SkyblockOverworldBiomeSource extends BiomeSource {
 
     // [VanillaCopy] overworld biome source codec
-    public static final Codec<SkyblockBiomeProvider> CODEC = RecordCodecBuilder.create(
+    public static final Codec<SkyblockOverworldBiomeSource> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
                     ExtraCodecs.nonEmptyList(RecordCodecBuilder.<Pair<Climate.ParameterPoint, Supplier<Biome>>>create((inst) -> inst
                                     .group(Climate.ParameterPoint.CODEC.fieldOf("parameters").forGetter(Pair::getFirst), Biome.CODEC.fieldOf("biome").forGetter(Pair::getSecond))
@@ -31,7 +31,7 @@ public class SkyblockBiomeProvider extends BiomeSource {
                             .fieldOf("biomes")
                             .forGetter((provider) -> provider.parameters),
                     RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(provider -> provider.lookupRegistry)
-            ).apply(instance, instance.stable((parameterList, lookupRegistry) -> new SkyblockBiomeProvider(
+            ).apply(instance, instance.stable((parameterList, lookupRegistry) -> new SkyblockOverworldBiomeSource(
                     lookupRegistry, new MultiNoiseBiomeSource(parameterList)
             ))));
 
@@ -40,7 +40,7 @@ public class SkyblockBiomeProvider extends BiomeSource {
     public final Registry<Biome> lookupRegistry;
     protected final Climate.ParameterList<Supplier<Biome>> parameters;
 
-    public SkyblockBiomeProvider(Registry<Biome> lookupRegistry, MultiNoiseBiomeSource parent) {
+    public SkyblockOverworldBiomeSource(Registry<Biome> lookupRegistry, MultiNoiseBiomeSource parent) {
         super(List.copyOf(parent.possibleBiomes()));
         this.parent = parent;
         this.parameters = parent.parameters;
@@ -61,7 +61,7 @@ public class SkyblockBiomeProvider extends BiomeSource {
     @Nonnull
     @OnlyIn(Dist.CLIENT)
     public BiomeSource withSeed(long seed) {
-        return new SkyblockBiomeProvider(this.lookupRegistry, (MultiNoiseBiomeSource) this.parent.withSeed(seed));
+        return new SkyblockOverworldBiomeSource(this.lookupRegistry, (MultiNoiseBiomeSource) this.parent.withSeed(seed));
     }
 
     @Nonnull

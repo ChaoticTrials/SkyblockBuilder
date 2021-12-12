@@ -15,14 +15,14 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 
-public class SkyblockNetherBiomeProvider extends BiomeSource {
+public class SkyblockNetherBiomeSource extends BiomeSource {
 
-    public static final Codec<SkyblockNetherBiomeProvider> PACKET_CODEC = RecordCodecBuilder.create(
+    public static final Codec<SkyblockNetherBiomeSource> PACKET_CODEC = RecordCodecBuilder.create(
             (builder) -> builder.group(
                     RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(provider -> provider.lookupRegistry)
             ).apply(builder, (lookupRegistry) -> {
                 LazyBiomeRegistryWrapper biomes = LazyBiomeRegistryWrapper.get(lookupRegistry);
-                return new SkyblockNetherBiomeProvider(
+                return new SkyblockNetherBiomeSource(
                         MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomes), biomes
                 );
             }));
@@ -31,7 +31,7 @@ public class SkyblockNetherBiomeProvider extends BiomeSource {
     private final boolean isSingleBiomeLevel;
     public final Registry<Biome> lookupRegistry;
 
-    public SkyblockNetherBiomeProvider(MultiNoiseBiomeSource parent, Registry<Biome> lookupRegistry) {
+    public SkyblockNetherBiomeSource(MultiNoiseBiomeSource parent, Registry<Biome> lookupRegistry) {
         super(List.copyOf(parent.possibleBiomes()));
         this.parent = parent;
         this.lookupRegistry = lookupRegistry;
@@ -51,7 +51,7 @@ public class SkyblockNetherBiomeProvider extends BiomeSource {
     @Override
     @OnlyIn(Dist.CLIENT)
     public BiomeSource withSeed(long seed) {
-        return new SkyblockNetherBiomeProvider((MultiNoiseBiomeSource) this.parent.withSeed(seed), this.lookupRegistry);
+        return new SkyblockNetherBiomeSource((MultiNoiseBiomeSource) this.parent.withSeed(seed), this.lookupRegistry);
     }
 
     @Nonnull

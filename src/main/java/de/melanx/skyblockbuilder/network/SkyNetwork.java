@@ -33,7 +33,6 @@ public class SkyNetwork extends NetworkX {
     protected void registerPackets() {
         this.register(new SaveStructureHandler.Serializer(), () -> SaveStructureHandler::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new DeleteTagsHandler.Serializer(), () -> DeleteTagsHandler::handle, NetworkDirection.PLAY_TO_SERVER);
-        this.register(new RequestDataUpdateHandler.Serializer(), () -> RequestDataUpdateHandler::handle, NetworkDirection.PLAY_TO_SERVER);
 
         this.register(new SkyblockDataUpdateHandler.Serializer(), () -> SkyblockDataUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
         this.register(new ProfilesUpdateHandler.ProfilesUpdateSerializer(), () -> ProfilesUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
