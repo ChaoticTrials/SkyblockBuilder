@@ -107,7 +107,7 @@ public class VoidWorldType extends ForgeWorldPreset {
     }
 
     private static ChunkGenerator netherChunkGenerator(@Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
-        MultiNoiseBiomeSource nether = MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry); // TODO check
+        MultiNoiseBiomeSource nether = MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry);
         SkyblockNetherBiomeSource provider = new SkyblockNetherBiomeSource(nether, biomeRegistry);
 
         NoiseGeneratorSettings settings = dimensionSettingsRegistry.getOrThrow(NoiseGeneratorSettings.NETHER);

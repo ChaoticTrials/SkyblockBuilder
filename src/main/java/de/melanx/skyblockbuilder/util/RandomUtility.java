@@ -11,7 +11,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.StructureFeatures;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -41,7 +40,7 @@ public class RandomUtility {
 
     public static RegistryAccess dynamicRegistries = null;
 
-    public static Biome modifyCopyBiome(Biome biome) { // TODO inject this in the correct place
+    public static Biome modifyCopyBiome(Biome biome) {
         Biome newBiome = new Biome(biome.climateSettings, biome.getBiomeCategory(), biome.getSpecialEffects(), RandomUtility.modifyBiomeGenerationSettings(biome.getGenerationSettings()), biome.getMobSettings());
         if (biome.getRegistryName() != null) {
             newBiome.setRegistryName(biome.getRegistryName());
@@ -176,7 +175,7 @@ public class RandomUtility {
         return profiles;
     }
 
-    // TODO check vanilla code
+    // [Vanilla copy]
     public static void fillTemplateFromWorld(StructureTemplate template, Level level, BlockPos pos, Vec3i box, boolean withEntities, Collection<Block> toIgnore) {
         if (box.getX() >= 1 && box.getY() >= 1 && box.getZ() >= 1) {
             BlockPos blockpos = pos.offset(box).offset(-1, -1, -1);
@@ -194,11 +193,7 @@ public class RandomUtility {
                     BlockEntity blockEntity = level.getBlockEntity(actPos);
                     StructureTemplate.StructureBlockInfo blockInfo;
                     if (blockEntity != null) {
-                        CompoundTag compoundtag = blockEntity.save(new CompoundTag());
-                        compoundtag.remove("x");
-                        compoundtag.remove("y");
-                        compoundtag.remove("z");
-                        blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, compoundtag.copy());
+                        blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, blockEntity.saveWithId());
                     } else {
                         blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, null);
                     }
