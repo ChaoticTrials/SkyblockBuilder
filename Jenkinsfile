@@ -28,7 +28,7 @@ pipeline {
             }
         }
 
-        /*stage('Upload artifacts to CurseForge') {
+        stage('Upload artifacts to CurseForge') {
             steps {
                 echo 'Uploading to CurseForge'
                 sh './gradlew curseforge'
@@ -40,7 +40,7 @@ pipeline {
                 echo 'Uploading to Modrinth'
                 sh './gradlew modrinth'
             }
-        }*/
+        }
 
         stage('Publish artifacts') {
             steps {

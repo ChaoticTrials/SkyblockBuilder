@@ -186,6 +186,7 @@ public class Team {
             //noinspection ConstantConditions
             MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(player));
         }
+        this.data.getMetaInfo(player).addPreviousTeamId(this.teamId);
         this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
 
@@ -199,25 +200,14 @@ public class Team {
                 //noinspection ConstantConditions
                 MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(id));
             }
+            this.data.getMetaInfo(id).addPreviousTeamId(this.teamId);
         }
         this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
     }
 
     public void removeAllPlayers() {
-        HashSet<UUID> uuids = new HashSet<>(this.players);
-        if (!uuids.isEmpty()) {
-            this.players.clear();
-            //noinspection ConstantConditions
-            PlayerList playerList = this.getLevel().getServer().getPlayerList();
-            if (ModList.get().isLoaded("minemention")) {
-                for (UUID id : uuids) {
-                    MineMentionCompat.updateMentions(playerList.getPlayer(id));
-                }
-            }
-            this.lastChanged = System.currentTimeMillis();
-            this.data.setDirty();
-        }
+        this.removePlayers(this.players);
     }
 
     public boolean hasPlayer(UUID player) {
