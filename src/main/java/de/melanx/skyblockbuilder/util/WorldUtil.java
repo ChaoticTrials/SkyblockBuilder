@@ -8,8 +8,7 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
-import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGenerator;
-import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
+import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -25,10 +24,7 @@ import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class WorldUtil {
 
@@ -50,12 +46,12 @@ public class WorldUtil {
         MinecraftServer server = ((ServerLevel) level).getServer();
 
         if (!ConfigHandler.Dimensions.Overworld.Default) {
-            return server.overworld().getChunkSource().getGenerator() instanceof SkyblockOverworldChunkGenerator;
+            return server.overworld().getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
         }
 
         if (!ConfigHandler.Dimensions.Nether.Default) {
             ServerLevel nether = server.getLevel(Level.NETHER);
-            return nether != null && nether.getChunkSource().getGenerator() instanceof SkyblockNetherChunkGenerator;
+            return nether != null && nether.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
         }
 
         if (!ConfigHandler.Dimensions.End.Default) {
@@ -64,6 +60,12 @@ public class WorldUtil {
         }
 
         return false;
+    }
+
+    public static boolean isSingleBiomeLevel(WorldUtil.Dimension dimensionType) {
+        return ConfigHandler.World.SingleBiome.enabled && ConfigHandler.World.SingleBiome.singleBiomeDimension
+                .map(value -> Objects.equals(value.getLocation(), dimensionType.getLocation()))
+                .orElseGet(() -> Objects.equals(ConfigHandler.Spawn.dimension.getLocation(), dimensionType.getLocation()));
     }
 
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {

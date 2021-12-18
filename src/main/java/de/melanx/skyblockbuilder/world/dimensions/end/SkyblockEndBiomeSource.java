@@ -2,7 +2,6 @@ package de.melanx.skyblockbuilder.world.dimensions.end;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.Registry;
@@ -35,10 +34,7 @@ public class SkyblockEndBiomeSource extends BiomeSource {
         this.parent = parent;
         this.seed = parent.seed;
         this.lookupRegistry = parent.biomes;
-        this.isSingleBiomeLevel = ConfigHandler.World.SingleBiome.enabled &&
-                ConfigHandler.World.SingleBiome.singleBiomeDimension
-                        .map(dimension -> dimension.getLocation().equals(WorldUtil.Dimension.THE_END.getLocation()))
-                        .orElseGet(() -> ConfigHandler.Spawn.dimension.getLocation().equals(WorldUtil.Dimension.THE_END.getLocation()));
+        this.isSingleBiomeLevel = WorldUtil.isSingleBiomeLevel(WorldUtil.Dimension.THE_END);
     }
 
     @Nonnull

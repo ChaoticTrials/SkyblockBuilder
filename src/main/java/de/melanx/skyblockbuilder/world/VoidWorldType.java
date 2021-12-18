@@ -5,15 +5,15 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeSource;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
-import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeSource;
-import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherChunkGenerator;
-import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldBiomeSource;
-import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldChunkGenerator;
+import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockMultiNoiseBiomeSource;
+import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
@@ -88,11 +88,11 @@ public class VoidWorldType extends ForgeWorldPreset {
 
     public static ChunkGenerator overworldChunkGenerator(@Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
         MultiNoiseBiomeSource overworld = MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(biomeRegistry);
-        BiomeSource provider = new SkyblockOverworldBiomeSource(biomeRegistry, overworld);
+        BiomeSource provider = new SkyblockMultiNoiseBiomeSource(biomeRegistry, overworld, WorldUtil.isSingleBiomeLevel(WorldUtil.Dimension.OVERWORLD));
         NoiseGeneratorSettings settings = dimensionSettingsRegistry.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
         RandomUtility.modifyStructureSettings(settings.structureSettings);
 
-        return new SkyblockOverworldChunkGenerator(noises, provider, seed, () -> settings);
+        return new SkyblockNoiseBasedChunkGenerator(noises, provider, seed, () -> settings, Level.OVERWORLD);
     }
 
     private static ChunkGenerator defaultNetherGenerator(@Nonnull RegistryAccess dynamicRegistries, long seed) {
@@ -108,11 +108,11 @@ public class VoidWorldType extends ForgeWorldPreset {
 
     private static ChunkGenerator netherChunkGenerator(@Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
         MultiNoiseBiomeSource nether = MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry);
-        SkyblockNetherBiomeSource provider = new SkyblockNetherBiomeSource(nether, biomeRegistry);
+        BiomeSource provider = new SkyblockMultiNoiseBiomeSource(biomeRegistry, nether, WorldUtil.isSingleBiomeLevel(WorldUtil.Dimension.THE_NETHER));
 
         NoiseGeneratorSettings settings = dimensionSettingsRegistry.getOrThrow(NoiseGeneratorSettings.NETHER);
 
-        return new SkyblockNetherChunkGenerator(noises, provider, seed, () -> settings);
+        return new SkyblockNoiseBasedChunkGenerator(noises, provider, seed, () -> settings, Level.NETHER);
     }
 
     private static ChunkGenerator defaultEndGenerator(@Nonnull RegistryAccess dynamicRegistries, long seed) {

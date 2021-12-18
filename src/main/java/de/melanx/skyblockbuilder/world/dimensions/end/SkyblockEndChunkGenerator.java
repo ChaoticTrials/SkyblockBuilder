@@ -1,75 +1,32 @@
 package de.melanx.skyblockbuilder.world.dimensions.end;
 
-import com.google.common.collect.Lists;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
-import de.melanx.skyblockbuilder.util.RandomUtility;
-import de.melanx.skyblockbuilder.util.WorldUtil;
+import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.RegistryLookupCodec;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.world.level.*;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.*;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-public class SkyblockEndChunkGenerator extends NoiseBasedChunkGenerator {
-
-    // [VanillaCopy] overworld chunk generator codec
-    public static final Codec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.create(
-            (instance) -> instance.group(
-                    RegistryLookupCodec.create(Registry.NOISE_REGISTRY).forGetter(gen -> gen.noises),
-                    BiomeSource.CODEC.fieldOf("biome_source").forGetter((gen) -> gen.biomeSource),
-                    Codec.LONG.fieldOf("seed").stable().forGetter((gen) -> gen.seed),
-                    NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter((gen) -> gen.generatorSettings)
-            ).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
-
-    protected final long seed;
-    protected final Supplier<NoiseGeneratorSettings> generatorSettings;
-    protected final StructureSettings settings;
-    protected final NoiseBasedChunkGenerator parent;
-    protected final List<FlatLayerInfo> layerInfos;
-    private final int layerHeight;
+public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator {
 
     public SkyblockEndChunkGenerator(Registry<NormalNoise.NoiseParameters> noises, BiomeSource provider, long seed, Supplier<NoiseGeneratorSettings> generatorSettings) {
-        super(noises, provider, seed, generatorSettings);
-        this.seed = seed;
-        this.generatorSettings = generatorSettings;
-        this.settings = RandomUtility.modifiedStructureSettings(generatorSettings.get().structureSettings());
-        this.parent = new NoiseBasedChunkGenerator(noises, provider, seed, generatorSettings);
-        this.layerInfos = ConfigHandler.World.surface
-                ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(Level.END.location().toString()))
-                : Lists.newArrayList();
-        this.layerHeight = WorldUtil.calculateHeightFromLayers(this.layerInfos);
-    }
-
-    @Nonnull
-    @Override
-    protected Codec<? extends ChunkGenerator> codec() {
-        return CODEC;
-    }
-
-    @Override
-    public int getSeaLevel() {
-        return ConfigHandler.World.seaHeight;
+        super(noises, provider, seed, generatorSettings, Level.END);
     }
 
     @Nonnull
@@ -80,29 +37,7 @@ public class SkyblockEndChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Override
     public void buildSurface(@Nonnull WorldGenRegion level, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk) {
-        if (ConfigHandler.World.surface) {
-            ChunkPos cp = chunk.getPos();
-            int xs = cp.getMinBlockX();
-            int zs = cp.getMinBlockZ();
-            int xe = cp.getMaxBlockX();
-            int ze = cp.getMaxBlockZ();
-            int y = 0;
-            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-            for (FlatLayerInfo info : this.layerInfos) {
-                BlockState state = info.getBlockState();
-                for (int i = 0; i < info.getHeight(); i++) {
-                    for (int x = xs; x <= xe; x++) {
-                        for (int z = zs; z <= ze; z++) {
-                            pos.setX(x);
-                            pos.setY(y);
-                            pos.setZ(z);
-                            chunk.setBlockState(pos, state, false);
-                        }
-                    }
-                    y++;
-                }
-            }
-        }
+        super.buildSurface(level, structureManager, chunk);
 
         if (ConfigHandler.Dimensions.End.mainIsland) {
             this.parent.buildSurface(level, structureManager, chunk);
@@ -123,22 +58,6 @@ public class SkyblockEndChunkGenerator extends NoiseBasedChunkGenerator {
         }
 
         return CompletableFuture.completedFuture(chunk);
-    }
-
-    @Nullable
-    @Override
-    public BlockPos findNearestMapFeature(@Nonnull ServerLevel level, StructureFeature<?> structure, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
-        boolean shouldSearch = WorldUtil.isStructureGenerated(structure.getRegistryName());
-        return shouldSearch ? super.findNearestMapFeature(level, structure, pos, searchRadius, skipKnownStructures) : null;
-    }
-
-    @Override
-    public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level) {
-        if (ConfigHandler.World.surface) {
-            return this.layerHeight;
-        }
-
-        return this.parent.getBaseHeight(x, z, heightmapType, level);
     }
 
     @Override
@@ -162,10 +81,4 @@ public class SkyblockEndChunkGenerator extends NoiseBasedChunkGenerator {
 //            structureManager.setStartForFeature(sectionpos, feature.feature, start, chunk);
 //        }
 //    }
-
-    @Nonnull
-    @Override
-    public NoiseColumn getBaseColumn(int posX, int posZ, @Nonnull LevelHeightAccessor level) {
-        return new NoiseColumn(0, new BlockState[0]);
-    }
 }

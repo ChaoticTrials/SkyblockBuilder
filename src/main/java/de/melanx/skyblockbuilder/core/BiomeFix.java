@@ -3,8 +3,9 @@ package de.melanx.skyblockbuilder.core;
 import com.mojang.serialization.Codec;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.RandomUtility;
-import de.melanx.skyblockbuilder.world.dimensions.nether.SkyblockNetherBiomeSource;
-import de.melanx.skyblockbuilder.world.dimensions.overworld.SkyblockOverworldBiomeSource;
+import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockMultiNoiseBiomeSource;
+import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,9 +13,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LinearPalette;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
 public class BiomeFix {
 
@@ -41,10 +44,23 @@ public class BiomeFix {
      */
     public static Codec<PalettedContainer<Biome>> modifiedCodec(Registry<Biome> biomeRegistry, ServerLevel level) {
         BiomeSource biomeSource = level.getChunkSource().getGenerator().getBiomeSource();
-        if (biomeSource instanceof SkyblockOverworldBiomeSource || biomeSource instanceof SkyblockNetherBiomeSource) {
+        if (biomeSource instanceof SkyblockMultiNoiseBiomeSource) {
             return ChunkSerializer.makeBiomeCodec(LazyBiomeRegistryWrapper.get(biomeRegistry));
         }
 
         return ChunkSerializer.makeBiomeCodec(biomeRegistry);
+    }
+
+    /**
+     * Patched into {@link ChunkGenerator#findNearestMapFeature(ServerLevel, StructureFeature, BlockPos, int, boolean)}
+     * redirecting to get the modified biome registry if needed to actually find the structure.
+     */
+    public static Registry<Biome> modifiedRegistry(Registry<Biome> biomeRegistry, ServerLevel level) {
+        ChunkGenerator generator = level.getChunkSource().getGenerator();
+        if (generator instanceof SkyblockNoiseBasedChunkGenerator) {
+            return LazyBiomeRegistryWrapper.get(biomeRegistry);
+        }
+
+        return biomeRegistry;
     }
 }
