@@ -103,7 +103,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
             int zs = cp.getMinBlockZ();
             int xe = cp.getMaxBlockX();
             int ze = cp.getMaxBlockZ();
-            int y = 0; // TODO use min height of level
+            int y = level.getMinBuildHeight();
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             for (FlatLayerInfo info : this.layerInfos) {
                 BlockState state = info.getBlockState();
