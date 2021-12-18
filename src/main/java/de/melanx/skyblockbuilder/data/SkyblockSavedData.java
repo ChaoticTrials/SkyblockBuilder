@@ -92,18 +92,20 @@ public class SkyblockSavedData extends SavedData {
 
     public Pair<IslandPos, Team> create(String teamName) {
         IslandPos islandPos;
+        Team team;
         if (teamName.equalsIgnoreCase("spawn")) {
             islandPos = SPAWN_ISLAND;
+            team = new Team(this, islandPos, SPAWN_ID);
         } else {
             do {
                 int[] pos = this.spiral.next();
                 islandPos = new IslandPos(pos[0], pos[1]);
             } while (this.skyblockPositions.containsValue(islandPos));
+            team = new Team(this, islandPos);
         }
 
         Set<BlockPos> positions = initialPossibleSpawns(islandPos.getCenter());
 
-        Team team = new Team(this, islandPos, SPAWN_ID);
         team.setPossibleSpawns(positions);
         team.setName(teamName);
 

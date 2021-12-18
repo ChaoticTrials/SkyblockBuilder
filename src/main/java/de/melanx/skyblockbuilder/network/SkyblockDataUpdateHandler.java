@@ -25,7 +25,11 @@ public class SkyblockDataUpdateHandler {
 
         @Override
         public void encode(SkyblockDataUpdateHandler.Message msg, FriendlyByteBuf buffer) {
-            buffer.writeNbt(msg.data.save(new CompoundTag()));
+            CompoundTag tag = msg.data.save(new CompoundTag());
+            if (tag.contains("MetaInformation")) {
+                tag.remove("MetaInformation");
+            }
+            buffer.writeNbt(tag);
         }
 
         @Override
