@@ -113,12 +113,13 @@ public class EventListener {
                     }
 
                     WorldUtil.teleportToIsland(player, spawn);
-                    data.addPlayerToTeam("spawn", player);
+                    data.addPlayerToTeam(SkyblockSavedData.SPAWN_ID, player);
                 }
 
                 return;
             }
             player.getPersistentData().putBoolean(SPAWNED_TAG, true);
+            data.addMetaInfo(player);
 
             if (ConfigHandler.Inventory.clearInv) {
                 player.getInventory().clearContent();

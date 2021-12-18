@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -76,9 +77,11 @@ public class Suggestions {
         ServerLevel world = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
-        List<Team> teams = data.getInvites(source.getPlayerOrException());
+        List<UUID> teams = data.getInvites(source.getPlayerOrException());
         if (teams != null && teams.size() != 0) {
             return SharedSuggestionProvider.suggest(teams.stream()
+                    .map(data::getTeam)
+                    .filter(Objects::nonNull)
                     .filter(team -> !team.isSpawn())
                     .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
                     .collect(Collectors.toSet()), builder);

@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -35,6 +36,12 @@ public class HomeCommand {
             return 0;
         }
 
+        if (!player.hasPermissions(2) && !data.getMetaInfo(player).canTeleportHome(level.getGameTime())) {
+            source.sendFailure(new TranslatableComponent("skyblockbuilder.command.error.cooldown",
+                    RandomUtility.formattedCooldown(ConfigHandler.Utility.Teleports.homeCooldown - (level.getGameTime() - data.addMetaInfo(player).getLastHomeTeleport()))));
+            return 0;
+        }
+
         switch (SkyblockHooks.onHome(player, team)) {
             case DENY:
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.teleport_home").withStyle(ChatFormatting.RED), false);
@@ -49,6 +56,7 @@ public class HomeCommand {
                 break;
         }
 
+        data.getMetaInfo(player).setLastHomeTeleport(level.getGameTime());
         source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.teleport_home").withStyle(ChatFormatting.GOLD), true);
         WorldUtil.teleportToIsland(player, team);
         return 1;

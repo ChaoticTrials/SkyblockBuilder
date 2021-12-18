@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -28,6 +29,13 @@ public class SpawnCommand {
         ServerPlayer player = source.getPlayerOrException();
         Team team = data.getSpawn();
 
+        if (!player.hasPermissions(2) && !data.getMetaInfo(player).canTeleportSpawn(level.getGameTime())) {
+            source.sendFailure(new TranslatableComponent("skyblockbuilder.command.error.cooldown",
+                    RandomUtility.formattedCooldown(ConfigHandler.Utility.Teleports.spawnCooldown - (level.getGameTime() - data.addMetaInfo(player).getLastSpawnTeleport()))));
+            return 0;
+        }
+
+        data.getMetaInfo(player).setLastSpawnTeleport(level.getGameTime());
         source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.teleport_to_spawn"), false);
         WorldUtil.teleportToIsland(player, team);
         return 1;

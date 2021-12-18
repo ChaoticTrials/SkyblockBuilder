@@ -17,10 +17,7 @@ import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class Team {
 
@@ -28,6 +25,7 @@ public class Team {
     private final Set<UUID> players;
     private final Set<UUID> joinRequests;
     private final Set<BlockPos> possibleSpawns;
+    private UUID teamId;
     private IslandPos island;
     private String name;
     private boolean allowVisits;
@@ -36,22 +34,31 @@ public class Team {
     private long lastChanged;
 
     public Team(SkyblockSavedData data, IslandPos island) {
+        this(data, island, UUID.randomUUID());
+    }
+
+    public Team(SkyblockSavedData data, IslandPos island, UUID teamId) {
         this.data = data;
         this.island = island;
         this.players = new HashSet<>();
         this.possibleSpawns = new HashSet<>();
         this.joinRequests = new HashSet<>();
+        this.teamId = teamId;
         this.allowVisits = false;
         this.createdAt = System.currentTimeMillis();
         this.lastChanged = System.currentTimeMillis();
     }
 
     public boolean isSpawn() {
-        return this.name.equalsIgnoreCase("spawn");
+        return Objects.equals(this.teamId, SkyblockSavedData.SPAWN_ID);
     }
 
     public String getName() {
         return this.name;
+    }
+
+    public UUID getId() {
+        return this.teamId;
     }
 
     public void setName(String name) {
@@ -319,6 +326,7 @@ public class Team {
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
 
+        nbt.putUUID("TeamId", this.teamId);
         nbt.put("Island", this.island.toTag());
         nbt.putString("Name", this.name != null ? this.name : "");
         nbt.putBoolean("Visits", this.allowVisits);
@@ -359,6 +367,7 @@ public class Team {
     }
 
     public void deserializeNBT(CompoundTag nbt) {
+        this.teamId = nbt.getUUID("TeamId");
         this.island = IslandPos.fromTag(nbt.getCompound("Island"));
         this.name = nbt.getString("Name");
         this.allowVisits = nbt.getBoolean("Visits");

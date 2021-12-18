@@ -135,6 +135,14 @@ public class RandomUtility {
         }
     }
 
+    public static String formattedCooldown(long ticks) {
+        int realTime = (int) (ticks / 20);
+        int min = realTime / 60;
+        String sec = String.format("%02d", realTime % 60);
+
+        return String.format("%s:%s", min, sec);
+    }
+
     public static Set<GameProfile> getGameProfiles(ServerLevel level) {
         MinecraftServer server = level.getServer();
 

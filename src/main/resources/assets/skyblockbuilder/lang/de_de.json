@@ -12,6 +12,7 @@
   "skyblockbuilder.command.argument.disabled": "deaktiviert",
 
   "skyblockbuilder.error.no_skyblock": "Dieser Befehl kann nur in SkyBlock Welten verwendet werden.",
+  "skyblockbuilder.command.error.cooldown": "Versuche es in %s Minuten noch einmal.",
   "skyblockbuilder.command.error.creating_file": "Fehlgeschlagen, folgende Datei zu erstellen: %s",
   "skyblockbuilder.command.error.creating_path": "Fehlgeschlagen, folgenden Ordner zu erstellen: %s",
   "skyblockbuilder.command.error.team_not_exist": "Dieses Team existiert nicht!",

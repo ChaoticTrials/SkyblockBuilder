@@ -155,11 +155,17 @@ public class ConfigHandler {
             @Config("Should players be able to teleport to spawn? [default: true]")
             public static boolean spawn = true;
 
+            @Config("Cooldown in ticks for teleporting to spawn. [default: 3600 = 3min]")
+            public static int spawnCooldown = 3600;
+
             @Config("Should players be able to visit other island? [default: true]")
             public static boolean allowVisits = true;
 
             @Config("Should players be able to teleport to their home island? [default: true]")
             public static boolean home = true;
+
+            @Config("Cooldown in ticks for teleporting back home. [default: 3600 = 3min]")
+            public static int homeCooldown = 3600;
         }
 
         public static class Spawns {
