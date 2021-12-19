@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.world.dimensions.multinoise;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryLookupCodec;
@@ -45,7 +46,7 @@ public class SkyblockMultiNoiseBiomeSource extends BiomeSource {
         this.isSingleBiomeLevel = isSingleBiomeLevel;
         this.parent = parent;
         this.parameters = parent.parameters;
-        this.lookupRegistry = lookupRegistry;
+        this.lookupRegistry = LazyBiomeRegistryWrapper.get(lookupRegistry);
     }
 
     @Nonnull
