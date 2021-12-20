@@ -1,4 +1,4 @@
-import {AbstractInsnNode, ASMAPI, CoreMods, InsnList, MethodInsnNode, MethodNode, Opcodes, VarInsnNode} from "coremods";
+import {ASMAPI, CoreMods, MethodInsnNode, MethodNode, Opcodes, VarInsnNode} from "coremods";
 
 function initializeCoreMod(): CoreMods {
     return {
@@ -57,48 +57,6 @@ function initializeCoreMod(): CoreMods {
                 }
 
                 throw new Error("Failed to patch ChunkSerializer.class");
-            }
-        },
-        'find_structure_biome_fix': {
-            'target': {
-                'type': 'METHOD',
-                'class': 'net.minecraft.world.level.chunk.ChunkGenerator',
-                'methodName': 'm_62161_',
-                'methodDesc': '(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/levelgen/feature/StructureFeature;Lnet/minecraft/core/BlockPos;IZ)Lnet/minecraft/core/BlockPos;'
-            },
-            'transformer': function (method: MethodNode) {
-                let insertAfter: AbstractInsnNode | null = null;
-
-                for (let i = 0; i < method.instructions.size(); i++) {
-                    const insn = method.instructions.get(i);
-                    if (insn != null && insn.getOpcode() == Opcodes.INVOKEVIRTUAL) {
-                        const methodInsn = insn as MethodInsnNode;
-                        if (methodInsn.owner == 'net/minecraft/core/RegistryAccess'
-                            && methodInsn.name == ASMAPI.mapMethod('m_175515_')) {
-                            const nextInsn = insn.getNext();
-                            if (nextInsn != null) {
-                                insertAfter = nextInsn;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (insertAfter == null) throw new Error("Failed to patch ChunkGenerator.class");
-
-                const target = new InsnList();
-                target.add(new VarInsnNode(Opcodes.ALOAD, 8));
-                target.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                target.add(ASMAPI.buildMethodCall(
-                    'de/melanx/skyblockbuilder/core/BiomeFix',
-                    'modifiedRegistry', '(Lnet/minecraft/core/Registry;Lnet/minecraft/server/level/ServerLevel;)Lnet/minecraft/core/Registry;',
-                    ASMAPI.MethodType.STATIC
-                ));
-                target.add(new VarInsnNode(Opcodes.ASTORE, 8));
-
-                method.instructions.insert(insertAfter, target);
-
-                return method;
             }
         }
     }

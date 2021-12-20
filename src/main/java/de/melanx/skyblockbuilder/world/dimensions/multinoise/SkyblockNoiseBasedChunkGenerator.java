@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.world.dimensions.multinoise;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -39,9 +40,11 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
@@ -128,11 +131,59 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         return CompletableFuture.completedFuture(chunk);
     }
 
+    // [Vanilla Copy]
     @Nullable
     @Override
     public BlockPos findNearestMapFeature(@Nonnull ServerLevel level, @Nonnull StructureFeature<?> structure, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
         boolean shouldSearch = this.generatorSettings.get().structureSettings.structureConfig().get(structure) != null;
-        return shouldSearch ? super.findNearestMapFeature(level, structure, pos, searchRadius, skipKnownStructures) : null;
+
+        if (!shouldSearch) {
+            return null;
+        }
+
+        if (structure == StructureFeature.STRONGHOLD) {
+            this.generateStrongholds();
+            BlockPos startPos = null;
+            double currentDist = Double.MAX_VALUE;
+            BlockPos.MutableBlockPos potentialStartPos = new BlockPos.MutableBlockPos();
+
+            for (ChunkPos chunkPos : this.strongholdPositions) {
+                potentialStartPos.set(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 32, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
+                double newDist = potentialStartPos.distSqr(pos);
+                if (startPos == null) {
+                    startPos = potentialStartPos.immutable();
+                    currentDist = newDist;
+                } else if (newDist < currentDist) {
+                    startPos = potentialStartPos.immutable();
+                    currentDist = newDist;
+                }
+            }
+
+            return startPos;
+        }
+
+        StructureFeatureConfiguration config = this.settings.getConfig(structure);
+        ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> featureBiomeMap = this.settings.structures(structure);
+
+        // my change: get correct biome registry
+        Registry<Biome> registry;
+        if (this.biomeSource instanceof SkyblockMultiNoiseBiomeSource biomeSource) {
+            registry = biomeSource.lookupRegistry;
+        } else {
+            registry = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        }
+
+        if (config != null && !featureBiomeMap.isEmpty()) {
+            Set<ResourceKey<Biome>> biomeKeys = this.runtimeBiomeSource.possibleBiomes()
+                    .stream()
+                    .flatMap((biome) -> registry.getResourceKey(biome).stream())
+                    .collect(Collectors.toSet());
+            return featureBiomeMap.values()
+                    .stream()
+                    .noneMatch(biomeKeys::contains) ? null : structure.getNearestGeneratedFeature(level, level.structureFeatureManager(), pos, searchRadius, skipKnownStructures, level.getSeed(), config);
+        }
+
+        return null;
     }
 
     @Override
