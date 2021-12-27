@@ -19,6 +19,8 @@ import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
+import java.util.Objects;
+
 public class BiomeFix {
 
     /**
@@ -62,5 +64,20 @@ public class BiomeFix {
         }
 
         return biomeRegistry;
+    }
+
+    /**
+     * Patched at head of {@link ServerLevel#findNearestBiome(Biome, BlockPos, int, int)} to change the way how to
+     * search for the biomes.
+     */
+    public static BlockPos findNearestBiome(ServerLevel level, Biome biome, BlockPos pos, int radius, int increment) {
+        ChunkGenerator generator = level.getChunkSource().getGenerator();
+        if (generator instanceof SkyblockNoiseBasedChunkGenerator) {
+            return generator.getBiomeSource().findBiomeHorizontal(pos.getX(), pos.getY(), pos.getZ(), radius, increment, target -> {
+                return Objects.equals(target.getRegistryName(), biome.getRegistryName());
+            }, level.random, true, generator.climateSampler());
+        }
+
+        return null;
     }
 }

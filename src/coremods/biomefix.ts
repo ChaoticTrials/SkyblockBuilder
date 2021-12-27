@@ -1,4 +1,16 @@
-import {ASMAPI, CoreMods, MethodInsnNode, MethodNode, Opcodes, VarInsnNode} from "coremods";
+import {
+    ASMAPI,
+    CoreMods,
+    InsnList,
+    InsnNode,
+    JumpInsnNode,
+    LabelNode,
+    MethodInsnNode,
+    MethodNode,
+    Opcodes,
+    TypeInsnNode,
+    VarInsnNode
+} from "coremods";
 
 function initializeCoreMod(): CoreMods {
     return {
@@ -57,6 +69,44 @@ function initializeCoreMod(): CoreMods {
                 }
 
                 throw new Error("Failed to patch ChunkSerializer.class");
+            }
+        },
+        'find_nearest_biome_redirection': {
+            'target': {
+                'type': 'METHOD',
+                'class': 'net.minecraft.server.level.ServerLevel',
+                'methodName': 'm_8705_',
+                'methodDesc': '(Lnet/minecraft/world/level/biome/Biome;Lnet/minecraft/core/BlockPos;II)Lnet/minecraft/core/BlockPos;'
+            },
+            'transformer': function (method: MethodNode) {
+                const target = new InsnList();
+                const label = new LabelNode();
+                target.add(new LabelNode());
+                target.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                target.add(ASMAPI.buildMethodCall('net/minecraft/server/level/ServerLevel',
+                    ASMAPI.mapMethod('m_7726_'), '()Lnet/minecraft/server/level/ServerChunkCache;',
+                    ASMAPI.MethodType.VIRTUAL));
+                target.add(ASMAPI.buildMethodCall('net/minecraft/server/level/ServerChunkCache',
+                    ASMAPI.mapMethod('m_8481_'), '()Lnet/minecraft/world/level/chunk/ChunkGenerator;',
+                    ASMAPI.MethodType.VIRTUAL));
+                target.add(new TypeInsnNode(Opcodes.INSTANCEOF, 'de/melanx/skyblockbuilder/world/dimensions/multinoise/SkyblockNoiseBasedChunkGenerator'));
+                target.add(new JumpInsnNode(Opcodes.IFEQ, label));
+
+                target.add(new LabelNode());
+                target.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                target.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                target.add(new VarInsnNode(Opcodes.ALOAD, 2));
+                target.add(new VarInsnNode(Opcodes.ILOAD, 3));
+                target.add(new VarInsnNode(Opcodes.ILOAD, 4));
+                target.add(ASMAPI.buildMethodCall('de/melanx/skyblockbuilder/core/BiomeFix',
+                    'findNearestBiome', '(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/biome/Biome;Lnet/minecraft/core/BlockPos;II)Lnet/minecraft/core/BlockPos;',
+                    ASMAPI.MethodType.STATIC));
+                target.add(new InsnNode(Opcodes.ARETURN));
+                target.add(label);
+
+                method.instructions.insert(target);
+
+                return method;
             }
         }
     }
