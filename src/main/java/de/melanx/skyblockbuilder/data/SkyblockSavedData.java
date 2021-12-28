@@ -11,6 +11,7 @@ import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
+import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -27,6 +28,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -104,6 +107,10 @@ public class SkyblockSavedData extends SavedData {
                 islandPos = new IslandPos(pos[0], pos[1]);
             } while (this.skyblockPositions.containsValue(islandPos));
             team = new Team(this, islandPos);
+        }
+        if (!(this.level.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator)) {
+            int height = this.level.getHeight(Heightmap.Types.WORLD_SURFACE, islandPos.getCenter().getX(), islandPos.getCenter().getZ());
+            islandPos.changeHeight(height);
         }
 
         Set<BlockPos> positions = initialPossibleSpawns(islandPos.getCenter());
@@ -265,7 +272,7 @@ public class SkyblockSavedData extends SavedData {
 
         StructurePlaceSettings settings = new StructurePlaceSettings();
         BlockPos center = team.getIsland().getCenter();
-        template.placeInWorld(this.level, center, center, settings, new Random(), 2);
+        template.placeInWorld(this.level, center, center, settings, new Random(), Block.UPDATE_CLIENTS);
 
         this.skyblocks.put(team.getId(), team);
         this.skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
