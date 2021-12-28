@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
+import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -23,6 +24,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -220,6 +222,21 @@ public class SkyblockSavedData extends SavedData {
         if (team.getIsland() != SPAWN_ISLAND) {
             team.broadcast(new TranslatableComponent("skyblockbuilder.event.player_joined", GameProfileCache.getName(player)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         }
+
+        ServerLevel level = team.getLevel();
+        if (level != null && !this.metaInfo.get(player).getPreviousTeamIds().contains(team.getId())) {
+            ServerPlayer onlinePlayer = level.getServer().getPlayerList().getPlayer(player);
+            if (onlinePlayer != null) {
+                StartingInventory.getStarterItems().forEach(entry -> {
+                    if (entry.getLeft() == EquipmentSlot.MAINHAND) {
+                        onlinePlayer.getInventory().add(entry.getRight().copy());
+                    } else {
+                        onlinePlayer.setItemSlot(entry.getLeft(), entry.getRight().copy());
+                    }
+                });
+            }
+        }
+
         this.getSpawn().removePlayer(player);
         team.addPlayer(player);
         this.setDirty();

@@ -15,7 +15,6 @@ import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
-import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -39,7 +38,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -124,14 +122,6 @@ public class EventListener {
             if (ConfigHandler.Inventory.clearInv) {
                 player.getInventory().clearContent();
             }
-
-            StartingInventory.getStarterItems().forEach(entry -> {
-                if (entry.getLeft() == EquipmentSlot.MAINHAND) {
-                    player.getInventory().add(entry.getRight().copy());
-                } else {
-                    player.setItemSlot(entry.getLeft(), entry.getRight().copy());
-                }
-            });
 
             data.addPlayerToTeam(spawn, player);
             ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), ConfigHandler.Spawn.direction.getYRot());
