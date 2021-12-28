@@ -150,7 +150,7 @@ public class WorldUtil {
             i = 1;
         }
 
-        int maxLayers = Math.min(currentLayers + i, 256);
+        int maxLayers = Math.min(currentLayers + i, 384);
         int height = maxLayers - currentLayers;
         String blockName = info[info.length - 1];
 

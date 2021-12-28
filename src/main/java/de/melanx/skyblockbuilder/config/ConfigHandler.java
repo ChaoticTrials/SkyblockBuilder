@@ -69,7 +69,6 @@ public class ConfigHandler {
         public static Map<String, String> surfaceSettings = initSurfaceSettingsMap(Maps.newHashMap());
 
         @Config("Sea level in world [default: 63]")
-        @IntRange(min = 0, max = 256)
         public static int seaHeight = 63;
 
         @Config({"Distance between islands in overworld [default: 8192]", "nether the distance is 1/8"})
@@ -118,8 +117,9 @@ public class ConfigHandler {
         @Config("Direction the player should look at initial spawn")
         public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
 
-        @Config({"Height of the bottom layer from the structure.", "This affects where exactly the island will be generated."})
-        @IntRange(min = 0, max = 255)
+        @Config({"Height of the bottom layer from the structure.",
+                "This affects where exactly the island will be generated.",
+                "Would be smart to choose a value within the world height (default -64 and 319)"})
         public static int height = 64;
     }
 
