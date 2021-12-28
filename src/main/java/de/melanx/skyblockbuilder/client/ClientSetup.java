@@ -9,6 +9,6 @@ import net.minecraftforge.client.ForgeWorldPresetScreens;
 public class ClientSetup {
 
     public static void clientSetup() {
-        ForgeWorldPresetScreens.registerPresetEditor(Registration.customSkyblock, (parent, settings) -> new ScreenCustomizeSkyblock(parent));
+        ForgeWorldPresetScreens.registerPresetEditor(Registration.skyblock, (parent, settings) -> new ScreenCustomizeSkyblock(parent));
     }
 }

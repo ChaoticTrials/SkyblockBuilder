@@ -31,7 +31,7 @@ public class ScreenCustomizeSkyblock extends Screen {
     private ConfiguredTemplate template;
 
     public ScreenCustomizeSkyblock(Screen parent) {
-        super(Registration.customSkyblock.getDisplayName());
+        super(Registration.skyblock.getDisplayName());
         this.parent = parent;
         TemplateLoader.updateTemplates();
         this.template = TemplateLoader.getConfiguredTemplate();

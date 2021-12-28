@@ -14,7 +14,7 @@ import net.minecraftforge.common.world.ForgeWorldPreset;
 @RegisterClass
 public class Registration {
 
-    public static final ForgeWorldPreset customSkyblock = new VoidWorldType();
+    public static final ForgeWorldPreset skyblock = new VoidWorldType();
 
     public static final Item structureSaver = new ItemStructureSaver();
 
