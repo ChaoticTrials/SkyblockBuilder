@@ -200,7 +200,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     }
 
-    // Vanilla copy
+    // [Vanilla copy]
     @Override
     public void createStructures(@Nonnull RegistryAccess registry, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull StructureManager templateManager, long seed) {
         ChunkPos chunkpos = chunk.getPos();
@@ -214,6 +214,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
             }
         }
 
+        // Get modified registry
         Registry<Biome> biomeRegistry = LazyBiomeRegistryWrapper.get(registry.registryOrThrow(Registry.BIOME_REGISTRY));
 
         structuresLoop:

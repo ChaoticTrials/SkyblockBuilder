@@ -62,12 +62,6 @@ public class SkyblockMultiNoiseBiomeSource extends MultiNoiseBiomeSource {
                 biome = this.lookupRegistry.get(Biomes.PLAINS.location());
             }
             return Objects.requireNonNull(biome);
-            // TODO biome range
-//        } else if (ConfigHandler.World.biomeRange.isPresent()) {
-//            int range = ConfigHandler.World.biomeRange.get() >> 10;
-//            int x2 = (((x - range / 2) % range) + range) % range;
-//            int z2 = (((z - range / 2) % range) + range) % range;
-//            return this.parent.getNoiseBiome(sampler.sample(x2, y, z2));
         } else {
             return this.getNoiseBiome(sampler.sample(x, y, z));
         }

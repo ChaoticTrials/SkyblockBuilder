@@ -20,7 +20,6 @@ public class ConfigHandler {
     @Group(value = {"With this you can configure the structures and features which are generated.",
             "INFO: You can also just use the modid as wildcard for all features/structures from this mod.",
             "WARNING: Some features like trees need special surface!",
-            "WARNING: Some structures like mansions only exist in special biomes! If the biome range is too low, the \"/locate\" command will run for a lot of minutes where you cannot play because it blocks the whole server tick.",
             "WARNING: This only works for vanilla dimensions (Overworld, Nether, End)"})
     public static class Structures {
 
@@ -76,14 +75,6 @@ public class ConfigHandler {
         @Config({"Distance between islands in overworld [default: 8192]", "nether the distance is 1/8"})
         @IntRange(min = 64, max = 29999900)
         public static int islandDistance = 8192;
-
-        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        @Config({"WARNING: THIS IS CURRENTLY NOT USED!!! WILL BE FIXED IN FUTURE!", // TODO remove this line
-                "The radius for the biomes to repeat [default: 8192]", "By default, it's the perfect range that each team has the same biomes",
-                "Set to \"null\" to disable the range.",
-                "WARNING: Too small biome range will prevent some structures to generate, if structures are enabled, because some need a special biome! You may fix this by decreasing the \"structureModifier\""})
-//        @IntRange(min = 64, max = 29999900)
-        public static Optional<Integer> biomeRange = Optional.of(8192);
 
         @Config({"The offset from 0, 0 to generate the islands", "Can be used to generate them in the middle of .mca files"})
         public static int offset = 0;
