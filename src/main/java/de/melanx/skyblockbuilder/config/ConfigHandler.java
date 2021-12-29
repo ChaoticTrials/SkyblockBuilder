@@ -8,6 +8,7 @@ import io.github.noeppi_noeppi.libx.config.Group;
 import io.github.noeppi_noeppi.libx.config.validator.DoubleRange;
 import io.github.noeppi_noeppi.libx.config.validator.IntRange;
 import io.github.noeppi_noeppi.libx.util.ResourceList;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
@@ -97,7 +98,7 @@ public class ConfigHandler {
 
             @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
             @Config("The dimension where the single biome should be applied. Use \"null\" for spawn dimension")
-            public static Optional<WorldUtil.Dimension> singleBiomeDimension = Optional.empty();
+            public static Optional<ResourceKey<Level>> singleBiomeDimension = Optional.empty();
 
             @Config({"Should only one biome be generated? [default: false]",
                     "WARNING: Some structures need a special biome, e.g. Mansion needs Dark Oak Forest! These structures will not be generated if you have only one biome!"})
@@ -112,10 +113,14 @@ public class ConfigHandler {
         public static int radius = 50;
 
         @Config({"The dimension the islands will be generated in."})
-        public static WorldUtil.Dimension dimension = WorldUtil.Dimension.OVERWORLD;
+        public static ResourceKey<Level> dimension = Level.OVERWORLD;
 
         @Config("Direction the player should look at initial spawn")
         public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
+
+        @Config({"This affects only dimensions which aren't skyblock dimensions!",
+                "If enabled, the spawn height is ignored and will be found by looking at the internal world surface height."})
+        public static boolean dynamicHeight = true;
 
         @Config({"Height of the bottom layer from the structure.",
                 "This affects where exactly the island will be generated.",

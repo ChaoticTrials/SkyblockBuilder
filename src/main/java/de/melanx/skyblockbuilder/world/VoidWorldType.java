@@ -88,7 +88,7 @@ public class VoidWorldType extends ForgeWorldPreset {
 
     public static ChunkGenerator overworldChunkGenerator(@Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
         MultiNoiseBiomeSource overworld = MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(biomeRegistry);
-        BiomeSource provider = new SkyblockMultiNoiseBiomeSource(biomeRegistry, overworld.parameters, WorldUtil.isSingleBiomeLevel(WorldUtil.Dimension.OVERWORLD));
+        BiomeSource provider = new SkyblockMultiNoiseBiomeSource(biomeRegistry, overworld.parameters, WorldUtil.isSingleBiomeLevel(Level.OVERWORLD));
         NoiseGeneratorSettings settings = dimensionSettingsRegistry.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
         RandomUtility.modifyStructureSettings(settings.structureSettings);
 
@@ -108,7 +108,7 @@ public class VoidWorldType extends ForgeWorldPreset {
 
     private static ChunkGenerator netherChunkGenerator(@Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
         MultiNoiseBiomeSource nether = MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry);
-        BiomeSource provider = new SkyblockMultiNoiseBiomeSource(biomeRegistry, nether.parameters, WorldUtil.isSingleBiomeLevel(WorldUtil.Dimension.THE_NETHER));
+        BiomeSource provider = new SkyblockMultiNoiseBiomeSource(biomeRegistry, nether.parameters, WorldUtil.isSingleBiomeLevel(Level.NETHER));
 
         NoiseGeneratorSettings settings = dimensionSettingsRegistry.getOrThrow(NoiseGeneratorSettings.NETHER);
 

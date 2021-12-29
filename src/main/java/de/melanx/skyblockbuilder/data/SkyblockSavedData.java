@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
+import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.Spiral;
@@ -108,7 +109,7 @@ public class SkyblockSavedData extends SavedData {
             } while (this.skyblockPositions.containsValue(islandPos));
             team = new Team(this, islandPos);
         }
-        if (!(this.level.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator)) {
+        if (ConfigHandler.Spawn.dynamicHeight && !(this.level.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator)) {
             int height = this.level.getHeight(Heightmap.Types.WORLD_SURFACE, islandPos.getCenter().getX(), islandPos.getCenter().getZ());
             islandPos.changeHeight(height);
         }

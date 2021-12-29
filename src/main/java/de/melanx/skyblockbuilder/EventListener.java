@@ -67,7 +67,7 @@ public class EventListener {
             return;
         }
 
-        SkyPaths.generateDefaultFiles();
+        SkyPaths.generateDefaultFiles(event.getPlayerList().getServer());
         TemplateLoader.updateTemplates();
         SkyblockBuilder.getNetwork().updateTemplateNames(TemplateLoader.getTemplateNames());
     }
@@ -160,7 +160,7 @@ public class EventListener {
         MinecraftServer server = event.getServer();
         RandomUtility.dynamicRegistries = server.registryAccess();
         if (WorldUtil.isSkyblock(server.overworld())) {
-            SkyPaths.generateDefaultFiles();
+            SkyPaths.generateDefaultFiles(server);
             TemplateLoader.updateTemplates();
             SkyblockBuilder.getNetwork().updateTemplateNames(TemplateLoader.getTemplateNames());
             TemplateData.get(server.overworld());

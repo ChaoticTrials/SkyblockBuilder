@@ -62,10 +62,10 @@ public class WorldUtil {
         return false;
     }
 
-    public static boolean isSingleBiomeLevel(WorldUtil.Dimension dimensionType) {
+    public static boolean isSingleBiomeLevel(ResourceKey<Level> dimensionType) {
         return ConfigHandler.World.SingleBiome.enabled && ConfigHandler.World.SingleBiome.singleBiomeDimension
-                .map(value -> Objects.equals(value.getLocation(), dimensionType.getLocation()))
-                .orElseGet(() -> Objects.equals(ConfigHandler.Spawn.dimension.getLocation(), dimensionType.getLocation()));
+                .map(value -> Objects.equals(value.location(), dimensionType.location()))
+                .orElseGet(() -> Objects.equals(ConfigHandler.Spawn.dimension.location(), dimensionType.location()));
     }
 
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {
@@ -75,7 +75,7 @@ public class WorldUtil {
     }
 
     public static ServerLevel getConfiguredLevel(MinecraftServer server) {
-        ResourceLocation location = ConfigHandler.Spawn.dimension.getLocation();
+        ResourceLocation location = ConfigHandler.Spawn.dimension.location();
         ResourceKey<Level> worldKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, location);
         ServerLevel configLevel = server.getLevel(worldKey);
 
@@ -196,28 +196,6 @@ public class WorldUtil {
 
         public int getYRot() {
             return this.yRot;
-        }
-    }
-
-    public enum Dimension {
-        OVERWORLD(Level.OVERWORLD),
-        THE_NETHER(Level.NETHER),
-        THE_END(Level.END);
-
-        private final ResourceKey<Level> resourceKey;
-        private final ResourceLocation location;
-
-        Dimension(ResourceKey<Level> dimension) {
-            this.resourceKey = dimension;
-            this.location = dimension.location();
-        }
-
-        public ResourceKey<Level> getResourceKey() {
-            return this.resourceKey;
-        }
-
-        public ResourceLocation getLocation() {
-            return this.location;
         }
     }
 }

@@ -43,7 +43,7 @@ public final class SkyblockBuilder extends ModXRegistration {
         }
 
         Registration.registerCodecs();
-        SkyPaths.generateDefaultFiles();
+        SkyPaths.generateDefaultFiles(null);
     }
 
     @Override

@@ -4,12 +4,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.StartingInventory;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nullable;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,6 +35,7 @@ public class SkyPaths {
     private static final Path FEATURES_FILE = DATA_DIR.resolve("features.txt");
     private static final Path STRUCTURES_FILE = DATA_DIR.resolve("structures.txt");
     private static final Path BIOMES_FILE = DATA_DIR.resolve("biomes.txt");
+    private static final Path DIMENSIONS_FILE = DATA_DIR.resolve("dimensions.txt");
 
     public static void createDirectories() {
         try {
@@ -43,7 +48,7 @@ public class SkyPaths {
         }
     }
 
-    public static void generateDefaultFiles() {
+    public static void generateDefaultFiles(@Nullable MinecraftServer server) {
         try {
             createDirectories();
 
@@ -52,6 +57,9 @@ public class SkyPaths {
             generateFeatureInformation();
             generateStructureInformation();
             generateBiomeInformation();
+            if (server != null) {
+                generateDimensionInformation(server);
+            }
 
             StartingInventory.loadStarterItems();
         } catch (IOException e) {
@@ -115,6 +123,16 @@ public class SkyPaths {
             if (biome.getRegistryName() != null) {
                 w.write(biome.getRegistryName().toString() + "\n");
             }
+        }
+
+        w.close();
+    }
+
+    public static void generateDimensionInformation(MinecraftServer server) throws IOException {
+        BufferedWriter w = Files.newBufferedWriter(DIMENSIONS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+
+        for (ResourceKey<Level> levelKey : server.levelKeys()) {
+            w.write(levelKey.location() + "\n");
         }
 
         w.close();

@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -34,7 +35,7 @@ public class SkyblockEndBiomeSource extends BiomeSource {
         this.parent = parent;
         this.seed = parent.seed;
         this.lookupRegistry = parent.biomes;
-        this.isSingleBiomeLevel = WorldUtil.isSingleBiomeLevel(WorldUtil.Dimension.THE_END);
+        this.isSingleBiomeLevel = WorldUtil.isSingleBiomeLevel(Level.END);
     }
 
     @Nonnull
