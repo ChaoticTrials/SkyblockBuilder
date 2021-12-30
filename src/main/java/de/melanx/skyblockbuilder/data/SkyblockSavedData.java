@@ -6,13 +6,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
-import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -30,7 +28,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -51,7 +48,6 @@ public class SkyblockSavedData extends SavedData {
 
     private static final String NAME = "skyblock_builder";
     private static SkyblockSavedData clientInstance;
-    public static final IslandPos SPAWN_ISLAND = new IslandPos(0, 0);
     public static final UUID SPAWN_ID = Util.NIL_UUID;
 
     private ServerLevel level;
@@ -100,18 +96,14 @@ public class SkyblockSavedData extends SavedData {
         IslandPos islandPos;
         Team team;
         if (teamName.equalsIgnoreCase("spawn")) {
-            islandPos = SPAWN_ISLAND;
+            islandPos = new IslandPos(this.level, 0, 0);
             team = new Team(this, islandPos, SPAWN_ID);
         } else {
             do {
                 int[] pos = this.spiral.next();
-                islandPos = new IslandPos(pos[0], pos[1]);
+                islandPos = new IslandPos(this.level, pos[0], pos[1]);
             } while (this.skyblockPositions.containsValue(islandPos));
             team = new Team(this, islandPos);
-        }
-        if (ConfigHandler.Spawn.dynamicHeight && !(this.level.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator)) {
-            int height = this.level.getHeight(Heightmap.Types.WORLD_SURFACE, islandPos.getCenter().getX(), islandPos.getCenter().getZ());
-            islandPos.changeHeight(height);
         }
 
         Set<BlockPos> positions = initialPossibleSpawns(islandPos.getCenter());
@@ -227,7 +219,7 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public boolean addPlayerToTeam(Team team, UUID player) {
-        if (team.getIsland() != SPAWN_ISLAND) {
+        if (!team.isSpawn()) {
             team.broadcast(new TranslatableComponent("skyblockbuilder.event.player_joined", GameProfileCache.getName(player)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         }
 

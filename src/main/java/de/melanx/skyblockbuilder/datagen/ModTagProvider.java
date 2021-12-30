@@ -6,6 +6,7 @@ import io.github.noeppi_noeppi.libx.data.provider.CommonTagsProviderBase;
 import io.github.noeppi_noeppi.libx.mod.ModX;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 @Datagen
@@ -18,6 +19,8 @@ public class ModTagProvider extends CommonTagsProviderBase {
     @Override
     public void setup() {
         //noinspection unchecked
-        this.block(ModBlockTags.ADDITIONAL_VALID_SPAWN).addTags(BlockTags.LEAVES);
+        this.block(ModBlockTags.ADDITIONAL_VALID_SPAWN)
+                .addTags(BlockTags.LEAVES)
+                .add(Blocks.WATER);
     }
 }

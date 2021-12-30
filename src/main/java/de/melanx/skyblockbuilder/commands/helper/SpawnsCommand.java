@@ -71,7 +71,7 @@ public class SpawnsCommand {
             for (BlockPos pos : possibleSpawns) {
                 JsonArray arr = new JsonArray();
                 arr.add(pos.getX() % ConfigHandler.World.islandDistance);
-                arr.add(pos.getY() - ConfigHandler.Spawn.height);
+                arr.add(pos.getY() - team.getIsland().getCenter().getY());
                 arr.add(pos.getZ() % ConfigHandler.World.islandDistance);
                 spawns.add(arr);
             }

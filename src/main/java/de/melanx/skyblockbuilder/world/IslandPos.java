@@ -1,8 +1,10 @@
 package de.melanx.skyblockbuilder.world;
 
 import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 /*
  * Credits go to Botania authors
@@ -13,8 +15,8 @@ public final class IslandPos {
     private final int z;
     private BlockPos center;
 
-    public IslandPos(int x, int z) {
-        this(x, ConfigHandler.Spawn.height, z);
+    public IslandPos(Level level, int x, int z) {
+        this(x, WorldUtil.calcSpawnHeight(level, x, z), z);
     }
 
     public IslandPos(int x, int y, int z) {

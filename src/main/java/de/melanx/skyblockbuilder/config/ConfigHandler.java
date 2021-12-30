@@ -118,14 +118,21 @@ public class ConfigHandler {
         @Config("Direction the player should look at initial spawn")
         public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
 
-        @Config({"This affects only dimensions which aren't skyblock dimensions!",
-                "If enabled, the spawn height is ignored and will be found by looking at the internal world surface height."})
-        public static boolean dynamicHeight = true;
+        public static class Height {
 
-        @Config({"Height of the bottom layer from the structure.",
-                "This affects where exactly the island will be generated.",
-                "Would be smart to choose a value within the world height (default -64 and 319)"})
-        public static int height = 64;
+            @Config({"set:",
+                    "   Uses the bottom height of the range",
+                    "range_top:",
+                    "   Searches from the top position down to the bottom position for a valid spawn.",
+                    "   If no valid position was found, the top position will be used.",
+                    "range_bottom:",
+                    "   Searches from the top position down to the bottom position for a valid spawn.",
+                    "   If no valid position was found, the bottom position will be used."})
+            public static SpawnSettings.Type spawnType = SpawnSettings.Type.SET;
+
+            @Config
+            public static SpawnSettings.Range range = new SpawnSettings.Range(-64, 319);
+        }
     }
 
     public static class Inventory {

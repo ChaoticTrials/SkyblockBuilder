@@ -6,11 +6,13 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.SpawnSettings;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -104,11 +106,44 @@ public class WorldUtil {
     }
 
     public static boolean isValidSpawn(Level level, BlockPos pos) {
-        return pos.getY() >= level.getMinBuildHeight()
-                && pos.getY() <= level.getMaxBuildHeight()
+        return WorldUtil.isValidSpawn(level, pos, level.getMinBuildHeight(), level.getMaxBuildHeight());
+    }
+
+    public static boolean isValidSpawn(Level level, BlockPos pos, int bottom, int top) {
+        return pos.getY() >= bottom
+                && pos.getY() <= top
                 && !level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty() || level.getBlockState(pos.below()).is(ModBlockTags.ADDITIONAL_VALID_SPAWN)
                 && level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()
                 && level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty();
+    }
+
+    public static int calcSpawnHeight(Level level, int x, int z) {
+        int top = ConfigHandler.Spawn.Height.range.top();
+        int bottom = ConfigHandler.Spawn.Height.range.bottom();
+
+        int height;
+        switch (ConfigHandler.Spawn.Height.spawnType) {
+            case RANGE_TOP, RANGE_BOTTOM -> {
+                BlockPos.MutableBlockPos spawn = new BlockPos.MutableBlockPos(x, top, z);
+                while (!WorldUtil.isValidSpawn(level, spawn, bottom, top)) {
+                    if (spawn.getY() <= level.getMinBuildHeight()) {
+                        if (ConfigHandler.Spawn.Height.spawnType == SpawnSettings.Type.RANGE_TOP) {
+                            spawn.setY(top);
+                        } else {
+                            spawn.setY(bottom);
+                        }
+                        break;
+                    }
+
+                    spawn.move(Direction.DOWN, 1);
+                }
+                height = spawn.getY();
+            }
+            // SpawnSettings.Type.SET
+            default -> height = bottom;
+        }
+
+        return Math.max(level.getMinBuildHeight() + 1, height);
     }
 
     // [Vanilla copy] Get flat world info on servers
