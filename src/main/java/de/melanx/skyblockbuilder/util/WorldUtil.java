@@ -137,7 +137,7 @@ public class WorldUtil {
 
                     spawn.move(Direction.DOWN, 1);
                 }
-                height = spawn.getY();
+                height = spawn.getY() + ConfigHandler.Spawn.Height.offset;
             }
             // SpawnSettings.Type.SET
             default -> height = bottom;

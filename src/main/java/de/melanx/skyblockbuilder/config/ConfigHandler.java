@@ -130,8 +130,14 @@ public class ConfigHandler {
                     "   If no valid position was found, the bottom position will be used."})
             public static SpawnSettings.Type spawnType = SpawnSettings.Type.SET;
 
-            @Config
-            public static SpawnSettings.Range range = new SpawnSettings.Range(-64, 319);
+            @Config({"You can set a range from minY to maxY. minY is the bottom spawn position. maxY is the top spawn dimension.",
+                    "If you set the spawn height type to \"set\", the bottom value will be used for a set height. " +
+                            "Otherwise, the height will be calculated."})
+            public static SpawnSettings.Range range = new SpawnSettings.Range(64, 319);
+
+            @Config({"If the spawn height type is set to \"range\", this offset will be used to slightly move the spawn height in any direction.",
+                    "Negative values go down, positive values go up."})
+            public static int offset = 0;
         }
     }
 
