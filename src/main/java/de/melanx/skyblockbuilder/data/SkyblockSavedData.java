@@ -323,7 +323,7 @@ public class SkyblockSavedData extends SavedData {
 
     @Nullable
     public Team getTeam(String name) {
-        return this.getTeam(this.skyblockIds.get(name));
+        return this.getTeam(this.skyblockIds.get(name.toLowerCase(Locale.ROOT)));
     }
 
     @Nullable
