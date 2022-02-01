@@ -57,6 +57,10 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
             return this.parent.fillFromNoise(executor, blender, manager, chunk);
         }
 
+        ChunkPos chunkPos = chunk.getPos();
+        if (chunkPos.x == 0 && chunkPos.z == 0) {
+            chunk.setBlockState(new BlockPos(0, 64, 0), Blocks.BEDROCK.defaultBlockState(), false);
+        }
         return CompletableFuture.completedFuture(chunk);
     }
 
