@@ -58,12 +58,12 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                     Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension)
             ).apply(instance, instance.stable(SkyblockNoiseBasedChunkGenerator::new)));
 
-    protected final long seed;
-    protected final Registry<NormalNoise.NoiseParameters> noises;
-    protected final Supplier<NoiseGeneratorSettings> generatorSettings;
+    public final long seed;
+    public final Registry<NormalNoise.NoiseParameters> noises;
+    public final Supplier<NoiseGeneratorSettings> generatorSettings;
+    public final ResourceKey<Level> dimension;
     protected final StructureSettings settings;
     protected final NoiseBasedChunkGenerator parent;
-    protected final ResourceKey<Level> dimension;
     protected final List<FlatLayerInfo> layerInfos;
     private final int layerHeight;
 
@@ -84,7 +84,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     @Nonnull
     @Override
     protected Codec<? extends ChunkGenerator> codec() {
-        return CODEC;
+        return SkyblockNoiseBasedChunkGenerator.CODEC;
     }
 
     @Override

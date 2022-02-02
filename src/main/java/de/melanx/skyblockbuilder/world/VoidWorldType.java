@@ -131,6 +131,6 @@ public class VoidWorldType extends ForgeWorldPreset {
 
         NoiseGeneratorSettings settings = dimensionSettingsRegistry.getOrThrow(NoiseGeneratorSettings.END);
 
-        return new SkyblockEndChunkGenerator(noises, provider, seed, () -> settings);
+        return new SkyblockEndChunkGenerator(noises, provider, seed, () -> settings, Level.END);
     }
 }

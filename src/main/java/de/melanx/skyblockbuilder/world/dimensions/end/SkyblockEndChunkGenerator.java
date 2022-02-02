@@ -1,9 +1,14 @@
 package de.melanx.skyblockbuilder.world.dimensions.end;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -13,8 +18,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
@@ -25,14 +29,30 @@ import java.util.function.Supplier;
 
 public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator {
 
-    public SkyblockEndChunkGenerator(Registry<NormalNoise.NoiseParameters> noises, BiomeSource provider, long seed, Supplier<NoiseGeneratorSettings> generatorSettings) {
-        super(noises, provider, seed, generatorSettings, Level.END);
+    // [VanillaCopy] overworld chunk generator codec
+    public static final Codec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.create(
+            (instance) -> instance.group(
+                    RegistryLookupCodec.create(Registry.NOISE_REGISTRY).forGetter(generator -> generator.noises),
+                    BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
+                    Codec.LONG.fieldOf("seed").stable().forGetter(generator -> generator.seed),
+                    NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
+                    Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension)
+            ).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
+
+    public SkyblockEndChunkGenerator(Registry<NormalNoise.NoiseParameters> noises, BiomeSource provider, long seed, Supplier<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension) {
+        super(noises, provider, seed, generatorSettings, dimension);
+    }
+
+    @Nonnull
+    @Override
+    protected Codec<? extends ChunkGenerator> codec() {
+        return SkyblockEndChunkGenerator.CODEC;
     }
 
     @Nonnull
     @Override
     public ChunkGenerator withSeed(long seed) {
-        return new SkyblockEndChunkGenerator(this.noises, this.biomeSource.withSeed(seed), seed, this.generatorSettings);
+        return new SkyblockEndChunkGenerator(this.noises, this.biomeSource.withSeed(seed), seed, this.generatorSettings, this.dimension);
     }
 
     @Override
@@ -40,7 +60,15 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
         super.buildSurface(level, structureManager, chunk);
 
         if (ConfigHandler.Dimensions.End.mainIsland) {
-            this.parent.buildSurface(level, structureManager, chunk);
+            // [Vanilla copy] to use registry wrapper when calling SurfaceSystem#buildSurface
+            WorldGenerationContext worldGenerationContext = new WorldGenerationContext(this, level);
+            NoiseGeneratorSettings noiseGeneratorSettings = this.generatorSettings.get();
+            NoiseChunk noisechunk = chunk.getOrCreateNoiseChunk(this.sampler, () -> {
+                //noinspection CodeBlock2Expr
+                return new Beardifier(structureManager, chunk);
+            }, noiseGeneratorSettings, this.globalFluidPicker, Blender.of(level));
+            this.surfaceSystem.buildSurface(level.getBiomeManager(), LazyBiomeRegistryWrapper.get(level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY)),
+                    noiseGeneratorSettings.useLegacyRandomSource(), worldGenerationContext, chunk, noisechunk, noiseGeneratorSettings.surfaceRule());
             return;
         }
 
@@ -57,10 +85,6 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
             return this.parent.fillFromNoise(executor, blender, manager, chunk);
         }
 
-        ChunkPos chunkPos = chunk.getPos();
-        if (chunkPos.x == 0 && chunkPos.z == 0) {
-            chunk.setBlockState(new BlockPos(0, 64, 0), Blocks.BEDROCK.defaultBlockState(), false);
-        }
         return CompletableFuture.completedFuture(chunk);
     }
 
@@ -72,17 +96,4 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
             super.applyCarvers(level, seed, biomeManager, structureManager, chunk, carving);
         }
     }
-
-//    // Vanilla copy
-//    @Override
-//    protected void createStructure(@Nonnull ConfiguredStructureFeature<?, ?> feature, @Nonnull RegistryAccess registry, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull StructureManager templateManager, long seed, @Nonnull Biome biome) {
-//        SectionPos sectionpos = SectionPos.bottomOf(chunk);
-//        StructureStart<?> existingStart = structureManager.getStartForFeature(sectionpos, feature.feature, chunk);
-//        int references = existingStart != null ? existingStart.getReferences() : 0;
-//        StructureFeatureConfiguration structurefeatureconfiguration = this.settings.getConfig(feature.feature);
-//        if (structurefeatureconfiguration != null) {
-//            StructureStart<?> start = feature.generate(registry, this, this.biomeSource, templateManager, seed, chunk.getPos(), biome, references, structurefeatureconfiguration, chunk);
-//            structureManager.setStartForFeature(sectionpos, feature.feature, start, chunk);
-//        }
-//    }
 }
