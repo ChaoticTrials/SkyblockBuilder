@@ -9,6 +9,7 @@ import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -136,7 +137,7 @@ public class RandomUtility {
         Set<GameProfile> profiles = Sets.newHashSet();
         ListTag tags = new ListTag();
 
-        Set<UUID> handledIds = Sets.newHashSet();
+        Set<UUID> handledIds = Sets.newHashSet(Util.NIL_UUID);
 
         // load the cache and look for all profiles
         profileCache.load().forEach(profileInfo -> {
