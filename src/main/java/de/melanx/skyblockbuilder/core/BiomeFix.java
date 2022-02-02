@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.core;
 import com.mojang.serialization.Codec;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeSource;
 import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockMultiNoiseBiomeSource;
 import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.BlockPos;
@@ -46,7 +47,7 @@ public class BiomeFix {
      */
     public static Codec<PalettedContainer<Biome>> modifiedCodec(Registry<Biome> biomeRegistry, ServerLevel level) {
         BiomeSource biomeSource = level.getChunkSource().getGenerator().getBiomeSource();
-        if (biomeSource instanceof SkyblockMultiNoiseBiomeSource) {
+        if (biomeSource instanceof SkyblockMultiNoiseBiomeSource || biomeSource instanceof SkyblockEndBiomeSource) {
             return ChunkSerializer.makeBiomeCodec(LazyBiomeRegistryWrapper.get(biomeRegistry));
         }
 
