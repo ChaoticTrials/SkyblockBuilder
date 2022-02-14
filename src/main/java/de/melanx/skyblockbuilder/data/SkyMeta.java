@@ -1,12 +1,12 @@
 package de.melanx.skyblockbuilder.data;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
-import org.apache.commons.compress.utils.Lists;
 
 import javax.annotation.Nonnull;
 import java.util.List;

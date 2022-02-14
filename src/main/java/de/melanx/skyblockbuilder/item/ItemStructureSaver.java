@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import org.apache.commons.compress.utils.IOUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -162,18 +161,12 @@ public class ItemStructureSaver extends Item {
         RandomUtility.fillTemplateFromWorld(template, level, origin, bounds, true, toIgnore);
 
         Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name));
-        OutputStream outputStream = null;
-        try {
-            outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE);
+        try (OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE)) {
             CompoundTag nbttagcompound = template.save(new CompoundTag());
             NbtIo.writeCompressed(nbttagcompound, outputStream);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
-        } finally {
-            if (outputStream != null) {
-                IOUtils.closeQuietly(outputStream);
-            }
         }
 
         return path.getFileName().toString();
