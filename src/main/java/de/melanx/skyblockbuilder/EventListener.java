@@ -105,7 +105,7 @@ public class EventListener {
             Team spawn = data.getSpawn();
             GameProfileCache.addProfiles(Set.of(player.getGameProfile()));
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
-                if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
+                if (!data.hasPlayerTeam(player) && !spawn.hasPlayer(player)) {
                     if (ConfigHandler.Inventory.dropItems) {
                         RandomUtility.dropInventories(player);
                     }
@@ -147,6 +147,11 @@ public class EventListener {
             BlockPos pos = player.getRespawnPosition();
 
             ServerLevel level = player.getLevel();
+
+            if (!WorldUtil.isSkyblock(level)) {
+                return;
+            }
+
             if (pos == null || !level.getBlockState(pos).is(BlockTags.BEDS) && !level.getBlockState(pos).is(Blocks.RESPAWN_ANCHOR)) {
                 SkyblockSavedData data = SkyblockSavedData.get(level);
                 Team team = data.getTeamFromPlayer(player);
