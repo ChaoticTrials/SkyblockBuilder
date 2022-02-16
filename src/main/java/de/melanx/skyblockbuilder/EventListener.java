@@ -99,7 +99,7 @@ public class EventListener {
             ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
             Team spawn = data.getSpawn();
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
-                if (!data.hasPlayerTeam(player) && !data.getSpawn().hasPlayer(player)) {
+                if (!data.hasPlayerTeam(player) && !spawn.hasPlayer(player)) {
                     if (LibXConfigHandler.Inventory.dropItems) {
                         RandomUtility.dropInventories(player);
                     }
@@ -148,6 +148,11 @@ public class EventListener {
             BlockPos pos = player.getSpawnPointPos();
 
             ServerWorld world = player.getServerWorld();
+
+            if (!WorldUtil.isSkyblock(world)) {
+                return;
+            }
+
             if (pos == null || !world.getBlockState(pos).isIn(BlockTags.BEDS) && !world.getBlockState(pos).matchesBlock(Blocks.RESPAWN_ANCHOR)) {
                 SkyblockSavedData data = SkyblockSavedData.get(world);
                 Team team = data.getTeamFromPlayer(player);
