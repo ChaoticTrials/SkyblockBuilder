@@ -4,6 +4,7 @@ buildscript {
 
 apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/mod.gradle'
 apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.coremods'
+apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.cursedep'
 
 repositories {
     maven {

@@ -60,6 +60,7 @@ public class SkyblockSavedData extends SavedData {
             DimensionDataStorage storage = server.overworld().getDataStorage();
             SkyblockSavedData data = storage.computeIfAbsent(nbt -> new SkyblockSavedData().load(nbt), SkyblockSavedData::new, NAME);
             data.level = WorldUtil.getConfiguredLevel(server);
+            data.addMetaInfo(Util.NIL_UUID);
             return data;
         } else {
             return clientInstance == null ? new SkyblockSavedData() : clientInstance;
@@ -77,7 +78,7 @@ public class SkyblockSavedData extends SavedData {
 
         SkyblockBuilder.getLogger().info("Successfully generated spawn.");
         Team team = this.createTeam("Spawn");
-        assert team != null;
+        //noinspection ConstantConditions
         team.addPlayer(Util.NIL_UUID);
 
         this.setDirty();
