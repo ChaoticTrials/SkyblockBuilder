@@ -46,11 +46,11 @@ public class ScreenCustomizeSkyblock extends Screen {
         this.list = new TemplateList();
         this.addWidget(this.list);
 
-        this.doneButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (p_241579_1_) -> {
+        this.doneButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, button -> {
             this.applyTemplate.accept(this.template);
             this.minecraft.setScreen(this.parent);
         }));
-        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, (p_213015_1_) -> {
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
             this.minecraft.setScreen(this.parent);
         }));
         if (this.template != null) {

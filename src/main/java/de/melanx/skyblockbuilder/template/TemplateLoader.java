@@ -44,7 +44,11 @@ public class TemplateLoader {
                 throw new IllegalStateException("You need at least one configured template.");
             }
 
-            TEMPLATE = TEMPLATES.get(0);
+            if (TEMPLATE == null) {
+                TEMPLATE = TEMPLATES.get(0);
+            } else {
+                TEMPLATE = TemplateLoader.getConfiguredTemplate(TEMPLATE.getName());
+            }
 
             TEMPLATES.sort(Comparator.comparing(ConfiguredTemplate::getName));
         } catch (IOException e) {
