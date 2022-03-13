@@ -1,18 +1,16 @@
 package de.melanx.skyblockbuilder.util;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.Util;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.Vec3i;
-import net.minecraft.data.worldgen.StructureFeatures;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -23,10 +21,6 @@ import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.StructureSettings;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.fml.ModList;
@@ -34,7 +28,6 @@ import net.minecraftforge.fml.ModList;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RandomUtility {
@@ -52,12 +45,12 @@ public class RandomUtility {
 
     public static BiomeGenerationSettings modifyBiomeGenerationSettings(BiomeGenerationSettings settings) {
         // Remove non-whitelisted features
-        List<List<Supplier<PlacedFeature>>> featureList = Lists.newArrayList();
+        List<List<Holder<PlacedFeature>>> featureList = Lists.newArrayList();
 
         settings.features().forEach(list -> {
-            ImmutableList.Builder<Supplier<PlacedFeature>> features = ImmutableList.builder();
-            for (Supplier<PlacedFeature> feature : list) {
-                ResourceLocation location = feature.get().feature.get().feature.getRegistryName();
+            ImmutableList.Builder<Holder<PlacedFeature>> features = ImmutableList.builder();
+            for (Holder<PlacedFeature> feature : list) {
+                ResourceLocation location = feature.value().feature().value().feature().getRegistryName();
                 if (location != null) {
                     if (ConfigHandler.Structures.generationFeatures.test(location)) {
                         features.add(feature);
@@ -70,32 +63,33 @@ public class RandomUtility {
         return new BiomeGenerationSettings(
                 settings.carvers.entrySet().stream()
                         .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey,
-                                (entry) -> ImmutableList.copyOf(entry.getValue()))),
+                                Map.Entry::getValue)),
                 featureList.stream()
-                        .map(ImmutableList::copyOf)
+                        .map(HolderSet::direct)
                         .collect(Collectors.toList()));
     }
 
-    public static void modifyStructureSettings(StructureSettings settings) {
-        // Remove non-whitelisted structures
-        Map<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap();
-
-        for (Map.Entry<StructureFeature<?>, StructureFeatureConfiguration> structure : settings.structureConfig.entrySet()) {
-            ResourceLocation location = structure.getKey().getRegistryName();
-            if (location != null) {
-                if (ConfigHandler.Structures.generationStructures.test(location)) {
-                    map.put(structure.getKey(), structure.getValue());
-                }
-            }
-        }
-
-        settings.structureConfig = map;
-        Map<StructureFeature<?>, ImmutableMultimap.Builder<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>>> hashMap = Maps.newHashMap();
-        StructureFeatures.registerStructures(((configuredStructureFeature, biomeResourceKey) -> {
-            hashMap.computeIfAbsent(configuredStructureFeature.feature, structure -> ImmutableMultimap.builder()).put(configuredStructureFeature, biomeResourceKey);
-        }));
-        settings.configuredStructures = hashMap.entrySet().stream().filter(entry -> map.get(entry.getKey()) != null).collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> entry.getValue().build()));
-    }
+    // TODO
+//    public static void modifyStructureSettings(StructureSettings settings) {
+//        // Remove non-whitelisted structures
+//        Map<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap();
+//
+//        for (Map.Entry<StructureFeature<?>, StructureFeatureConfiguration> structure : settings.structureConfig.entrySet()) {
+//            ResourceLocation location = structure.getKey().getRegistryName();
+//            if (location != null) {
+//                if (ConfigHandler.Structures.generationStructures.test(location)) {
+//                    map.put(structure.getKey(), structure.getValue());
+//                }
+//            }
+//        }
+//
+//        settings.structureConfig = map;
+//        Map<StructureFeature<?>, ImmutableMultimap.Builder<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>>> hashMap = Maps.newHashMap();
+//        StructureFeatures.registerStructures(((configuredStructureFeature, biomeResourceKey) -> {
+//            hashMap.computeIfAbsent(configuredStructureFeature.feature, structure -> ImmutableMultimap.builder()).put(configuredStructureFeature, biomeResourceKey);
+//        }));
+//        settings.configuredStructures = hashMap.entrySet().stream().filter(entry -> map.get(entry.getKey()) != null).collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> entry.getValue().build()));
+//    }
 
     public static int validateBiome(Biome biome) {
         if (dynamicRegistries != null) {
@@ -106,24 +100,25 @@ public class RandomUtility {
         }
     }
 
-    public static StructureSettings modifiedStructureSettings(StructureSettings settings) {
-        Map<StructureFeature<?>, StructureFeatureConfiguration> structureConfig = new HashMap<>();
-
-        for (Map.Entry<StructureFeature<?>, StructureFeatureConfiguration> entry : settings.structureConfig.entrySet()) {
-            StructureFeature<?> structureFeature = entry.getKey();
-            StructureFeatureConfiguration config = entry.getValue();
-            StructureFeatureConfiguration newConfig = new StructureFeatureConfiguration(
-                    Math.max(1, (int) (config.spacing() * ConfigHandler.World.structureModifier)),
-                    Math.max(0, (int) (config.separation() * ConfigHandler.World.structureModifier)),
-                    config.salt()
-            );
-
-            structureConfig.put(structureFeature, newConfig);
-        }
-        settings.structureConfig = structureConfig;
-
-        return settings;
-    }
+    // TODO
+//    public static StructureSettings modifiedStructureSettings(StructureSettings settings) {
+//        Map<StructureFeature<?>, StructureFeatureConfiguration> structureConfig = new HashMap<>();
+//
+//        for (Map.Entry<StructureFeature<?>, StructureFeatureConfiguration> entry : settings.structureConfig.entrySet()) {
+//            StructureFeature<?> structureFeature = entry.getKey();
+//            StructureFeatureConfiguration config = entry.getValue();
+//            StructureFeatureConfiguration newConfig = new StructureFeatureConfiguration(
+//                    Math.max(1, (int) (config.spacing() * ConfigHandler.World.structureModifier)),
+//                    Math.max(0, (int) (config.separation() * ConfigHandler.World.structureModifier)),
+//                    config.salt()
+//            );
+//
+//            structureConfig.put(structureFeature, newConfig);
+//        }
+//        settings.structureConfig = structureConfig;
+//
+//        return settings;
+//    }
 
     public static void dropInventories(Player player) {
         if (player.isSpectator() || player.isCreative()) {

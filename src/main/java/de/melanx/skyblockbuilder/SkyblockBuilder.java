@@ -13,7 +13,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Mod("skyblockbuilder")
 public final class SkyblockBuilder extends ModXRegistration {

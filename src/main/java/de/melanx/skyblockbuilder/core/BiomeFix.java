@@ -7,6 +7,7 @@ import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndBiomeSource;
 import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockMultiNoiseBiomeSource;
 import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,8 +20,6 @@ import net.minecraft.world.level.chunk.LinearPalette;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-
-import java.util.Objects;
 
 public class BiomeFix {
 
@@ -45,7 +44,7 @@ public class BiomeFix {
      * Patched into {@link ChunkSerializer#write(ServerLevel, ChunkAccess)} redirecting the call to
      * change the biome registry if needed.
      */
-    public static Codec<PalettedContainer<Biome>> modifiedCodec(Registry<Biome> biomeRegistry, ServerLevel level) {
+    public static Codec<PalettedContainer<Holder<Biome>>> modifiedCodec(Registry<Biome> biomeRegistry, ServerLevel level) {
         BiomeSource biomeSource = level.getChunkSource().getGenerator().getBiomeSource();
         if (biomeSource instanceof SkyblockMultiNoiseBiomeSource || biomeSource instanceof SkyblockEndBiomeSource) {
             return ChunkSerializer.makeBiomeCodec(LazyBiomeRegistryWrapper.get(biomeRegistry));
@@ -71,14 +70,17 @@ public class BiomeFix {
      * Patched at head of {@link ServerLevel#findNearestBiome(Biome, BlockPos, int, int)} to change the way how to
      * search for the biomes.
      */
-    public static BlockPos findNearestBiome(ServerLevel level, Biome biome, BlockPos pos, int radius, int increment) {
-        ChunkGenerator generator = level.getChunkSource().getGenerator();
-        if (generator instanceof SkyblockNoiseBasedChunkGenerator) {
-            return generator.getBiomeSource().findBiomeHorizontal(pos.getX(), pos.getY(), pos.getZ(), radius, increment, target -> {
-                return Objects.equals(target.getRegistryName(), biome.getRegistryName());
-            }, level.random, true, generator.climateSampler());
-        }
-
-        return null;
+//    public static BlockPos findNearestBiome(ServerLevel level, Biome biome, BlockPos pos, int radius, int increment) {
+//        ChunkGenerator generator = level.getChunkSource().getGenerator();
+//        if (generator instanceof SkyblockNoiseBasedChunkGenerator) {
+//            return generator.getBiomeSource().findBiomeHorizontal(pos.getX(), pos.getY(), pos.getZ(), radius, increment, target -> {
+//                return Objects.equals(target.getRegistryName(), biome.getRegistryName());
+//            }, level.random, true, generator.climateSampler());
+//        }
+//
+//        return null;
+//    }
+    public static boolean isValidRegistry(Registry<?> thisRegistry, Registry<?> thatRegistry) {
+        return thisRegistry.key() == thatRegistry.key();
     }
 }

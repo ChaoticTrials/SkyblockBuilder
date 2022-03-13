@@ -28,13 +28,13 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.18.1-3.1.1"
+    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.0"
 
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.18.1-3.1.1")
+    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.0")
     implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.18-1.1.0")
-    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.18-5.0.2.3")
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.18.2-5.0.6.3")
 
-    runtimeOnly fg.deobf("mezz.jei:jei-1.18:9.0.0.40")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.18.2:9.4.1.114")
 
     coremods "io.github.noeppi_noeppi.misc:CoreModTypes:5.0.1-2"
 
