@@ -12,12 +12,10 @@ import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.LinearPalette;
-import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
@@ -80,7 +78,21 @@ public class BiomeFix {
 //
 //        return null;
 //    }
+
+    // TODO javadoc
     public static boolean isValidRegistry(Registry<?> thisRegistry, Registry<?> thatRegistry) {
         return thisRegistry.key() == thatRegistry.key();
+    }
+
+    public static void replaceMissingSections(LevelHeightAccessor levelHeightAccessor, Registry<Biome> biomeRegistry, LevelChunkSection[] chunkSections) {
+        if (levelHeightAccessor instanceof ServerLevel level) {
+            biomeRegistry = BiomeFix.modifiedRegistry(biomeRegistry, level);
+        }
+
+        for (int i = 0; i < chunkSections.length; ++i) {
+            if (chunkSections[i] == null) {
+                chunkSections[i] = new LevelChunkSection(levelHeightAccessor.getSectionIndexFromSectionY(i), biomeRegistry);
+            }
+        }
     }
 }

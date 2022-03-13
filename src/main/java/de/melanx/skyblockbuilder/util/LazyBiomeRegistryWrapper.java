@@ -96,7 +96,9 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
 
     @Override
     public int getId(@Nullable Biome value) {
-        return this.parent.getId(this.parent.get(value == null ? null : value.getRegistryName()));
+        Biome biome = this.parent.get(value == null ? null : value.getRegistryName());
+        int id = this.parent.getId(biome);
+        return id;
     }
 
     @Override
