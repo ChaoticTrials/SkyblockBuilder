@@ -1,15 +1,15 @@
 package de.melanx.skyblockbuilder.world.dimensions.multinoise;
 
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.*;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -22,11 +22,14 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -48,7 +51,6 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     public final Registry<NormalNoise.NoiseParameters> noises;
     public final Holder<NoiseGeneratorSettings> generatorSettings;
     public final ResourceKey<Level> dimension;
-    //    protected final StructureSettings settings;
     protected final NoiseBasedChunkGenerator parent;
     protected final List<FlatLayerInfo> layerInfos;
     private final int layerHeight;
@@ -58,7 +60,6 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         this.seed = seed;
         this.noises = noises;
         this.generatorSettings = generatorSettings;
-//        this.settings = RandomUtility.modifiedStructureSettings(generatorSettings.get().structureSettings());
         this.parent = new NoiseBasedChunkGenerator(structureSets, this.noises, source, seed, generatorSettings);
         this.dimension = dimension;
         this.layerInfos = ConfigHandler.World.surface
@@ -117,60 +118,17 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         return CompletableFuture.completedFuture(chunk);
     }
 
-    // [Vanilla Copy]
-//    @Nullable TODO
-//    @Override
-//    public BlockPos findNearestMapFeature(@Nonnull ServerLevel level, @Nonnull StructureFeature<?> structure, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
-//        boolean shouldSearch = this.generatorSettings.get().structureSettings.structureConfig().get(structure) != null;
-//
-//        if (!shouldSearch) {
-//            return null;
-//        }
-//
-//        if (structure == StructureFeature.STRONGHOLD) {
-//            this.generateStrongholds();
-//            BlockPos startPos = null;
-//            double currentDist = Double.MAX_VALUE;
-//            BlockPos.MutableBlockPos potentialStartPos = new BlockPos.MutableBlockPos();
-//
-//            for (ChunkPos chunkPos : this.strongholdPositions) {
-//                potentialStartPos.set(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 32, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
-//                double newDist = potentialStartPos.distSqr(pos);
-//                if (startPos == null) {
-//                    startPos = potentialStartPos.immutable();
-//                    currentDist = newDist;
-//                } else if (newDist < currentDist) {
-//                    startPos = potentialStartPos.immutable();
-//                    currentDist = newDist;
-//                }
-//            }
-//
-//            return startPos;
-//        }
-//
-//        StructureFeatureConfiguration config = this.settings.getConfig(structure);
-//        ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> featureBiomeMap = this.settings.structures(structure);
-//
-//        // my change: get correct biome registry
-//        Registry<Biome> registry;
-//        if (this.biomeSource instanceof SkyblockMultiNoiseBiomeSource biomeSource) {
-//            registry = biomeSource.lookupRegistry;
-//        } else {
-//            registry = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-//        }
-//
-//        if (config != null && !featureBiomeMap.isEmpty()) {
-//            Set<ResourceKey<Biome>> biomeKeys = this.runtimeBiomeSource.possibleBiomes()
-//                    .stream()
-//                    .flatMap((biome) -> registry.getResourceKey(biome).stream())
-//                    .collect(Collectors.toSet());
-//            return featureBiomeMap.values()
-//                    .stream()
-//                    .noneMatch(biomeKeys::contains) ? null : structure.getNearestGeneratedFeature(level, level.structureFeatureManager(), pos, searchRadius, skipKnownStructures, level.getSeed(), config);
-//        }
-//
-//        return null;
-//    }
+    @Nullable
+    @Override
+    public Pair<BlockPos, Holder<ConfiguredStructureFeature<?, ?>>> findNearestMapFeature(@Nonnull ServerLevel level, @Nonnull HolderSet<ConfiguredStructureFeature<?, ?>> structureSet, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
+        for (Holder<ConfiguredStructureFeature<?, ?>> holder : structureSet) {
+            if (!ConfigHandler.Structures.generationStructures.test(holder.value().feature.getRegistryName())) {
+                return null;
+            }
+        }
+
+        return super.findNearestMapFeature(level, structureSet, pos, searchRadius, skipKnownStructures);
+    }
 
     @Override
     public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level) {
@@ -186,52 +144,14 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     }
 
-    // [Vanilla copy]
-//    @Override
-//    public void createStructures(@Nonnull RegistryAccess registry, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull StructureManager templateManager, long seed) {
-//        ChunkPos chunkpos = chunk.getPos();
-//        SectionPos sectionpos = SectionPos.bottomOf(chunk);
-//        StructureFeatureConfiguration strongholdConfig = this.settings.getConfig(StructureFeature.STRONGHOLD);
-//        if (strongholdConfig != null) {
-//            StructureStart<?> existingStart = structureManager.getStartForFeature(sectionpos, StructureFeature.STRONGHOLD, chunk);
-//            if (WorldUtil.isStructureGenerated(StructureFeature.STRONGHOLD.getRegistryName()) && (existingStart == null || !existingStart.isValid())) {
-//                StructureStart<?> start = StructureFeatures.STRONGHOLD.generate(registry, this, this.biomeSource, templateManager, seed, chunkpos, ChunkGenerator.fetchReferences(structureManager, chunk, sectionpos, StructureFeature.STRONGHOLD), strongholdConfig, chunk, ChunkGenerator::validStrongholdBiome);
-//                structureManager.setStartForFeature(sectionpos, StructureFeature.STRONGHOLD, start, chunk);
-//            }
-//        }
-//
-//        // Get modified registry
-//        Registry<Biome> biomeRegistry = LazyBiomeRegistryWrapper.get(registry.registryOrThrow(Registry.BIOME_REGISTRY));
-//
-//        structuresLoop:
-//        for (StructureFeature<?> structureFeature : ForgeRegistries.STRUCTURE_FEATURES) {
-//            if (structureFeature == StructureFeature.STRONGHOLD) {
-//                continue;
-//            }
-//
-//            StructureFeatureConfiguration config = this.settings.getConfig(structureFeature);
-//            if (config != null) {
-//                StructureStart<?> existingStart = structureManager.getStartForFeature(sectionpos, structureFeature, chunk);
-//
-//                if (WorldUtil.isStructureGenerated(structureFeature.getRegistryName()) && (existingStart == null || !existingStart.isValid())) {
-//                    int references = ChunkGenerator.fetchReferences(structureManager, chunk, sectionpos, structureFeature);
-//
-//                    for (Map.Entry<ConfiguredStructureFeature<?, ?>, Collection<ResourceKey<Biome>>> entry : this.settings.structures(structureFeature).asMap().entrySet()) {
-//                        StructureStart<?> start = entry.getKey().generate(registry, this, this.biomeSource, templateManager, seed, chunkpos, references, config, chunk, (biome) -> {
-//                            return this.validBiome(biomeRegistry, entry.getValue()::contains, biome);
-//                        });
-//
-//                        if (start.isValid()) {
-//                            structureManager.setStartForFeature(sectionpos, structureFeature, start, chunk);
-//                            continue structuresLoop;
-//                        }
-//                    }
-//
-//                    structureManager.setStartForFeature(sectionpos, structureFeature, StructureStart.INVALID_START, chunk);
-//                }
-//            }
-//        }
-//    } TODO
+    @Override
+    protected boolean tryGenerateStructure(@Nonnull StructureSet.StructureSelectionEntry structureEntry, @Nonnull StructureFeatureManager structureManager, @Nonnull RegistryAccess registry, @Nonnull StructureManager featureManager, long seed, @Nonnull ChunkAccess chunk, @Nonnull ChunkPos chunkPos, @Nonnull SectionPos sectionPos) {
+        if (!ConfigHandler.Structures.generationStructures.test(structureEntry.structure().value().feature.getRegistryName())) {
+            return false;
+        }
+
+        return super.tryGenerateStructure(structureEntry, structureManager, registry, featureManager, seed, chunk, chunkPos, sectionPos);
+    }
 
     @Nonnull
     @Override
