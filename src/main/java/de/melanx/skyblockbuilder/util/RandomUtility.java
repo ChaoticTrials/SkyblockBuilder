@@ -69,28 +69,6 @@ public class RandomUtility {
                         .collect(Collectors.toList()));
     }
 
-    // TODO
-//    public static void modifyStructureSettings(StructureSettings settings) {
-//        // Remove non-whitelisted structures
-//        Map<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap();
-//
-//        for (Map.Entry<StructureFeature<?>, StructureFeatureConfiguration> structure : settings.structureConfig.entrySet()) {
-//            ResourceLocation location = structure.getKey().getRegistryName();
-//            if (location != null) {
-//                if (ConfigHandler.Structures.generationStructures.test(location)) {
-//                    map.put(structure.getKey(), structure.getValue());
-//                }
-//            }
-//        }
-//
-//        settings.structureConfig = map;
-//        Map<StructureFeature<?>, ImmutableMultimap.Builder<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>>> hashMap = Maps.newHashMap();
-//        StructureFeatures.registerStructures(((configuredStructureFeature, biomeResourceKey) -> {
-//            hashMap.computeIfAbsent(configuredStructureFeature.feature, structure -> ImmutableMultimap.builder()).put(configuredStructureFeature, biomeResourceKey);
-//        }));
-//        settings.configuredStructures = hashMap.entrySet().stream().filter(entry -> map.get(entry.getKey()) != null).collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> entry.getValue().build()));
-//    }
-
     public static int validateBiome(Biome biome) {
         if (dynamicRegistries != null) {
             Registry<Biome> lookup = dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY);

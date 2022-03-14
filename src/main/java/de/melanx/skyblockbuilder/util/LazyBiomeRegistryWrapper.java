@@ -19,7 +19,7 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
     private static final HashMap<Registry<Biome>, LazyBiomeRegistryWrapper> cache = new HashMap<>();
     private final Registry<Biome> parent;
     private final Map<ResourceLocation, Biome> modifiedBiomes = new HashMap<>();
-    private final Map<ResourceKey<Biome>, Holder<Biome>> modifiedBiomeHolders = new HashMap<>();
+    private final Map<ResourceKey<Biome>, Holder<Biome>> modifiedByKey = new HashMap<>();
     private final Map<ResourceLocation, ResourceKey<Biome>> keyCache = new HashMap<>();
 
     private LazyBiomeRegistryWrapper(Registry<Biome> parent) {
@@ -59,12 +59,6 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
         return this.modified(this.parent.get(name));
     }
 
-    @Nonnull
-    @Override
-    public Optional<Biome> getOptional(@Nullable ResourceLocation name) {
-        return this.parent.getOptional(name).map(this::modified);
-    }
-
     @Override
     @Nullable
     public Biome get(@Nullable ResourceKey<Biome> key) {
@@ -79,14 +73,20 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
 
     @Nonnull
     @Override
-    public Optional<Holder<Biome>> getHolder(int value) {
-        return this.modified(this.parent.getHolder(value));
+    public Optional<Holder<Biome>> getHolder(@Nonnull ResourceKey<Biome> key) {
+        return this.modified(this.parent.getHolder(key));
+    }
+
+    @Override
+    @Nullable
+    public Biome byId(int value) {
+        return this.modified(this.parent.byId(value));
     }
 
     @Nonnull
     @Override
-    public Optional<Holder<Biome>> getHolder(@Nonnull ResourceKey<Biome> key) {
-        return this.modified(this.parent.getHolder(key));
+    public Optional<Holder<Biome>> getHolder(int value) {
+        return this.modified(this.parent.getHolder(value));
     }
 
     @Override
@@ -96,15 +96,7 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
 
     @Override
     public int getId(@Nullable Biome value) {
-        Biome biome = this.parent.get(value == null ? null : value.getRegistryName());
-        int id = this.parent.getId(biome);
-        return id;
-    }
-
-    @Override
-    @Nullable
-    public Biome byId(int value) {
-        return this.modified(this.parent.byId(value));
+        return this.parent.getId(this.parent.get(value == null ? null : value.getRegistryName()));
     }
 
     @Nonnull
@@ -141,7 +133,7 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
     @Nonnull
     @Override
     public Holder<Biome> getOrCreateHolder(@Nonnull ResourceKey<Biome> key) {
-        return this.modifiedBiomeHolders.computeIfAbsent(key, nKey -> {
+        return this.modifiedByKey.computeIfAbsent(key, nKey -> {
             Holder.Reference<Biome> holder = Holder.Reference.createStandAlone(this, nKey);
             //noinspection ConstantConditions
             holder.bind(nKey, this.get(key));
@@ -149,20 +141,34 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
         });
     }
 
+    public Holder<Biome> modified(Holder<Biome> biomeHolder) {
+        //noinspection ConstantConditions
+        ResourceKey<Biome> key = ResourceKey.create(this.key(), biomeHolder.value().getRegistryName());
+        if (this.modifiedByKey.containsKey(key)) {
+            return this.modifiedByKey.get(key);
+        }
+
+        Biome modified = RandomUtility.modifyCopyBiome(biomeHolder.value());
+        Holder.Reference<Biome> modifiedHolder = Holder.Reference.createStandAlone(this, key);
+        modifiedHolder.bind(key, modified);
+        this.modifiedByKey.put(key, modifiedHolder);
+        return modifiedHolder;
+    }
+
     private Optional<Holder<Biome>> modified(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Holder<Biome>> biomeHolder) {
         if (biomeHolder.isPresent()) {
             Holder<Biome> holder = biomeHolder.get();
             //noinspection ConstantConditions
             ResourceKey<Biome> key = ResourceKey.create(this.key(), holder.value().getRegistryName());
-            if (this.modifiedBiomeHolders.containsKey(key)) {
-                return Optional.of(this.modifiedBiomeHolders.get(key));
-            } else {
-                Biome modified = RandomUtility.modifyCopyBiome(holder.value());
-                Holder.Reference<Biome> modifiedHolder = Holder.Reference.createStandAlone(this, key);
-                modifiedHolder.bind(key, modified);
-                this.modifiedBiomeHolders.put(key, modifiedHolder);
-                return Optional.of(modifiedHolder);
+            if (this.modifiedByKey.containsKey(key)) {
+                return Optional.of(this.modifiedByKey.get(key));
             }
+
+            Biome modified = RandomUtility.modifyCopyBiome(holder.value());
+            Holder.Reference<Biome> modifiedHolder = Holder.Reference.createStandAlone(this, key);
+            modifiedHolder.bind(key, modified);
+            this.modifiedByKey.put(key, modifiedHolder);
+            return Optional.of(modifiedHolder);
         }
 
         return biomeHolder;

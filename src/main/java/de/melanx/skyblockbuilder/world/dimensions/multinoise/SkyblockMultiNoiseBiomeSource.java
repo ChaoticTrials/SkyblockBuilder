@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.util.WorldUtil;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryOps;
@@ -12,7 +13,7 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.biome.*;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
+import java.util.Set;
 
 public class SkyblockMultiNoiseBiomeSource extends MultiNoiseBiomeSource {
 
@@ -35,7 +36,8 @@ public class SkyblockMultiNoiseBiomeSource extends MultiNoiseBiomeSource {
             ));
 
     private final boolean isSingleBiomeLevel;
-    public final Registry<Biome> lookupRegistry;
+    public final LazyBiomeRegistryWrapper lookupRegistry;
+    private Set<Holder<Biome>> modifiedPossibleBiomes;
 
     public SkyblockMultiNoiseBiomeSource(Registry<Biome> lookupRegistry, Climate.ParameterList<Holder<Biome>> parameters) {
         this(lookupRegistry, parameters, false);
@@ -55,15 +57,28 @@ public class SkyblockMultiNoiseBiomeSource extends MultiNoiseBiomeSource {
 
     @Nonnull
     @Override
+    public Set<Holder<Biome>> possibleBiomes() {
+        if (this.modifiedPossibleBiomes == null) {
+            //noinspection OptionalGetWithoutIsPresent
+            this.modifiedPossibleBiomes = new ObjectLinkedOpenHashSet<>(this.possibleBiomes.stream().map(holder -> this.lookupRegistry.getOrCreateHolder(this.lookupRegistry.getResourceKey(holder.value()).get())).distinct().toList());
+        }
+
+        return this.modifiedPossibleBiomes;
+    }
+
+    @Nonnull
+    @Override
     public Holder<Biome> getNoiseBiome(int x, int y, int z, @Nonnull Climate.Sampler sampler) {
         if (this.isSingleBiomeLevel) {
             Biome biome = this.lookupRegistry.get(WorldUtil.SINGLE_BIOME);
             if (biome == null) {
                 biome = this.lookupRegistry.get(Biomes.PLAINS.location());
             }
-            return Holder.direct(Objects.requireNonNull(biome));
+
+            //noinspection OptionalGetWithoutIsPresent,ConstantConditions
+            return this.lookupRegistry.getOrCreateHolder(this.lookupRegistry.getResourceKey(biome).get());
         } else {
-            return this.getNoiseBiome(sampler.sample(x, y, z));
+            return this.lookupRegistry.modified(this.getNoiseBiome(sampler.sample(x, y, z)));
         }
     }
 }
