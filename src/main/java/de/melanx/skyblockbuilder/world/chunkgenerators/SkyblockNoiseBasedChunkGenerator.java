@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.world.dimensions.multinoise;
+package de.melanx.skyblockbuilder.world.chunkgenerators;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;

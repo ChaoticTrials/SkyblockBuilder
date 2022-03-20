@@ -2,8 +2,8 @@ package de.melanx.skyblockbuilder;
 
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
 import de.melanx.skyblockbuilder.world.VoidWorldType;
-import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
-import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
+import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
+import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import io.github.noeppi_noeppi.libx.annotation.registration.RegisterClass;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
