@@ -26,11 +26,12 @@ import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public class WorldUtil {
-
-    public static final ResourceLocation SINGLE_BIOME = ConfigHandler.World.SingleBiome.biome;
 
     public static void teleportToIsland(ServerPlayer player, Team team) {
         MinecraftServer server = player.getServer();
@@ -62,12 +63,6 @@ public class WorldUtil {
         }
 
         return false;
-    }
-
-    public static boolean isSingleBiomeLevel(ResourceKey<Level> dimensionType) {
-        return ConfigHandler.World.SingleBiome.enabled && ConfigHandler.World.SingleBiome.singleBiomeDimension
-                .map(value -> Objects.equals(value.location(), dimensionType.location()))
-                .orElseGet(() -> Objects.equals(ConfigHandler.Spawn.dimension.location(), dimensionType.location()));
     }
 
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {
@@ -210,11 +205,8 @@ public class WorldUtil {
         for (FlatLayerInfo info : layerInfos) {
             i += info.getHeight();
         }
-        return i;
-    }
 
-    public static boolean isStructureGenerated(ResourceLocation registryName) {
-        return ConfigHandler.Structures.generationStructures.test(registryName) || ConfigHandler.Structures.generationFeatures.test(registryName);
+        return i;
     }
 
     public enum Directions {

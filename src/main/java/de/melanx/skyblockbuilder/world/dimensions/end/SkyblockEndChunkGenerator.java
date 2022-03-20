@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.world.dimensions.end;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
-import de.melanx.skyblockbuilder.util.LazyBiomeRegistryWrapper;
 import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -69,7 +68,7 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
                 //noinspection CodeBlock2Expr
                 return new Beardifier(structureManager, chunk);
             }, noiseGeneratorSettings, this.globalFluidPicker, Blender.of(level));
-            this.surfaceSystem.buildSurface(level.getBiomeManager(), LazyBiomeRegistryWrapper.get(level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY)),
+            this.surfaceSystem.buildSurface(level.getBiomeManager(), level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
                     noiseGeneratorSettings.useLegacyRandomSource(), worldGenerationContext, chunk, noisechunk, noiseGeneratorSettings.surfaceRule());
             return;
         }

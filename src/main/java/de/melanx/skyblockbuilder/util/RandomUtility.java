@@ -1,82 +1,29 @@
 package de.melanx.skyblockbuilder.util;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.Util;
-import net.minecraft.core.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.fml.ModList;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RandomUtility {
-
-    public static RegistryAccess dynamicRegistries = null;
-
-    public static Biome modifyCopyBiome(Biome biome) {
-        Biome newBiome = new Biome(biome.climateSettings, biome.getBiomeCategory(), biome.getSpecialEffects(), RandomUtility.modifyBiomeGenerationSettings(biome.getGenerationSettings()), biome.getMobSettings());
-        if (biome.getRegistryName() != null) {
-            newBiome.setRegistryName(biome.getRegistryName());
-        }
-
-        return newBiome;
-    }
-
-    public static BiomeGenerationSettings modifyBiomeGenerationSettings(BiomeGenerationSettings settings) {
-        // Remove non-whitelisted features
-        List<List<Holder<PlacedFeature>>> featureList = Lists.newArrayList();
-
-        settings.features().forEach(list -> {
-            ImmutableList.Builder<Holder<PlacedFeature>> features = ImmutableList.builder();
-            for (Holder<PlacedFeature> feature : list) {
-                ResourceLocation location = feature.value().feature().value().feature().getRegistryName();
-                if (location != null) {
-                    if (ConfigHandler.Structures.generationFeatures.test(location)) {
-                        features.add(feature);
-                    }
-                }
-            }
-            featureList.add(features.build());
-        });
-
-        return new BiomeGenerationSettings(
-                settings.carvers.entrySet().stream()
-                        .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey,
-                                Map.Entry::getValue)),
-                featureList.stream()
-                        .map(HolderSet::direct)
-                        .collect(Collectors.toList()));
-    }
-
-    public static int validateBiome(Biome biome) {
-        if (dynamicRegistries != null) {
-            Registry<Biome> lookup = dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY);
-            return lookup.getId(lookup.get(biome.getRegistryName()));
-        } else {
-            return -1;
-        }
-    }
 
     public static void dropInventories(Player player) {
         if (player.isSpectator() || player.isCreative()) {
