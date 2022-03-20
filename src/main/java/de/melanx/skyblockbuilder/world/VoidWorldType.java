@@ -95,7 +95,6 @@ public class VoidWorldType extends ForgeWorldPreset {
         MultiNoiseBiomeSource overworld = MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(biomeRegistry);
         BiomeSource provider = new SkyblockMultiNoiseBiomeSource(biomeRegistry, overworld.parameters, WorldUtil.isSingleBiomeLevel(Level.OVERWORLD));
         Holder<NoiseGeneratorSettings> settings = dimensionSettingsRegistry.getOrCreateHolder(NoiseGeneratorSettings.OVERWORLD);
-//        RandomUtility.modifyStructureSettings(settings.structureSettings); TODO?
 
         return new SkyblockNoiseBasedChunkGenerator(structureSets, noises, provider, seed, settings, Level.OVERWORLD);
     }
@@ -107,7 +106,6 @@ public class VoidWorldType extends ForgeWorldPreset {
         Registry<NormalNoise.NoiseParameters> noises = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
         MultiNoiseBiomeSource biomeSource = MultiNoiseBiomeSource.Preset.NETHER.biomeSource(dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY));
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrCreateHolder(NoiseGeneratorSettings.NETHER);
-//        RandomUtility.modifyStructureSettings(settings.structureSettings);
 
         return new NoiseBasedChunkGenerator(structureSets, noises, biomeSource, seed, settings);
     }
@@ -128,14 +126,12 @@ public class VoidWorldType extends ForgeWorldPreset {
         Registry<NormalNoise.NoiseParameters> noises = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
         TheEndBiomeSource biomeSource = new TheEndBiomeSource(dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY), seed);
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrCreateHolder(NoiseGeneratorSettings.END);
-//        RandomUtility.modifyStructureSettings(settings.structureSettings);
 
         return new NoiseBasedChunkGenerator(structureSets, noises, biomeSource, seed, settings);
     }
 
     private static ChunkGenerator endChunkGenerator(@Nonnull Registry<StructureSet> structureSets, @Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
         SkyblockEndBiomeSource provider = new SkyblockEndBiomeSource(biomeRegistry, new TheEndBiomeSource(biomeRegistry, seed));
-//        SkyblockMultiNoiseBiomeSource provider = new SkyblockMultiNoiseBiomeSource(biomeRegistry, MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry).parameters);
 
         Holder<NoiseGeneratorSettings> settings = dimensionSettingsRegistry.getOrCreateHolder(NoiseGeneratorSettings.END);
 

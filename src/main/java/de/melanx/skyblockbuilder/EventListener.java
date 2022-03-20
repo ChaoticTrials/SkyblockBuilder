@@ -99,6 +99,11 @@ public class EventListener {
         Level level = event.getPlayer().level;
         SkyblockBuilder.getNetwork().updateProfiles(level);
         SkyblockBuilder.getNetwork().updateTemplateNames(event.getPlayer(), TemplateLoader.getTemplateNames());
+//        if (level instanceof ServerLevel) { TODO remove
+//            RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, level.registryAccess());
+//            Optional<JsonElement> result = ChunkGenerator.CODEC.encodeStart(dynamicOps, ((ServerLevel) level).getChunkSource().getGenerator()).result();
+//            result.ifPresent(jsonElement -> SkyblockBuilder.getLogger().info(jsonElement.toString()));
+//        }
         if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
             SkyblockSavedData data = SkyblockSavedData.get(level);
             ServerPlayer player = (ServerPlayer) event.getPlayer();

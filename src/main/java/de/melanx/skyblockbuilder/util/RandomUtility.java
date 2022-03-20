@@ -78,26 +78,6 @@ public class RandomUtility {
         }
     }
 
-    // TODO
-//    public static StructureSettings modifiedStructureSettings(StructureSettings settings) {
-//        Map<StructureFeature<?>, StructureFeatureConfiguration> structureConfig = new HashMap<>();
-//
-//        for (Map.Entry<StructureFeature<?>, StructureFeatureConfiguration> entry : settings.structureConfig.entrySet()) {
-//            StructureFeature<?> structureFeature = entry.getKey();
-//            StructureFeatureConfiguration config = entry.getValue();
-//            StructureFeatureConfiguration newConfig = new StructureFeatureConfiguration(
-//                    Math.max(1, (int) (config.spacing() * ConfigHandler.World.structureModifier)),
-//                    Math.max(0, (int) (config.separation() * ConfigHandler.World.structureModifier)),
-//                    config.salt()
-//            );
-//
-//            structureConfig.put(structureFeature, newConfig);
-//        }
-//        settings.structureConfig = structureConfig;
-//
-//        return settings;
-//    }
-
     public static void dropInventories(Player player) {
         if (player.isSpectator() || player.isCreative()) {
             return;

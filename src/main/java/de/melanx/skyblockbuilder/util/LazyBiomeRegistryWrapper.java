@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.util;
 
+import com.google.common.collect.Iterators;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
@@ -13,6 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
 
@@ -21,6 +23,7 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
     private final Map<ResourceLocation, Biome> modifiedBiomes = new HashMap<>();
     private final Map<ResourceKey<Biome>, Holder<Biome>> modifiedByKey = new HashMap<>();
     private final Map<ResourceLocation, ResourceKey<Biome>> keyCache = new HashMap<>();
+    private List<Holder.Reference<Biome>> holdersInOrder;
 
     private LazyBiomeRegistryWrapper(Registry<Biome> parent) {
         super(parent.key(), Lifecycle.experimental(), null);
@@ -101,19 +104,22 @@ public class LazyBiomeRegistryWrapper extends MappedRegistry<Biome> {
 
     @Nonnull
     @Override
-    public Iterator<Biome> iterator() {
-        Iterator<Biome> itr = this.parent.iterator();
-        return new Iterator<>() {
-            @Override
-            public boolean hasNext() {
-                return itr.hasNext();
-            }
+    public Stream<Holder.Reference<Biome>> holders() {
+        return this.holdersInOrder().stream();
+    }
 
-            @Override
-            public Biome next() {
-                return itr.next();
-            }
-        };
+    private List<Holder.Reference<Biome>> holdersInOrder() {
+        if (this.holdersInOrder == null) {
+            this.holdersInOrder = this.parent.holders().filter(Objects::nonNull).map(holder -> (Holder.Reference<Biome>) this.modified(holder)).toList();
+        }
+
+        return this.holdersInOrder;
+    }
+
+    @Nonnull
+    @Override
+    public Iterator<Biome> iterator() {
+        return Iterators.transform(this.holdersInOrder().iterator(), Holder::value);
     }
 
     @Nonnull
