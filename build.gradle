@@ -3,7 +3,6 @@ buildscript {
 }
 
 apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/mod.gradle'
-apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.coremods'
 apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.cursedep'
 
 repositories {
@@ -35,8 +34,6 @@ dependencies {
     implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.18.2-5.0.6.3")
 
     runtimeOnly fg.deobf("mezz.jei:jei-1.18.2:9.4.1.114")
-
-    coremods "io.github.noeppi_noeppi.misc:CoreModTypes:5.0.1-2"
 
 //    runtimeOnly curse.mod(291874, 3433685)
 //    runtimeOnly curse.mod(353942, 3455374)
