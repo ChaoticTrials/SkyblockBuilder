@@ -57,77 +57,78 @@ public class VoidWorldType extends ForgeWorldPreset {
     }
 
     public static MappedRegistry<LevelStem> voidDimensions(RegistryAccess dynamicRegistries, long seed) {
-        Registry<NoiseGeneratorSettings> dimensionSettingsRegistry = dynamicRegistries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+        Registry<NoiseGeneratorSettings> noiseGeneratorSettings = dynamicRegistries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
         Registry<StructureSet> structureSets = dynamicRegistries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-        Registry<NormalNoise.NoiseParameters> noiseRegistry = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
+        Registry<NormalNoise.NoiseParameters> noises = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
 
-        MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
+        MappedRegistry<LevelStem> levelStems = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
         Registry<DimensionType> dimensionTypes = dynamicRegistries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
         Registry<Biome> biomes = dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY);
 
-        registry.register(LevelStem.OVERWORLD, new LevelStem(dimensionTypes.getOrCreateHolder(DimensionType.OVERWORLD_LOCATION),
+        levelStems.register(LevelStem.OVERWORLD, new LevelStem(dimensionTypes.getOrCreateHolder(DimensionType.OVERWORLD_LOCATION),
                 configuredOverworldChunkGenerator(dynamicRegistries, seed)), Lifecycle.stable());
 
-        registry.register(LevelStem.NETHER, new LevelStem(dimensionTypes.getOrCreateHolder(DimensionType.NETHER_LOCATION),
+        levelStems.register(LevelStem.NETHER, new LevelStem(dimensionTypes.getOrCreateHolder(DimensionType.NETHER_LOCATION),
                 ConfigHandler.Dimensions.Nether.Default ? VoidWorldType.defaultNetherGenerator(dynamicRegistries, seed)
-                        : netherChunkGenerator(dynamicRegistries, structureSets, noiseRegistry, biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
+                        : netherChunkGenerator(dynamicRegistries, structureSets, noises, biomes, noiseGeneratorSettings, seed)), Lifecycle.stable());
 
-        registry.register(LevelStem.END, new LevelStem(dimensionTypes.getOrCreateHolder(DimensionType.END_LOCATION),
+        levelStems.register(LevelStem.END, new LevelStem(dimensionTypes.getOrCreateHolder(DimensionType.END_LOCATION),
                 ConfigHandler.Dimensions.End.Default ? VoidWorldType.defaultEndGenerator(dynamicRegistries, seed)
-                        : endChunkGenerator(dynamicRegistries, structureSets, noiseRegistry, biomes, dimensionSettingsRegistry, seed)), Lifecycle.stable());
-        return registry;
+                        : endChunkGenerator(dynamicRegistries, structureSets, noises, biomes, noiseGeneratorSettings, seed)), Lifecycle.stable());
+
+        return levelStems;
     }
 
     public static ChunkGenerator configuredOverworldChunkGenerator(RegistryAccess dynamicRegistries, long seed) {
         Registry<StructureSet> structureSets = dynamicRegistries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-        Registry<NormalNoise.NoiseParameters> noiseRegistry = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
+        Registry<NormalNoise.NoiseParameters> noises = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
         Registry<Biome> biomes = dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY);
-        Registry<NoiseGeneratorSettings> dimensionSettingsRegistry = dynamicRegistries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
-
-        return ConfigHandler.Dimensions.Overworld.Default ? WorldGenSettings.makeDefaultOverworld(dynamicRegistries, seed)
-                : overworldChunkGenerator(dynamicRegistries, structureSets, noiseRegistry, biomes, dimensionSettingsRegistry, seed);
-    }
-
-    public static ChunkGenerator overworldChunkGenerator(RegistryAccess dynamicRegistries, @Nonnull Registry<StructureSet> structureSets, @Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
-        MultiNoiseBiomeSource overworld = (MultiNoiseBiomeSource) BiomeSourceConverter.customBiomeSource(Level.OVERWORLD, dynamicRegistries, MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(biomeRegistry, false));
-        Holder<NoiseGeneratorSettings> settings = dimensionSettingsRegistry.getOrCreateHolder(NoiseGeneratorSettings.OVERWORLD);
-
-        return new SkyblockNoiseBasedChunkGenerator(structureSets, noises, overworld, seed, settings, Level.OVERWORLD);
-    }
-
-    private static ChunkGenerator defaultNetherGenerator(@Nonnull RegistryAccess dynamicRegistries, long seed) {
         Registry<NoiseGeneratorSettings> noiseGeneratorSettings = dynamicRegistries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
 
+        return ConfigHandler.Dimensions.Overworld.Default ? WorldGenSettings.makeDefaultOverworld(dynamicRegistries, seed)
+                : overworldChunkGenerator(dynamicRegistries, structureSets, noises, biomes, noiseGeneratorSettings, seed);
+    }
+
+    public static ChunkGenerator overworldChunkGenerator(RegistryAccess dynamicRegistries, Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
+        MultiNoiseBiomeSource biomeSource = (MultiNoiseBiomeSource) BiomeSourceConverter.customBiomeSource(Level.OVERWORLD, dynamicRegistries, MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(biomeRegistry, false));
+        Holder<NoiseGeneratorSettings> settings = dimensionSettingsRegistry.getOrCreateHolder(NoiseGeneratorSettings.OVERWORLD);
+
+        return new SkyblockNoiseBasedChunkGenerator(structureSets, noises, biomeSource, seed, settings, Level.OVERWORLD);
+    }
+
+    private static ChunkGenerator defaultNetherGenerator(RegistryAccess dynamicRegistries, long seed) {
+        Registry<NoiseGeneratorSettings> noiseGeneratorSettings = dynamicRegistries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
         Registry<StructureSet> structureSets = dynamicRegistries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
         Registry<NormalNoise.NoiseParameters> noises = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
+
         MultiNoiseBiomeSource biomeSource = MultiNoiseBiomeSource.Preset.NETHER.biomeSource(dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY));
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrCreateHolder(NoiseGeneratorSettings.NETHER);
 
         return new NoiseBasedChunkGenerator(structureSets, noises, biomeSource, seed, settings);
     }
 
-    private static ChunkGenerator netherChunkGenerator(RegistryAccess dynamicRegistries, @Nonnull Registry<StructureSet> structureSets, @Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
-        BiomeSource nether = BiomeSourceConverter.customBiomeSource(Level.NETHER, dynamicRegistries, MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry));
+    private static ChunkGenerator netherChunkGenerator(RegistryAccess dynamicRegistries, Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, Registry<Biome> biomeRegistry, Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
+        BiomeSource biomeSource = BiomeSourceConverter.customBiomeSource(Level.NETHER, dynamicRegistries, MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry));
         Holder<NoiseGeneratorSettings> settings = dimensionSettingsRegistry.getOrCreateHolder(NoiseGeneratorSettings.NETHER);
 
-        return new SkyblockNoiseBasedChunkGenerator(structureSets, noises, nether, seed, settings, Level.NETHER);
+        return new SkyblockNoiseBasedChunkGenerator(structureSets, noises, biomeSource, seed, settings, Level.NETHER);
     }
 
-    private static ChunkGenerator defaultEndGenerator(@Nonnull RegistryAccess dynamicRegistries, long seed) {
+    private static ChunkGenerator defaultEndGenerator(RegistryAccess dynamicRegistries, long seed) {
         Registry<NoiseGeneratorSettings> noiseGeneratorSettings = dynamicRegistries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
-
         Registry<StructureSet> structureSets = dynamicRegistries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
         Registry<NormalNoise.NoiseParameters> noises = dynamicRegistries.registryOrThrow(Registry.NOISE_REGISTRY);
+
         TheEndBiomeSource biomeSource = new TheEndBiomeSource(dynamicRegistries.registryOrThrow(Registry.BIOME_REGISTRY), seed);
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrCreateHolder(NoiseGeneratorSettings.END);
 
         return new NoiseBasedChunkGenerator(structureSets, noises, biomeSource, seed, settings);
     }
 
-    private static ChunkGenerator endChunkGenerator(RegistryAccess dynamicRegistries, @Nonnull Registry<StructureSet> structureSets, @Nonnull Registry<NormalNoise.NoiseParameters> noises, @Nonnull Registry<Biome> biomeRegistry, @Nonnull Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
-        TheEndBiomeSource source = (TheEndBiomeSource) BiomeSourceConverter.customBiomeSource(Level.END, dynamicRegistries, new TheEndBiomeSource(biomeRegistry, seed));
+    private static ChunkGenerator endChunkGenerator(RegistryAccess dynamicRegistries, Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, Registry<Biome> biomeRegistry, Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
+        TheEndBiomeSource biomeSource = (TheEndBiomeSource) BiomeSourceConverter.customBiomeSource(Level.END, dynamicRegistries, new TheEndBiomeSource(biomeRegistry, seed));
         Holder<NoiseGeneratorSettings> settings = dimensionSettingsRegistry.getOrCreateHolder(NoiseGeneratorSettings.END);
 
-        return new SkyblockEndChunkGenerator(structureSets, noises, source, seed, settings, Level.END);
+        return new SkyblockEndChunkGenerator(structureSets, noises, biomeSource, seed, settings, Level.END);
     }
 }

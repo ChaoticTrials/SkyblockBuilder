@@ -162,8 +162,8 @@ public class ItemStructureSaver extends Item {
 
         Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name));
         try (OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE)) {
-            CompoundTag nbttagcompound = template.save(new CompoundTag());
-            NbtIo.writeCompressed(nbttagcompound, outputStream);
+            CompoundTag tag = template.save(new CompoundTag());
+            NbtIo.writeCompressed(tag, outputStream);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
