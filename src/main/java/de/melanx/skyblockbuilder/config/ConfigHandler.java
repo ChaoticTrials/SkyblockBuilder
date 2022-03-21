@@ -62,11 +62,11 @@ public class ConfigHandler {
     public static class World {
 
         @Config({"A list of biomes for each dimension.",
+                "You can not use this for the end dimension. The end dimension will always have it's five biomes.",
                 "These are resource lists. See https://noeppi-noeppi.github.io/LibX/io/github/noeppi_noeppi/libx/util/ResourceList.html#use_resource_lists_in_configs"})
         public static Map<String, ResourceList> biomes = Util.make(Maps.newHashMap(), map -> {
             map.put(Level.OVERWORLD.location().toString(), ResourceList.DENY_LIST);
             map.put(Level.NETHER.location().toString(), ResourceList.DENY_LIST);
-            map.put(Level.END.location().toString(), ResourceList.DENY_LIST);
         });
 
         @Config("Should a surface be generated in the dimensions? [default: false]")
