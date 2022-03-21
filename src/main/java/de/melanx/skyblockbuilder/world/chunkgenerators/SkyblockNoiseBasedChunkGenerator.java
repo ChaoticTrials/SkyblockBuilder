@@ -62,12 +62,12 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     protected final List<FlatLayerInfo> layerInfos;
     private final int layerHeight;
 
-    public SkyblockNoiseBasedChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource source, long seed, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension) {
-        super(structureSets, noises, source, seed, generatorSettings);
+    public SkyblockNoiseBasedChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, long seed, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension) {
+        super(structureSets, noises, biomeSource, seed, generatorSettings);
         this.seed = seed;
         this.noises = noises;
         this.generatorSettings = generatorSettings;
-        this.parent = new NoiseBasedChunkGenerator(structureSets, this.noises, source, seed, generatorSettings);
+        this.parent = new NoiseBasedChunkGenerator(structureSets, this.noises, biomeSource, seed, generatorSettings);
         this.dimension = dimension;
         this.layerInfos = ConfigHandler.World.surface
                 ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(dimension.location().toString()))

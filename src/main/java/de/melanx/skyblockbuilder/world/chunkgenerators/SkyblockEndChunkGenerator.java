@@ -39,8 +39,8 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
                             Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension)
                     )).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
 
-    public SkyblockEndChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource provider, long seed, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension) {
-        super(structureSets, noises, provider, seed, generatorSettings, dimension);
+    public SkyblockEndChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, long seed, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension) {
+        super(structureSets, noises, biomeSource, seed, generatorSettings, dimension);
     }
 
     @Nonnull
