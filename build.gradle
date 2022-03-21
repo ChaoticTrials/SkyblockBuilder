@@ -18,22 +18,16 @@ repositories {
         name = "Curios"
         url = "https://maven.theillusivec4.top/"
     }
-
-    // for testing with other mods
-    maven {
-        name = "CurseMaven"
-        url = "https://cursemaven.com/"
-    }
 }
 
 dependencies {
-    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.0"
+    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.2"
 
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.0")
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.18-1.1.0")
+    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.2")
+    implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.18.2-1.3.0")
     implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.18.2-5.0.6.3")
 
-    runtimeOnly fg.deobf("mezz.jei:jei-1.18.2:9.4.1.114")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.18.2:9.5.3.143")
 
 //    runtimeOnly curse.mod(291874, 3433685)
 //    runtimeOnly curse.mod(353942, 3455374)
