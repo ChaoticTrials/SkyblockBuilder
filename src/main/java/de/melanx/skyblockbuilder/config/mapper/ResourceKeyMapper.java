@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.config;
+package de.melanx.skyblockbuilder.config.mapper;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;

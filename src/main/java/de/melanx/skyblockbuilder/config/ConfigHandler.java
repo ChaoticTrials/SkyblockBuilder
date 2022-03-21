@@ -1,7 +1,6 @@
 package de.melanx.skyblockbuilder.config;
 
 import com.google.common.collect.Maps;
-import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.annotation.config.RegisterConfig;
 import io.github.noeppi_noeppi.libx.config.Config;
 import io.github.noeppi_noeppi.libx.config.Group;
@@ -99,9 +98,6 @@ public class ConfigHandler {
 
         @Config({"The dimension the islands will be generated in."})
         public static ResourceKey<Level> dimension = Level.OVERWORLD;
-
-        @Config("Direction the player should look at initial spawn")
-        public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
 
         public static class Height {
 

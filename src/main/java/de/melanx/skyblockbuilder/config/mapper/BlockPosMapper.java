@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.config;
+package de.melanx.skyblockbuilder.config.mapper;
 
 import com.google.gson.JsonArray;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -18,7 +18,7 @@ import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.awt.*;
+import java.awt.Color;
 
 @RegisterMapper
 public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {

@@ -1,9 +1,9 @@
 package de.melanx.skyblockbuilder.data;
 
+import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
@@ -13,21 +13,21 @@ public class TemplateData extends SavedData {
 
     private static final String NAME = "skyblock_template";
 
-    private final StructureTemplate template;
+    private final ConfiguredTemplate template;
 
-    public TemplateData(StructureTemplate template) {
+    public TemplateData(ConfiguredTemplate template) {
         this.template = template;
         this.setDirty();
     }
 
     public static TemplateData get(ServerLevel level) {
         DimensionDataStorage storage = level.getServer().overworld().getDataStorage();
-        StructureTemplate template = TemplateLoader.getTemplate();
+        ConfiguredTemplate template = TemplateLoader.getConfiguredTemplate();
         return storage.computeIfAbsent(nbt -> new TemplateData(template).load(nbt), () -> new TemplateData(template), NAME);
     }
 
     public TemplateData load(@Nonnull CompoundTag nbt) {
-        this.template.load(nbt);
+        this.template.read(nbt);
 
         return this;
     }
@@ -35,15 +35,15 @@ public class TemplateData extends SavedData {
     @Nonnull
     @Override
     public CompoundTag save(@Nonnull CompoundTag compound) {
-        return this.template.save(compound);
+        return this.template.write(compound);
     }
 
     public void refreshTemplate() {
-        this.template.load(TemplateLoader.getTemplate().save(new CompoundTag()));
+        this.template.read(TemplateLoader.getTemplate().save(new CompoundTag()));
         this.setDirty();
     }
 
-    public StructureTemplate getTemplate() {
+    public ConfiguredTemplate getConfiguredTemplate() {
         return this.template;
     }
 }

@@ -39,7 +39,7 @@ public class WorldUtil {
         ServerLevel level = getConfiguredLevel(server);
 
         BlockPos spawn = validPosition(level, team);
-        player.teleportTo(level, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, ConfigHandler.Spawn.direction.getYRot(), 0);
+        player.teleportTo(level, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, team.getDirection().getYRot(), 0);
         player.setRespawnPosition(level.dimension(), spawn, 0, true, false);
     }
 

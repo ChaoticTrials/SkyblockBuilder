@@ -2,7 +2,9 @@ package de.melanx.skyblockbuilder.data;
 
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
+import io.github.noeppi_noeppi.libx.annotation.meta.RemoveIn;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -32,12 +34,29 @@ public class Team {
     private boolean allowJoinRequests;
     private long createdAt;
     private long lastChanged;
+    private WorldUtil.Directions direction;
 
-    public Team(SkyblockSavedData data, IslandPos island) {
-        this(data, island, UUID.randomUUID());
+    private Team(SkyblockSavedData data) {
+        this(data, null, null, null);
     }
 
+    @RemoveIn(minecraft = "1.19")
+    @Deprecated(forRemoval = true)
+    public Team(SkyblockSavedData data, IslandPos island) {
+        this(data, island, UUID.randomUUID(), WorldUtil.Directions.SOUTH);
+    }
+
+    @RemoveIn(minecraft = "1.19")
+    @Deprecated(forRemoval = true)
     public Team(SkyblockSavedData data, IslandPos island, UUID teamId) {
+        this(data, island, teamId, WorldUtil.Directions.SOUTH);
+    }
+
+    public Team(SkyblockSavedData data, IslandPos island, WorldUtil.Directions direction) {
+        this(data, island, UUID.randomUUID(), direction);
+    }
+
+    public Team(SkyblockSavedData data, IslandPos island, UUID teamId, WorldUtil.Directions direction) {
         this.data = data;
         this.island = island;
         this.players = new HashSet<>();
@@ -47,6 +66,14 @@ public class Team {
         this.allowVisits = false;
         this.createdAt = System.currentTimeMillis();
         this.lastChanged = System.currentTimeMillis();
+        this.direction = direction;
+    }
+
+    public static Team create(SkyblockSavedData data, CompoundTag tag) {
+        Team team = new Team(data);
+        team.deserializeNBT(tag);
+
+        return team;
     }
 
     public boolean isSpawn() {
@@ -294,6 +321,14 @@ public class Team {
         this.data.setDirty();
     }
 
+    public void setDirection(WorldUtil.Directions direction) {
+        this.direction = direction;
+    }
+
+    public WorldUtil.Directions getDirection() {
+        return this.direction;
+    }
+
     @Nullable
     public ServerLevel getLevel() {
         return this.data.getLevel();
@@ -325,6 +360,7 @@ public class Team {
         nbt.putBoolean("AllowJoinRequests", this.allowJoinRequests);
         nbt.putLong("CreatedAt", this.createdAt);
         nbt.putLong("LastChanged", this.lastChanged);
+        nbt.putString("SpawnPointDirection", this.direction.name());
 
         ListTag players = new ListTag();
         for (UUID player : this.players) {
@@ -366,6 +402,7 @@ public class Team {
         this.allowJoinRequests = nbt.getBoolean("AllowJoinRequests");
         this.createdAt = nbt.getLong("CreatedAt");
         this.lastChanged = nbt.getLong("LastChanged");
+        this.direction = WorldUtil.Directions.valueOf(nbt.getString("SpawnPointDirection"));
 
         ListTag players = nbt.getList("Players", Tag.TAG_COMPOUND);
         this.players.clear();

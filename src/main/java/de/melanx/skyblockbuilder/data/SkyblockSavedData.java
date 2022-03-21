@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.config.StartingInventory;
+import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -26,7 +27,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.apache.commons.lang3.tuple.Pair;
@@ -89,18 +89,18 @@ public class SkyblockSavedData extends SavedData {
         return Optional.ofNullable(this.skyblocks.get(SPAWN_ID));
     }
 
-    public Pair<IslandPos, Team> create(String teamName) {
+    public Pair<IslandPos, Team> create(String teamName, WorldUtil.Directions direction) {
         IslandPos islandPos;
         Team team;
         if (teamName.equalsIgnoreCase("spawn")) {
             islandPos = new IslandPos(this.level, 0, 0);
-            team = new Team(this, islandPos, SPAWN_ID);
+            team = new Team(this, islandPos, SPAWN_ID, direction);
         } else {
             do {
                 int[] pos = this.spiral.next();
                 islandPos = new IslandPos(this.level, pos[0], pos[1]);
             } while (this.skyblockPositions.containsValue(islandPos));
-            team = new Team(this, islandPos);
+            team = new Team(this, islandPos, direction);
         }
 
         Set<BlockPos> positions = initialPossibleSpawns(islandPos.getCenter());
@@ -125,8 +125,7 @@ public class SkyblockSavedData extends SavedData {
             CompoundTag tag = (CompoundTag) inbt;
 
             IslandPos island = IslandPos.fromTag(tag.getCompound("Island"));
-            Team team = new Team(this, island);
-            team.deserializeNBT(tag);
+            Team team = Team.create(this, tag);
 
             skyblocks.put(team.getId(), team);
             skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
@@ -246,23 +245,24 @@ public class SkyblockSavedData extends SavedData {
             return null;
         }
 
-        return this.createTeam(teamName, TemplateData.get(this.level).getTemplate());
+        return this.createTeam(teamName, TemplateData.get(this.level).getConfiguredTemplate());
     }
 
     @Nullable
-    public Team createTeam(String teamName, StructureTemplate template) {
+    public Team createTeam(String teamName, ConfiguredTemplate template) {
         if (this.teamExists(teamName) || this.level == null) {
             return null;
         }
 
-        Pair<IslandPos, Team> pair = this.create(teamName);
+        Pair<IslandPos, Team> pair = this.create(teamName, template.getDirection());
         Team team = pair.getRight();
         List<BlockPos> possibleSpawns = new ArrayList<>(this.getPossibleSpawns(team.getIsland()));
         team.setPossibleSpawns(possibleSpawns);
+        team.setDirection(template.getDirection());
 
         StructurePlaceSettings settings = new StructurePlaceSettings();
         BlockPos center = team.getIsland().getCenter();
-        template.placeInWorld(this.level, center, center, settings, new Random(), Block.UPDATE_CLIENTS);
+        template.getTemplate().placeInWorld(this.level, center, center, settings, new Random(), Block.UPDATE_CLIENTS);
 
         this.skyblocks.put(team.getId(), team);
         this.skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
