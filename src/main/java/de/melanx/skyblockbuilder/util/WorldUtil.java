@@ -8,8 +8,8 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
 import de.melanx.skyblockbuilder.data.Team;
-import de.melanx.skyblockbuilder.world.dimensions.end.SkyblockEndChunkGenerator;
-import de.melanx.skyblockbuilder.world.dimensions.multinoise.SkyblockNoiseBasedChunkGenerator;
+import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
+import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,11 +26,12 @@ import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public class WorldUtil {
-
-    public static final ResourceLocation SINGLE_BIOME = ConfigHandler.World.SingleBiome.biome;
 
     public static void teleportToIsland(ServerPlayer player, Team team) {
         MinecraftServer server = player.getServer();
@@ -38,7 +39,7 @@ public class WorldUtil {
         ServerLevel level = getConfiguredLevel(server);
 
         BlockPos spawn = validPosition(level, team);
-        player.teleportTo(level, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, ConfigHandler.Spawn.direction.getYRot(), 0);
+        player.teleportTo(level, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, team.getDirection().getYRot(), 0);
         player.setRespawnPosition(level.dimension(), spawn, 0, true, false);
     }
 
@@ -62,12 +63,6 @@ public class WorldUtil {
         }
 
         return false;
-    }
-
-    public static boolean isSingleBiomeLevel(ResourceKey<Level> dimensionType) {
-        return ConfigHandler.World.SingleBiome.enabled && ConfigHandler.World.SingleBiome.singleBiomeDimension
-                .map(value -> Objects.equals(value.location(), dimensionType.location()))
-                .orElseGet(() -> Objects.equals(ConfigHandler.Spawn.dimension.location(), dimensionType.location()));
     }
 
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {
@@ -210,11 +205,8 @@ public class WorldUtil {
         for (FlatLayerInfo info : layerInfos) {
             i += info.getHeight();
         }
-        return i;
-    }
 
-    public static boolean isStructureGenerated(ResourceLocation registryName) {
-        return ConfigHandler.Structures.generationStructures.test(registryName) || ConfigHandler.Structures.generationFeatures.test(registryName);
+        return i;
     }
 
     public enum Directions {

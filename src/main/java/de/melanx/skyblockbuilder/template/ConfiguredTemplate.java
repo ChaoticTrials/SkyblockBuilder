@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.template;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -21,6 +22,7 @@ public class ConfiguredTemplate {
     private final Set<BlockPos> defaultSpawns = new HashSet<>();
     private StructureTemplate template;
     private String name;
+    private WorldUtil.Directions direction;
 
     public ConfiguredTemplate(TemplateInfo info) {
         StructureTemplate template = new StructureTemplate();
@@ -36,6 +38,7 @@ public class ConfiguredTemplate {
         this.template = template;
         this.defaultSpawns.addAll(TemplateConfig.spawns.get(info.spawns()));
         this.name = info.name();
+        this.direction = info.direction();
     }
 
     private ConfiguredTemplate() {
@@ -53,9 +56,12 @@ public class ConfiguredTemplate {
         return this.name;
     }
 
+    public WorldUtil.Directions getDirection() {
+        return this.direction;
+    }
+
     @Nonnull
-    public CompoundTag write() {
-        CompoundTag nbt = new CompoundTag();
+    public CompoundTag write(CompoundTag nbt) {
         CompoundTag template = this.template.save(new CompoundTag());
 
         ListTag spawns = new ListTag();

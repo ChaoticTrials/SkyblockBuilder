@@ -1,19 +1,17 @@
 package de.melanx.skyblockbuilder.config;
 
 import com.google.common.collect.Maps;
-import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.annotation.config.RegisterConfig;
 import io.github.noeppi_noeppi.libx.config.Config;
 import io.github.noeppi_noeppi.libx.config.Group;
-import io.github.noeppi_noeppi.libx.config.validator.DoubleRange;
 import io.github.noeppi_noeppi.libx.config.validator.IntRange;
 import io.github.noeppi_noeppi.libx.util.ResourceList;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RegisterConfig("common-config")
 public class ConfigHandler {
@@ -63,11 +61,23 @@ public class ConfigHandler {
 
     public static class World {
 
+        @Config({"A list of biomes for each dimension.",
+                "These are resource lists. See https://noeppi-noeppi.github.io/LibX/io/github/noeppi_noeppi/libx/util/ResourceList.html#use_resource_lists_in_configs"})
+        public static Map<String, ResourceList> biomes = Util.make(Maps.newHashMap(), map -> {
+            map.put(Level.OVERWORLD.location().toString(), ResourceList.DENY_LIST);
+            map.put(Level.NETHER.location().toString(), ResourceList.DENY_LIST);
+            map.put(Level.END.location().toString(), ResourceList.DENY_LIST);
+        });
+
         @Config("Should a surface be generated in the dimensions? [default: false]")
         public static boolean surface = false;
 
         @Config({"The block settings for generating the different dimensions surfaces.", "Same format as flat world generation settings (blocks only)"})
-        public static Map<String, String> surfaceSettings = initSurfaceSettingsMap(Maps.newHashMap());
+        public static Map<String, String> surfaceSettings = Util.make(Maps.newHashMap(), map -> {
+            map.put(Level.OVERWORLD.location().toString(), "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block");
+            map.put(Level.NETHER.location().toString(), "");
+            map.put(Level.END.location().toString(), "");
+        });
 
         @Config("Sea level in world [default: 63]")
         public static int seaHeight = 63;
@@ -78,32 +88,6 @@ public class ConfigHandler {
 
         @Config({"The offset from 0, 0 to generate the islands", "Can be used to generate them in the middle of .mca files"})
         public static int offset = 0;
-
-        @Config({"The modifier for spacing and separation of structures. These values can be defined by a data pack. However, this is a multiplier to change these values.",
-                "Minimal spacing is 1", "Minimal separation is 0"})
-        @DoubleRange(min = 0, max = 10)
-        public static double structureModifier = 1;
-
-        private static Map<String, String> initSurfaceSettingsMap(Map<String, String> map) {
-            map.put(Level.OVERWORLD.location().toString(), "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block");
-            map.put(Level.NETHER.location().toString(), "");
-            map.put(Level.END.location().toString(), "");
-            return map;
-        }
-
-        public static class SingleBiome {
-
-            @Config({"Specifies the biome for the whole world", "A list with all possible structures can be found in config/skyblockbuilder/data/biomes.txt"})
-            public static ResourceLocation biome = new ResourceLocation("minecraft", "plains");
-
-            @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-            @Config("The dimension where the single biome should be applied. Use \"null\" for spawn dimension")
-            public static Optional<ResourceKey<Level>> singleBiomeDimension = Optional.empty();
-
-            @Config({"Should only one biome be generated? [default: false]",
-                    "WARNING: Some structures need a special biome, e.g. Mansion needs Dark Oak Forest! These structures will not be generated if you have only one biome!"})
-            public static boolean enabled = false;
-        }
     }
 
     public static class Spawn {
@@ -114,9 +98,6 @@ public class ConfigHandler {
 
         @Config({"The dimension the islands will be generated in."})
         public static ResourceKey<Level> dimension = Level.OVERWORLD;
-
-        @Config("Direction the player should look at initial spawn")
-        public static WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
 
         public static class Height {
 

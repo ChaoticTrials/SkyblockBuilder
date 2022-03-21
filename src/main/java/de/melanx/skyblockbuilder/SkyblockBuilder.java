@@ -13,13 +13,15 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Mod("skyblockbuilder")
 public final class SkyblockBuilder extends ModXRegistration {
 
     private static SkyblockBuilder instance;
     private static SkyNetwork network;
+    private final Logger logger;
     public static final Gson PRETTY_GSON = Util.make(() -> {
         GsonBuilder gsonbuilder = new GsonBuilder();
         gsonbuilder.disableHtmlEscaping();
@@ -32,6 +34,7 @@ public final class SkyblockBuilder extends ModXRegistration {
         super(null);
         instance = this;
         network = new SkyNetwork();
+        this.logger = LoggerFactory.getLogger(SkyblockBuilder.class);
 
         SkyPaths.createDirectories();
     }

@@ -267,7 +267,7 @@ public class TeamCommand {
                     source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
-                Vec3i templateSize = TemplateData.get(level).getTemplate().getSize();
+                Vec3i templateSize = TemplateData.get(level).getConfiguredTemplate().getTemplate().getSize();
                 BlockPos center = team.getIsland().getCenter().mutable();
                 center.offset(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
                 if (!pos.closerThan(center, ConfigHandler.Utility.Spawns.range)) {

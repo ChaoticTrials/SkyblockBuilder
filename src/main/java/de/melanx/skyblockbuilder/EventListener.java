@@ -124,7 +124,7 @@ public class EventListener {
             }
 
             data.addPlayerToTeam(spawn, player);
-            ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), ConfigHandler.Spawn.direction.getYRot());
+            ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), spawn.getDirection().getYRot());
             WorldUtil.teleportToIsland(player, spawn);
         }
     }
@@ -163,7 +163,6 @@ public class EventListener {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
-        RandomUtility.dynamicRegistries = server.registryAccess();
         if (WorldUtil.isSkyblock(server.overworld())) {
             SkyPaths.generateDefaultFiles(server);
             TemplateLoader.updateTemplates();
