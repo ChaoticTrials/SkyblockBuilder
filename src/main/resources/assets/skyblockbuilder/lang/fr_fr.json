@@ -50,6 +50,7 @@
   "skyblockbuilder.command.denied.modify_spawns1": "Il reste trop peu de points d'apparition.",
   "skyblockbuilder.command.denied.rename_team": "Vous ne pouvez pas renommer cette équipe.",
   "skyblockbuilder.command.denied.add_players_to_team": "Vous ne pouvez pas ajouter de joueurs à cette équipe.",
+  "skyblockbuilder.command.denied.remove_players_from_team": "Vous ne pouvez pas retirer de joueurs de cette équipe.",
   "skyblockbuilder.command.denied.toggle_visits": "Vous ne pouvez pas visiter l'équipe de %s.",
   "skyblockbuilder.command.denied.toggle_request": "Vous ne pouvez pas rejoindre les demandes de %s.",
 
@@ -79,6 +80,7 @@
 
   "skyblockbuilder.command.success.reset_island": "Définition réussit de la forme de l'île de %s.",
   "skyblockbuilder.command.success.export_spawns": "Exportation réussie des points d'apparitions actuels vers %s.",
+  "skyblockbuilder.command.success.export_inventory": "Inventaire exporté à %s avec succès",
   "skyblockbuilder.command.success.joined_team": "Adhésion à l'équipe %s réussit.",
   "skyblockbuilder.command.success.declined_invitation": "Suppression de l'invitation de l'équipe %s réussit.",
   "skyblockbuilder.command.success.left_team": "Vos coéquipiers sont maintenant seuls.",
