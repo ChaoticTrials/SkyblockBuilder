@@ -4,6 +4,7 @@
   "screen.skyblockbuilder.select_template": "Please select a template",
 
   "skyblockbuilder.generator.custom_skyblock": "Skyblock",
+  "generator.skyblockbuilder.skylands": "Skylands",
 
   "skyblockbuilder.command.argument.empty": "empty",
   "skyblockbuilder.command.argument.enable": "enable",
