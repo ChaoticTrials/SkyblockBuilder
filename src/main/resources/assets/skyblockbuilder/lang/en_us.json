@@ -3,7 +3,7 @@
   "screen.skyblockbuilder.structure_saver": "Structure Saver",
   "screen.skyblockbuilder.select_template": "Please select a template",
 
-  "skyblockbuilder.generator.custom_skyblock": "Skyblock",
+  "generator.skyblockbuilder.skyblock": "Skyblock",
   "generator.skyblockbuilder.skylands": "Skylands",
 
   "skyblockbuilder.command.argument.empty": "empty",

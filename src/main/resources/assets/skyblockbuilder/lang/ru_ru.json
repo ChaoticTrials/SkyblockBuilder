@@ -3,7 +3,7 @@
     "screen.skyblockbuilder.structure_saver": "Менеджер структур",
     "screen.skyblockbuilder.select_template": "Пожалуйста выбери шаблон",
 
-    "skyblockbuilder.generator.custom_skyblock": "Скайблок",
+    "generator.skyblockbuilder.skyblock": "Скайблок",
 
     "skyblockbuilder.command.argument.empty": "пустой",
     "skyblockbuilder.command.argument.enable": "включено",

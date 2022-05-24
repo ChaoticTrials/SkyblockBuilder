@@ -1,5 +1,5 @@
 {
-  "skyblockbuilder.generator.custom_skyblock": "スカイブロック",
+  "generator.skyblockbuilder.skyblock": "スカイブロック",
 
   "skyblockbuilder.command.argument.empty": "空",
   "skyblockbuilder.command.argument.enabled": "イネーブルド",

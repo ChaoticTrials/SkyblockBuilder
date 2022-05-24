@@ -3,7 +3,7 @@
   "screen.skyblockbuilder.structure_saver": "Guardador de Estrutura",
   "screen.skyblockbuilder.select_template": "Selecione um modelo",
 
-  "skyblockbuilder.generator.custom_skyblock": "Skyblock",
+  "generator.skyblockbuilder.skyblock": "Skyblock",
 
   "skyblockbuilder.command.argument.empty": "vazio",
   "skyblockbuilder.command.argument.enable": "ativar",

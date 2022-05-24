@@ -1,7 +1,6 @@
 package de.melanx.skyblockbuilder.world;
 
 import com.mojang.serialization.Lifecycle;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.BiomeSourceConverter;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
@@ -31,11 +30,6 @@ public class VoidWorldType extends ForgeWorldPreset {
 
     public VoidWorldType() {
         super(VoidWorldType::configuredOverworldChunkGenerator);
-    }
-
-    @Override
-    public String getTranslationKey() {
-        return SkyblockBuilder.getInstance().modid + ".generator.custom_skyblock";
     }
 
     @Override
