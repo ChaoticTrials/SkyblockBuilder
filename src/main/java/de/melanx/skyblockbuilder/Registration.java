@@ -23,7 +23,7 @@ public class Registration {
 
     public static final Item structureSaver = new ItemStructureSaver();
 
-    public static final ResourceKey<NoiseGeneratorSettings> SKYLANDS_SETTINGS = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation(SkyblockBuilder.getInstance().modid, "test"));
+    public static final ResourceKey<NoiseGeneratorSettings> SKYLANDS_SETTINGS = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation(SkyblockBuilder.getInstance().modid, "skylands"));
 
     public static void registerCodecs() {
         // chunk generators
