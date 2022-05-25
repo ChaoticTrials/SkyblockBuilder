@@ -27,6 +27,7 @@ public class SkyPaths {
     public static final Path MOD_CONFIG = FMLPaths.CONFIGDIR.get().resolve("skyblockbuilder");
     public static final Path MOD_EXPORTS = FMLPaths.GAMEDIR.get().resolve("skyblock_exports");
     public static final Path TEMPLATES_DIR = MOD_CONFIG.resolve("templates");
+    public static final Path ICONS_DIR = TEMPLATES_DIR.resolve("icons");
     public static final Path DATA_DIR = MOD_CONFIG.resolve("data");
 
     // files
@@ -42,6 +43,7 @@ public class SkyPaths {
             Files.createDirectories(MOD_CONFIG);
             Files.createDirectories(MOD_EXPORTS);
             Files.createDirectories(TEMPLATES_DIR);
+            Files.createDirectories(ICONS_DIR);
             Files.createDirectories(DATA_DIR);
         } catch (IOException e) {
             throw new RuntimeException("Unable to create default directories.", e);

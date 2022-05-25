@@ -7,6 +7,7 @@ import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.Util;
+import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.MinecraftServer;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.fml.ModList;
 
+import javax.annotation.Nonnull;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -141,5 +143,16 @@ public class RandomUtility {
         } while (Files.exists(Paths.get(filepath)));
 
         return filepath;
+    }
+
+    public static String shorten(@Nonnull Font font, String name, int length) {
+        String s = name;
+        int k = 0;
+        while (font.width(s) > length) {
+            s = name.substring(0, name.length() - k).trim() + "...";
+            k++;
+        }
+
+        return s;
     }
 }

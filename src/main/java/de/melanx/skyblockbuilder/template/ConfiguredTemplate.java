@@ -9,6 +9,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nonnull;
@@ -22,6 +25,7 @@ public class ConfiguredTemplate {
     private final Set<BlockPos> defaultSpawns = new HashSet<>();
     private StructureTemplate template;
     private String name;
+    private String desc;
     private WorldUtil.Directions direction;
 
     public ConfiguredTemplate(TemplateInfo info) {
@@ -38,6 +42,7 @@ public class ConfiguredTemplate {
         this.template = template;
         this.defaultSpawns.addAll(TemplateConfig.spawns.get(info.spawns()));
         this.name = info.name();
+        this.desc = info.desc();
         this.direction = info.direction();
     }
 
@@ -54,6 +59,14 @@ public class ConfiguredTemplate {
 
     public String getName() {
         return this.name;
+    }
+
+    public Component getNameComponent() {
+        return (this.name.startsWith("{") && this.name.endsWith("}")) ? new TranslatableComponent(this.name) : new TextComponent(this.name);
+    }
+
+    public Component getDescriptionComponent() {
+        return (this.desc.startsWith("{") && this.desc.endsWith("}")) ? new TranslatableComponent(this.desc) : new TextComponent(this.desc);
     }
 
     public WorldUtil.Directions getDirection() {
@@ -77,6 +90,7 @@ public class ConfiguredTemplate {
         nbt.put("Template", template);
         nbt.put("Spawns", spawns);
         nbt.putString("Name", this.name);
+        nbt.putString("Desc", this.desc);
 
         return nbt;
     }
@@ -95,6 +109,7 @@ public class ConfiguredTemplate {
         }
 
         this.name = nbt.getString("Name");
+        this.desc = nbt.getString("Desc");
     }
 
     public static ConfiguredTemplate fromTag(@Nonnull CompoundTag nbt) {
