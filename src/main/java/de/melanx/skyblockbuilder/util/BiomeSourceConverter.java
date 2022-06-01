@@ -32,8 +32,8 @@ public class BiomeSourceConverter {
         }
 
         Optional<JsonElement> sourceElement = BiomeSource.CODEC.encodeStart(dynOps, modifiableSource).result();
-        if (sourceElement.isPresent()) {
-            ResourceList resourceList = ConfigHandler.World.biomes.get(level.location().toString());
+        ResourceList resourceList = ConfigHandler.World.biomes.get(level.location().toString());
+        if (sourceElement.isPresent() && resourceList != null) {
             JsonObject json = sourceElement.get().getAsJsonObject();
             JsonArray biomes = GsonHelper.getAsJsonArray(json, "biomes", new JsonArray());
             JsonArray newBiomes = new JsonArray();
