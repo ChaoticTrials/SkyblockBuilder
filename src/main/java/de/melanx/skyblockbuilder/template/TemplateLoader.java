@@ -18,6 +18,7 @@ public class TemplateLoader {
     public static void updateTemplates() {
         try {
             TEMPLATE_NAMES.clear();
+            TEMPLATE_MAP.clear();
             SkyPaths.copyTemplateFile();
             Set<String> takenNames = new HashSet<>();
 
