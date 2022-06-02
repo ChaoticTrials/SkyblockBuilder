@@ -112,6 +112,14 @@ public class ConfiguredTemplate {
         this.desc = nbt.getString("Desc");
     }
 
+    public ConfiguredTemplate copy() {
+        CompoundTag nbt = this.write(new CompoundTag());
+        ConfiguredTemplate template = new ConfiguredTemplate();
+        template.read(nbt);
+
+        return template;
+    }
+
     public static ConfiguredTemplate fromTag(@Nonnull CompoundTag nbt) {
         ConfiguredTemplate info = new ConfiguredTemplate();
         info.read(nbt);

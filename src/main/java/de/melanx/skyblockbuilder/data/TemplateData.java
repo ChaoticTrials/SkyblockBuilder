@@ -22,7 +22,7 @@ public class TemplateData extends SavedData {
 
     public static TemplateData get(ServerLevel level) {
         DimensionDataStorage storage = level.getServer().overworld().getDataStorage();
-        ConfiguredTemplate template = TemplateLoader.getConfiguredTemplate();
+        ConfiguredTemplate template = TemplateLoader.getConfiguredTemplate().copy();
         return storage.computeIfAbsent(nbt -> new TemplateData(template).load(nbt), () -> new TemplateData(template), NAME);
     }
 
