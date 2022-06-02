@@ -91,6 +91,7 @@ public class ConfiguredTemplate {
         nbt.put("Spawns", spawns);
         nbt.putString("Name", this.name);
         nbt.putString("Desc", this.desc);
+        nbt.putString("Direction", this.direction.toString());
 
         return nbt;
     }
@@ -110,6 +111,7 @@ public class ConfiguredTemplate {
 
         this.name = nbt.getString("Name");
         this.desc = nbt.getString("Desc");
+        this.direction = WorldUtil.Directions.valueOf(nbt.getString("Direction"));
     }
 
     public ConfiguredTemplate copy() {
