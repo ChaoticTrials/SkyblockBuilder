@@ -14,6 +14,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.core.*;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.*;
@@ -244,7 +245,8 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                         int featureIndex = array[j];
                         PlacedFeature placedfeature = stepFeatureData.features().get(featureIndex);
                         // The only reason why I needed to copy the code - checking if it should be placed
-                        if (!ConfigHandler.Structures.generationFeatures.test(placedfeature.feature().value().feature().getRegistryName())) {
+                        ResourceLocation registryName = placedfeature.feature().value().feature().getRegistryName();
+                        if (registryName != null && !ConfigHandler.Structures.generationFeatures.test(registryName)) {
                             continue;
                         }
 
