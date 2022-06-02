@@ -206,8 +206,7 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onConfigChange(ConfigLoadedEvent event) {
-        if (event.getConfigClass() == TemplateConfig.class
-                && event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
+        if (event.getConfigClass() == TemplateConfig.class && event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
             TemplateLoader.updateTemplates();
         }
     }

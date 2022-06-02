@@ -11,13 +11,12 @@ import java.util.*;
 
 public class TemplateLoader {
 
-    private static final List<ConfiguredTemplate> TEMPLATES = new ArrayList<>();
     private static final List<String> TEMPLATE_NAMES = new ArrayList<>();
+    private static final Map<String, ConfiguredTemplate> TEMPLATE_MAP = new HashMap<>();
     private static ConfiguredTemplate TEMPLATE;
 
     public static void updateTemplates() {
         try {
-            TEMPLATES.clear();
             TEMPLATE_NAMES.clear();
             SkyPaths.copyTemplateFile();
             Set<String> takenNames = new HashSet<>();
@@ -36,21 +35,20 @@ public class TemplateLoader {
                 }
 
                 takenNames.add(info.name().toLowerCase(Locale.ROOT));
-                TEMPLATES.add(new ConfiguredTemplate(info));
+                ConfiguredTemplate template = new ConfiguredTemplate(info);
                 TEMPLATE_NAMES.add(info.name());
+                TEMPLATE_MAP.put(info.name().toLowerCase(Locale.ROOT), template);
             }
 
-            if (TEMPLATES.size() == 0) {
+            if (TEMPLATE_MAP.size() == 0) {
                 throw new IllegalStateException("You need at least one configured template.");
             }
 
             if (TEMPLATE == null) {
-                TEMPLATE = TEMPLATES.get(0);
+                TEMPLATE = TEMPLATE_MAP.get(TEMPLATE_NAMES.get(0).toLowerCase(Locale.ROOT));
             } else {
                 TEMPLATE = TemplateLoader.getConfiguredTemplate(TEMPLATE.getName());
             }
-
-            TEMPLATES.sort(Comparator.comparing(ConfiguredTemplate::getName));
         } catch (IOException e) {
             throw new RuntimeException("Cannot load templates.", e);
         }
@@ -72,7 +70,9 @@ public class TemplateLoader {
      * client. Use {@link TemplateLoader#getTemplateNames()} on client and send a packet to server to communicate.
      */
     public static List<ConfiguredTemplate> getConfiguredTemplates() {
-        return TEMPLATES;
+        List<ConfiguredTemplate> templates = new ArrayList<>(TEMPLATE_MAP.values());
+        templates.sort(Comparator.comparing(ConfiguredTemplate::getName));
+        return templates;
     }
 
     public static void setTemplate(ConfiguredTemplate template) {
@@ -89,13 +89,7 @@ public class TemplateLoader {
 
     @Nullable
     public static ConfiguredTemplate getConfiguredTemplate(String name) {
-        for (ConfiguredTemplate template : TEMPLATES) {
-            if (template.getName().equalsIgnoreCase(name)) {
-                return template;
-            }
-        }
-
-        return null;
+        return TEMPLATE_MAP.get(name.toLowerCase(Locale.ROOT));
     }
 
     public static ConfiguredTemplate getConfiguredTemplate() {
