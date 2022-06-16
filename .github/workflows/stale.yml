@@ -13,6 +13,7 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: No activity issues/prs
       - uses: actions/stale@v5
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
@@ -28,7 +29,7 @@ jobs:
           close-pr-message: >
             This pull request was automatically closed due to inactivity. Please feel free to update or reopen it.
 
-      - name:
+      - name: Missing information issues/prs
         uses: actions/stale@v5
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
