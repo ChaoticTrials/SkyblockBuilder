@@ -9,6 +9,7 @@ import de.melanx.skyblockbuilder.util.SkyPaths;
 import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
 import io.github.noeppi_noeppi.libx.mod.registration.RegistrationBuilder;
 import net.minecraft.Util;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -37,6 +38,7 @@ public final class SkyblockBuilder extends ModXRegistration {
         this.logger = LoggerFactory.getLogger(SkyblockBuilder.class);
 
         SkyPaths.createDirectories();
+        MinecraftForge.EVENT_BUS.register(new SpawnProtectionEvents());
     }
 
     @Override

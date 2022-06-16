@@ -92,6 +92,9 @@ public class ConfigHandler {
 
     public static class Spawn {
 
+        @Config("The radius of chunks where to apply spawn protection. In this area, only op players can avoid this.")
+        public static int spawnProtectionRadius = 0;
+
         @Config("The radius to find a valid spawn if no given spawn is valid")
         @IntRange(min = 0)
         public static int radius = 50;

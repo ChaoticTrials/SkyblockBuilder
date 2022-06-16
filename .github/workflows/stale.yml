@@ -6,7 +6,7 @@ on:
 
 jobs:
   stale:
-    if: startsWith('MelanX/') # don't run this in forks
+    if: startsWith(github.repository, 'MelanX/') # don't run this in forks
     runs-on: ubuntu-latest
     permissions:
       issues: write
