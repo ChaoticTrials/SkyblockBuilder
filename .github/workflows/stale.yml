@@ -1,0 +1,42 @@
+name: Mark stale issues and pull requests
+
+on:
+  schedule:
+    - cron: '31 * * * *'
+
+jobs:
+  stale:
+    if: startsWith('MelanX/') # don't run this in forks
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/stale@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not had activity in a long time. 
+            If this issue is still relevant and should stay open, please reply with a short explanation why.
+          close-issue-message: >
+            This issue was automatically closed due to inactivity. Please feel free to reopen or create a new issue.
+          stale-pr-message: >
+            This pull request has been automatically marked as stale because it has not had activity in a long time.
+            If this pull request was just overlooked, forgotten, or should remain open for any other reason, please
+            reply here to call attention to it and remove the stale status.
+          close-pr-message: >
+            This pull request was automatically closed due to inactivity. Please feel free to update or reopen it.
+
+      - name:
+        uses: actions/stale@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          only-labels: wontfix
+          days-before-stale: 7
+          days-before-close: 3
+          stale-issue-message: >
+            The required information were not provided yet. Thus, this was marked as stale.
+          close-issue-message: >
+            None of the required information was ever provided. If this is still an issue, feel free to reopen with
+            the required information, or create a new issue.
