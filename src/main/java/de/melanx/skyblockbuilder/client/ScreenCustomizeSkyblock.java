@@ -154,7 +154,8 @@ public class ScreenCustomizeSkyblock extends Screen {
                 this.iconLocation = SkyblockBuilder.getInstance().resource(Util.sanitizeName(template.getName(), ResourceLocation::validPathChar) + "/icon");
                 this.iconFile = SkyPaths.ICONS_DIR.resolve(template.getName().toLowerCase(Locale.ROOT) + ".png").toFile();
                 if (!this.iconFile.isFile()) {
-                    SkyblockBuilder.getLogger().info("No icon set for template '" + template.getName() + "'. Should be at this location: '" + this.iconFile + "'");
+                    // TODO re-add when screen is available
+//                    SkyblockBuilder.getLogger().info("No icon set for template '" + template.getName() + "'. Should be at this location: '" + this.iconFile + "'");
                     this.iconFile = null;
                 }
 

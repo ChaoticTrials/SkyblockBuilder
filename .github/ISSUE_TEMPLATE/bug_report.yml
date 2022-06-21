@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report an issue with supported versions of SkyblockBuilder
+description: Report an issue with supported versions of Skyblock Builder
 labels: [ bug ]
 body:
   - type: input

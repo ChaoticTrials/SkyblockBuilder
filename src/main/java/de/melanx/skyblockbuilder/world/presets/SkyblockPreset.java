@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.world.presets;
 
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.BiomeSourceConverter;
+import de.melanx.skyblockbuilder.util.WorldPresetUtil;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.Holder;
@@ -26,10 +27,10 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import javax.annotation.Nonnull;
 import java.util.Map;
 
-public class VoidWorldPreset extends WorldPreset {
+public class SkyblockPreset extends WorldPreset {
 
-    public VoidWorldPreset() {
-        super(dimensions());
+    public SkyblockPreset() {
+        super(SkyblockPreset.dimensions());
     }
 
     public static Map<ResourceKey<LevelStem>, LevelStem> dimensions() {
@@ -45,11 +46,11 @@ public class VoidWorldPreset extends WorldPreset {
                         configuredOverworldChunkGenerator()),
                 LevelStem.NETHER, new LevelStem(dimensionTypes.getOrCreateHolderOrThrow(BuiltinDimensionTypes.NETHER),
                         ConfigHandler.Dimensions.Nether.Default ?
-                                VoidWorldPreset.defaultNetherGenerator()
+                                WorldPresetUtil.defaultNetherGenerator()
                                 : netherChunkGenerator(structureSets, noises, biomes, noiseGeneratorSettings)),
                 LevelStem.END, new LevelStem(dimensionTypes.getOrCreateHolderOrThrow(BuiltinDimensionTypes.END),
                         ConfigHandler.Dimensions.End.Default ?
-                                VoidWorldPreset.defaultEndGenerator()
+                                WorldPresetUtil.defaultEndGenerator()
                                 : endChunkGenerator(structureSets, noises, biomes, noiseGeneratorSettings))
         );
     }
@@ -72,33 +73,11 @@ public class VoidWorldPreset extends WorldPreset {
         return new SkyblockNoiseBasedChunkGenerator(structureSets, noises, biomeSource, settings, Level.OVERWORLD);
     }
 
-    private static ChunkGenerator defaultNetherGenerator() {
-        Registry<NoiseGeneratorSettings> noiseGeneratorSettings = BuiltinRegistries.NOISE_GENERATOR_SETTINGS;
-        Registry<StructureSet> structureSets = BuiltinRegistries.STRUCTURE_SETS;
-        Registry<NormalNoise.NoiseParameters> noises = BuiltinRegistries.NOISE;
-
-        MultiNoiseBiomeSource biomeSource = MultiNoiseBiomeSource.Preset.NETHER.biomeSource(BuiltinRegistries.BIOME);
-        Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrCreateHolderOrThrow(NoiseGeneratorSettings.NETHER);
-
-        return new NoiseBasedChunkGenerator(structureSets, noises, biomeSource, settings);
-    }
-
     private static ChunkGenerator netherChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, Registry<Biome> biomeRegistry, Registry<NoiseGeneratorSettings> dimensionSettingsRegistry) {
         BiomeSource biomeSource = BiomeSourceConverter.customBiomeSource(Level.NETHER, MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry));
         Holder<NoiseGeneratorSettings> settings = dimensionSettingsRegistry.getOrCreateHolderOrThrow(NoiseGeneratorSettings.NETHER);
 
         return new SkyblockNoiseBasedChunkGenerator(structureSets, noises, biomeSource, settings, Level.NETHER);
-    }
-
-    private static ChunkGenerator defaultEndGenerator() {
-        Registry<NoiseGeneratorSettings> noiseGeneratorSettings = BuiltinRegistries.NOISE_GENERATOR_SETTINGS;
-        Registry<StructureSet> structureSets = BuiltinRegistries.STRUCTURE_SETS;
-        Registry<NormalNoise.NoiseParameters> noises = BuiltinRegistries.NOISE;
-
-        TheEndBiomeSource biomeSource = new TheEndBiomeSource(BuiltinRegistries.BIOME);
-        Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrCreateHolderOrThrow(NoiseGeneratorSettings.END);
-
-        return new NoiseBasedChunkGenerator(structureSets, noises, biomeSource, settings);
     }
 
     private static ChunkGenerator endChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, Registry<Biome> biomeRegistry, Registry<NoiseGeneratorSettings> dimensionSettingsRegistry) {
