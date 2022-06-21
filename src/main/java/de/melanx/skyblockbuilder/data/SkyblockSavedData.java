@@ -17,11 +17,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -216,7 +215,7 @@ public class SkyblockSavedData extends SavedData {
 
     public boolean addPlayerToTeam(Team team, UUID player) {
         if (!team.isSpawn()) {
-            team.broadcast(new TranslatableComponent("skyblockbuilder.event.player_joined", GameProfileCache.getName(player)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
+            team.broadcast(Component.translatable("skyblockbuilder.event.player_joined", GameProfileCache.getName(player)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         }
 
         ServerLevel level = team.getLevel();
@@ -262,7 +261,7 @@ public class SkyblockSavedData extends SavedData {
 
         StructurePlaceSettings settings = new StructurePlaceSettings();
         BlockPos center = team.getIsland().getCenter();
-        template.getTemplate().placeInWorld(this.level, center, center, settings, new Random(), Block.UPDATE_CLIENTS);
+        template.getTemplate().placeInWorld(this.level, center, center, settings, RandomSource.create(), Block.UPDATE_CLIENTS);
 
         this.skyblocks.put(team.getId(), team);
         this.skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
@@ -298,7 +297,7 @@ public class SkyblockSavedData extends SavedData {
             if (team.hasPlayer(player)) {
                 boolean removed = team.removePlayer(player);
                 if (removed) {
-                    team.broadcast(new TranslatableComponent("skyblockbuilder.event.remove_player", GameProfileCache.getName(player)), Style.EMPTY.applyFormat(ChatFormatting.RED));
+                    team.broadcast(Component.translatable("skyblockbuilder.event.remove_player", GameProfileCache.getName(player)), Style.EMPTY.applyFormat(ChatFormatting.RED));
                     //noinspection ConstantConditions
                     this.getTeam(SPAWN_ID).addPlayer(player);
                 }
@@ -387,7 +386,7 @@ public class SkyblockSavedData extends SavedData {
 
         if (!meta.getInvites().contains(team.getId())) {
             meta.addInvite(team.getId());
-            team.broadcast(new TranslatableComponent("skyblockbuilder.event.invite_player", invitor.getDisplayName(), GameProfileCache.getName(id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
+            team.broadcast(Component.translatable("skyblockbuilder.event.invite_player", invitor.getDisplayName(), GameProfileCache.getName(id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         }
 
         this.setDirty();
@@ -433,7 +432,7 @@ public class SkyblockSavedData extends SavedData {
         }
 
         if (meta.getInvites().contains(team.getId())) {
-            team.broadcast(new TranslatableComponent("skyblockbuilder.event.accept_invite", GameProfileCache.getName(id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
+            team.broadcast(Component.translatable("skyblockbuilder.event.accept_invite", GameProfileCache.getName(id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
 
             this.addPlayerToTeam(team.getName(), id);
             meta.resetInvites();
@@ -470,9 +469,9 @@ public class SkyblockSavedData extends SavedData {
         team.setName(name);
         this.skyblockIds.put(name.toLowerCase(Locale.ROOT), team.getId());
 
-        Component playerName = player != null ? player.getDisplayName() : new TextComponent("Server");
+        Component playerName = player != null ? player.getDisplayName() : Component.literal("Server");
 
-        team.broadcast(new TranslatableComponent("skyblockbuilder.event.rename_team", playerName, oldName, name), Style.EMPTY.applyFormat(ChatFormatting.DARK_RED));
+        team.broadcast(Component.translatable("skyblockbuilder.event.rename_team", playerName, oldName, name), Style.EMPTY.applyFormat(ChatFormatting.DARK_RED));
 
         this.setDirty();
     }

@@ -11,7 +11,6 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -40,8 +39,8 @@ import java.util.List;
 
 public class ItemStructureSaver extends Item {
 
-    private static final MutableComponent TOOLTIP_INFO = new TranslatableComponent("skyblockbuilder.item.structure_saver.info.tooltip").withStyle(ChatFormatting.GOLD);
-    private static final MutableComponent TOOLTIP_SAVE = new TranslatableComponent("skyblockbuilder.item.structure_saver.save.tooltip").withStyle(ChatFormatting.GOLD);
+    private static final MutableComponent TOOLTIP_INFO = Component.translatable("skyblockbuilder.item.structure_saver.info.tooltip").withStyle(ChatFormatting.GOLD);
+    private static final MutableComponent TOOLTIP_SAVE = Component.translatable("skyblockbuilder.item.structure_saver.save.tooltip").withStyle(ChatFormatting.GOLD);
 
     public ItemStructureSaver() {
         super(new Properties().tab(CreativeModeTab.TAB_TOOLS));
@@ -59,13 +58,13 @@ public class ItemStructureSaver extends Item {
 
             if (!tag.contains("Position1")) {
                 tag.put("Position1", NbtUtils.writeBlockPos(pos));
-                player.displayClientMessage(new TranslatableComponent("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
+                player.displayClientMessage(Component.translatable("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
                 return InteractionResult.SUCCESS;
             }
 
             if (!tag.contains("Position2")) {
                 tag.put("Position2", NbtUtils.writeBlockPos(pos));
-                player.displayClientMessage(new TranslatableComponent("skyblockbuilder.structure_saver.pos", 2, pos.getX(), pos.getY(), pos.getZ()), false);
+                player.displayClientMessage(Component.translatable("skyblockbuilder.structure_saver.pos", 2, pos.getX(), pos.getY(), pos.getZ()), false);
                 return InteractionResult.SUCCESS;
             }
         }
@@ -104,12 +103,12 @@ public class ItemStructureSaver extends Item {
 
         if (nbt.contains("Position1")) {
             BlockPos pos = NbtUtils.readBlockPos(nbt.getCompound("Position1"));
-            tooltip.add(new TranslatableComponent("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.translatable("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.DARK_GRAY));
         }
 
         if (nbt.contains("Position2")) {
             BlockPos pos = NbtUtils.readBlockPos(nbt.getCompound("Position1"));
-            tooltip.add(new TranslatableComponent("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.translatable("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.DARK_GRAY));
         }
 
         if (nbt.contains("CanSave")) {

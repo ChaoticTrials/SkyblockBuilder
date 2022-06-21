@@ -2,9 +2,9 @@ package de.melanx.skyblockbuilder.config;
 
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import io.github.noeppi_noeppi.libx.annotation.config.RegisterConfig;
-import io.github.noeppi_noeppi.libx.config.Config;
 import net.minecraft.core.BlockPos;
+import org.moddingx.libx.annotation.config.RegisterConfig;
+import org.moddingx.libx.config.Config;
 
 import java.util.List;
 import java.util.Map;

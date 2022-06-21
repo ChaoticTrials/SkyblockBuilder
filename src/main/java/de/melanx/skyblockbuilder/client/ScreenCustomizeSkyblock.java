@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.client;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import de.melanx.skyblockbuilder.Registration;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
@@ -18,8 +17,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
 
@@ -44,7 +41,7 @@ public class ScreenCustomizeSkyblock extends Screen {
     private ConfiguredTemplate template;
 
     public ScreenCustomizeSkyblock(Screen parent) {
-        super(Registration.skyblock.getDisplayName());
+        super(Component.translatable("skyblockbuilder.skyblock.world_preset"));
         this.parent = parent;
         TemplateLoader.updateTemplates();
         this.template = TemplateLoader.getConfiguredTemplate();
@@ -83,7 +80,7 @@ public class ScreenCustomizeSkyblock extends Screen {
         this.renderDirtBackground(0);
         this.list.render(poseStack, mouseX, mouseY, partialTick);
         Screen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
-        Screen.drawCenteredString(poseStack, this.font, new TranslatableComponent("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
+        Screen.drawCenteredString(poseStack, this.font, Component.translatable("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
         super.render(poseStack, mouseX, mouseY, partialTick);
         this.list.renderEntries(poseStack, mouseX, mouseY, partialTick);
     }
@@ -226,7 +223,7 @@ public class ScreenCustomizeSkyblock extends Screen {
             private Component shortened(Component text) {
                 String string = text.getString();
                 String shorten = RandomUtility.shorten(Minecraft.getInstance().font, string, 210);
-                return new TextComponent(shorten);
+                return Component.literal(shorten);
             }
         }
     }

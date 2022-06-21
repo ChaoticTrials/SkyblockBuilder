@@ -1,12 +1,12 @@
 package de.melanx.skyblockbuilder.network;
 
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 

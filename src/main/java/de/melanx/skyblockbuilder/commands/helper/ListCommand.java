@@ -11,9 +11,8 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
@@ -40,7 +39,7 @@ public class ListCommand {
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
         List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).filter(team -> !team.getName().equalsIgnoreCase("spawn")).collect(Collectors.toList());
-        MutableComponent info = new TranslatableComponent("skyblockbuilder.command.info.teams",
+        MutableComponent info = Component.translatable("skyblockbuilder.command.info.teams",
                 teams.size(),
                 teams.stream().filter(Team::isEmpty).count());
         info.withStyle(ChatFormatting.GOLD);
@@ -48,10 +47,10 @@ public class ListCommand {
 
         for (Team team : teams) {
             if (!team.isSpawn()) {
-                MutableComponent list = (new TextComponent("- " + team.getName()));
+                MutableComponent list = (Component.literal("- " + team.getName()));
                 if (team.isEmpty()) {
                     list.append(" (");
-                    list.append(new TranslatableComponent("skyblockbuilder.command.argument.empty"));
+                    list.append(Component.translatable("skyblockbuilder.command.argument.empty"));
                     list.append(")");
                     list.withStyle(ChatFormatting.RED);
                 } else {
@@ -72,18 +71,18 @@ public class ListCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         GameProfileCache profileCache = source.getServer().getProfileCache();
-        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.info.team_detailed", team.getName(), team.getPlayers().size()).withStyle(ChatFormatting.GOLD), false);
+        source.sendSuccess(Component.translatable("skyblockbuilder.command.info.team_detailed", team.getName(), team.getPlayers().size()).withStyle(ChatFormatting.GOLD), false);
         team.getPlayers().forEach(id -> {
             Optional<GameProfile> profile = profileCache.get(id);
             if (profile.isPresent()) {
                 String name = profile.get().getName();
                 if (!StringUtil.isNullOrEmpty(name)) {
-                    source.sendSuccess(new TextComponent("- " + name), false);
+                    source.sendSuccess(Component.literal("- " + name), false);
                 }
             }
         });

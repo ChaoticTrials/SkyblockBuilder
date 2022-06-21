@@ -21,17 +21,18 @@ import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.FeatureSorter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import javax.annotation.Nonnull;
@@ -41,6 +42,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
@@ -50,12 +52,10 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                     .and(instance.group(
                             RegistryOps.retrieveRegistry(Registry.NOISE_REGISTRY).forGetter(generator -> generator.noises),
                             BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
-                            Codec.LONG.fieldOf("seed").stable().forGetter(generator -> generator.seed),
                             NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
                             Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension)
                     )).apply(instance, instance.stable(SkyblockNoiseBasedChunkGenerator::new)));
 
-    public final long seed;
     public final Registry<NormalNoise.NoiseParameters> noises;
     public final Holder<NoiseGeneratorSettings> generatorSettings;
     public final ResourceKey<Level> dimension;
@@ -63,12 +63,11 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     protected final List<FlatLayerInfo> layerInfos;
     private final int layerHeight;
 
-    public SkyblockNoiseBasedChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, long seed, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension) {
-        super(structureSets, noises, biomeSource, seed, generatorSettings);
-        this.seed = seed;
+    public SkyblockNoiseBasedChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension) {
+        super(structureSets, noises, biomeSource, generatorSettings);
         this.noises = noises;
         this.generatorSettings = generatorSettings;
-        this.parent = new NoiseBasedChunkGenerator(structureSets, this.noises, biomeSource, seed, generatorSettings);
+        this.parent = new NoiseBasedChunkGenerator(structureSets, this.noises, biomeSource, generatorSettings);
         this.dimension = dimension;
         this.layerInfos = ConfigHandler.World.surface
                 ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(dimension.location().toString()))
@@ -87,14 +86,8 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         return ConfigHandler.World.seaHeight;
     }
 
-    @Nonnull
     @Override
-    public ChunkGenerator withSeed(long seed) {
-        return new SkyblockNoiseBasedChunkGenerator(this.structureSets, this.noises, this.biomeSource.withSeed(seed), seed, this.generatorSettings, this.dimension);
-    }
-
-    @Override
-    public void buildSurface(@Nonnull WorldGenRegion level, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk) {
+    public void buildSurface(@Nonnull WorldGenRegion level, @Nonnull StructureManager structureManager, @Nonnull RandomState randomState, @Nonnull ChunkAccess chunk) {
         if (ConfigHandler.World.surface) {
             ChunkPos cp = chunk.getPos();
             int xs = cp.getMinBlockX();
@@ -122,76 +115,69 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Nonnull
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull Blender blender, @Nonnull StructureFeatureManager manager, @Nonnull ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager manager, @Nonnull ChunkAccess chunk) {
         return CompletableFuture.completedFuture(chunk);
     }
 
     @Nullable
     @Override
-    public Pair<BlockPos, Holder<ConfiguredStructureFeature<?, ?>>> findNearestMapFeature(@Nonnull ServerLevel level, @Nonnull HolderSet<ConfiguredStructureFeature<?, ?>> structureSet, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
-        for (Holder<ConfiguredStructureFeature<?, ?>> holder : structureSet) {
-            if (!ConfigHandler.Structures.generationStructures.test(holder.value().feature.getRegistryName())) {
+    public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(@Nonnull ServerLevel level, @Nonnull HolderSet<Structure> structureHolderSet, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
+        for (Holder<Structure> holder : structureHolderSet) {
+            if (holder.unwrapKey().isPresent() && !ConfigHandler.Structures.generationStructures.test(holder.unwrapKey().get().location())) {
                 return null;
             }
         }
 
-        return super.findNearestMapFeature(level, structureSet, pos, searchRadius, skipKnownStructures);
+        return super.findNearestMapStructure(level, structureHolderSet, pos, searchRadius, skipKnownStructures);
     }
 
     @Override
-    public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level) {
+    public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level, @Nonnull RandomState randomState) {
         if (ConfigHandler.World.surface) {
             return this.layerHeight;
         }
 
-        return this.parent.getBaseHeight(x, z, heightmapType, level);
+        return this.parent.getBaseHeight(x, z, heightmapType, level, randomState);
     }
 
     @Override
-    public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull BiomeManager biomeManager, @Nonnull StructureFeatureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving carving) {
+    public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState randomState, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving carving) {
 
-    }
-
-    @Override
-    protected boolean tryGenerateStructure(@Nonnull StructureSet.StructureSelectionEntry structureEntry, @Nonnull StructureFeatureManager structureManager, @Nonnull RegistryAccess registry, @Nonnull StructureManager featureManager, long seed, @Nonnull ChunkAccess chunk, @Nonnull ChunkPos chunkPos, @Nonnull SectionPos sectionPos) {
-        if (!ConfigHandler.Structures.generationStructures.test(structureEntry.structure().value().feature.getRegistryName())) {
-            return false;
-        }
-
-        return super.tryGenerateStructure(structureEntry, structureManager, registry, featureManager, seed, chunk, chunkPos, sectionPos);
     }
 
     @Nonnull
     @Override
-    public NoiseColumn getBaseColumn(int posX, int posZ, @Nonnull LevelHeightAccessor level) {
+    public Stream<Holder<StructureSet>> possibleStructureSets() {
+        return super.possibleStructureSets().filter(holder -> holder.unwrapKey().map(structureSetResourceKey -> !ConfigHandler.Structures.generationStructures.test(structureSetResourceKey.location())).orElse(true));
+    }
+
+    @Nonnull
+    @Override
+    public NoiseColumn getBaseColumn(int posX, int posZ, @Nonnull LevelHeightAccessor level, @Nonnull RandomState randomState) {
         return new NoiseColumn(0, new BlockState[0]);
     }
 
     // [Vanilla copy] to ignore some features
     @Override
-    public void applyBiomeDecoration(@Nonnull WorldGenLevel level, @Nonnull ChunkAccess chunk, @Nonnull StructureFeatureManager structureFeatureManager) {
+    public void applyBiomeDecoration(@Nonnull WorldGenLevel level, @Nonnull ChunkAccess chunk, @Nonnull StructureManager structureManager) {
         ChunkPos chunkPos = chunk.getPos();
         SectionPos sectionPos = SectionPos.of(chunkPos, level.getMinSection());
-        BlockPos blockPos = sectionPos.origin();
+        BlockPos blockpos = sectionPos.origin();
 
-        Registry<ConfiguredStructureFeature<?, ?>> configuredStructureFeatureRegistry = level.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-        Map<Integer, List<ConfiguredStructureFeature<?, ?>>> featuresMap = configuredStructureFeatureRegistry.stream().collect(Collectors.groupingBy((feature) -> feature.feature.step().ordinal()));
-        List<BiomeSource.StepFeatureData> stepFeatureDataList = this.biomeSource.featuresPerStep();
-        WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
-        long decorationSeed = worldgenRandom.setDecorationSeed(level.getSeed(), blockPos.getX(), blockPos.getZ());
+        Registry<Structure> structureRegistry = level.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+        Map<Integer, List<Structure>> map = structureRegistry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
+        List<FeatureSorter.StepFeatureData> stepFeatureDataList = this.featuresPerStep.get();
+        WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
+        long decorationSeed = worldgenRandom.setDecorationSeed(level.getSeed(), blockpos.getX(), blockpos.getZ());
 
-        Set<Biome> possibleBiomes = new ObjectArraySet<>();
+        Set<Holder<Biome>> possibleBiomes = new ObjectArraySet<>();
         ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach((pos) -> {
-            ChunkAccess chunkAccess = level.getChunk(pos.x, pos.z);
-
-            for (LevelChunkSection chunkSection : chunkAccess.getSections()) {
-                chunkSection.getBiomes().getAll((biomeHolder) -> {
-                    possibleBiomes.add(biomeHolder.value());
-                });
+            ChunkAccess chunkaccess = level.getChunk(pos.x, pos.z);
+            for (LevelChunkSection chunkSection : chunkaccess.getSections()) {
+                chunkSection.getBiomes().getAll(possibleBiomes::add);
             }
-
         });
-        possibleBiomes.retainAll(this.biomeSource.possibleBiomes().stream().map(Holder::value).collect(Collectors.toSet()));
+        possibleBiomes.retainAll(this.biomeSource.possibleBiomes());
 
         int dataSize = stepFeatureDataList.size();
 
@@ -201,19 +187,24 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
             for (int i = 0; i < maxDecorations; ++i) {
                 int index = 0;
-                if (structureFeatureManager.shouldGenerateFeatures()) {
-                    for (ConfiguredStructureFeature<?, ?> feature : featuresMap.getOrDefault(i, Collections.emptyList())) {
+                if (structureManager.shouldGenerateStructures()) {
+                    for (Structure structure : map.getOrDefault(i, Collections.emptyList())) {
+                        ResourceLocation location = level.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).getKey(structure);
+                        if (!ConfigHandler.Structures.generationStructures.test(location)) {
+                            continue;
+                        }
+
                         worldgenRandom.setFeatureSeed(decorationSeed, index, i);
-                        Supplier<String> supplier = () -> configuredStructureFeatureRegistry.getResourceKey(feature).map(Object::toString).orElseGet(feature::toString);
+                        Supplier<String> currentlyGenerating = () -> structureRegistry.getResourceKey(structure).map(Object::toString).orElseGet(structure::toString);
 
                         try {
-                            level.setCurrentlyGenerating(supplier);
-                            structureFeatureManager.startsForFeature(sectionPos, feature).forEach((structureStart) -> {
-                                structureStart.placeInChunk(level, structureFeatureManager, this, worldgenRandom, ChunkGenerator.getWritableArea(chunk), chunkPos);
+                            level.setCurrentlyGenerating(currentlyGenerating);
+                            structureManager.startsForStructure(sectionPos, structure).forEach((structureStart) -> {
+                                structureStart.placeInChunk(level, structureManager, this, worldgenRandom, getWritableArea(chunk), chunkPos);
                             });
-                        } catch (Exception exception) {
-                            CrashReport report = CrashReport.forThrowable(exception, "Feature placement");
-                            report.addCategory("Feature").setDetail("Description", supplier::get);
+                        } catch (Exception e) {
+                            CrashReport report = CrashReport.forThrowable(e, "Feature placement");
+                            report.addCategory("Feature").setDetail("Description", currentlyGenerating::get);
                             throw new ReportedException(report);
                         }
 
@@ -224,14 +215,13 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                 if (i < dataSize) {
                     IntSet mapping = new IntArraySet();
 
-                    for (Biome biome : possibleBiomes) {
-                        List<HolderSet<PlacedFeature>> holderSets = biome.getGenerationSettings().features();
+                    for (Holder<Biome> holder : possibleBiomes) {
+                        List<HolderSet<PlacedFeature>> holderSets = this.generationSettingsGetter.apply(holder).features();
                         if (i < holderSets.size()) {
                             HolderSet<PlacedFeature> featureHolderSet = holderSets.get(i);
-                            BiomeSource.StepFeatureData stepFeatureData = stepFeatureDataList.get(i);
-                            //noinspection CodeBlock2Expr
-                            featureHolderSet.stream().map(Holder::value).forEach((feature) -> {
-                                mapping.add(stepFeatureData.indexMapping().applyAsInt(feature));
+                            FeatureSorter.StepFeatureData stepFeatureData = stepFeatureDataList.get(i);
+                            featureHolderSet.stream().map(Holder::value).forEach((p_223174_) -> {
+                                mapping.add(stepFeatureData.indexMapping().applyAsInt(p_223174_));
                             });
                         }
                     }
@@ -239,14 +229,14 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                     int mappingSize = mapping.size();
                     int[] array = mapping.toIntArray();
                     Arrays.sort(array);
-                    BiomeSource.StepFeatureData stepFeatureData = stepFeatureDataList.get(i);
+                    FeatureSorter.StepFeatureData stepFeatureData = stepFeatureDataList.get(i);
 
                     for (int j = 0; j < mappingSize; ++j) {
                         int featureIndex = array[j];
                         PlacedFeature placedfeature = stepFeatureData.features().get(featureIndex);
                         // The only reason why I needed to copy the code - checking if it should be placed
-                        ResourceLocation registryName = placedfeature.feature().value().feature().getRegistryName();
-                        if (registryName != null && !ConfigHandler.Structures.generationFeatures.test(registryName)) {
+                        Optional<ResourceKey<ConfiguredFeature<?, ?>>> optionalResourceKey = placedfeature.feature().unwrapKey();
+                        if (optionalResourceKey.isPresent() && !ConfigHandler.Structures.generationFeatures.test(optionalResourceKey.get().location())) {
                             continue;
                         }
 
@@ -255,9 +245,9 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
                         try {
                             level.setCurrentlyGenerating(currentlyGenerating);
-                            placedfeature.placeWithBiomeCheck(level, this, worldgenRandom, blockPos);
-                        } catch (Exception exception1) {
-                            CrashReport report = CrashReport.forThrowable(exception1, "Feature placement");
+                            placedfeature.placeWithBiomeCheck(level, this, worldgenRandom, blockpos);
+                        } catch (Exception e) {
+                            CrashReport report = CrashReport.forThrowable(e, "Feature placement");
                             report.addCategory("Feature").setDetail("Description", currentlyGenerating::get);
                             throw new ReportedException(report);
                         }
@@ -266,8 +256,8 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
             }
 
             level.setCurrentlyGenerating(null);
-        } catch (Exception exception2) {
-            CrashReport report = CrashReport.forThrowable(exception2, "Biome decoration");
+        } catch (Exception e) {
+            CrashReport report = CrashReport.forThrowable(e, "Biome decoration");
             report.addCategory("Generation").setDetail("CenterX", chunkPos.x).setDetail("CenterZ", chunkPos.z).setDetail("Seed", decorationSeed);
             throw new ReportedException(report);
         }

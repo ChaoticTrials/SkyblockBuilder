@@ -11,7 +11,7 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -33,26 +33,26 @@ public class VisitCommand {
         Team team = data.getTeam(name);
 
         if (team == null) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onVisit(player, team)) {
             case DENY:
-                source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
+                source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (team.hasPlayer(player)) {
-                    source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.visit_own_team").withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(Component.translatable("skyblockbuilder.command.error.visit_own_team").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 if (!player.hasPermissions(2)) {
                     if (!ConfigHandler.Utility.Teleports.allowVisits) {
-                        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.team_visit").withStyle(ChatFormatting.RED), false);
+                        source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.team_visit").withStyle(ChatFormatting.RED), false);
                         return 0;
                     }
                     if (!team.allowsVisits()) {
-                        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
+                        source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
                         return 0;
                     }
                 }
@@ -62,7 +62,7 @@ public class VisitCommand {
         }
 
         WorldUtil.teleportToIsland(player, team);
-        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.visit_team", name).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(Component.translatable("skyblockbuilder.command.success.visit_team", name).withStyle(ChatFormatting.GOLD), true);
         return 1;
     }
 }

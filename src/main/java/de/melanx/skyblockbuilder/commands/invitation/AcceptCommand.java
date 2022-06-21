@@ -12,7 +12,7 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -33,27 +33,27 @@ public class AcceptCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         if (data.hasPlayerTeam(player)) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         if (!data.hasInvites(player)) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.no_invitations").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.no_invitations").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onAccept(player, team)) {
             case DENY:
-                source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.accept_invitations").withStyle(ChatFormatting.RED), false);
+                source.sendSuccess(Component.translatable("skyblockbuilder.command.denied.accept_invitations").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
-                    source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.accept_invitations").withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.accept_invitations").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -62,11 +62,11 @@ public class AcceptCommand {
         }
 
         if (!data.acceptInvite(team, player)) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.accept_invitations").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.accept_invitations").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
-        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.joined_team", team.getName()).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(Component.translatable("skyblockbuilder.command.success.joined_team", team.getName()).withStyle(ChatFormatting.GOLD), true);
         return 1;
     }
 

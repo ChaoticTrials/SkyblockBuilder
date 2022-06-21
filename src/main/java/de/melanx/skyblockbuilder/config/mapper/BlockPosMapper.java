@@ -2,19 +2,19 @@ package de.melanx.skyblockbuilder.config.mapper;
 
 import com.google.gson.JsonArray;
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.noeppi_noeppi.libx.annotation.config.RegisterMapper;
-import io.github.noeppi_noeppi.libx.config.ValidatorInfo;
-import io.github.noeppi_noeppi.libx.config.ValueMapper;
-import io.github.noeppi_noeppi.libx.config.gui.ConfigEditor;
-import io.github.noeppi_noeppi.libx.config.gui.WidgetProperties;
-import io.github.noeppi_noeppi.libx.impl.config.gui.EditorHelper;
-import io.github.noeppi_noeppi.libx.impl.config.mappers.SimpleValueMappers;
-import io.github.noeppi_noeppi.libx.screen.Panel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import org.moddingx.libx.annotation.config.RegisterMapper;
+import org.moddingx.libx.config.gui.ConfigEditor;
+import org.moddingx.libx.config.gui.WidgetProperties;
+import org.moddingx.libx.config.mapper.ValueMapper;
+import org.moddingx.libx.config.validator.ValidatorInfo;
+import org.moddingx.libx.impl.config.gui.EditorHelper;
+import org.moddingx.libx.impl.config.mappers.SimpleValueMappers;
+import org.moddingx.libx.screen.Panel;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

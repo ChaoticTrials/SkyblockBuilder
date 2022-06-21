@@ -1,9 +1,9 @@
 buildscript {
-    apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/buildscript.gradle', to: buildscript
+    apply from: 'https://moddingx.github.io/ModUtils/v4/buildscript.gradle', to: buildscript
 }
 
-apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/mod.gradle'
-apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.cursedep'
+apply from: 'https://moddingx.github.io/ModUtils/v4/mod.gradle'
+apply plugin: 'org.moddingx.modgradle.cursedep'
 
 repositories {
     maven {
@@ -21,16 +21,26 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.2"
+    annotationProcessor "org.moddingx:LibX:1.19-4.0.3"
 
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.2")
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.18.2-1.3.0")
-    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.18.2-5.0.6.3")
+    implementation fg.deobf("org.moddingx:LibX:1.19-4.0.3")
+    implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.19-2.0.0")
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.19-5.1.0.1")
 
-    runtimeOnly fg.deobf("mezz.jei:jei-1.18.2:9.5.3.143")
+//    runtimeOnly fg.deobf("mezz.jei:jei-1.18.2:9.5.3.143")
 
 //    runtimeOnly curse.mod(291874, 3433685)
 //    runtimeOnly curse.mod(353942, 3455374)
 
 //    runtimeOnly fg.deobf("curse.maven:good-nights-sleep-61461:3208812")
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'net.minecraftforge:srgutils:0.4.11'
+    testImplementation 'com.moandjiezana.toml:toml4j:0.7.2'
+}
+
+test {
+    dependsOn createSrgToMcp // Needed, so the tests can load mappings
+    useJUnitPlatform()
 }

@@ -13,7 +13,7 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -34,28 +34,28 @@ public class JoinCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         if (data.hasPlayerTeam(player)) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         SkyblockJoinRequestEvent.SendRequest event = SkyblockHooks.onSendJoinRequest(player, team);
         switch (event.getResult()) {
             case DENY:
-                source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.join_request").withStyle(ChatFormatting.RED), false);
+                source.sendSuccess(Component.translatable("skyblockbuilder.command.denied.join_request").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!source.hasPermission(2)) {
                     if (!ConfigHandler.Utility.selfManage) {
-                        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED), false);
+                        source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED), false);
                         return 0;
                     }
                     if (!team.allowsJoinRequests()) {
-                        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.team_join_request").withStyle(ChatFormatting.RED), false);
+                        source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.team_join_request").withStyle(ChatFormatting.RED), false);
                         return 0;
                     }
                 }
@@ -65,7 +65,7 @@ public class JoinCommand {
         }
 
         team.sendJoinRequest(player);
-        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.join_request", teamName).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(Component.translatable("skyblockbuilder.command.success.join_request", teamName).withStyle(ChatFormatting.GOLD), true);
         return 1;
     }
 }

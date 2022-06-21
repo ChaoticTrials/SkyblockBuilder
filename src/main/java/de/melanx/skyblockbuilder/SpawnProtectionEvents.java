@@ -87,8 +87,8 @@ public class SpawnProtectionEvents {
     }
 
     @SubscribeEvent
-    public void cropGrow(BlockEvent.BlockToolInteractEvent event) {
-        if (SpawnProtectionEvents.isOnSpawn(event.getPlayer()) && !event.getPlayer().hasPermissions(2)) {
+    public void cropGrow(BlockEvent.BlockToolModificationEvent event) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getContext().getLevel(), event.getPos()) && (event.getPlayer() == null || !event.getPlayer().hasPermissions(2))) {
             event.setCanceled(true);
         }
     }

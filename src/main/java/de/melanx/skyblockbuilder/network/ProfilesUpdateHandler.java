@@ -2,11 +2,11 @@ package de.melanx.skyblockbuilder.network;
 
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.HashSet;
 import java.util.Set;

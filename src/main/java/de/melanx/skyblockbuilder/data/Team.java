@@ -4,13 +4,15 @@ import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
-import io.github.noeppi_noeppi.libx.annotation.meta.RemoveIn;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -38,18 +40,6 @@ public class Team {
 
     private Team(SkyblockSavedData data) {
         this(data, null, null, null);
-    }
-
-    @RemoveIn(minecraft = "1.19")
-    @Deprecated(forRemoval = true)
-    public Team(SkyblockSavedData data, IslandPos island) {
-        this(data, island, UUID.randomUUID(), WorldUtil.Directions.SOUTH);
-    }
-
-    @RemoveIn(minecraft = "1.19")
-    @Deprecated(forRemoval = true)
-    public Team(SkyblockSavedData data, IslandPos island, UUID teamId) {
-        this(data, island, teamId, WorldUtil.Directions.SOUTH);
     }
 
     public Team(SkyblockSavedData data, IslandPos island, WorldUtil.Directions direction) {
@@ -299,12 +289,12 @@ public class Team {
 
     public void sendJoinRequest(Player requestingPlayer) {
         this.addJoinRequest(requestingPlayer.getGameProfile().getId());
-        TranslatableComponent component = new TranslatableComponent("skyblockbuilder.event.join_request0", requestingPlayer.getDisplayName());
-        component.append(new TextComponent("/skyblock team accept " + requestingPlayer.getDisplayName().getString()).setStyle(Style.EMPTY
+        MutableComponent component = Component.translatable("skyblockbuilder.event.join_request0", requestingPlayer.getDisplayName());
+        component.append(Component.literal("/skyblock team accept " + requestingPlayer.getDisplayName().getString()).setStyle(Style.EMPTY
                 .withHoverEvent(InviteCommand.COPY_TEXT)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock team accept " + requestingPlayer.getDisplayName().getString()))
                 .applyFormats(ChatFormatting.UNDERLINE, ChatFormatting.GOLD)));
-        component.append(new TranslatableComponent("skyblockbuilder.event.join_request1"));
+        component.append(Component.translatable("skyblockbuilder.event.join_request1"));
         this.broadcast(component, Style.EMPTY.applyFormat(ChatFormatting.GOLD));
     }
 
@@ -343,8 +333,8 @@ public class Team {
         this.players.forEach(uuid -> {
             ServerPlayer player = playerList.getPlayer(uuid);
             if (player != null) {
-                MutableComponent component = new TextComponent("[" + this.name + "] ").setStyle(Style.EMPTY);
-                player.sendMessage(component.append(msg.withStyle(style)), uuid);
+                MutableComponent component = Component.literal("[" + this.name + "] ").setStyle(Style.EMPTY);
+                player.sendSystemMessage(component.append(msg.withStyle(style)));
             }
         });
     }

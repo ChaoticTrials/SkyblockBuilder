@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.util.RandomUtility;
-import io.github.noeppi_noeppi.libx.network.NetworkX;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
@@ -14,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.PacketDistributor;
+import org.moddingx.libx.network.NetworkX;
 
 import java.util.List;
 import java.util.Set;

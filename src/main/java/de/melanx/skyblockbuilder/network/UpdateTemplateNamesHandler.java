@@ -2,9 +2,9 @@ package de.melanx.skyblockbuilder.network;
 
 import com.google.common.collect.Lists;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.List;
 import java.util.function.Supplier;

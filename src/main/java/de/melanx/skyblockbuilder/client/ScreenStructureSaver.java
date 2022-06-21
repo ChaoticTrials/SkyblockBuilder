@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.ClientUtility;
-import io.github.noeppi_noeppi.libx.util.Math2;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
@@ -13,8 +12,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -45,26 +42,26 @@ public class ScreenStructureSaver extends Screen {
     protected void init() {
         this.relX = (this.width - this.xSize) / 2;
         this.relY = (this.height - this.ySize) / 2;
-        this.name = new EditBox(this.font, this.relX + 11, this.relY + 25, 125, 17, new TranslatableComponent("skyblockbuilder.screen.widget.structure_name"));
+        this.name = new EditBox(this.font, this.relX + 11, this.relY + 25, 125, 17, Component.translatable("skyblockbuilder.screen.widget.structure_name"));
         this.name.setMaxLength(Short.MAX_VALUE);
         this.name.changeFocus(true);
         this.name.setValue(this.name.getValue());
-        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 55, 60, 20, new TranslatableComponent("skyblockbuilder.screen.button.save"), button -> {
+        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 55, 60, 20, Component.translatable("skyblockbuilder.screen.button.save"), button -> {
             SkyblockBuilder.getNetwork().saveStructure(this.stack, this.name.getValue().isEmpty() ? "template" : this.name.getValue(), this.ignoreAir.selected());
             this.onClose();
         }));
-        this.addRenderableWidget(new Button(this.relX + 77, this.relY + 55, 60, 20, new TranslatableComponent("skyblockbuilder.screen.button.delete"), button -> {
+        this.addRenderableWidget(new Button(this.relX + 77, this.relY + 55, 60, 20, Component.translatable("skyblockbuilder.screen.button.delete"), button -> {
             SkyblockBuilder.getNetwork().deleteTags(this.stack);
             this.onClose();
         }));
-        this.addRenderableWidget(new Button(this.relX + 144, this.relY + 23, 20, 20, TextComponent.EMPTY, button -> {
+        this.addRenderableWidget(new Button(this.relX + 144, this.relY + 23, 20, 20, Component.empty(), button -> {
             ClientUtility.openPath("skyblock_exports");
-        }, (button, poseStack, mouseX, mouseY) -> this.renderTooltip(poseStack, new TranslatableComponent("skyblockbuilder.screen.button.open_folder.tooltip"), mouseX, mouseY)));
-        this.ignoreAir = this.addRenderableWidget(new Checkbox(this.relX + 144, this.relY + 55, 20, 20, TextComponent.EMPTY, false, false));
+        }, (button, poseStack, mouseX, mouseY) -> this.renderTooltip(poseStack, Component.translatable("skyblockbuilder.screen.button.open_folder.tooltip"), mouseX, mouseY)));
+        this.ignoreAir = this.addRenderableWidget(new Checkbox(this.relX + 144, this.relY + 55, 20, 20, Component.empty(), false, false));
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(poseStack);
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -72,15 +69,15 @@ public class ScreenStructureSaver extends Screen {
         RenderSystem.setShaderTexture(0, SCREEN_LOCATION);
         this.blit(poseStack, this.relX, this.relY, 0, 0, this.xSize, this.ySize);
 
-        this.name.render(poseStack, mouseX, mouseY, partialTicks);
+        this.name.render(poseStack, mouseX, mouseY, partialTick);
         this.font.draw(poseStack, this.title, this.relX + 10, this.relY + 8, Color.DARK_GRAY.getRGB());
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+        super.render(poseStack, mouseX, mouseY, partialTick);
 
         RenderSystem.setShaderTexture(0, SCREEN_LOCATION);
         this.blit(poseStack, this.relX + 147, this.relY + 25, 0, this.ySize, 14, 14);
 
-        if (Math2.isInBounds(this.relX + 144, this.relY + 50, 19, 19, mouseX, mouseY)) {
-            this.renderTooltip(poseStack, new TranslatableComponent("skyblockbuilder.item.structure_saver.ignore_air.tooltip"), mouseX, mouseY);
+        if (this.ignoreAir.isHoveredOrFocused()) {
+            this.renderTooltip(poseStack, Component.translatable("skyblockbuilder.item.structure_saver.ignore_air.tooltip"), mouseX, mouseY);
         }
     }
 

@@ -13,7 +13,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -47,19 +47,19 @@ public class CreateCommand {
         }
 
         if (SkyblockHooks.onCreateTeam(name)) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.denied.create_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.denied.create_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         if (players.isEmpty() && source.getEntity() instanceof ServerPlayer && data.hasPlayerTeam((ServerPlayer) source.getEntity())) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         Team team = data.createTeam(name);
 
         if (team == null) {
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.team_already_exist", name).withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.team_already_exist", name).withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
@@ -69,7 +69,7 @@ public class CreateCommand {
         } else {
             players.forEach(player -> {
                 if (data.getTeamFromPlayer(player) != null) {
-                    source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(Component.translatable("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).withStyle(ChatFormatting.RED), false);
                 } else {
                     data.addPlayerToTeam(team, player);
                     WorldUtil.teleportToIsland(player, team);
@@ -77,7 +77,7 @@ public class CreateCommand {
             });
         }
 
-        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.create_team", name).withStyle(ChatFormatting.GREEN), true);
+        source.sendSuccess(Component.translatable("skyblockbuilder.command.success.create_team", name).withStyle(ChatFormatting.GREEN), true);
         return 1;
     }
 }

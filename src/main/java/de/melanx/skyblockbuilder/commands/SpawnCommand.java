@@ -9,7 +9,7 @@ import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -30,13 +30,13 @@ public class SpawnCommand {
         Team team = data.getSpawn();
 
         if (!player.hasPermissions(2) && !data.getMetaInfo(player).canTeleportSpawn(level.getGameTime())) {
-            source.sendFailure(new TranslatableComponent("skyblockbuilder.command.error.cooldown",
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
                     RandomUtility.formattedCooldown(ConfigHandler.Utility.Teleports.spawnCooldown - (level.getGameTime() - data.addMetaInfo(player).getLastSpawnTeleport()))));
             return 0;
         }
 
         data.getMetaInfo(player).setLastSpawnTeleport(level.getGameTime());
-        source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.teleport_to_spawn"), false);
+        source.sendSuccess(Component.translatable("skyblockbuilder.command.success.teleport_to_spawn"), false);
         WorldUtil.teleportToIsland(player, team);
         return 1;
     }

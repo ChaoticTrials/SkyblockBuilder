@@ -6,14 +6,14 @@ import de.melanx.skyblockbuilder.client.ClientSetup;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.network.SkyNetwork;
 import de.melanx.skyblockbuilder.util.SkyPaths;
-import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
-import io.github.noeppi_noeppi.libx.mod.registration.RegistrationBuilder;
 import net.minecraft.Util;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import org.moddingx.libx.mod.ModXRegistration;
+import org.moddingx.libx.registration.RegistrationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public final class SkyblockBuilder extends ModXRegistration {
 
     private static SkyblockBuilder instance;
-    private static SkyNetwork network;
+    private final SkyNetwork network;
     private final Logger logger;
     public static final Gson PRETTY_GSON = Util.make(() -> {
         GsonBuilder gsonbuilder = new GsonBuilder();
@@ -34,7 +34,7 @@ public final class SkyblockBuilder extends ModXRegistration {
     public SkyblockBuilder() {
         super(null);
         instance = this;
-        network = new SkyNetwork();
+        this.network = new SkyNetwork();
         this.logger = LoggerFactory.getLogger(SkyblockBuilder.class);
 
         SkyPaths.createDirectories();
@@ -61,7 +61,7 @@ public final class SkyblockBuilder extends ModXRegistration {
     }
 
     public static SkyNetwork getNetwork() {
-        return network;
+        return instance.network;
     }
 
     public static Logger getLogger() {
@@ -70,6 +70,6 @@ public final class SkyblockBuilder extends ModXRegistration {
 
     @Override
     protected void initRegistration(RegistrationBuilder builder) {
-        builder.setVersion(1);
+        builder.enableRegistryTracking();
     }
 }

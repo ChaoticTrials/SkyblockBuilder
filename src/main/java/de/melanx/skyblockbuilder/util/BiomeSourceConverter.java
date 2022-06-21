@@ -1,80 +1,70 @@
 package de.melanx.skyblockbuilder.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.JsonOps;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
-import io.github.noeppi_noeppi.libx.util.ResourceList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.RegistryOps;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.*;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.moddingx.libx.util.data.ResourceList;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BiomeSourceConverter {
 
-    public static BiomeSource customBiomeSource(ResourceKey<Level> level, RegistryAccess registryAccess, BiomeSource baseSource) {
-        RegistryOps<JsonElement> dynOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        BiomeSource modifiableSource;
-        if (baseSource instanceof MultiNoiseBiomeSource noiseBiomeSource && noiseBiomeSource.preset.isPresent()) {
-            MultiNoiseBiomeSource.PresetInstance presetInstance = noiseBiomeSource.preset.get();
-            modifiableSource = presetInstance.preset().biomeSource(presetInstance, false);
-        } else {
-            modifiableSource = baseSource;
-        }
-
-        Optional<JsonElement> sourceElement = BiomeSource.CODEC.encodeStart(dynOps, modifiableSource).result();
+    public static BiomeSource customBiomeSource(ResourceKey<Level> level, BiomeSource baseSource) {
         ResourceList resourceList = ConfigHandler.World.biomes.get(level.location().toString());
-        if (sourceElement.isPresent() && resourceList != null) {
-            JsonObject json = sourceElement.get().getAsJsonObject();
-            JsonArray biomes = GsonHelper.getAsJsonArray(json, "biomes", new JsonArray());
-            JsonArray newBiomes = new JsonArray();
-            for (JsonElement biome : biomes) {
-                ResourceLocation location = new ResourceLocation(GsonHelper.getAsString(biome.getAsJsonObject(), "biome"));
-                if (resourceList.test(location)) {
-                    newBiomes.add(biome);
-                }
-            }
-
-            if (newBiomes.isEmpty()) {
-                ForgeRegistries.BIOMES.getEntries().forEach(entry -> {
-                    if (resourceList.test(entry.getKey().location())) {
-                        JsonObject biomeEntry = new JsonObject();
-                        JsonObject parameters = new JsonObject();
-                        JsonArray emptyArray = new JsonArray();
-                        emptyArray.add(0);
-                        emptyArray.add(0);
-                        parameters.addProperty("erosion", 0.0);
-                        parameters.addProperty("depth", 0.0);
-                        parameters.addProperty("weirdness", 0.0);
-                        parameters.addProperty("offset", 0.0);
-                        parameters.addProperty("temperature", 0.0);
-                        parameters.addProperty("humidity", 0.0);
-                        parameters.addProperty("continentalness", 0.0);
-                        biomeEntry.add("parameters", parameters);
-                        //noinspection ConstantConditions
-                        biomeEntry.addProperty("biome", entry.getValue().getRegistryName().toString());
-
-                        newBiomes.add(biomeEntry);
+        if (resourceList != null) {
+            Set<Holder<Biome>> newBiomes = new HashSet<>();
+            for (Holder<Biome> possibleBiome : baseSource.possibleBiomes()) {
+                Optional<ResourceKey<Biome>> optionalResourceKey = possibleBiome.unwrapKey();
+                optionalResourceKey.ifPresent(key -> {
+                    ResourceLocation location = key.location();
+                    if (resourceList.test(location)) {
+                        newBiomes.add(possibleBiome);
                     }
                 });
             }
 
-            json.add("biomes", newBiomes);
-
-            Optional<Pair<BiomeSource, JsonElement>> newSourcePair = BiomeSource.CODEC.decode(dynOps, json).result();
-
-            if (newSourcePair.isPresent()) {
-                return newSourcePair.get().getFirst();
+            if (newBiomes.isEmpty()) {
+                ForgeRegistries.BIOMES.getEntries().stream().map(Map.Entry::getKey).filter(key -> resourceList.test(key.location())).forEach(key -> {
+                    Optional<Holder<Biome>> optHolder = ForgeRegistries.BIOMES.getHolder(key);
+                    optHolder.ifPresent(newBiomes::add);
+                });
             }
+
+            if (newBiomes.isEmpty()) {
+                throw new IllegalStateException("No biomes selected for " + level);
+            }
+
+            if (baseSource instanceof MultiNoiseBiomeSource) {
+                List<Pair<Climate.ParameterPoint, Holder<Biome>>> parameters = new ArrayList<>(((MultiNoiseBiomeSource) baseSource).parameters.values()).stream().filter(pair -> {
+                    Holder<Biome> holder = pair.getSecond();
+                    Optional<ResourceKey<Biome>> optionalResourceKey = holder.unwrapKey();
+                    return optionalResourceKey.filter(biomeResourceKey -> resourceList.test(biomeResourceKey.location())).isPresent();
+                }).collect(Collectors.toList());
+                if (parameters.isEmpty()) {
+                    newBiomes.forEach(holder -> {
+                        parameters.add(Pair.of(new Climate.ParameterPoint(Climate.Parameter.point(0), Climate.Parameter.point(0), Climate.Parameter.point(0), Climate.Parameter.point(0), Climate.Parameter.point(0), Climate.Parameter.point(0), 0L), holder));
+                    });
+                }
+                return new MultiNoiseBiomeSource(new Climate.ParameterList<>(parameters), Optional.empty());
+            }
+
+            if (baseSource instanceof TheEndBiomeSource) {
+                if (newBiomes.size() == 5) {
+                    List<Holder<Biome>> newBiomesList = newBiomes.stream().toList();
+                    return new TheEndBiomeSource(newBiomesList.get(0), newBiomesList.get(1), newBiomesList.get(2), newBiomesList.get(3), newBiomesList.get(4));
+                }
+
+                SkyblockBuilder.getLogger().warn("Need to be exactly 5 biomes for '{}', currently {}", level, newBiomes.size());
+            }
+
+            SkyblockBuilder.getLogger().warn("Unable to modify dimension '{}' properly, using default", level);
         }
 
         return baseSource;

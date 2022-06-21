@@ -1,15 +1,15 @@
 package de.melanx.skyblockbuilder.config;
 
 import com.google.common.collect.Maps;
-import io.github.noeppi_noeppi.libx.annotation.config.RegisterConfig;
-import io.github.noeppi_noeppi.libx.config.Config;
-import io.github.noeppi_noeppi.libx.config.Group;
-import io.github.noeppi_noeppi.libx.config.validator.IntRange;
-import io.github.noeppi_noeppi.libx.util.ResourceList;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import org.moddingx.libx.annotation.config.RegisterConfig;
+import org.moddingx.libx.config.Config;
+import org.moddingx.libx.config.Group;
+import org.moddingx.libx.config.validate.IntRange;
+import org.moddingx.libx.util.data.ResourceList;
 
 import java.util.Map;
 

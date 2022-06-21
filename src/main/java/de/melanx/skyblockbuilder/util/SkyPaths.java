@@ -4,12 +4,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.StartingInventory;
+import net.minecraft.core.Holder;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -97,10 +98,8 @@ public class SkyPaths {
     public static void generateFeatureInformation() throws IOException {
         BufferedWriter w = Files.newBufferedWriter(FEATURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        for (Feature<?> feature : ForgeRegistries.FEATURES.getValues()) {
-            if (feature.getRegistryName() != null) {
-                w.write(feature.getRegistryName().toString() + "\n");
-            }
+        for (ResourceLocation location : ForgeRegistries.FEATURES.getKeys()) {
+            w.write(location.toString() + "\n");
         }
 
         w.close();
@@ -109,10 +108,8 @@ public class SkyPaths {
     public static void generateStructureInformation() throws IOException {
         BufferedWriter w = Files.newBufferedWriter(STRUCTURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        for (StructureFeature<?> feature : ForgeRegistries.STRUCTURE_FEATURES.getValues()) {
-            if (feature.getRegistryName() != null) {
-                w.write(feature.getRegistryName().toString() + "\n");
-            }
+        for (Holder.Reference<Structure> holder : BuiltinRegistries.STRUCTURES.holders().toList()) {
+            w.write(holder.key().location() + "\n");
         }
 
         w.close();
@@ -121,10 +118,8 @@ public class SkyPaths {
     public static void generateBiomeInformation() throws IOException {
         BufferedWriter w = Files.newBufferedWriter(BIOMES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        for (Biome biome : ForgeRegistries.BIOMES.getValues()) {
-            if (biome.getRegistryName() != null) {
-                w.write(biome.getRegistryName().toString() + "\n");
-            }
+        for (ResourceLocation location : ForgeRegistries.BIOMES.getKeys()) {
+            w.write(location.toString() + "\n");
         }
 
         w.close();

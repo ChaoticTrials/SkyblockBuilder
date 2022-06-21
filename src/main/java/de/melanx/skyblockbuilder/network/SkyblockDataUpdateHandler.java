@@ -1,10 +1,10 @@
 package de.melanx.skyblockbuilder.network;
 
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.Objects;
 import java.util.function.Supplier;

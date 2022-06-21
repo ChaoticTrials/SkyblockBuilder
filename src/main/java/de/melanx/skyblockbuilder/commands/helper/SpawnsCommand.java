@@ -12,16 +12,16 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
-import io.github.noeppi_noeppi.libx.command.EnumArgument2;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import org.moddingx.libx.command.EnumArgument2;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -61,7 +61,7 @@ public class SpawnsCommand {
             try {
                 Files.createDirectories(Paths.get(folderName));
             } catch (IOException e) {
-                throw new SimpleCommandExceptionType(new TranslatableComponent("skyblockbuilder.command.error.creating_path", folderName)).create();
+                throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", folderName)).create();
             }
             String filePath = RandomUtility.getFilePath(folderName, "spawns", "json");
 
@@ -83,10 +83,10 @@ public class SpawnsCommand {
                 w.write(SkyblockBuilder.PRETTY_GSON.toJson(json));
                 w.close();
             } catch (IOException e) {
-                throw new SimpleCommandExceptionType(new TranslatableComponent("skyblockbuilder.command.error.creating_file", file)).create();
+                throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_file", file)).create();
             }
 
-            source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.export_spawns", filePath).withStyle(ChatFormatting.GOLD), true);
+            source.sendSuccess(Component.translatable("skyblockbuilder.command.success.export_spawns", filePath).withStyle(ChatFormatting.GOLD), true);
             return 1;
         }
 

@@ -2,17 +2,17 @@ package de.melanx.skyblockbuilder.config.mapper;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import io.github.noeppi_noeppi.libx.annotation.config.RegisterMapper;
-import io.github.noeppi_noeppi.libx.config.ValidatorInfo;
-import io.github.noeppi_noeppi.libx.config.ValueMapper;
-import io.github.noeppi_noeppi.libx.config.correct.ConfigCorrection;
-import io.github.noeppi_noeppi.libx.config.gui.ConfigEditor;
-import io.github.noeppi_noeppi.libx.config.gui.InputProperties;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import org.moddingx.libx.annotation.config.RegisterMapper;
+import org.moddingx.libx.config.correct.ConfigCorrection;
+import org.moddingx.libx.config.gui.ConfigEditor;
+import org.moddingx.libx.config.gui.InputProperties;
+import org.moddingx.libx.config.mapper.ValueMapper;
+import org.moddingx.libx.config.validator.ValidatorInfo;
 
 import java.util.Optional;
 

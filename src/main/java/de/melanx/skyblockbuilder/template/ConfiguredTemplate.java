@@ -10,8 +10,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nonnull;
@@ -62,11 +60,11 @@ public class ConfiguredTemplate {
     }
 
     public Component getNameComponent() {
-        return (this.name.startsWith("{") && this.name.endsWith("}")) ? new TranslatableComponent(this.name) : new TextComponent(this.name);
+        return (this.name.startsWith("{") && this.name.endsWith("}")) ? Component.translatable(this.name) : Component.literal(this.name);
     }
 
     public Component getDescriptionComponent() {
-        return (this.desc.startsWith("{") && this.desc.endsWith("}")) ? new TranslatableComponent(this.desc) : new TextComponent(this.desc);
+        return (this.desc.startsWith("{") && this.desc.endsWith("}")) ? Component.translatable(this.desc) : Component.literal(this.desc);
     }
 
     public WorldUtil.Directions getDirection() {
