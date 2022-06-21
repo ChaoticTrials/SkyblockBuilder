@@ -23,7 +23,7 @@ public class ClientUtility {
             Util.getPlatform().openUri(dir.toUri());
         } catch (IOException e) {
             //noinspection ConstantConditions
-            Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("skyblockbuilder.", path), false);
+            Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("skyblockbuilder.screen.open_folder.error", path), false);
         }
     }
 
