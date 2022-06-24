@@ -1,9 +1,9 @@
 buildscript {
-    apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v3/buildscript.gradle', to: buildscript
+    apply from: 'https://moddingx.github.io/ModUtils/v4/buildscript.gradle', to: buildscript
 }
 
-apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v3/mod.gradle'
-apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.coremods'
+apply from: 'https://moddingx.github.io/ModUtils/v4/mod.gradle'
+apply plugin: 'org.moddingx.modgradle.coremods'
 
 repositories {
     maven {
@@ -35,7 +35,7 @@ dependencies {
 
     runtimeOnly fg.deobf("mezz.jei:jei-1.17.1:8.0.0.14")
 
-    coremods "io.github.noeppi_noeppi.misc:CoreModTypes:5.0.1-2"
+    coremods "org.moddingx:CoreModTypes:5.0.2-2"
 
 //    runtimeOnly curse.mod(291874, 3433685)
 //    runtimeOnly curse.mod(353942, 3455374)
