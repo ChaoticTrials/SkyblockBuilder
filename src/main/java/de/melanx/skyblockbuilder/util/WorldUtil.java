@@ -40,7 +40,7 @@ public class WorldUtil {
         ServerWorld world = getConfiguredWorld(server);
 
         BlockPos spawn = validPosition(world, team);
-        player.teleport(world, spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5, LibXConfigHandler.Spawn.direction.getYaw(), 0);
+        player.teleport(world, spawn.getX() + 0.5, spawn.getY() + 0.2, spawn.getZ() + 0.5, LibXConfigHandler.Spawn.direction.getYaw(), 0);
         player.setSpawnPoint(world.getDimensionKey(), spawn, 0, true, false);
     }
 
@@ -104,9 +104,9 @@ public class WorldUtil {
     public static boolean isValidSpawn(World world, BlockPos pos) {
         return pos.getY() >= 0
                 && pos.getY() <= world.getHeight()
-                && !world.getBlockState(pos.down()).getCollisionShape(world, pos.down()).isEmpty() || world.getBlockState(pos.down()).isIn(ModBlockTags.ADDITIONAL_VALID_SPAWN)
-                && world.getBlockState(pos).getCollisionShape(world, pos).isEmpty()
-                && world.getBlockState(pos.up()).getCollisionShape(world, pos.up()).isEmpty();
+                && world.getBlockState(pos.down()).isSolid() || world.getBlockState(pos.down()).isIn(ModBlockTags.ADDITIONAL_VALID_SPAWN)
+                && !world.getBlockState(pos).isSolid()
+                && !world.getBlockState(pos.up()).isSolid();
     }
 
     // [Vanilla copy] Get flat world info on servers
