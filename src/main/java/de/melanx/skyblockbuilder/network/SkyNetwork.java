@@ -26,7 +26,7 @@ public class SkyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("6");
+        return Protocol.of("7");
     }
 
     @Override
@@ -41,13 +41,15 @@ public class SkyNetwork extends NetworkX {
 
     public void updateData(Level level) {
         if (!level.isClientSide) {
-            this.channel.send(PacketDistributor.ALL.noArg(), new SkyblockDataUpdateHandler.Message(SkyblockSavedData.get(level)));
+            for (ServerPlayer player : ((ServerLevel) level).getServer().getPlayerList().getPlayers()) {
+                this.updateData(player);
+            }
         }
     }
 
     public void updateData(Player player) {
         if (!player.getCommandSenderWorld().isClientSide) {
-            this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new SkyblockDataUpdateHandler.Message(SkyblockSavedData.get(player.getCommandSenderWorld())));
+            this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new SkyblockDataUpdateHandler.Message(SkyblockSavedData.get(player.getCommandSenderWorld()), player.getGameProfile().getId()));
         }
     }
 

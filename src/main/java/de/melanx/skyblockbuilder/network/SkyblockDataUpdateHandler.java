@@ -1,12 +1,16 @@
 package de.melanx.skyblockbuilder.network;
 
+import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class SkyblockDataUpdateHandler {
@@ -27,20 +31,39 @@ public class SkyblockDataUpdateHandler {
         public void encode(SkyblockDataUpdateHandler.Message msg, FriendlyByteBuf buffer) {
             CompoundTag tag = msg.data.save(new CompoundTag());
             if (tag.contains("MetaInformation")) {
+                SkyMeta meta = null;
+                for (Tag inbt : tag.getList("MetaInformation", Tag.TAG_COMPOUND)) {
+                    CompoundTag mtag = (CompoundTag) inbt;
+
+                    UUID player = mtag.getUUID("Player");
+                    if (msg.player.equals(player)) {
+                        meta = SkyMeta.get(msg.data, mtag.getCompound("Meta"));
+                        break;
+                    }
+                }
                 tag.remove("MetaInformation");
+                if (meta != null) {
+                    ListTag metaInfo = new ListTag();
+                    CompoundTag playerMeta = new CompoundTag();
+                    playerMeta.putUUID("Player", msg.player);
+                    playerMeta.put("Meta", meta.save());
+                    metaInfo.add(playerMeta);
+                    tag.put("MetaInformation", metaInfo);
+                }
             }
             buffer.writeNbt(tag);
+            buffer.writeUUID(msg.player);
         }
 
         @Override
         public SkyblockDataUpdateHandler.Message decode(FriendlyByteBuf buffer) {
             SkyblockSavedData data = new SkyblockSavedData();
             data.load(Objects.requireNonNull(buffer.readNbt()));
-            return new SkyblockDataUpdateHandler.Message(data);
+            return new SkyblockDataUpdateHandler.Message(data, buffer.readUUID());
         }
     }
 
-    public record Message(SkyblockSavedData data) {
+    public record Message(SkyblockSavedData data, UUID player) {
         // empty
     }
 }
