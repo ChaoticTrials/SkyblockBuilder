@@ -29,6 +29,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.apache.commons.lang3.tuple.Pair;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,7 +60,7 @@ public class SkyblockSavedData extends SavedData {
             DimensionDataStorage storage = server.overworld().getDataStorage();
             SkyblockSavedData data = storage.computeIfAbsent(nbt -> new SkyblockSavedData().load(nbt), SkyblockSavedData::new, NAME);
             data.level = WorldUtil.getConfiguredLevel(server);
-            data.addMetaInfo(Util.NIL_UUID);
+            data.getOrCreateMetaInfo(Util.NIL_UUID);
             return data;
         } else {
             return clientInstance == null ? new SkyblockSavedData() : clientInstance;
@@ -300,6 +301,7 @@ public class SkyblockSavedData extends SavedData {
                     team.broadcast(Component.translatable("skyblockbuilder.event.remove_player", GameProfileCache.getName(player)), Style.EMPTY.applyFormat(ChatFormatting.RED));
                     //noinspection ConstantConditions
                     this.getTeam(SPAWN_ID).addPlayer(player);
+                    this.getOrCreateMetaInfo(player).setTeamId(SPAWN_ID);
                 }
                 return removed;
             }
@@ -360,7 +362,7 @@ public class SkyblockSavedData extends SavedData {
             return null;
         }
 
-        Team team = this.skyblocks.get(meta.getTeamId());
+        Team team = this.skyblocks.getOrDefault(meta.getTeamId(), this.skyblocks.get(SPAWN_ID));
 
         return team.isSpawn() ? null : team;
     }
@@ -476,19 +478,35 @@ public class SkyblockSavedData extends SavedData {
         this.setDirty();
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public SkyMeta getMetaInfo(Player player) {
-        return this.getMetaInfo(player.getGameProfile().getId());
+        return this.getOrCreateMetaInfo(player);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public SkyMeta getMetaInfo(UUID id) {
-        return this.metaInfo.get(id);
+        return this.getOrCreateMetaInfo(id);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public SkyMeta addMetaInfo(Player player) {
-        return this.addMetaInfo(player.getGameProfile().getId());
+        return this.getOrCreateMetaInfo(player);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public SkyMeta addMetaInfo(UUID id) {
+        return this.getOrCreateMetaInfo(id);
+    }
+
+    public SkyMeta getOrCreateMetaInfo(Player player) {
+        return this.getOrCreateMetaInfo(player.getGameProfile().getId());
+    }
+
+    public SkyMeta getOrCreateMetaInfo(UUID id) {
         return this.metaInfo.computeIfAbsent(id, meta -> new SkyMeta(this, id));
     }
 

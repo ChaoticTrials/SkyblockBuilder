@@ -29,13 +29,13 @@ public class SpawnCommand {
         ServerPlayer player = source.getPlayerOrException();
         Team team = data.getSpawn();
 
-        if (!player.hasPermissions(2) && !data.getMetaInfo(player).canTeleportSpawn(level.getGameTime())) {
+        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleportSpawn(level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(ConfigHandler.Utility.Teleports.spawnCooldown - (level.getGameTime() - data.addMetaInfo(player).getLastSpawnTeleport()))));
+                    RandomUtility.formattedCooldown(ConfigHandler.Utility.Teleports.spawnCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastSpawnTeleport()))));
             return 0;
         }
 
-        data.getMetaInfo(player).setLastSpawnTeleport(level.getGameTime());
+        data.getOrCreateMetaInfo(player).setLastSpawnTeleport(level.getGameTime());
         source.sendSuccess(Component.translatable("skyblockbuilder.command.success.teleport_to_spawn"), false);
         WorldUtil.teleportToIsland(player, team);
         return 1;

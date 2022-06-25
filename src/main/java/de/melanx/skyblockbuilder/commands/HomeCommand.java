@@ -36,9 +36,9 @@ public class HomeCommand {
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !data.getMetaInfo(player).canTeleportHome(level.getGameTime())) {
+        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleportHome(level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(ConfigHandler.Utility.Teleports.homeCooldown - (level.getGameTime() - data.addMetaInfo(player).getLastHomeTeleport()))));
+                    RandomUtility.formattedCooldown(ConfigHandler.Utility.Teleports.homeCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastHomeTeleport()))));
             return 0;
         }
 
@@ -56,7 +56,7 @@ public class HomeCommand {
                 break;
         }
 
-        data.getMetaInfo(player).setLastHomeTeleport(level.getGameTime());
+        data.getOrCreateMetaInfo(player).setLastHomeTeleport(level.getGameTime());
         source.sendSuccess(Component.translatable("skyblockbuilder.command.success.teleport_home").withStyle(ChatFormatting.GOLD), true);
         WorldUtil.teleportToIsland(player, team);
         return 1;
