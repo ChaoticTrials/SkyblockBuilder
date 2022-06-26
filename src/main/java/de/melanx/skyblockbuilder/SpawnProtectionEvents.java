@@ -145,7 +145,7 @@ public class SpawnProtectionEvents {
     private static boolean isOnSpawn(Level level, BlockPos blockPos) {
         ChunkPos pos = new ChunkPos(blockPos);
         return WorldUtil.isSkyblock(level) && ConfigHandler.Spawn.dimension == level.dimension()
-                && Math.abs(pos.x) <= ConfigHandler.Spawn.spawnProtectionRadius && Math.abs(pos.z) <= ConfigHandler.Spawn.spawnProtectionRadius;
+                && Math.abs(pos.x) < ConfigHandler.Spawn.spawnProtectionRadius && Math.abs(pos.z) < ConfigHandler.Spawn.spawnProtectionRadius;
     }
 
     private static boolean isOnSpawn(Entity entity) {
