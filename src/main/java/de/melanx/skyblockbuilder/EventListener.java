@@ -117,7 +117,7 @@ public class EventListener {
                 return;
             }
             player.getPersistentData().putBoolean(SPAWNED_TAG, true);
-            data.addMetaInfo(player);
+            data.getOrCreateMetaInfo(player);
 
             if (ConfigHandler.Inventory.clearInv) {
                 player.getInventory().clearContent();

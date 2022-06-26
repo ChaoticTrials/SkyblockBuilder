@@ -178,7 +178,7 @@ public class Team {
                 MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(player));
             }
             this.lastChanged = System.currentTimeMillis();
-            this.data.getMetaInfo(player).setTeamId(this.teamId);
+            this.data.getOrCreateMetaInfo(player).setTeamId(this.teamId);
             this.data.setDirty();
         }
         return added;
@@ -195,7 +195,7 @@ public class Team {
                 for (UUID id : players) {
                     //noinspection ConstantConditions
                     MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(id));
-                    this.data.getMetaInfo(id).setTeamId(this.teamId);
+                    this.data.getOrCreateMetaInfo(id).setTeamId(this.teamId);
                 }
             }
             this.lastChanged = System.currentTimeMillis();
@@ -215,7 +215,7 @@ public class Team {
             //noinspection ConstantConditions
             MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(player));
         }
-        this.data.getMetaInfo(player).addPreviousTeamId(this.teamId);
+        this.data.getOrCreateMetaInfo(player).addPreviousTeamId(this.teamId);
         this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
 
@@ -229,7 +229,7 @@ public class Team {
                 //noinspection ConstantConditions
                 MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(id));
             }
-            this.data.getMetaInfo(id).addPreviousTeamId(this.teamId);
+            this.data.getOrCreateMetaInfo(id).addPreviousTeamId(this.teamId);
         }
         this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();

@@ -9,6 +9,7 @@ import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
+import io.github.noeppi_noeppi.libx.annotation.meta.RemoveIn;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -60,7 +61,7 @@ public class SkyblockSavedData extends SavedData {
             DimensionDataStorage storage = server.overworld().getDataStorage();
             SkyblockSavedData data = storage.computeIfAbsent(nbt -> new SkyblockSavedData().load(nbt), SkyblockSavedData::new, NAME);
             data.level = WorldUtil.getConfiguredLevel(server);
-            data.addMetaInfo(Util.NIL_UUID);
+            data.getOrCreateMetaInfo(Util.NIL_UUID);
             return data;
         } else {
             return clientInstance == null ? new SkyblockSavedData() : clientInstance;
@@ -477,19 +478,35 @@ public class SkyblockSavedData extends SavedData {
         this.setDirty();
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public SkyMeta getMetaInfo(Player player) {
-        return this.getMetaInfo(player.getGameProfile().getId());
+        return this.getOrCreateMetaInfo(player);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public SkyMeta getMetaInfo(UUID id) {
-        return this.metaInfo.get(id);
+        return this.getOrCreateMetaInfo(id);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public SkyMeta addMetaInfo(Player player) {
-        return this.addMetaInfo(player.getGameProfile().getId());
+        return this.getOrCreateMetaInfo(player);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public SkyMeta addMetaInfo(UUID id) {
+        return this.getOrCreateMetaInfo(id);
+    }
+
+    public SkyMeta getOrCreateMetaInfo(Player player) {
+        return this.getOrCreateMetaInfo(player.getGameProfile().getId());
+    }
+
+    public SkyMeta getOrCreateMetaInfo(UUID id) {
         return this.metaInfo.computeIfAbsent(id, meta -> new SkyMeta(this, id));
     }
 
