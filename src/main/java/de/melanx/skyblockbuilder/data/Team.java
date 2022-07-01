@@ -205,8 +205,10 @@ public class Team {
             //noinspection ConstantConditions
             MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(player));
         }
-        this.data.getOrCreateMetaInfo(player).addPreviousTeamId(this.teamId);
-        this.lastChanged = System.currentTimeMillis();
+        if (removed) {
+            this.data.getOrCreateMetaInfo(player).addPreviousTeamId(this.teamId);
+            this.lastChanged = System.currentTimeMillis();
+        }
         this.data.setDirty();
 
         return removed;
@@ -214,12 +216,14 @@ public class Team {
 
     public void removePlayers(Collection<UUID> players) {
         for (UUID id : players) {
-            this.players.remove(id);
+            boolean removed = this.players.remove(id);
             if (ModList.get().isLoaded("minemention")) {
                 //noinspection ConstantConditions
                 MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(id));
             }
-            this.data.getOrCreateMetaInfo(id).addPreviousTeamId(this.teamId);
+            if (removed) {
+                this.data.getOrCreateMetaInfo(id).addPreviousTeamId(this.teamId);
+            }
         }
         this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
