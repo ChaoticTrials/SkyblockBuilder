@@ -39,7 +39,7 @@ public class TemplateData extends SavedData {
     }
 
     public void refreshTemplate() {
-        this.template.read(TemplateLoader.getTemplate().save(new CompoundTag()));
+        this.template.read(TemplateLoader.getConfiguredTemplate().write(new CompoundTag()));
         this.setDirty();
     }
 

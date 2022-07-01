@@ -91,7 +91,7 @@ public class ConfiguredTemplate {
         nbt.put("Spawns", spawns);
         nbt.putString("Name", this.name);
         nbt.putString("Desc", this.desc);
-        nbt.putString("Direction", this.direction.toString());
+        nbt.putString("Direction", this.direction == null ? WorldUtil.Directions.SOUTH.toString() : this.direction.toString());
 
         return nbt;
     }
