@@ -5,15 +5,17 @@ import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -21,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 public class SkyPaths {
 
@@ -57,16 +61,16 @@ public class SkyPaths {
 
             copyTemplateFile();
             generateStarterItemsFile();
-            generateFeatureInformation();
-            generateStructureInformation();
-            generateBiomeInformation();
+            generateFeatureInformation(server);
+            generateStructureInformation(server);
+            generateBiomeInformation(server);
             if (server != null) {
                 generateDimensionInformation(server);
             }
 
             StartingInventory.loadStarterItems();
         } catch (IOException e) {
-            e.printStackTrace();
+            SkyblockBuilder.getLogger().error("Unable to generate default files", e);
         }
     }
 
@@ -95,37 +99,70 @@ public class SkyPaths {
         w.close();
     }
 
-    public static void generateFeatureInformation() throws IOException {
+    public static void generateFeatureInformation(@Nullable MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(FEATURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        for (ResourceLocation location : ForgeRegistries.FEATURES.getKeys()) {
-            w.write(location.toString() + "\n");
+        Stream<Holder.Reference<PlacedFeature>> stream;
+        if (server != null) {
+            stream = server.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY).holders();
+        } else {
+            stream = BuiltinRegistries.PLACED_FEATURE.holders();
         }
+
+        stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
+            try {
+                w.write(holder.key().location() + "\n");
+            } catch (IOException e) {
+                SkyblockBuilder.getLogger().error("Failed to write '" + holder.key().location() + "' to file", e);
+            }
+        });
 
         w.close();
     }
 
-    public static void generateStructureInformation() throws IOException {
+    public static void generateStructureInformation(@Nullable MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(STRUCTURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        for (Holder.Reference<Structure> holder : BuiltinRegistries.STRUCTURES.holders().toList()) {
-            w.write(holder.key().location() + "\n");
+        Stream<Holder.Reference<Structure>> stream;
+        if (server != null) {
+            stream = server.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).holders();
+        } else {
+            stream = BuiltinRegistries.STRUCTURES.holders();
         }
+
+        stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
+            try {
+                w.write(holder.key().location() + "\n");
+            } catch (IOException e) {
+                SkyblockBuilder.getLogger().error("Failed to write '" + holder.key().location() + "' to file", e);
+            }
+        });
 
         w.close();
     }
 
-    public static void generateBiomeInformation() throws IOException {
+    public static void generateBiomeInformation(@Nullable MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(BIOMES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        for (ResourceLocation location : ForgeRegistries.BIOMES.getKeys()) {
-            w.write(location.toString() + "\n");
+        Stream<Holder.Reference<Biome>> stream;
+        if (server != null) {
+            stream = server.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).holders();
+        } else {
+            stream = BuiltinRegistries.BIOME.holders();
         }
+
+        stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
+            try {
+                w.write(holder.key().location() + "\n");
+            } catch (IOException e) {
+                SkyblockBuilder.getLogger().error("Failed to write '" + holder.key().location() + "' to file", e);
+            }
+        });
 
         w.close();
     }
 
-    public static void generateDimensionInformation(MinecraftServer server) throws IOException {
+    public static void generateDimensionInformation(@Nonnull MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(DIMENSIONS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
         for (ResourceKey<Level> levelKey : server.levelKeys()) {
