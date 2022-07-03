@@ -31,7 +31,7 @@ public class ConfigHandler {
                 "INFO: The two default values are required for the obsidian towers in end. If this is missing, they will be first generated when respawning the dragon."})
         public static ResourceList generationFeatures = new ResourceList(true, b -> {
             b.simple(new ResourceLocation("minecraft", "end_spike"));
-            b.simple(new ResourceLocation("minecraft", "end_gateway"));
+            b.simple(new ResourceLocation("minecraft", "end_gateway_return"));
         });
     }
 
