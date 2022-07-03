@@ -167,8 +167,8 @@ public class ConfigHandler {
             @Config("The range from island center for possible spawns to add. [default: 50]")
             public static int range = 50;
 
-            @Config("Should players be able to modify their spawn positions? [default: false]")
-            public static boolean modifySpawns = false;
+            @Config("Should players be able to modify their spawn positions? [default: true]")
+            public static boolean modifySpawns = true;
         }
     }
 }
