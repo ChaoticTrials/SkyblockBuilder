@@ -122,13 +122,15 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     @Nullable
     @Override
     public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(@Nonnull ServerLevel level, @Nonnull HolderSet<Structure> structureHolderSet, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
-        for (Holder<Structure> holder : structureHolderSet) {
-            if (holder.unwrapKey().isPresent() && !ConfigHandler.Structures.generationStructures.test(holder.unwrapKey().get().location())) {
-                return null;
+        List<Holder<Structure>> holders = structureHolderSet.stream().filter(holder -> holder.unwrapKey().isPresent() && ConfigHandler.Structures.generationStructures.test(holder.unwrapKey().get().location())).toList();
+        HolderSet.Direct<Structure> modifiedStructureHolderSet = HolderSet.direct(holders);
+        for (Holder<Structure> holder : modifiedStructureHolderSet) {
+            if (holder.unwrapKey().isPresent() && ConfigHandler.Structures.generationStructures.test(holder.unwrapKey().get().location())) {
+                return super.findNearestMapStructure(level, modifiedStructureHolderSet, pos, searchRadius, skipKnownStructures);
             }
         }
 
-        return super.findNearestMapStructure(level, structureHolderSet, pos, searchRadius, skipKnownStructures);
+        return null;
     }
 
     @Override
