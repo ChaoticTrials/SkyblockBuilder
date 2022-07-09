@@ -42,7 +42,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
@@ -145,12 +144,6 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     @Override
     public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState randomState, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving carving) {
 
-    }
-
-    @Nonnull
-    @Override
-    public Stream<Holder<StructureSet>> possibleStructureSets() {
-        return super.possibleStructureSets().filter(holder -> holder.unwrapKey().map(structureSetResourceKey -> !ConfigHandler.Structures.generationStructures.test(structureSetResourceKey.location())).orElse(true));
     }
 
     @Nonnull
