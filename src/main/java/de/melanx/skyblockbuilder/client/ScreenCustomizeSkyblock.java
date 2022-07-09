@@ -41,7 +41,7 @@ public class ScreenCustomizeSkyblock extends Screen {
     private ConfiguredTemplate template;
 
     public ScreenCustomizeSkyblock(Screen parent) {
-        super(Component.translatable("skyblockbuilder.skyblock.world_preset"));
+        super(Component.translatable("generator.skyblockbuilder.skyblock"));
         this.parent = parent;
         TemplateLoader.updateTemplates();
         this.template = TemplateLoader.getConfiguredTemplate();
