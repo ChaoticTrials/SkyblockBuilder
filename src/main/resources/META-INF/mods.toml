@@ -17,7 +17,7 @@ Let you create a custom skyblock island via config
 [[dependencies.skyblockbuilder]]
     modId = "forge"
     mandatory = true
-    versionRange = "[41.0.35,)"
+    versionRange = "[41.0.35, 41.0.64)"
     ordering = "NONE"
     side = "BOTH"
 
