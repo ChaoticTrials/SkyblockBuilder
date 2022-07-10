@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RegisterConfig("templates")
 public class TemplateConfig {
@@ -19,4 +20,15 @@ public class TemplateConfig {
     public static Map<String, List<BlockPos>> spawns = Map.of("default", List.of(
             new BlockPos(6, 3, 5)
     ));
+
+    @Config({"The template which will be used for spawn only",
+            "Example: ",
+            "{",
+            "    \"name\": \"default\",",
+            "    \"desc\": \"\",",
+            "    \"file\": \"default.nbt\",",
+            "    \"spawns\": \"default\",",
+            "    \"direction\": \"south\"",
+            "}"})
+    public static Optional<TemplateInfo> spawn = Optional.empty();
 }
