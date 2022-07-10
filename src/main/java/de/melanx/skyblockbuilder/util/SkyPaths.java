@@ -4,12 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.StartingInventory;
+import net.minecraft.core.Holder;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -97,10 +99,8 @@ public class SkyPaths {
     public static void generateFeatureInformation() throws IOException {
         BufferedWriter w = Files.newBufferedWriter(FEATURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        for (Feature<?> feature : ForgeRegistries.FEATURES.getValues()) {
-            if (feature.getRegistryName() != null) {
-                w.write(feature.getRegistryName().toString() + "\n");
-            }
+        for (Holder.Reference<PlacedFeature> feature : BuiltinRegistries.PLACED_FEATURE.holders().toList()) {
+            w.write(feature.key().location().toString() + "\n");
         }
 
         w.close();
