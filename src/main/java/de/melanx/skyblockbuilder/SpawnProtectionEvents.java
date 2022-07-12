@@ -14,8 +14,8 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.event.world.ExplosionEvent;
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -23,7 +23,7 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent event) {
-        if (SpawnProtectionEvents.isOnSpawn(event.getPlayer()) && !event.getPlayer().hasPermissions(2)) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !event.getEntity().hasPermissions(2)) {
             if (event.isCancelable()) {
                 event.setCanceled(true);
             }
@@ -42,7 +42,7 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void explode(ExplosionEvent.Start event) {
-        if (SpawnProtectionEvents.isOnSpawn(event.getWorld(), new BlockPos(event.getExplosion().getPosition()))) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), new BlockPos(event.getExplosion().getPosition()))) {
             event.setCanceled(true);
         }
     }
@@ -56,7 +56,7 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void blockPlace(BlockEvent.EntityPlaceEvent event) {
-        if (event.getWorld() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
+        if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             if (!(event.getEntity() instanceof Player) || !event.getEntity().hasPermissions(2)) {
                 event.setCanceled(true);
             }
@@ -65,7 +65,7 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void blockMultiPlace(BlockEvent.EntityMultiPlaceEvent event) {
-        if (event.getWorld() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
+        if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             if (!(event.getEntity() instanceof Player) || !event.getEntity().hasPermissions(2)) {
                 event.setCanceled(true);
             }
@@ -81,7 +81,7 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void cropGrow(BlockEvent.CropGrowEvent.Pre event) {
-        if (event.getWorld() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
+        if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             event.setResult(Event.Result.DENY);
         }
     }
@@ -96,9 +96,9 @@ public class SpawnProtectionEvents {
     @SubscribeEvent
     public void mobSpawnAttempt(LivingSpawnEvent.CheckSpawn event) {
         Level level;
-        if (event.getWorld() instanceof Level) level = (Level) event.getWorld();
+        if (event.getLevel() instanceof Level) level = (Level) event.getLevel();
         else level = event.getEntity().level;
-        if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !(event.getEntity() instanceof Player)) {
+        if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
             event.setResult(Event.Result.DENY);
         }
     }
@@ -106,9 +106,9 @@ public class SpawnProtectionEvents {
     @SubscribeEvent
     public void mobSpawn(LivingSpawnEvent.SpecialSpawn event) {
         Level level;
-        if (event.getWorld() instanceof Level) level = (Level) event.getWorld();
+        if (event.getLevel() instanceof Level) level = (Level) event.getLevel();
         else level = event.getEntity().level;
-        if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !(event.getEntity() instanceof Player)) {
+        if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
             if (event.getSpawnReason() != MobSpawnType.SPAWN_EGG && event.getSpawnReason() != MobSpawnType.BUCKET
                     && event.getSpawnReason() != MobSpawnType.MOB_SUMMONED && event.getSpawnReason() != MobSpawnType.COMMAND) {
                 if (event.isCancelable()) {

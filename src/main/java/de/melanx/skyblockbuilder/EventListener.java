@@ -43,7 +43,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -95,13 +95,13 @@ public class EventListener {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        SkyblockBuilder.getNetwork().updateData(event.getPlayer());
-        Level level = event.getPlayer().level;
+        SkyblockBuilder.getNetwork().updateData(event.getEntity());
+        Level level = event.getEntity().level;
         SkyblockBuilder.getNetwork().updateProfiles(level);
-        SkyblockBuilder.getNetwork().updateTemplateNames(event.getPlayer(), TemplateLoader.getTemplateNames());
+        SkyblockBuilder.getNetwork().updateTemplateNames(event.getEntity(), TemplateLoader.getTemplateNames());
         if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
             SkyblockSavedData data = SkyblockSavedData.get(level);
-            ServerPlayer player = (ServerPlayer) event.getPlayer();
+            ServerPlayer player = (ServerPlayer) event.getEntity();
             Team spawn = data.getSpawn();
             GameProfileCache.addProfiles(Set.of(player.getGameProfile()));
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
@@ -131,7 +131,7 @@ public class EventListener {
 
     @SubscribeEvent
     public static void clonePlayer(PlayerEvent.Clone event) {
-        Player newPlayer = event.getPlayer();
+        Player newPlayer = event.getEntity();
         CompoundTag newData = newPlayer.getPersistentData();
 
         Player oldPlayer = event.getOriginal();
@@ -142,8 +142,8 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (!event.getPlayer().level.isClientSide) {
-            ServerPlayer player = (ServerPlayer) event.getPlayer();
+        if (!event.getEntity().level.isClientSide) {
+            ServerPlayer player = (ServerPlayer) event.getEntity();
             BlockPos pos = player.getRespawnPosition();
 
             ServerLevel level = player.getLevel();
@@ -180,9 +180,9 @@ public class EventListener {
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void renderBoundingBox(RenderLevelLastEvent event) {
+    public static void renderBoundingBox(RenderLevelStageEvent event) {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null || !(player.getMainHandItem().getItem() instanceof ItemStructureSaver)) {
+        if (player == null || !(player.getMainHandItem().getItem() instanceof ItemStructureSaver) || event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
             return;
         }
 
@@ -194,7 +194,7 @@ public class EventListener {
 
         PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
-        RenderHelperLevel.loadProjection(poseStack, area.minX(), area.minY(), area.minZ());
+        RenderHelperLevel.loadCameraPosition(event.getCamera(), poseStack, area.minX(), area.minY(), area.minZ());
 
         MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer buffer = source.getBuffer(RenderType.LINES);
