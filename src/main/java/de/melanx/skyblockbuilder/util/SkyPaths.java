@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -102,11 +102,11 @@ public class SkyPaths {
     public static void generateFeatureInformation(@Nullable MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(FEATURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        Stream<Holder.Reference<PlacedFeature>> stream;
+        Stream<Holder.Reference<ConfiguredFeature<?, ?>>> stream;
         if (server != null) {
-            stream = server.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY).holders();
+            stream = server.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY).holders();
         } else {
-            stream = BuiltinRegistries.PLACED_FEATURE.holders();
+            stream = BuiltinRegistries.CONFIGURED_FEATURE.holders();
         }
 
         stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
