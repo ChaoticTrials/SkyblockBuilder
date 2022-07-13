@@ -10,8 +10,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -99,7 +99,7 @@ public class SkyPaths {
     public static void generateFeatureInformation() throws IOException {
         BufferedWriter w = Files.newBufferedWriter(FEATURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
-        for (Holder.Reference<PlacedFeature> feature : BuiltinRegistries.PLACED_FEATURE.holders().toList()) {
+        for (Holder.Reference<ConfiguredFeature<?, ?>> feature : BuiltinRegistries.CONFIGURED_FEATURE.holders().toList()) {
             w.write(feature.key().location().toString() + "\n");
         }
 
