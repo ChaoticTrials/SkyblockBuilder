@@ -15,6 +15,7 @@ import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -206,8 +207,11 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onConfigChange(ConfigLoadedEvent event) {
-        if (event.getConfigClass() == TemplateConfig.class && event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
-            TemplateLoader.updateTemplates();
+        if (event.getConfigClass() == TemplateConfig.class) {
+            StartingInventory.loadStarterItems();
+            if (event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
+                TemplateLoader.updateTemplates();
+            }
         }
     }
 }

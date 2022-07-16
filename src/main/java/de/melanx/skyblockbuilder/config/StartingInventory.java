@@ -22,37 +22,41 @@ public class StartingInventory {
 
     private static final List<Pair<EquipmentSlot, ItemStack>> STARTER_ITEMS = new ArrayList<>();
 
-    public static void loadStarterItems() throws IOException {
+    public static void loadStarterItems() {
         StartingInventory.STARTER_ITEMS.clear();
 
         File spawns = new File(SkyPaths.ITEMS_FILE.toUri());
 
-        String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
-        JsonObject json = GsonHelper.parse(s);
+        try {
+            String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
+            JsonObject json = GsonHelper.parse(s);
 
-        if (json.has("items")) {
-            JsonArray items = json.getAsJsonArray("items");
-            Set<EquipmentSlot> usedTypes = new HashSet<>();
-            int slotsUsedInMainInventory = 0;
-            for (JsonElement item : items) {
-                JsonObject itemObj = (JsonObject) item;
-                ItemStack stack = CraftingHelper.getItemStack(itemObj, true);
-                EquipmentSlot slot = (itemObj).has("Slot") ? EquipmentSlot.byName(GsonHelper.getAsString(itemObj, "Slot")) : EquipmentSlot.MAINHAND;
-                if (slot == EquipmentSlot.MAINHAND) {
-                    if (slotsUsedInMainInventory >= 36) {
-                        throw new IllegalStateException("Too many starting items in main inventory. Not more than 36 are allowed.");
+            if (json.has("items")) {
+                JsonArray items = json.getAsJsonArray("items");
+                Set<EquipmentSlot> usedTypes = new HashSet<>();
+                int slotsUsedInMainInventory = 0;
+                for (JsonElement item : items) {
+                    JsonObject itemObj = (JsonObject) item;
+                    ItemStack stack = CraftingHelper.getItemStack(itemObj, true);
+                    EquipmentSlot slot = (itemObj).has("Slot") ? EquipmentSlot.byName(GsonHelper.getAsString(itemObj, "Slot")) : EquipmentSlot.MAINHAND;
+                    if (slot == EquipmentSlot.MAINHAND) {
+                        if (slotsUsedInMainInventory >= 36) {
+                            throw new IllegalStateException("Too many starting items in main inventory. Not more than 36 are allowed.");
+                        } else {
+                            slotsUsedInMainInventory += 1;
+                        }
                     } else {
-                        slotsUsedInMainInventory += 1;
+                        if (usedTypes.contains(slot)) {
+                            throw new IllegalStateException("Slot type that is not 'mainhand' was used multiple times for starting inventory.");
+                        } else {
+                            usedTypes.add(slot);
+                        }
                     }
-                } else {
-                    if (usedTypes.contains(slot)) {
-                        throw new IllegalStateException("Slot type that is not 'mainhand' was used multiple times for starting inventory.");
-                    } else {
-                        usedTypes.add(slot);
-                    }
+                    StartingInventory.STARTER_ITEMS.add(Pair.of(slot, stack));
                 }
-                StartingInventory.STARTER_ITEMS.add(Pair.of(slot, stack));
             }
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to read starting inventory", e);
         }
     }
 
