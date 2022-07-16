@@ -66,7 +66,7 @@ public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> VISIT_TEAMS = (context, builder) -> SharedSuggestionProvider
             .suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().getLevel())
                     .getTeams().stream()
-                    .filter(Team::allowsVisits)
+                    .filter(team -> team.allowsVisits() || context.getSource().hasPermission(2))
                     .filter(team -> !team.isSpawn())
                     .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
                     .collect(Collectors.toSet()), builder);
