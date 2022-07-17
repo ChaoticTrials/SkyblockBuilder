@@ -262,9 +262,11 @@ public class SkyblockSavedData extends SavedData {
         team.setPossibleSpawns(possibleSpawns);
         team.setDirection(template.getDirection());
 
-        StructurePlaceSettings settings = new StructurePlaceSettings();
+        StructurePlaceSettings settings = new StructurePlaceSettings().setKnownShape(true);
         BlockPos center = team.getIsland().getCenter();
+        this.level.captureBlockSnapshots = true;
         template.getTemplate().placeInWorld(this.level, center, center, settings, new Random(), Block.UPDATE_CLIENTS);
+        this.level.captureBlockSnapshots = false;
 
         this.skyblocks.put(team.getId(), team);
         this.skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
