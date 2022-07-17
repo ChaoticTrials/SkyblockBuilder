@@ -107,7 +107,7 @@ public class ItemStructureSaver extends Item {
         }
 
         if (nbt.contains("Position2")) {
-            BlockPos pos = NbtUtils.readBlockPos(nbt.getCompound("Position1"));
+            BlockPos pos = NbtUtils.readBlockPos(nbt.getCompound("Position2"));
             tooltip.add(Component.translatable("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.DARK_GRAY));
         }
 
