@@ -1,9 +1,9 @@
 buildscript {
-    apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/buildscript.gradle', to: buildscript
+    apply from: 'https://moddingx.github.io/ModUtils/v4/buildscript.gradle', to: buildscript
 }
 
-apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/mod.gradle'
-apply plugin: 'io.github.noeppi_noeppi.tools.modgradle.cursedep'
+apply from: 'https://moddingx.github.io/ModUtils/v4/mod.gradle'
+apply plugin: 'org.moddingx.modgradle.cursedep'
 
 repositories {
     maven {
@@ -29,8 +29,7 @@ dependencies {
 
     runtimeOnly fg.deobf("mezz.jei:jei-1.18.2:9.5.3.143")
 
-//    runtimeOnly curse.mod(291874, 3433685)
-//    runtimeOnly curse.mod(353942, 3455374)
+    runtimeOnly curse.mod(418915, 3836227)
 
 //    runtimeOnly fg.deobf("curse.maven:good-nights-sleep-61461:3208812")
 }

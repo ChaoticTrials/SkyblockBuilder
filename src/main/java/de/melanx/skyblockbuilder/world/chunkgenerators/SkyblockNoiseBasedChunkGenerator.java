@@ -132,7 +132,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         List<Holder<ConfiguredStructureFeature<?, ?>>> holders = structureSet.stream().filter(holder -> holder.unwrapKey().isPresent() && ConfigHandler.Structures.generationStructures.test(holder.unwrapKey().get().location())).toList();
         HolderSet.Direct<ConfiguredStructureFeature<?, ?>> modifiedStructureSet = HolderSet.direct(holders);
         for (Holder<ConfiguredStructureFeature<?, ?>> holder : modifiedStructureSet) {
-            if (ConfigHandler.Structures.generationStructures.test(holder.value().feature.getRegistryName())) {
+            if (holder.unwrapKey().isPresent() && ConfigHandler.Structures.generationStructures.test(holder.unwrapKey().get().location())) {
                 return super.findNearestMapFeature(level, modifiedStructureSet, pos, searchRadius, skipKnownStructures);
             }
         }
@@ -156,7 +156,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Override
     protected boolean tryGenerateStructure(@Nonnull StructureSet.StructureSelectionEntry structureEntry, @Nonnull StructureFeatureManager structureManager, @Nonnull RegistryAccess registry, @Nonnull StructureManager featureManager, long seed, @Nonnull ChunkAccess chunk, @Nonnull ChunkPos chunkPos, @Nonnull SectionPos sectionPos) {
-        if (!ConfigHandler.Structures.generationStructures.test(structureEntry.structure().value().feature.getRegistryName())) {
+        if (structureEntry.structure().unwrapKey().isEmpty() || !ConfigHandler.Structures.generationStructures.test(structureEntry.structure().unwrapKey().get().location())) {
             return false;
         }
 
