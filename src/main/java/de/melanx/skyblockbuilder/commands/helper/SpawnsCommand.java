@@ -11,7 +11,6 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -91,8 +90,7 @@ public class SpawnsCommand {
         }
 
         for (Team team : data.getTeams()) {
-            IslandPos spawn = team.getIsland();
-            Set<BlockPos> posSet = mode == Mode.NORMAL ? SkyblockSavedData.initialPossibleSpawns(spawn.getCenter()) : team.getPossibleSpawns();
+            Set<BlockPos> posSet = mode == Mode.NORMAL ? team.getDefaultPossibleSpawns() : team.getPossibleSpawns();
             for (BlockPos pos : posSet) {
                 if (source.getEntity() instanceof ServerPlayer) {
                     level.sendParticles(source.getPlayerOrException(), ParticleTypes.HAPPY_VILLAGER, true, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);

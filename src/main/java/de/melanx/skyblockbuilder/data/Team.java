@@ -29,6 +29,7 @@ public class Team {
     private final Set<UUID> players;
     private final Set<UUID> joinRequests;
     private final Set<BlockPos> possibleSpawns;
+    private final Set<BlockPos> defaultPossibleSpawns;
     private UUID teamId;
     private IslandPos island;
     private String name;
@@ -51,6 +52,7 @@ public class Team {
         this.island = island;
         this.players = new HashSet<>();
         this.possibleSpawns = new HashSet<>();
+        this.defaultPossibleSpawns = new HashSet<>();
         this.joinRequests = new HashSet<>();
         this.teamId = teamId;
         this.allowVisits = false;
@@ -116,9 +118,15 @@ public class Team {
         return this.possibleSpawns;
     }
 
+    public Set<BlockPos> getDefaultPossibleSpawns() {
+        return this.defaultPossibleSpawns;
+    }
+
     public void setPossibleSpawns(Collection<BlockPos> spawns) {
         this.possibleSpawns.clear();
+        this.defaultPossibleSpawns.clear();
         this.possibleSpawns.addAll(spawns);
+        this.defaultPossibleSpawns.addAll(spawns);
         this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
     }
@@ -374,6 +382,16 @@ public class Team {
             spawns.add(posTag);
         }
 
+        ListTag defaultSpawns = new ListTag();
+        for (BlockPos pos : this.defaultPossibleSpawns) {
+            CompoundTag posTag = new CompoundTag();
+            posTag.putDouble("posX", pos.getX() + 0.5);
+            posTag.putDouble("posY", pos.getY());
+            posTag.putDouble("posZ", pos.getZ() + 0.5);
+
+            defaultSpawns.add(posTag);
+        }
+
         ListTag joinRequests = new ListTag();
         for (UUID id : this.joinRequests) {
             CompoundTag idTag = new CompoundTag();
@@ -384,6 +402,7 @@ public class Team {
 
         nbt.put("Players", players);
         nbt.put("Spawns", spawns);
+        nbt.put("DefaultSpawns", defaultSpawns);
         nbt.put("JoinRequests", joinRequests);
         return nbt;
     }
@@ -409,6 +428,19 @@ public class Team {
         for (Tag pos : spawns) {
             CompoundTag posTag = (CompoundTag) pos;
             this.possibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
+        }
+
+        ListTag defaultSpawns = nbt.getList("DefaultSpawns", Tag.TAG_COMPOUND);
+        // TODO remove in 1.19.1 or 1.20
+        // START
+        if (defaultSpawns.isEmpty()) {
+            defaultSpawns.addAll(spawns);
+        }
+        // END
+        this.defaultPossibleSpawns.clear();
+        for (Tag pos : defaultSpawns) {
+            CompoundTag posTag = (CompoundTag) pos;
+            this.defaultPossibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
         }
 
         ListTag joinRequests = nbt.getList("JoinRequests", Tag.TAG_COMPOUND);

@@ -91,21 +91,21 @@ public class SkyblockSavedData extends SavedData {
         return Optional.ofNullable(this.skyblocks.get(SPAWN_ID));
     }
 
-    public Pair<IslandPos, Team> create(String teamName, WorldUtil.Directions direction) {
+    public Pair<IslandPos, Team> create(String teamName, ConfiguredTemplate template) {
         IslandPos islandPos;
         Team team;
         if (teamName.equalsIgnoreCase("spawn")) {
             islandPos = new IslandPos(this.level, 0, 0);
-            team = new Team(this, islandPos, SPAWN_ID, direction);
+            team = new Team(this, islandPos, SPAWN_ID, template.getDirection());
         } else {
             do {
                 int[] pos = this.spiral.next();
                 islandPos = new IslandPos(this.level, pos[0], pos[1]);
             } while (this.skyblockPositions.containsValue(islandPos));
-            team = new Team(this, islandPos, direction);
+            team = new Team(this, islandPos, template.getDirection());
         }
 
-        Set<BlockPos> positions = initialPossibleSpawns(islandPos.getCenter());
+        Set<BlockPos> positions = initialPossibleSpawns(islandPos.getCenter(), template);
 
         team.setPossibleSpawns(positions);
         team.setName(teamName);
@@ -256,9 +256,9 @@ public class SkyblockSavedData extends SavedData {
             return null;
         }
 
-        Pair<IslandPos, Team> pair = this.create(teamName, template.getDirection());
+        Pair<IslandPos, Team> pair = this.create(teamName, template);
         Team team = pair.getRight();
-        List<BlockPos> possibleSpawns = new ArrayList<>(this.getPossibleSpawns(team.getIsland()));
+        List<BlockPos> possibleSpawns = new ArrayList<>(this.getPossibleSpawns(team.getIsland(), template));
         team.setPossibleSpawns(possibleSpawns);
         team.setDirection(template.getDirection());
 
@@ -518,17 +518,29 @@ public class SkyblockSavedData extends SavedData {
         return this.metaInfo.computeIfAbsent(id, meta -> new SkyMeta(this, id));
     }
 
+    @Deprecated
+    @RemoveIn(minecraft = "1.20")
     public Set<BlockPos> getPossibleSpawns(IslandPos pos) {
+        return this.getPossibleSpawns(pos, TemplateLoader.getConfiguredTemplate());
+    }
+
+    public Set<BlockPos> getPossibleSpawns(IslandPos pos, ConfiguredTemplate template) {
         if (!this.skyblockPositions.containsValue(pos)) {
-            return initialPossibleSpawns(pos.getCenter());
+            return initialPossibleSpawns(pos.getCenter(), template);
         }
 
         return this.skyblocks.get(this.skyblockPositions.inverse().get(pos)).getPossibleSpawns();
     }
 
+    @Deprecated
+    @RemoveIn(minecraft = "1.20")
     public static Set<BlockPos> initialPossibleSpawns(BlockPos center) {
+        return initialPossibleSpawns(center, TemplateLoader.getConfiguredTemplate());
+    }
+
+    public static Set<BlockPos> initialPossibleSpawns(BlockPos center, ConfiguredTemplate template) {
         Set<BlockPos> positions = Sets.newHashSet();
-        for (BlockPos pos : TemplateLoader.getCurrentSpawns()) {
+        for (BlockPos pos : template.getDefaultSpawns()) {
             positions.add(center.offset(pos.immutable()));
         }
 
