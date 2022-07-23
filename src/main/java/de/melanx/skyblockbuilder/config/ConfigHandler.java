@@ -93,6 +93,9 @@ public class ConfigHandler {
 
     public static class Spawn {
 
+        @Config("The entities which you can interact with within the spawn protection")
+        public static ResourceList interactionEntitiesInSpawnProtection = ResourceList.ALLOW_LIST;
+
         @Config("The radius of chunks where to apply spawn protection. In this area, only op players can avoid this.")
         public static int spawnProtectionRadius = 0;
 

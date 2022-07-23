@@ -18,12 +18,18 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent event) {
         if (SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !event.getEntity().hasPermissions(2)) {
+            if (event instanceof PlayerInteractEvent.EntityInteract entityInteract &&
+                    ConfigHandler.Spawn.interactionEntitiesInSpawnProtection.test(ForgeRegistries.ENTITY_TYPES.getKey(entityInteract.getTarget().getType()))) {
+                return;
+            }
+
             if (event.isCancelable()) {
                 event.setCanceled(true);
             }

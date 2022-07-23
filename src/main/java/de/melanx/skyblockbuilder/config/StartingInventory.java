@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.config;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -61,7 +62,7 @@ public class StartingInventory {
     }
 
     public static List<Pair<EquipmentSlot, ItemStack>> getStarterItems() {
-        return StartingInventory.STARTER_ITEMS;
+        return ImmutableList.copyOf(StartingInventory.STARTER_ITEMS);
     }
 
     public static JsonObject serializeItem(ItemStack stack) {
