@@ -518,7 +518,7 @@ public class SkyblockSavedData extends SavedData {
         return this.metaInfo.computeIfAbsent(id, meta -> new SkyMeta(this, id));
     }
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @RemoveIn(minecraft = "1.20")
     public Set<BlockPos> getPossibleSpawns(IslandPos pos) {
         return this.getPossibleSpawns(pos, TemplateLoader.getConfiguredTemplate());
@@ -532,7 +532,7 @@ public class SkyblockSavedData extends SavedData {
         return this.skyblocks.get(this.skyblockPositions.inverse().get(pos)).getPossibleSpawns();
     }
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @RemoveIn(minecraft = "1.20")
     public static Set<BlockPos> initialPossibleSpawns(BlockPos center) {
         return initialPossibleSpawns(center, TemplateLoader.getConfiguredTemplate());
