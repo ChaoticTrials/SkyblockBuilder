@@ -96,7 +96,7 @@ public class EventListener {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        SkyblockBuilder.getNetwork().updateData(event.getEntity());
+        SkyblockBuilder.getNetwork().updateData(event.getEntity(), null);
         Level level = event.getEntity().level;
         SkyblockBuilder.getNetwork().updateProfiles(level);
         SkyblockBuilder.getNetwork().updateTemplateNames(event.getEntity(), TemplateLoader.getTemplateNames());

@@ -551,7 +551,7 @@ public class SkyblockSavedData extends SavedData {
     public void setDirty() {
         super.setDirty();
         if (this.level != null) {
-            SkyblockBuilder.getNetwork().updateData(this.level);
+            SkyblockBuilder.getNetwork().updateData(this.level, this);
         }
     }
 

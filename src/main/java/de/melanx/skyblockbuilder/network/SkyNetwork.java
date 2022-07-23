@@ -13,8 +13,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.PacketDistributor;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 import org.moddingx.libx.network.NetworkX;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -39,17 +41,31 @@ public class SkyNetwork extends NetworkX {
         this.register(new UpdateTemplateNamesHandler.Serializer(), () -> UpdateTemplateNamesHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public void updateData(Level level) {
         if (!level.isClientSide) {
+            this.updateData(level, SkyblockSavedData.get(level));
+        }
+    }
+
+    public void updateData(Level level, SkyblockSavedData data) {
+        if (!level.isClientSide) {
             for (ServerPlayer player : ((ServerLevel) level).getServer().getPlayerList().getPlayers()) {
-                this.updateData(player);
+                this.updateData(player, data);
             }
         }
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
     public void updateData(Player player) {
+        this.updateData(player, null);
+    }
+
+    public void updateData(Player player, @Nullable SkyblockSavedData data) {
         if (!player.getCommandSenderWorld().isClientSide) {
-            this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new SkyblockDataUpdateHandler.Message(SkyblockSavedData.get(player.getCommandSenderWorld()), player.getGameProfile().getId()));
+            this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new SkyblockDataUpdateHandler.Message(data != null ? data : SkyblockSavedData.get(player.getCommandSenderWorld()), player.getGameProfile().getId()));
         }
     }
 
