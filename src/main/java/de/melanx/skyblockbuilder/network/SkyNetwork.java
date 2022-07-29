@@ -28,17 +28,17 @@ public class SkyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("8");
+        return Protocol.of("9");
     }
 
     @Override
     protected void registerPackets() {
-        this.register(new SaveStructureHandler.Serializer(), () -> SaveStructureHandler::handle, NetworkDirection.PLAY_TO_SERVER);
-        this.register(new DeleteTagsHandler.Serializer(), () -> DeleteTagsHandler::handle, NetworkDirection.PLAY_TO_SERVER);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new SaveStructureMessage.Serializer(), () -> SaveStructureMessage.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new DeleteTagsMessage.Serializer(), () -> DeleteTagsMessage.Handler::new);
 
-        this.register(new SkyblockDataUpdateHandler.Serializer(), () -> SkyblockDataUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
-        this.register(new ProfilesUpdateHandler.ProfilesUpdateSerializer(), () -> ProfilesUpdateHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
-        this.register(new UpdateTemplateNamesHandler.Serializer(), () -> UpdateTemplateNamesHandler::handle, NetworkDirection.PLAY_TO_CLIENT);
+        this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new SkyblockDataUpdateMessage.Serializer(), () -> SkyblockDataUpdateMessage.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new ProfilesUpdateMessage.Serializer(), () -> ProfilesUpdateMessage.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new UpdateTemplateNamesMessage.Serializer(), () -> UpdateTemplateNamesMessage.Handler::new);
     }
 
     @Deprecated(forRemoval = true)
@@ -65,16 +65,16 @@ public class SkyNetwork extends NetworkX {
 
     public void updateData(Player player, @Nullable SkyblockSavedData data) {
         if (!player.getCommandSenderWorld().isClientSide) {
-            this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new SkyblockDataUpdateHandler.Message(data != null ? data : SkyblockSavedData.get(player.getCommandSenderWorld()), player.getGameProfile().getId()));
+            this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new SkyblockDataUpdateMessage(data != null ? data : SkyblockSavedData.get(player.getCommandSenderWorld()), player.getGameProfile().getId()));
         }
     }
 
     public void deleteTags(ItemStack stack) {
-        this.channel.sendToServer(new DeleteTagsHandler.Message(stack));
+        this.channel.sendToServer(new DeleteTagsMessage(stack));
     }
 
     public void saveStructure(ItemStack stack, String name, boolean ignoreAir) {
-        this.channel.sendToServer(new SaveStructureHandler.Message(stack, name, ignoreAir));
+        this.channel.sendToServer(new SaveStructureMessage(stack, name, ignoreAir));
     }
 
     public void updateProfiles(Player player) {
@@ -82,7 +82,7 @@ public class SkyNetwork extends NetworkX {
             return;
         }
 
-        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) player.getCommandSenderWorld())));
+        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new ProfilesUpdateMessage(this.getProfilesTag((ServerLevel) player.getCommandSenderWorld())));
     }
 
     public void updateProfiles(Level level) {
@@ -90,7 +90,7 @@ public class SkyNetwork extends NetworkX {
             return;
         }
 
-        this.channel.send(PacketDistributor.ALL.noArg(), new ProfilesUpdateHandler.Message(this.getProfilesTag((ServerLevel) level)));
+        this.channel.send(PacketDistributor.ALL.noArg(), new ProfilesUpdateMessage(this.getProfilesTag((ServerLevel) level)));
     }
 
     public void updateTemplateNames(Player player, List<String> names) {
@@ -98,11 +98,11 @@ public class SkyNetwork extends NetworkX {
             return;
         }
 
-        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new UpdateTemplateNamesHandler.Message(names));
+        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new UpdateTemplateNamesMessage(names));
     }
 
     public void updateTemplateNames(List<String> names) {
-        this.channel.send(PacketDistributor.ALL.noArg(), new UpdateTemplateNamesHandler.Message(names));
+        this.channel.send(PacketDistributor.ALL.noArg(), new UpdateTemplateNamesMessage(names));
     }
 
     private CompoundTag getProfilesTag(ServerLevel level) {

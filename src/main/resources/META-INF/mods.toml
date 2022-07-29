@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[41,)"
+loaderVersion="[42,)"
 license="Apache License"
 issueTrackerURL="https://www.github.com/MelanX/SkyblockBuilder/issues/"
 
@@ -17,27 +17,27 @@ Let you create a custom skyblock island via config
 [[dependencies.skyblockbuilder]]
     modId = "forge"
     mandatory = true
-    versionRange = "[41.0.98,)"
+    versionRange = "[42,)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.skyblockbuilder]]
     modId = "minecraft"
     mandatory = true
-    versionRange = "[1.19, 1.20)"
+    versionRange = "[1.19.1, 1.20)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.skyblockbuilder]]
     modId = "libx"
     mandatory = true
-    versionRange = "[1.19-4.0.7,)"
+    versionRange = "[1.19.1-4.1.1,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.skyblockbuilder]]
     modId = "minemention"
     mandatory = false
-    versionRange = "[1.19-2.0.0,)"
+    versionRange = "[1.19.1-2.1.0,)"
     ordering = "NONE"
     side = "BOTH"

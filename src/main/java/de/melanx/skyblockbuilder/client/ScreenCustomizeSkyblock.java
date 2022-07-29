@@ -82,7 +82,7 @@ public class ScreenCustomizeSkyblock extends Screen {
         Screen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
         Screen.drawCenteredString(poseStack, this.font, Component.translatable("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
         super.render(poseStack, mouseX, mouseY, partialTick);
-        this.list.renderEntries(poseStack, mouseX, mouseY, partialTick);
+        this.list.renderEntries(poseStack, partialTick);
     }
 
     private class TemplateList extends ObjectSelectionList<TemplateList.TemplateEntry> {
@@ -128,12 +128,12 @@ public class ScreenCustomizeSkyblock extends Screen {
         }
 
         @Override
-        protected void renderList(@Nonnull PoseStack poseStack, int x, int y, int mouseX, int mouseY, float partialTick) {
+        protected void renderList(@Nonnull PoseStack poseStack, int x, int y, float partialTick) {
             // delayed to #renderEntries to call it later
         }
 
-        protected void renderEntries(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-            super.renderList(poseStack, this.getRowLeft(), this.y0 + 4 - (int) this.getScrollAmount(), mouseX, mouseY, partialTick);
+        protected void renderEntries(@Nonnull PoseStack poseStack, float partialTick) {
+            super.renderList(poseStack, this.getRowLeft(), this.y0 + 4 - (int) this.getScrollAmount(), partialTick);
         }
 
         private class TemplateEntry extends ObjectSelectionList.Entry<TemplateEntry> {

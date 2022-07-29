@@ -9,17 +9,25 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketHandler;
 import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 
-public class SaveStructureHandler {
+public record SaveStructureMessage(ItemStack stack, String name, boolean ignoreAir) {
 
-    public static void handle(SaveStructureHandler.Message msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static class Handler implements PacketHandler<SaveStructureMessage> {
+
+        @Override
+        public Target target() {
+            return Target.MAIN_THREAD;
+        }
+
+        @Override
+        public boolean handle(SaveStructureMessage msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) {
-                return;
+                return true;
             }
 
             ServerLevel level = player.getLevel();
@@ -28,31 +36,27 @@ public class SaveStructureHandler {
             player.setItemInHand(InteractionHand.MAIN_HAND, stack);
             MutableComponent component = Component.translatable("skyblockbuilder.schematic.saved", name);
             player.displayClientMessage(component, true);
-        });
-        ctx.get().setPacketHandled(true);
+            return true;
+        }
     }
 
-    public static class Serializer implements PacketSerializer<Message> {
+    public static class Serializer implements PacketSerializer<SaveStructureMessage> {
 
         @Override
-        public Class<Message> messageClass() {
-            return Message.class;
+        public Class<SaveStructureMessage> messageClass() {
+            return SaveStructureMessage.class;
         }
 
         @Override
-        public void encode(Message msg, FriendlyByteBuf buffer) {
+        public void encode(SaveStructureMessage msg, FriendlyByteBuf buffer) {
             buffer.writeItem(msg.stack);
             buffer.writeUtf(msg.name);
             buffer.writeBoolean(msg.ignoreAir);
         }
 
         @Override
-        public Message decode(FriendlyByteBuf buffer) {
-            return new Message(buffer.readItem(), buffer.readUtf(Short.MAX_VALUE), buffer.readBoolean());
+        public SaveStructureMessage decode(FriendlyByteBuf buffer) {
+            return new SaveStructureMessage(buffer.readItem(), buffer.readUtf(Short.MAX_VALUE), buffer.readBoolean());
         }
-    }
-
-    public record Message(ItemStack stack, String name, boolean ignoreAir) {
-        // empty
     }
 }

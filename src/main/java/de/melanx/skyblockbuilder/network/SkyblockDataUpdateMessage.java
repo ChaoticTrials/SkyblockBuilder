@@ -7,28 +7,38 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketHandler;
 import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class SkyblockDataUpdateHandler {
+public record SkyblockDataUpdateMessage(SkyblockSavedData data, UUID player) {
 
-    public static void handle(SkyblockDataUpdateHandler.Message msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> SkyblockSavedData.updateClient(msg.data));
-        ctx.get().setPacketHandled(true);
-    }
-
-    public static class Serializer implements PacketSerializer<SkyblockDataUpdateHandler.Message> {
+    public static class Handler implements PacketHandler<SkyblockDataUpdateMessage> {
 
         @Override
-        public Class<SkyblockDataUpdateHandler.Message> messageClass() {
-            return SkyblockDataUpdateHandler.Message.class;
+        public Target target() {
+            return Target.MAIN_THREAD;
         }
 
         @Override
-        public void encode(SkyblockDataUpdateHandler.Message msg, FriendlyByteBuf buffer) {
+        public boolean handle(SkyblockDataUpdateMessage msg, Supplier<NetworkEvent.Context> ctx) {
+            SkyblockSavedData.updateClient(msg.data);
+            return true;
+        }
+    }
+
+    public static class Serializer implements PacketSerializer<SkyblockDataUpdateMessage> {
+
+        @Override
+        public Class<SkyblockDataUpdateMessage> messageClass() {
+            return SkyblockDataUpdateMessage.class;
+        }
+
+        @Override
+        public void encode(SkyblockDataUpdateMessage msg, FriendlyByteBuf buffer) {
             CompoundTag tag = msg.data.save(new CompoundTag());
             if (tag.contains("MetaInformation")) {
                 SkyMeta meta = null;
@@ -56,14 +66,10 @@ public class SkyblockDataUpdateHandler {
         }
 
         @Override
-        public SkyblockDataUpdateHandler.Message decode(FriendlyByteBuf buffer) {
+        public SkyblockDataUpdateMessage decode(FriendlyByteBuf buffer) {
             SkyblockSavedData data = new SkyblockSavedData();
             data.load(Objects.requireNonNull(buffer.readNbt()));
-            return new SkyblockDataUpdateHandler.Message(data, buffer.readUUID());
+            return new SkyblockDataUpdateMessage(data, buffer.readUUID());
         }
-    }
-
-    public record Message(SkyblockSavedData data, UUID player) {
-        // empty
     }
 }

@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketHandler;
 import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.HashSet;
@@ -13,10 +14,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class ProfilesUpdateHandler {
+public record ProfilesUpdateMessage(CompoundTag profiles) {
 
-    public static void handle(ProfilesUpdateHandler.Message msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static class Handler implements PacketHandler<ProfilesUpdateMessage> {
+
+        @Override
+        public Target target() {
+            return Target.MAIN_THREAD;
+        }
+
+        @Override
+        public boolean handle(ProfilesUpdateMessage msg, Supplier<NetworkEvent.Context> ctx) {
             Set<GameProfile> profiles = new HashSet<>();
             for (Tag tag : msg.profiles.getList("Profiles", Tag.TAG_COMPOUND)) {
                 CompoundTag nbt = (CompoundTag) tag;
@@ -28,29 +36,25 @@ public class ProfilesUpdateHandler {
             }
 
             GameProfileCache.addProfiles(profiles);
-        });
-        ctx.get().setPacketHandled(true);
+            return true;
+        }
     }
 
-    public static class ProfilesUpdateSerializer implements PacketSerializer<ProfilesUpdateHandler.Message> {
+    public static class Serializer implements PacketSerializer<ProfilesUpdateMessage> {
 
         @Override
-        public Class<ProfilesUpdateHandler.Message> messageClass() {
-            return ProfilesUpdateHandler.Message.class;
+        public Class<ProfilesUpdateMessage> messageClass() {
+            return ProfilesUpdateMessage.class;
         }
 
         @Override
-        public void encode(ProfilesUpdateHandler.Message msg, FriendlyByteBuf buffer) {
+        public void encode(ProfilesUpdateMessage msg, FriendlyByteBuf buffer) {
             buffer.writeNbt(msg.profiles);
         }
 
         @Override
-        public ProfilesUpdateHandler.Message decode(FriendlyByteBuf buffer) {
-            return new ProfilesUpdateHandler.Message(buffer.readNbt());
+        public ProfilesUpdateMessage decode(FriendlyByteBuf buffer) {
+            return new ProfilesUpdateMessage(buffer.readNbt());
         }
-    }
-
-    public record Message(CompoundTag profiles) {
-        // empty
     }
 }
