@@ -372,7 +372,7 @@ public class SkyblockSavedData extends SavedData {
 
         Team team = this.skyblocks.get(meta.getTeamId());
 
-        return team.isSpawn() ? null : team;
+        return team == null || team.isSpawn() ? null : team;
     }
 
     public boolean teamExists(String name) {
