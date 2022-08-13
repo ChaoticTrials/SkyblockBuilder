@@ -29,7 +29,7 @@ dependencies {
 
     runtimeOnly fg.deobf("mezz.jei:jei-1.18.2:9.5.3.143")
 
-    runtimeOnly curse.mod(418915, 3836227)
+    runtimeOnly curse.mod(557696, 3849384)
 
 //    runtimeOnly fg.deobf("curse.maven:good-nights-sleep-61461:3208812")
 }

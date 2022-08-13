@@ -177,6 +177,9 @@ public class Team {
                 //noinspection ConstantConditions
                 MineMentionCompat.updateMentions(this.getLevel().getServer().getPlayerList().getPlayer(player));
             }
+            if (!this.isSpawn()) {
+                this.data.getSpawn().removePlayer(player);
+            }
             this.lastChanged = System.currentTimeMillis();
             this.data.getOrCreateMetaInfo(player).setTeamId(this.teamId);
             this.data.setDirty();
