@@ -1,20 +1,20 @@
 package de.melanx.skyblockbuilder.template;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import org.apache.commons.io.IOUtils;
 
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,10 +30,12 @@ public class ConfiguredTemplate {
         StructureTemplate template = new StructureTemplate();
         CompoundTag nbt;
         try {
-            File file = SkyPaths.TEMPLATES_DIR.resolve(info.file()).toFile();
-            nbt = NbtIo.readCompressed(file);
+            Path file = SkyPaths.TEMPLATES_DIR.resolve(info.file());
+            nbt = file.toString().endsWith(".snbt")
+                    ? NbtUtils.snbtToStructure(IOUtils.toString(Files.newBufferedReader(file)))
+                    : NbtIo.readCompressed(file.toFile());
             template.load(nbt);
-        } catch (IOException e) {
+        } catch (IOException | CommandSyntaxException e) {
             SkyblockBuilder.getLogger().error("Template with name " + info.file() + " is incorrect.", e);
         }
 

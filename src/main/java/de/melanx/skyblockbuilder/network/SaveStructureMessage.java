@@ -14,7 +14,7 @@ import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 
-public record SaveStructureMessage(ItemStack stack, String name, boolean ignoreAir) {
+public record SaveStructureMessage(ItemStack stack, String name, boolean ignoreAir, boolean asSnbt) {
 
     public static class Handler implements PacketHandler<SaveStructureMessage> {
 
@@ -31,7 +31,7 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean ignoreA
             }
 
             ServerLevel level = player.getLevel();
-            String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.ignoreAir, msg.name);
+            String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.ignoreAir, msg.asSnbt, msg.name);
             ItemStack stack = ItemStructureSaver.removeTags(msg.stack);
             player.setItemInHand(InteractionHand.MAIN_HAND, stack);
             MutableComponent component = Component.translatable("skyblockbuilder.schematic.saved", name);
@@ -52,11 +52,12 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean ignoreA
             buffer.writeItem(msg.stack);
             buffer.writeUtf(msg.name);
             buffer.writeBoolean(msg.ignoreAir);
+            buffer.writeBoolean(msg.asSnbt);
         }
 
         @Override
         public SaveStructureMessage decode(FriendlyByteBuf buffer) {
-            return new SaveStructureMessage(buffer.readItem(), buffer.readUtf(Short.MAX_VALUE), buffer.readBoolean());
+            return new SaveStructureMessage(buffer.readItem(), buffer.readUtf(Short.MAX_VALUE), buffer.readBoolean(), buffer.readBoolean());
         }
     }
 }

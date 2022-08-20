@@ -9,6 +9,7 @@ import de.melanx.skyblockbuilder.commands.*;
 import de.melanx.skyblockbuilder.commands.helper.InventoryCommand;
 import de.melanx.skyblockbuilder.commands.helper.ListCommand;
 import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
+import de.melanx.skyblockbuilder.commands.helper.TemplatesToSnbtCommand;
 import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
 import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
@@ -90,6 +91,7 @@ public class EventListener {
                 .then(SpawnCommand.register())
                 .then(SpawnsCommand.register())
                 .then(TeamCommand.register())
+                .then(TemplatesToSnbtCommand.register())
                 .then(VisitCommand.register())
         );
     }

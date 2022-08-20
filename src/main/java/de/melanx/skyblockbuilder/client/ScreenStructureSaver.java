@@ -30,10 +30,11 @@ public class ScreenStructureSaver extends Screen {
     private int relY;
     private EditBox name;
     private Checkbox ignoreAir;
+    private Checkbox nbtToSnbt;
 
     public ScreenStructureSaver(ItemStack stack, Component title) {
         super(title);
-        this.xSize = 176;
+        this.xSize = 196;
         this.ySize = 85;
         this.stack = stack;
     }
@@ -47,7 +48,7 @@ public class ScreenStructureSaver extends Screen {
         this.name.changeFocus(true);
         this.name.setValue(this.name.getValue());
         this.addRenderableWidget(new Button(this.relX + 10, this.relY + 55, 60, 20, Component.translatable("skyblockbuilder.screen.button.save"), button -> {
-            SkyblockBuilder.getNetwork().saveStructure(this.stack, this.name.getValue().isEmpty() ? "template" : this.name.getValue(), this.ignoreAir.selected());
+            SkyblockBuilder.getNetwork().saveStructure(this.stack, this.name.getValue().isEmpty() ? "template" : this.name.getValue(), this.ignoreAir.selected(), this.nbtToSnbt.selected());
             this.onClose();
         }));
         this.addRenderableWidget(new Button(this.relX + 77, this.relY + 55, 60, 20, Component.translatable("skyblockbuilder.screen.button.delete"), button -> {
@@ -58,6 +59,7 @@ public class ScreenStructureSaver extends Screen {
             ClientUtility.openPath("skyblock_exports");
         }, (button, poseStack, mouseX, mouseY) -> this.renderTooltip(poseStack, Component.translatable("skyblockbuilder.screen.button.open_folder.tooltip"), mouseX, mouseY)));
         this.ignoreAir = this.addRenderableWidget(new Checkbox(this.relX + 144, this.relY + 55, 20, 20, Component.empty(), false, false));
+        this.nbtToSnbt = this.addRenderableWidget(new Checkbox(this.relX + 169, this.relY + 55, 20, 20, Component.empty(), false, false));
     }
 
     @Override
@@ -78,6 +80,8 @@ public class ScreenStructureSaver extends Screen {
 
         if (this.ignoreAir.isHoveredOrFocused()) {
             this.renderTooltip(poseStack, Component.translatable("skyblockbuilder.item.structure_saver.ignore_air.tooltip"), mouseX, mouseY);
+        } else if (this.nbtToSnbt.isHoveredOrFocused()) {
+            this.renderTooltip(poseStack, Component.translatable("skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip"), mouseX, mouseY);
         }
     }
 

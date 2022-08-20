@@ -28,7 +28,7 @@ public class SkyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("9");
+        return Protocol.of("10");
     }
 
     @Override
@@ -73,8 +73,8 @@ public class SkyNetwork extends NetworkX {
         this.channel.sendToServer(new DeleteTagsMessage(stack));
     }
 
-    public void saveStructure(ItemStack stack, String name, boolean ignoreAir) {
-        this.channel.sendToServer(new SaveStructureMessage(stack, name, ignoreAir));
+    public void saveStructure(ItemStack stack, String name, boolean ignoreAir, boolean asSnbt) {
+        this.channel.sendToServer(new SaveStructureMessage(stack, name, ignoreAir, asSnbt));
     }
 
     public void updateProfiles(Player player) {

@@ -102,6 +102,7 @@
   "skyblockbuilder.command.success.spawn_removed": "Successfully removed spawn point at x %s, y %s, z %s.",
   "skyblockbuilder.command.success.reset_spawns": "Successfully reset all possible spawns.",
   "skyblockbuilder.command.success.rename_team": "Successfully renamed team to %s.",
+  "skyblockbuilder.command.success.convert_template": "Converted %s to %s.",
 
   "skyblockbuilder.command.warning.edit_spawn_spawns": "[WARNING] You are editing the spawn island!",
 
@@ -119,6 +120,7 @@
   "skyblockbuilder.item.structure_saver.save.tooltip": "Right click to save schematic",
   "skyblockbuilder.item.structure_saver.position.tooltip": "Position %s: x %s, y %s, z %s",
   "skyblockbuilder.item.structure_saver.ignore_air.tooltip": "Ignore Air",
+  "skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip": "Save as .snbt file",
   "skyblockbuilder.screen.button.save": "Save",
   "skyblockbuilder.screen.button.delete": "Delete",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Open Folder",

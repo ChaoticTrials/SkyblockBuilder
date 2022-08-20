@@ -138,11 +138,11 @@ public class ItemStructureSaver extends Item {
         return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    public static String saveSchematic(Level level, ItemStack stack, boolean ignoreAir) {
-        return saveSchematic(level, stack, ignoreAir, null);
+    public static String saveSchematic(Level level, ItemStack stack, boolean ignoreAir, boolean asSnbt) {
+        return saveSchematic(level, stack, ignoreAir, asSnbt, null);
     }
 
-    public static String saveSchematic(Level level, ItemStack stack, boolean ignoreAir, @Nullable String name) {
+    public static String saveSchematic(Level level, ItemStack stack, boolean ignoreAir, boolean asSnbt, @Nullable String name) {
         StructureTemplate template = new StructureTemplate();
         BoundingBox boundingBox = getArea(stack);
 
@@ -159,14 +159,22 @@ public class ItemStructureSaver extends Item {
         }
         RandomUtility.fillTemplateFromWorld(template, level, origin, bounds, true, toIgnore);
 
-        Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name));
-        try (OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE)) {
-            CompoundTag tag = template.save(new CompoundTag());
-            NbtIo.writeCompressed(tag, outputStream);
+        Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name, asSnbt ? "snbt" : "nbt"));
+        CompoundTag tag = template.save(new CompoundTag());
+        try {
+            if (asSnbt) {
+                String snbt = NbtUtils.structureToSnbt(tag);
+                Files.writeString(path, snbt);
+            } else {
+                OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE);
+                NbtIo.writeCompressed(tag, outputStream);
+                outputStream.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
+
 
         return path.getFileName().toString();
     }
