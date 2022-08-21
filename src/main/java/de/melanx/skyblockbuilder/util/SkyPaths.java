@@ -77,7 +77,7 @@ public class SkyPaths {
     public static void copyTemplateFile() throws IOException {
         //noinspection ConstantConditions
         if (Arrays.stream(TEMPLATES_DIR.toFile().listFiles())
-                .anyMatch(file -> file.isFile() && file.getName().endsWith(".nbt"))) {
+                .anyMatch(file -> file.isFile() && (file.getName().endsWith(".nbt") || file.getName().endsWith(".snbt")))) {
             return;
         }
 
