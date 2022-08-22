@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -41,6 +42,7 @@ public class SkyPaths {
     private static final Path FEATURES_FILE = DATA_DIR.resolve("features.txt");
     private static final Path STRUCTURES_FILE = DATA_DIR.resolve("structures.txt");
     private static final Path BIOMES_FILE = DATA_DIR.resolve("biomes.txt");
+    private static final Path CARVERS_FILE = DATA_DIR.resolve("carvers.txt");
     private static final Path DIMENSIONS_FILE = DATA_DIR.resolve("dimensions.txt");
 
     public static void createDirectories() {
@@ -64,6 +66,7 @@ public class SkyPaths {
             generateFeatureInformation(server);
             generateStructureInformation(server);
             generateBiomeInformation(server);
+            generateCarversInformation(server);
             if (server != null) {
                 generateDimensionInformation(server);
             }
@@ -109,6 +112,7 @@ public class SkyPaths {
             stream = BuiltinRegistries.CONFIGURED_FEATURE.holders();
         }
 
+        //noinspection DuplicatedCode
         stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
             try {
                 w.write(holder.key().location() + "\n");
@@ -130,6 +134,7 @@ public class SkyPaths {
             stream = BuiltinRegistries.STRUCTURES.holders();
         }
 
+        //noinspection DuplicatedCode
         stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
             try {
                 w.write(holder.key().location() + "\n");
@@ -148,9 +153,33 @@ public class SkyPaths {
         if (server != null) {
             stream = server.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).holders();
         } else {
+            //noinspection deprecation
             stream = BuiltinRegistries.BIOME.holders();
         }
 
+        //noinspection DuplicatedCode
+        stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
+            try {
+                w.write(holder.key().location() + "\n");
+            } catch (IOException e) {
+                SkyblockBuilder.getLogger().error("Failed to write '" + holder.key().location() + "' to file", e);
+            }
+        });
+
+        w.close();
+    }
+
+    public static void generateCarversInformation(@Nullable MinecraftServer server) throws IOException {
+        BufferedWriter w = Files.newBufferedWriter(CARVERS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+
+        Stream<Holder.Reference<ConfiguredWorldCarver<?>>> stream;
+        if (server != null) {
+            stream = server.registryAccess().registryOrThrow(Registry.CONFIGURED_CARVER_REGISTRY).holders();
+        } else {
+            stream = BuiltinRegistries.CONFIGURED_CARVER.holders();
+        }
+
+        //noinspection DuplicatedCode
         stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
             try {
                 w.write(holder.key().location() + "\n");

@@ -80,11 +80,11 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
     }
 
     @Override
-    public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState randomState, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving carving) {
+    public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState random, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving carving) {
         ChunkPos pos = chunk.getPos();
         int value = 10 * 16;
         if (pos.getMinBlockX() < value && pos.getMinBlockX() > -value && pos.getMinBlockZ() < value && pos.getMinBlockZ() > -value) {
-            super.applyCarvers(level, seed, randomState, biomeManager, structureManager, chunk, carving);
+            super.applyCarvers(level, seed, random, biomeManager, structureManager, chunk, carving);
         }
     }
 }

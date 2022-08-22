@@ -18,16 +18,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.*;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.FeatureSorter;
+import net.minecraft.world.level.biome.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.carver.CarvingContext;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
@@ -142,8 +139,47 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     }
 
     @Override
-    public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState randomState, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving carving) {
+    public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState random, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving step) {
+        if (this.layerInfos.isEmpty()) {
+            return;
+        }
 
+        NoiseChunk noiseChunk = chunk.getOrCreateNoiseChunk((otherChunk) -> this.createNoiseChunk(otherChunk, structureManager, Blender.of(level), random));
+
+        ChunkPos chunkPos = chunk.getPos();
+        Aquifer aquifer = noiseChunk.aquifer();
+        CarvingMask carvingMask = ((ProtoChunk) chunk).getOrCreateCarvingMask(step);
+        WorldgenRandom worldGenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
+        BiomeManager differentBiomeManager = biomeManager.withDifferentSource((x, y, z) -> this.biomeSource.getNoiseBiome(x, y, z, random.sampler()));
+        CarvingContext carvingContext = new CarvingContext(this, level.registryAccess(), chunk.getHeightAccessorForGeneration(), noiseChunk, random, this.settings.value().surfaceRule());
+
+        int i = 8;
+        for (int j = -i; j <= i; ++j) {
+            for (int k = -i; k <= i; ++k) {
+                ChunkPos tempChunkPos = new ChunkPos(chunkPos.x + j, chunkPos.z + k);
+                //noinspection deprecation
+                BiomeGenerationSettings biomeGenerationSettings = level.getChunk(tempChunkPos.x, tempChunkPos.z).carverBiome(() -> {
+                    //noinspection deprecation
+                    return this.getBiomeGenerationSettings(this.biomeSource.getNoiseBiome(QuartPos.fromBlock(tempChunkPos.getMinBlockX()), 0, QuartPos.fromBlock(tempChunkPos.getMinBlockZ()), random.sampler()));
+                });
+
+                int l = 0;
+                for (Holder<ConfiguredWorldCarver<?>> holder : biomeGenerationSettings.getCarvers(step)) {
+                    // my change
+                    if (holder.unwrapKey().isPresent() && !ConfigHandler.World.carvers.get(this.dimension.location().toString()).test(holder.unwrapKey().get().location())) {
+                        continue;
+                    }
+
+                    ConfiguredWorldCarver<?> configuredCarver = holder.value();
+                    worldGenRandom.setLargeFeatureSeed(seed + (long) l, tempChunkPos.x, tempChunkPos.z);
+                    if (configuredCarver.isStartChunk(worldGenRandom)) {
+                        configuredCarver.carve(carvingContext, chunk, differentBiomeManager::getBiome, worldGenRandom, aquifer, tempChunkPos, carvingMask);
+                    }
+
+                    l++;
+                }
+            }
+        }
     }
 
     @Nonnull

@@ -80,6 +80,13 @@ public class ConfigHandler {
             map.put(Level.END.location().toString(), "");
         });
 
+        @Config
+        public static Map<String, ResourceList> carvers = Util.make(Maps.newHashMap(), map -> {
+            map.put(Level.OVERWORLD.location().toString(), ResourceList.ALLOW_LIST);
+            map.put(Level.NETHER.location().toString(), ResourceList.ALLOW_LIST);
+            map.put(Level.END.location().toString(), ResourceList.ALLOW_LIST);
+        });
+
         @Config("Sea level in world [default: 63]")
         public static int seaHeight = 63;
 
