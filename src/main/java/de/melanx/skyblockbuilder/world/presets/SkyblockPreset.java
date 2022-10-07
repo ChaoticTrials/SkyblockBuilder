@@ -39,6 +39,7 @@ public class SkyblockPreset extends WorldPreset {
         Registry<NormalNoise.NoiseParameters> noises = BuiltinRegistries.NOISE;
 
         Registry<DimensionType> dimensionTypes = BuiltinRegistries.DIMENSION_TYPE;
+        //noinspection deprecation
         Registry<Biome> biomes = BuiltinRegistries.BIOME;
 
         return Map.of(
@@ -58,6 +59,7 @@ public class SkyblockPreset extends WorldPreset {
     public static ChunkGenerator configuredOverworldChunkGenerator() {
         Registry<StructureSet> structureSets = BuiltinRegistries.STRUCTURE_SETS;
         Registry<NormalNoise.NoiseParameters> noises = BuiltinRegistries.NOISE;
+        //noinspection deprecation
         Registry<Biome> biomes = BuiltinRegistries.BIOME;
         Registry<NoiseGeneratorSettings> noiseGeneratorSettings = BuiltinRegistries.NOISE_GENERATOR_SETTINGS;
 

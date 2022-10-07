@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "maledicta.refmap.json",
+  "package": "de.melanx.skyblockbuilder.mixin",
+  "minVersion": "0.8",
+  "client": [
+    "CreateWorldScreenMixin"
+  ],
+  "server": [],
+  "mixins": []
+}
