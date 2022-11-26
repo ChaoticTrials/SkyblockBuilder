@@ -38,16 +38,19 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -56,6 +59,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.moddingx.libx.event.ConfigLoadedEvent;
 import org.moddingx.libx.render.RenderHelperLevel;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = "skyblockbuilder")
@@ -94,6 +98,16 @@ public class EventListener {
                 .then(TemplatesToSnbtCommand.register())
                 .then(VisitCommand.register())
         );
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof LightningBolt lightning && WorldUtil.isSkyblock(event.getLevel())) {
+            ServerLevel level = (ServerLevel) event.getLevel();
+            BlockPos pos = new BlockPos(lightning.position().x, level.getSeaLevel(), lightning.position().z);
+            Optional<BlockPos> rodPos = level.findLightningRod(pos);
+            rodPos.ifPresent(blockPos -> lightning.moveTo(Vec3.atBottomCenterOf(blockPos)));
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
