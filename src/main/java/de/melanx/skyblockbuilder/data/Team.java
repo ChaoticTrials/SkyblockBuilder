@@ -115,11 +115,11 @@ public class Team {
     }
 
     public Set<BlockPos> getPossibleSpawns() {
-        return this.possibleSpawns;
+        return Set.copyOf(this.possibleSpawns);
     }
 
     public Set<BlockPos> getDefaultPossibleSpawns() {
-        return this.defaultPossibleSpawns;
+        return Set.copyOf(this.defaultPossibleSpawns);
     }
 
     public void setPossibleSpawns(Collection<BlockPos> spawns) {
@@ -434,12 +434,6 @@ public class Team {
         }
 
         ListTag defaultSpawns = nbt.getList("DefaultSpawns", Tag.TAG_COMPOUND);
-        // TODO remove in 1.19.1 or 1.20
-        // START
-        if (defaultSpawns.isEmpty()) {
-            defaultSpawns.addAll(spawns);
-        }
-        // END
         this.defaultPossibleSpawns.clear();
         for (Tag pos : defaultSpawns) {
             CompoundTag posTag = (CompoundTag) pos;

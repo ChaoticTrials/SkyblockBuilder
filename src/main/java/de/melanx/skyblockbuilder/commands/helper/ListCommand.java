@@ -20,7 +20,6 @@ import net.minecraft.util.StringUtil;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ListCommand {
 
@@ -38,7 +37,7 @@ public class ListCommand {
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
-        List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).filter(team -> !team.getName().equalsIgnoreCase("spawn")).collect(Collectors.toList());
+        List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).filter(team -> !team.getName().equalsIgnoreCase("spawn")).toList();
         MutableComponent info = Component.translatable("skyblockbuilder.command.info.teams",
                 teams.size(),
                 teams.stream().filter(Team::isEmpty).count());

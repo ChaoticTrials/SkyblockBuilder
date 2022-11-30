@@ -95,7 +95,7 @@ public class WorldUtil {
             spawns.remove(pos);
         }
 
-        BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(BlockPos.ZERO);
+        BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(team.getIsland().getCenter());
 
         return PositionHelper.findPos(pos, blockPos -> isValidSpawn(level, blockPos), ConfigHandler.Spawn.radius);
     }
