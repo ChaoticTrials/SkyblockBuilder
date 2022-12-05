@@ -8,5 +8,7 @@
     "CreateWorldScreenMixin"
   ],
   "server": [],
-  "mixins": []
+  "mixins": [
+    "PackRepositoryMixin"
+  ]
 }
