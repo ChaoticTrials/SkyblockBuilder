@@ -170,6 +170,9 @@ public class ConfigHandler {
 
             @Config("Cooldown in ticks for teleporting back home. [default: 3600 = 3min]")
             public static int homeCooldown = 3600;
+
+            @Config("Should players be able to teleport to another dimension? [default: true]")
+            public static boolean crossDimensionTeleportation = true;
         }
 
         public static class Spawns {

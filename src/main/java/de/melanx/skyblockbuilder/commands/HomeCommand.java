@@ -42,6 +42,11 @@ public class HomeCommand {
             return 0;
         }
 
+        if (!ConfigHandler.Utility.Teleports.crossDimensionTeleportation && player.getLevel() != data.getLevel()) {
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
+            return 0;
+        }
+
         switch (SkyblockHooks.onHome(player, team)) {
             case DENY:
                 source.sendSuccess(Component.translatable("skyblockbuilder.command.denied.teleport_home").withStyle(ChatFormatting.RED), false);
