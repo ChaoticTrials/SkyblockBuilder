@@ -22,15 +22,28 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class SpawnProtectionEvents {
 
+    public enum Type {
+        INTERACT_ENTITIES,
+        INTERACT_BLOCKS,
+        MOB_GRIEFING,
+        EXPLOSIONS,
+        CROP_GROW,
+        MOBS_SPAWN,
+        MOBS_SPAWN_EGG,
+        DAMAGE,
+        HEALING
+    }
+
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent event) {
         if (SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !event.getEntity().hasPermissions(2)) {
             if (event instanceof PlayerInteractEvent.EntityInteract entityInteract &&
-                    ConfigHandler.Spawn.interactionEntitiesInSpawnProtection.test(ForgeRegistries.ENTITY_TYPES.getKey(entityInteract.getTarget().getType()))) {
+                    (ConfigHandler.Spawn.interactionEntitiesInSpawnProtection.test(ForgeRegistries.ENTITY_TYPES.getKey(entityInteract.getTarget().getType()))
+                            || SpawnProtectionEvents.ignore(Type.INTERACT_ENTITIES))) {
                 return;
             }
 
-            if (event.isCancelable()) {
+            if (event.isCancelable() && !SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
                 event.setCanceled(true);
             }
         }
@@ -38,6 +51,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void mobGrief(EntityMobGriefingEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.MOB_GRIEFING)) {
+            return;
+        }
+
         //noinspection ConstantConditions
         if (event.getEntity() != null && event.getEntity().level != null && event.getEntity().level.dimension() != null) {
             if (SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
@@ -48,6 +65,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void explode(ExplosionEvent.Start event) {
+        if (SpawnProtectionEvents.ignore(Type.EXPLOSIONS)) {
+            return;
+        }
+
         if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), new BlockPos(event.getExplosion().getPosition()))) {
             event.setCanceled(true);
         }
@@ -55,6 +76,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void blockBreak(BlockEvent.BreakEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
+            return;
+        }
+
         if (SpawnProtectionEvents.isOnSpawn(event.getPlayer()) && !event.getPlayer().hasPermissions(2)) {
             event.setCanceled(true);
         }
@@ -62,6 +87,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void blockPlace(BlockEvent.EntityPlaceEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
+            return;
+        }
+
         if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             if (!(event.getEntity() instanceof Player) || !event.getEntity().hasPermissions(2)) {
                 event.setCanceled(true);
@@ -71,6 +100,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void blockMultiPlace(BlockEvent.EntityMultiPlaceEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
+            return;
+        }
+
         if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             if (!(event.getEntity() instanceof Player) || !event.getEntity().hasPermissions(2)) {
                 event.setCanceled(true);
@@ -80,6 +113,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void farmlandTrample(BlockEvent.FarmlandTrampleEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.MOB_GRIEFING)) {
+            return;
+        }
+
         if (SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
             event.setCanceled(true);
         }
@@ -87,6 +124,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void cropGrow(BlockEvent.CropGrowEvent.Pre event) {
+        if (SpawnProtectionEvents.ignore(Type.CROP_GROW)) {
+            return;
+        }
+
         if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             event.setResult(Event.Result.DENY);
         }
@@ -94,6 +135,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void cropGrow(BlockEvent.BlockToolModificationEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.CROP_GROW)) {
+            return;
+        }
+
         if (SpawnProtectionEvents.isOnSpawn(event.getContext().getLevel(), event.getPos()) && (event.getPlayer() == null || !event.getPlayer().hasPermissions(2))) {
             event.setCanceled(true);
         }
@@ -101,6 +146,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void mobSpawnAttempt(LivingSpawnEvent.CheckSpawn event) {
+        if (SpawnProtectionEvents.ignore(Type.MOBS_SPAWN)) {
+            return;
+        }
+
         Level level;
         if (event.getLevel() instanceof Level) level = (Level) event.getLevel();
         else level = event.getEntity().level;
@@ -111,6 +160,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void mobSpawn(LivingSpawnEvent.SpecialSpawn event) {
+        if (SpawnProtectionEvents.ignore(Type.MOBS_SPAWN_EGG)) {
+            return;
+        }
+
         Level level;
         if (event.getLevel() instanceof Level) level = (Level) event.getLevel();
         else level = event.getEntity().level;
@@ -126,6 +179,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void livingAttack(LivingAttackEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.DAMAGE)) {
+            return;
+        }
+
         if (!event.getSource().isBypassInvul() && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (!(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
             event.setCanceled(true);
         }
@@ -133,6 +190,10 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void livingHurt(LivingHurtEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.DAMAGE)) {
+            return;
+        }
+
         if (!event.getSource().isBypassInvul() && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (event.getEntity() instanceof Player || !(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
             event.setCanceled(true);
         }
@@ -140,12 +201,20 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void playerTick(TickEvent.PlayerTickEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.HEALING)) {
+            return;
+        }
+
         if (!event.player.level.isClientSide && !event.player.isDeadOrDying() && event.player.tickCount % 20 == 0 && SpawnProtectionEvents.isOnSpawn(event.player)) {
             event.player.setHealth(20);
             event.player.getFoodData().setFoodLevel(20);
             event.player.setAirSupply(event.player.getMaxAirSupply());
             event.player.setRemainingFireTicks(0);
         }
+    }
+
+    private static boolean ignore(Type type) {
+        return !ConfigHandler.Spawn.spawnProtectionEvents.contains(type);
     }
 
     private static boolean isOnSpawn(Level level, BlockPos blockPos) {

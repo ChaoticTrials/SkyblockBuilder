@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.config;
 
 import com.google.common.collect.Maps;
+import de.melanx.skyblockbuilder.SpawnProtectionEvents;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +12,8 @@ import org.moddingx.libx.config.Group;
 import org.moddingx.libx.config.validate.IntRange;
 import org.moddingx.libx.util.data.ResourceList;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RegisterConfig("common-config")
@@ -105,6 +108,28 @@ public class ConfigHandler {
 
         @Config("The radius of chunks where to apply spawn protection. In this area, only op players can avoid this.")
         public static int spawnProtectionRadius = 0;
+
+        @Config({"A list of event types which will be prevented:",
+                "   interact_entities = Interacting with entities, e.g. riding a pig",
+                "   interact_blocks   = Interacting with blocks, e.g. activating buttons, placing, or destroying blocks",
+                "   mob_griefing      = Mobs destroying the world",
+                "   explosions        = TNT, creeper, or other explosions",
+                "   crop_grow         = Crops increasing their growth status",
+                "   mobs_spawn        = Mobs spawning",
+                "   mobs_spawn_egg    = Mobs being summoned using a spawn egg",
+                "   damage            = Attacking others, or getting attacked",
+                "   healing           = Getting healed and saturated on spawn"})
+        public static List<SpawnProtectionEvents.Type> spawnProtectionEvents = Util.make(new ArrayList<>(), list -> {
+            list.add(SpawnProtectionEvents.Type.INTERACT_ENTITIES);
+            list.add(SpawnProtectionEvents.Type.INTERACT_BLOCKS);
+            list.add(SpawnProtectionEvents.Type.MOB_GRIEFING);
+            list.add(SpawnProtectionEvents.Type.EXPLOSIONS);
+            list.add(SpawnProtectionEvents.Type.CROP_GROW);
+            list.add(SpawnProtectionEvents.Type.MOBS_SPAWN);
+            list.add(SpawnProtectionEvents.Type.MOBS_SPAWN_EGG);
+            list.add(SpawnProtectionEvents.Type.DAMAGE);
+            list.add(SpawnProtectionEvents.Type.HEALING);
+        });
 
         @Config("The radius to find a valid spawn if no given spawn is valid")
         @IntRange(min = 0)
