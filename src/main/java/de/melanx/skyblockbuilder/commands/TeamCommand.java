@@ -378,7 +378,7 @@ public class TeamCommand {
                 break;
         }
 
-        team.setPossibleSpawns(SkyblockSavedData.initialPossibleSpawns(team.getIsland().getCenter()));
+        team.setPossibleSpawns(team.getPossibleSpawns());
         source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.reset_spawns").withStyle(ChatFormatting.GOLD), true);
         return 1;
     }
