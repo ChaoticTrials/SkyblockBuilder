@@ -25,6 +25,7 @@ public class ConfiguredTemplate {
     private String name;
     private String desc;
     private WorldUtil.Directions direction;
+    private TemplateInfo.Offset offset;
 
     public ConfiguredTemplate(TemplateInfo info) {
         StructureTemplate template = new StructureTemplate();
@@ -44,6 +45,7 @@ public class ConfiguredTemplate {
         this.name = info.name();
         this.desc = info.desc();
         this.direction = info.direction();
+        this.offset = info.offset();
     }
 
     private ConfiguredTemplate() {
@@ -71,6 +73,10 @@ public class ConfiguredTemplate {
 
     public WorldUtil.Directions getDirection() {
         return this.direction;
+    }
+
+    public TemplateInfo.Offset getOffset() {
+        return this.offset;
     }
 
     @Nonnull

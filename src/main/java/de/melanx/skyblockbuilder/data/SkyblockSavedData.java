@@ -95,12 +95,12 @@ public class SkyblockSavedData extends SavedData {
         IslandPos islandPos;
         Team team;
         if (teamName.equalsIgnoreCase("spawn")) {
-            islandPos = new IslandPos(this.level, 0, 0);
+            islandPos = new IslandPos(this.level, 0, 0, template);
             team = new Team(this, islandPos, SPAWN_ID, template.getDirection());
         } else {
             do {
                 int[] pos = this.spiral.next();
-                islandPos = new IslandPos(this.level, pos[0], pos[1]);
+                islandPos = new IslandPos(this.level, pos[0], pos[1], template);
             } while (this.skyblockPositions.containsValue(islandPos));
             team = new Team(this, islandPos, template.getDirection());
         }

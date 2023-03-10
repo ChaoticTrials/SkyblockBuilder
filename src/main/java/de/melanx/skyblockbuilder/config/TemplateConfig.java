@@ -14,7 +14,7 @@ import java.util.Optional;
 public class TemplateConfig {
 
     @Config("The list of templates being available. The first entry is the default template.")
-    public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", "default", WorldUtil.Directions.SOUTH));
+    public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", "default", WorldUtil.Directions.SOUTH, new TemplateInfo.Offset(0, 0)));
 
     @Config
     public static Map<String, List<BlockPos>> spawns = Map.of("default", List.of(
@@ -28,7 +28,8 @@ public class TemplateConfig {
             "    \"desc\": \"\",",
             "    \"file\": \"default.nbt\",",
             "    \"spawns\": \"default\",",
-            "    \"direction\": \"south\"",
+            "    \"direction\": \"south\",",
+            "    \"offset\": [ 0, 0 ]",
             "}"})
     public static Optional<TemplateInfo> spawn = Optional.empty();
 }
