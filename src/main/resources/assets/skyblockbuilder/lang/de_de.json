@@ -34,6 +34,7 @@
   "skyblockbuilder.command.error.remove_spawn1": "Zu wenig Spawnpunkte vorhanden.",
   "skyblockbuilder.command.error.user_no_player": "Du bist kein Spieler. Lügner!",
   "skyblockbuilder.command.error.teleport_across_dimensions": "Du darfst dich nicht zwischen Dimensionen teleportieren.",
+  "skyblockbuilder.command.error.teleportation_not_allowed_dimension": "Du darfst dich nicht in dieser Dimension teleportieren.",
 
   "skyblockbuilder.command.denied.accept_invitations": "Du kannst diese Einladung nicht annehmen!",
   "skyblockbuilder.command.denied.decline_invitations": "Du kannst diese Einladung nicht ablehnen!",

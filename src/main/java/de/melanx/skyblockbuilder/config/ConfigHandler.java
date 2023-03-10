@@ -198,6 +198,9 @@ public class ConfigHandler {
 
             @Config("Should players be able to teleport to another dimension? [default: true]")
             public static boolean crossDimensionTeleportation = true;
+
+            @Config("Dimensions in this list are not allowed for executing teleportation commands. Inverted behaviour if you set \"allow_list\" to true.")
+            public static ResourceList teleportationDimensions = ResourceList.DENY_LIST;
         }
 
         public static class Spawns {

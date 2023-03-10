@@ -35,6 +35,11 @@ public class SpawnCommand {
             return 0;
         }
 
+        if (!ConfigHandler.Utility.Teleports.teleportationDimensions.test(player.getLevel().dimension().location())) {
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
+            return 0;
+        }
+
         if (!ConfigHandler.Utility.Teleports.crossDimensionTeleportation && player.getLevel() != data.getLevel()) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
             return 0;
