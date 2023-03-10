@@ -132,7 +132,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     @Override
     public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level, @Nonnull RandomState randomState) {
         if (ConfigHandler.World.surface) {
-            return this.layerHeight;
+            return level.getMinBuildHeight() + this.layerHeight;
         }
 
         return this.parent.getBaseHeight(x, z, heightmapType, level, randomState);
