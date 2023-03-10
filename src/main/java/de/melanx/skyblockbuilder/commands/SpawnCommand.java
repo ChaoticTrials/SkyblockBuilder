@@ -35,6 +35,16 @@ public class SpawnCommand {
             return 0;
         }
 
+        if (!ConfigHandler.Utility.Teleports.teleportationDimensions.test(player.getLevel().dimension().location())) {
+            source.sendFailure(new TranslatableComponent("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
+            return 0;
+        }
+
+        if (!ConfigHandler.Utility.Teleports.crossDimensionTeleportation && player.getLevel() != data.getLevel()) {
+            source.sendFailure(new TranslatableComponent("skyblockbuilder.command.error.teleport_across_dimensions"));
+            return 0;
+        }
+
         data.getOrCreateMetaInfo(player).setLastSpawnTeleport(level.getGameTime());
         source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.success.teleport_to_spawn"), false);
         WorldUtil.teleportToIsland(player, team);

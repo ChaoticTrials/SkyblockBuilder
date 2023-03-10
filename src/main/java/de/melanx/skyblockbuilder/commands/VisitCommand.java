@@ -37,6 +37,16 @@ public class VisitCommand {
             return 0;
         }
 
+        if (!ConfigHandler.Utility.Teleports.teleportationDimensions.test(player.getLevel().dimension().location())) {
+            source.sendFailure(new TranslatableComponent("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
+            return 0;
+        }
+
+        if (!ConfigHandler.Utility.Teleports.crossDimensionTeleportation && player.getLevel() != data.getLevel()) {
+            source.sendFailure(new TranslatableComponent("skyblockbuilder.command.error.teleport_across_dimensions"));
+            return 0;
+        }
+
         switch (SkyblockHooks.onVisit(player, team)) {
             case DENY:
                 source.sendSuccess(new TranslatableComponent("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
