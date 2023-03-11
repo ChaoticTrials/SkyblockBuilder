@@ -98,6 +98,8 @@ public class ConfiguredTemplate {
         nbt.putString("Name", this.name);
         nbt.putString("Desc", this.desc);
         nbt.putString("Direction", this.direction == null ? WorldUtil.Directions.SOUTH.toString() : this.direction.toString());
+        nbt.putInt("OffsetX", this.offset.x());
+        nbt.putInt("OffsetZ", this.offset.z());
 
         return nbt;
     }
@@ -118,6 +120,7 @@ public class ConfiguredTemplate {
         this.name = nbt.getString("Name");
         this.desc = nbt.getString("Desc");
         this.direction = WorldUtil.Directions.valueOf(nbt.getString("Direction"));
+        this.offset = new TemplateInfo.Offset(nbt.getInt("OffsetX"), nbt.getInt("OffsetZ"));
     }
 
     public ConfiguredTemplate copy() {
