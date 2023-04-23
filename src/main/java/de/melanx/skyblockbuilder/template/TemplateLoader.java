@@ -27,6 +27,10 @@ public class TemplateLoader {
                     throw new IllegalArgumentException("Spawn configuration \"" + info.spawns() + "\" is not defined: " + info.name());
                 }
 
+                if (!TemplateConfig.surroundingBlocks.containsKey(info.surroundingBlocks()) && !info.surroundingBlocks().isEmpty()) {
+                    throw new IllegalArgumentException("Surrounding blocks configuration \"" + info.surroundingBlocks() + "\" is not defined: " + info.name());
+                }
+
                 if (!SkyPaths.TEMPLATES_DIR.resolve(info.file()).toFile().exists()) {
                     throw new IllegalArgumentException("Template file \"" + info.file() + "\" does not exist: " + info.name());
                 }

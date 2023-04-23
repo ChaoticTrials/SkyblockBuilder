@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.config;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
 
@@ -21,6 +22,9 @@ public class TemplateConfig {
             new BlockPos(6, 3, 5)
     ));
 
+    @Config("A list of blocks which can be used to surround islands/caves.")
+    public static Map<String, List<Block>> surroundingBlocks = Map.of("default", List.of());
+
     @Config({"The template which will be used for spawn only",
             "Example: ",
             "{",
@@ -30,7 +34,9 @@ public class TemplateConfig {
             "    \"spawns\": \"default\",",
             "    \"direction\": \"south\",",
             "    \"offset\": [ 0, 0 ],",
-            "    \"offsetY\": 0",
+            "    \"offsetY\": 0,",
+            "    \"surroundingMargin\": 0,",
+            "    \"surroundingBlocks\": \"default\"",
             "}"})
     public static Optional<TemplateInfo> spawn = Optional.empty();
 }

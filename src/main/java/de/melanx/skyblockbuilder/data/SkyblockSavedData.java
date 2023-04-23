@@ -26,7 +26,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraftforge.common.util.BlockSnapshot;
@@ -269,6 +271,7 @@ public class SkyblockSavedData extends SavedData {
         this.level.capturedBlockSnapshots.clear();
         this.level.captureBlockSnapshots = true;
         template.getTemplate().placeInWorld(this.level, center, center, settings, RandomSource.create(), Block.UPDATE_CLIENTS);
+        SkyblockSavedData.surround(this.level, team.getIsland().getCenter(), template);
         this.level.captureBlockSnapshots = false;
         this.level.capturedBlockSnapshots.addAll(capturedBlockSnapshots);
 
@@ -545,6 +548,23 @@ public class SkyblockSavedData extends SavedData {
         }
 
         return positions;
+    }
+
+    private static void surround(ServerLevel level, BlockPos zero, ConfiguredTemplate configuredTemplate) {
+        if (configuredTemplate.getSurroundingBlocks().isEmpty() || configuredTemplate.getSurroundingMargin() <= 0) {
+            return;
+        }
+
+        StructureTemplate template = configuredTemplate.getTemplate();
+        BoundingBox box = new BoundingBox(zero.getX(), zero.getY(), zero.getZ(), zero.getX() + template.size.getX(), zero.getY() + template.size.getY(), zero.getZ() + template.size.getZ());
+        BoundingBox outside = box.inflatedBy(configuredTemplate.getSurroundingMargin());
+        RandomSource random = RandomSource.create();
+        BlockPos.betweenClosedStream(outside).forEach(blockPos -> {
+            if (!box.isInside(blockPos)) {
+                Block block = configuredTemplate.getSurroundingBlocks().get(random.nextInt(configuredTemplate.getSurroundingBlocks().size()));
+                level.setBlock(blockPos, block.defaultBlockState(), Block.UPDATE_CLIENTS);
+            }
+        });
     }
 
     @Override

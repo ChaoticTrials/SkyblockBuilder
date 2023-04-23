@@ -8,7 +8,10 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.io.IOUtils;
 import org.moddingx.libx.annotation.meta.RemoveIn;
 
@@ -17,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class ConfiguredTemplate {
@@ -28,6 +33,8 @@ public class ConfiguredTemplate {
     private WorldUtil.Directions direction;
     private TemplateInfo.Offset offset;
     private int offsetY;
+    private int surroundingMargin;
+    private List<Block> surroundingBlocks;
 
     public ConfiguredTemplate(TemplateInfo info) {
         StructureTemplate template = new StructureTemplate();
@@ -49,6 +56,13 @@ public class ConfiguredTemplate {
         this.direction = info.direction();
         this.offset = info.offset();
         this.offsetY = info.offsetY(); // todo 1.20 remove
+        this.surroundingMargin = info.surroundingMargin();
+        List<Block> blockPalette = TemplateConfig.surroundingBlocks.get(info.surroundingBlocks());
+        if (blockPalette != null) {
+            this.surroundingBlocks = List.copyOf(blockPalette);
+        } else {
+            this.surroundingBlocks = List.of();
+        }
     }
 
     private ConfiguredTemplate() {
@@ -88,6 +102,14 @@ public class ConfiguredTemplate {
         return this.offsetY;
     }
 
+    public int getSurroundingMargin() {
+        return this.surroundingMargin;
+    }
+
+    public List<Block> getSurroundingBlocks() {
+        return this.surroundingBlocks;
+    }
+
     @Nonnull
     public CompoundTag write(CompoundTag nbt) {
         CompoundTag template = this.template.save(new CompoundTag());
@@ -110,6 +132,14 @@ public class ConfiguredTemplate {
         nbt.putInt("OffsetX", this.offset.x());
         nbt.putInt("OffsetY", this.offsetY); // todo 1.20
         nbt.putInt("OffsetZ", this.offset.z());
+        nbt.putInt("SurroundingMargin", this.surroundingMargin);
+
+        ListTag surroundingBlocks = new ListTag();
+        this.surroundingBlocks.forEach(block -> {
+            StringTag tag = StringTag.valueOf(Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block), "This block doesn't exist: " + block).toString());
+            surroundingBlocks.add(tag);
+        });
+        nbt.put("SurroundingBlocks", surroundingBlocks);
 
         return nbt;
     }
@@ -132,6 +162,15 @@ public class ConfiguredTemplate {
         this.direction = WorldUtil.Directions.valueOf(nbt.getString("Direction"));
         this.offset = new TemplateInfo.Offset(nbt.getInt("OffsetX"), nbt.getInt("OffsetZ"));
         this.offsetY = nbt.getInt("OffsetY");
+        this.surroundingMargin = nbt.getInt("SurroundingMargin");
+
+        ListTag surroundingBlocks = nbt.getList("SurroundingBlocks", Tag.TAG_STRING);
+        Set<Block> blocks = new HashSet<>();
+        for (Tag block : surroundingBlocks) {
+            Block value = ForgeRegistries.BLOCKS.getValue(ResourceLocation.tryParse(block.getAsString()));
+            blocks.add(value);
+        }
+        this.surroundingBlocks = List.copyOf(blocks);
     }
 
     public ConfiguredTemplate copy() {

@@ -63,7 +63,17 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             }
         }
 
-        return new TemplateInfo(name, desc, file, spawns, direction, offsetY, offset);
+        String surroundingBlocks = "";
+        if (json.has("surroundingBlocks")) {
+            surroundingBlocks = json.get("surroundingBlocks").getAsString();
+        }
+
+        int surroundingMargin = 0;
+        if (json.has("surroundingMargin")) {
+            surroundingMargin = json.get("surroundingMargin").getAsInt();
+        }
+
+        return new TemplateInfo(name, desc, file, spawns, direction, offsetY, offset, surroundingBlocks, surroundingMargin);
     }
 
     @Override
@@ -89,6 +99,14 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
         // todo 1.20 merge with normal offset
         if (templateInfo.offsetY() != 0) {
             json.addProperty("offsetY", templateInfo.offsetY());
+        }
+
+        if (!templateInfo.surroundingBlocks().isEmpty()) {
+            json.addProperty("surroundingBlocks", templateInfo.surroundingBlocks());
+        }
+
+        if (templateInfo.surroundingMargin() > 0) {
+            json.addProperty("surroundingMargin", templateInfo.surroundingMargin());
         }
 
         return json;
