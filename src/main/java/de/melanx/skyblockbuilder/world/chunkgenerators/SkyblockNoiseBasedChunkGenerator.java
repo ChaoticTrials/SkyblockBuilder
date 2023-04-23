@@ -1,11 +1,11 @@
 package de.melanx.skyblockbuilder.world.chunkgenerators;
 
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.WorldUtil;
+import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
@@ -49,7 +49,8 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                             RegistryOps.retrieveRegistry(Registry.NOISE_REGISTRY).forGetter(generator -> generator.noises),
                             BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                             NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
-                            Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension)
+                            Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
+                            FlatLayerInfo.CODEC.listOf().optionalFieldOf("layers", new InvalidList()).forGetter(generator -> generator.layerInfos) // todo 1.19.4 change to #fieldOf
                     )).apply(instance, instance.stable(SkyblockNoiseBasedChunkGenerator::new)));
 
     public final Registry<NormalNoise.NoiseParameters> noises;
@@ -59,15 +60,13 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     protected final List<FlatLayerInfo> layerInfos;
     private final int layerHeight;
 
-    public SkyblockNoiseBasedChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension) {
+    public SkyblockNoiseBasedChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
         super(structureSets, noises, biomeSource, generatorSettings);
         this.noises = noises;
         this.generatorSettings = generatorSettings;
         this.parent = new NoiseBasedChunkGenerator(structureSets, this.noises, biomeSource, generatorSettings);
         this.dimension = dimension;
-        this.layerInfos = ConfigHandler.World.surface
-                ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(dimension.location().toString()))
-                : Lists.newArrayList();
+        this.layerInfos = !(layerInfos instanceof InvalidList) ? layerInfos : SkyblockPreset.getLayers(dimension); // todo 1.19.4
         this.layerHeight = WorldUtil.calculateHeightFromLayers(this.layerInfos);
     }
 
@@ -84,7 +83,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Override
     public void buildSurface(@Nonnull WorldGenRegion level, @Nonnull StructureManager structureManager, @Nonnull RandomState randomState, @Nonnull ChunkAccess chunk) {
-        if (ConfigHandler.World.surface) {
+        if (!this.layerInfos.isEmpty()) {
             ChunkPos cp = chunk.getPos();
             int xs = cp.getMinBlockX();
             int zs = cp.getMinBlockZ();
@@ -292,5 +291,18 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
             report.addCategory("Generation").setDetail("CenterX", chunkPos.x).setDetail("CenterZ", chunkPos.z).setDetail("Seed", decorationSeed);
             throw new ReportedException(report);
         }
+    }
+
+    public ResourceKey<Level> getDimension() {
+        return this.dimension;
+    }
+
+    public List<FlatLayerInfo> getLayerInfos() {
+        return this.layerInfos;
+    }
+
+    // todo 1.19.4 remove
+    protected static class InvalidList extends ArrayList<FlatLayerInfo> {
+
     }
 }
