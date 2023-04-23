@@ -48,6 +48,12 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt(), offsetArray.get(1).getAsInt());
         }
 
+        // todo 1.20 merge with normal offset
+        int offsetY = 0;
+        if (json.has("offsetY")) {
+            offsetY = json.get("offsetY").getAsInt();
+        }
+
         String str = json.get("direction").getAsString().toLowerCase(Locale.ROOT).strip();
         WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
         for (WorldUtil.Directions value : WorldUtil.Directions.values()) {
@@ -57,7 +63,7 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             }
         }
 
-        return new TemplateInfo(name, desc, file, spawns, direction, offset);
+        return new TemplateInfo(name, desc, file, spawns, direction, offsetY, offset);
     }
 
     @Override
@@ -78,6 +84,11 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             offsetArray.add(templateInfo.offset().x());
             offsetArray.add(templateInfo.offset().z());
             json.add("offset", offsetArray);
+        }
+
+        // todo 1.20 merge with normal offset
+        if (templateInfo.offsetY() != 0) {
+            json.addProperty("offsetY", templateInfo.offsetY());
         }
 
         return json;

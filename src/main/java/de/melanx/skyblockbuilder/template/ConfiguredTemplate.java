@@ -10,6 +10,7 @@ import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.apache.commons.io.IOUtils;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class ConfiguredTemplate {
     private String desc;
     private WorldUtil.Directions direction;
     private TemplateInfo.Offset offset;
+    private int offsetY;
 
     public ConfiguredTemplate(TemplateInfo info) {
         StructureTemplate template = new StructureTemplate();
@@ -46,6 +48,7 @@ public class ConfiguredTemplate {
         this.desc = info.desc();
         this.direction = info.direction();
         this.offset = info.offset();
+        this.offsetY = info.offsetY(); // todo 1.20 remove
     }
 
     private ConfiguredTemplate() {
@@ -79,6 +82,12 @@ public class ConfiguredTemplate {
         return this.offset;
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.20")
+    public int getOffsetY() {
+        return this.offsetY;
+    }
+
     @Nonnull
     public CompoundTag write(CompoundTag nbt) {
         CompoundTag template = this.template.save(new CompoundTag());
@@ -99,6 +108,7 @@ public class ConfiguredTemplate {
         nbt.putString("Desc", this.desc);
         nbt.putString("Direction", this.direction == null ? WorldUtil.Directions.SOUTH.toString() : this.direction.toString());
         nbt.putInt("OffsetX", this.offset.x());
+        nbt.putInt("OffsetY", this.offsetY); // todo 1.20
         nbt.putInt("OffsetZ", this.offset.z());
 
         return nbt;
@@ -121,6 +131,7 @@ public class ConfiguredTemplate {
         this.desc = nbt.getString("Desc");
         this.direction = WorldUtil.Directions.valueOf(nbt.getString("Direction"));
         this.offset = new TemplateInfo.Offset(nbt.getInt("OffsetX"), nbt.getInt("OffsetZ"));
+        this.offsetY = nbt.getInt("OffsetY");
     }
 
     public ConfiguredTemplate copy() {

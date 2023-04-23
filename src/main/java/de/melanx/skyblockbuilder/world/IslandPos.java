@@ -7,6 +7,7 @@ import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import org.moddingx.libx.annotation.meta.RemoveIn;
 
@@ -23,11 +24,11 @@ public final class IslandPos {
     @Deprecated(forRemoval = true)
     @RemoveIn(minecraft = "1.20")
     public IslandPos(Level level, int x, int z) {
-        this(x, WorldUtil.calcSpawnHeight(level, x, z), z, TemplateLoader.getConfiguredTemplate());
+        this(x, Mth.clamp(WorldUtil.calcSpawnHeight(level, x, z) + TemplateLoader.getConfiguredTemplate().getOffsetY(), level.getMinBuildHeight(), level.getMaxBuildHeight()), z, TemplateLoader.getConfiguredTemplate());
     }
 
     public IslandPos(Level level, int x, int z, ConfiguredTemplate template) {
-        this(x, WorldUtil.calcSpawnHeight(level, x, z), z, template.getOffset());
+        this(x, Mth.clamp(WorldUtil.calcSpawnHeight(level, x, z) + template.getOffsetY(), level.getMinBuildHeight(), level.getMaxBuildHeight()), z, template.getOffset());
     }
 
     @Deprecated(forRemoval = true)

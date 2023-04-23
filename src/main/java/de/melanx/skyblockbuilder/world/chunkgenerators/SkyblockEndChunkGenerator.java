@@ -43,7 +43,7 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
                             BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                             NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
                             Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
-                            FlatLayerInfo.CODEC.listOf().optionalFieldOf("layers", new InvalidList()).forGetter(generator -> generator.layerInfos) // todo 1.19.4 change to #fieldOf
+                            FlatLayerInfo.CODEC.listOf().optionalFieldOf("layers", new InvalidList()).forGetter(generator -> generator.layerInfos) // todo 1.20 change to #fieldOf
                     )).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
 
     public SkyblockEndChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {

@@ -29,7 +29,8 @@ public class TemplateConfig {
             "    \"file\": \"default.nbt\",",
             "    \"spawns\": \"default\",",
             "    \"direction\": \"south\",",
-            "    \"offset\": [ 0, 0 ]",
+            "    \"offset\": [ 0, 0 ],",
+            "    \"offsetY\": 0",
             "}"})
     public static Optional<TemplateInfo> spawn = Optional.empty();
 }
