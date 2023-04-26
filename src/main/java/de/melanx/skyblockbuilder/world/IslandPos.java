@@ -20,7 +20,7 @@ public final class IslandPos {
     private final TemplateInfo.Offset offset;
 
     public IslandPos(Level level, int x, int z, ConfiguredTemplate template) {
-        this(x, Mth.clamp(WorldUtil.calcSpawnHeight(level, x, z) + template.getOffsetY(), level.getMinBuildHeight(), level.getMaxBuildHeight()), z, template.getOffset());
+        this(x, Mth.clamp(WorldUtil.calcSpawnHeight(level, x, z), level.getMinBuildHeight(), level.getMaxBuildHeight()), z, template.getOffset());
     }
 
     public IslandPos(int x, int y, int z, ConfiguredTemplate template) {
@@ -31,7 +31,7 @@ public final class IslandPos {
         this.x = x;
         this.z = z;
         this.offset = offset;
-        this.center = new BlockPos(this.x * ConfigHandler.World.islandDistance + offset.x(), y, this.z * ConfigHandler.World.islandDistance + offset.z());
+        this.center = new BlockPos(this.x * ConfigHandler.World.islandDistance + offset.x(), y + offset.y(), this.z * ConfigHandler.World.islandDistance + offset.z());
     }
 
     public BlockPos getCenter() {
@@ -42,8 +42,8 @@ public final class IslandPos {
         this.center = this.center.atY(y);
     }
 
-    public static IslandPos fromTag(CompoundTag tag) { // TODO 1.20 fix the offset
-        return new IslandPos(tag.getInt("IslandX"), tag.getInt("Height"), tag.getInt("IslandZ"), new TemplateInfo.Offset(tag.contains("OffsetX") ? tag.getInt("OffsetX") : ConfigHandler.World.offset, tag.contains("OffsetZ") ? tag.getInt("OffsetZ") : ConfigHandler.World.offset));
+    public static IslandPos fromTag(CompoundTag tag) {
+        return new IslandPos(tag.getInt("IslandX"), tag.getInt("Height"), tag.getInt("IslandZ"), new TemplateInfo.Offset(tag.getInt("OffsetX"), tag.getInt("OffsetY"), tag.getInt("OffsetZ")));
     }
 
     public CompoundTag toTag() {
@@ -52,6 +52,7 @@ public final class IslandPos {
         tag.putInt("IslandZ", this.z);
         tag.putInt("Height", this.center.getY());
         tag.putInt("OffsetX", this.offset.x());
+        tag.putInt("OffsetY", this.offset.y());
         tag.putInt("OffsetZ", this.offset.z());
         return tag;
     }

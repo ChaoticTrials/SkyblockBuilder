@@ -44,6 +44,7 @@ public final class SkyblockBuilder extends ModXRegistration {
         SkyPaths.createDirectories();
         MinecraftForge.EVENT_BUS.register(new SpawnProtectionEvents());
         FMLJavaModLoadingContext.get().getModEventBus().addListener(Registration::registerCodecs);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(ModItems::registerTab);
 
         DatagenSystem.create(this, system -> {
             system.addDataProvider(ItemModelProvider::new);

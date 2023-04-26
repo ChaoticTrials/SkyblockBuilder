@@ -42,7 +42,7 @@ public class ItemStructureSaver extends Item {
     private static final MutableComponent TOOLTIP_SAVE = Component.translatable("skyblockbuilder.item.structure_saver.save.tooltip").withStyle(ChatFormatting.GOLD);
 
     public ItemStructureSaver() {
-        super(new Properties().stacksTo(1)); // TODO add to tools tab
+        super(new Properties().stacksTo(1));
     }
 
     @Nonnull

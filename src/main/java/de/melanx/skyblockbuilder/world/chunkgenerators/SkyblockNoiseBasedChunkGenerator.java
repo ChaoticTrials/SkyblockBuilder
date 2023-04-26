@@ -5,14 +5,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.core.*;
-import net.minecraft.resources.RegistryOps;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -29,8 +28,6 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -44,30 +41,23 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     // [VanillaCopy] overworld chunk generator codec
     public static final Codec<SkyblockNoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.create(
-            (instance) -> ChunkGenerator.commonCodec(instance)
-                    .and(instance.group(
-                            RegistryOps.retrieveRegistry(Registry.NOISE_REGISTRY).forGetter(generator -> generator.noises),
-                            BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
-                            NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
-                            Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
-                            FlatLayerInfo.CODEC.listOf().optionalFieldOf("layers").forGetter(generator -> Optional.ofNullable(generator.layerInfos)) // todo 1.20 change to #fieldOf
-                    )).apply(instance, instance.stable((structureSets, noises, biomeSource, generatorSettings, dimension, layerInfos) -> {
-                        List<FlatLayerInfo> flatLayerInfos = layerInfos.orElseGet(() -> SkyblockPreset.getLayers(dimension));
-                        return new SkyblockNoiseBasedChunkGenerator(structureSets, noises, biomeSource, generatorSettings, dimension, flatLayerInfos);
-                    })));
+            (instance) -> instance.group(
+                    BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
+                    NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
+                    Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
+                    FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(generator -> generator.layerInfos)
+            ).apply(instance, instance.stable(SkyblockNoiseBasedChunkGenerator::new)));
 
-    public final Registry<NormalNoise.NoiseParameters> noises;
     public final Holder<NoiseGeneratorSettings> generatorSettings;
     public final ResourceKey<Level> dimension;
     protected final NoiseBasedChunkGenerator parent;
     protected final List<FlatLayerInfo> layerInfos;
     private final int layerHeight;
 
-    public SkyblockNoiseBasedChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
-        super(structureSets, noises, biomeSource, generatorSettings);
-        this.noises = noises;
+    public SkyblockNoiseBasedChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
+        super(biomeSource, generatorSettings);
         this.generatorSettings = generatorSettings;
-        this.parent = new NoiseBasedChunkGenerator(structureSets, this.noises, biomeSource, generatorSettings);
+        this.parent = new NoiseBasedChunkGenerator(biomeSource, generatorSettings);
         this.dimension = dimension;
         this.layerInfos = layerInfos;
         this.layerHeight = WorldUtil.calculateHeightFromLayers(this.layerInfos);
@@ -153,7 +143,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         CarvingMask carvingMask = ((ProtoChunk) chunk).getOrCreateCarvingMask(step);
         WorldgenRandom worldGenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
         BiomeManager differentBiomeManager = biomeManager.withDifferentSource((x, y, z) -> this.biomeSource.getNoiseBiome(x, y, z, random.sampler()));
-        CarvingContext carvingContext = new CarvingContext(this, level.registryAccess(), chunk.getHeightAccessorForGeneration(), noiseChunk, random, this.settings.value().surfaceRule());
+        CarvingContext carvingContext = new CarvingContext(this, level.registryAccess(), chunk.getHeightAccessorForGeneration(), noiseChunk, random, this.generatorSettings.value().surfaceRule());
 
         int i = 8;
         for (int j = -i; j <= i; ++j) {
@@ -197,7 +187,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         SectionPos sectionPos = SectionPos.of(chunkPos, level.getMinSection());
         BlockPos blockpos = sectionPos.origin();
 
-        Registry<Structure> structureRegistry = level.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+        Registry<Structure> structureRegistry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
         Map<Integer, List<Structure>> map = structureRegistry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
         List<FeatureSorter.StepFeatureData> stepFeatureDataList = this.featuresPerStep.get();
         WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
@@ -215,14 +205,14 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         int dataSize = stepFeatureDataList.size();
 
         try {
-            Registry<PlacedFeature> placedFeatureRegistry = level.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY);
+            Registry<PlacedFeature> placedFeatureRegistry = level.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
             int maxDecorations = Math.max(GenerationStep.Decoration.values().length, dataSize);
 
             for (int i = 0; i < maxDecorations; ++i) {
                 int index = 0;
                 if (structureManager.shouldGenerateStructures()) {
                     for (Structure structure : map.getOrDefault(i, Collections.emptyList())) {
-                        ResourceLocation location = level.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).getKey(structure);
+                        ResourceLocation location = level.registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(structure);
                         if (!ConfigHandler.Structures.generationStructures.test(location)) {
                             continue;
                         }

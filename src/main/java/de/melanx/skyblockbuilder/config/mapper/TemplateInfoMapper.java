@@ -42,16 +42,10 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             desc = json.get("desc").getAsString();
         }
 
-        TemplateInfo.Offset offset = new TemplateInfo.Offset(ConfigHandler.World.offset, ConfigHandler.World.offset);
+        TemplateInfo.Offset offset = new TemplateInfo.Offset(ConfigHandler.World.offset, 0, ConfigHandler.World.offset);
         if (json.has("offset")) {
             JsonArray offsetArray = json.get("offset").getAsJsonArray();
-            offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt(), offsetArray.get(1).getAsInt());
-        }
-
-        // todo 1.20 merge with normal offset
-        int offsetY = 0;
-        if (json.has("offsetY")) {
-            offsetY = json.get("offsetY").getAsInt();
+            offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt(), offsetArray.get(1).getAsInt(), offsetArray.get(2).getAsInt());
         }
 
         String str = json.get("direction").getAsString().toLowerCase(Locale.ROOT).strip();
@@ -73,7 +67,7 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             surroundingMargin = json.get("surroundingMargin").getAsInt();
         }
 
-        return new TemplateInfo(name, desc, file, spawns, direction, offsetY, offset, surroundingBlocks, surroundingMargin);
+        return new TemplateInfo(name, desc, file, spawns, direction, offset, surroundingBlocks, surroundingMargin);
     }
 
     @Override
@@ -92,13 +86,9 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
         if (templateInfo.offset().x() != ConfigHandler.World.offset || templateInfo.offset().z() != ConfigHandler.World.offset) {
             JsonArray offsetArray = new JsonArray();
             offsetArray.add(templateInfo.offset().x());
+            offsetArray.get(templateInfo.offset().y());
             offsetArray.add(templateInfo.offset().z());
             json.add("offset", offsetArray);
-        }
-
-        // todo 1.20 merge with normal offset
-        if (templateInfo.offsetY() != 0) {
-            json.addProperty("offsetY", templateInfo.offsetY());
         }
 
         if (!templateInfo.surroundingBlocks().isEmpty()) {
