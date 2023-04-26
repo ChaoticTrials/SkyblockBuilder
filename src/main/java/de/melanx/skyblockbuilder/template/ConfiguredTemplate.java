@@ -6,6 +6,8 @@ import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +28,8 @@ import java.util.Set;
 
 public class ConfiguredTemplate {
 
+    @SuppressWarnings("deprecation")
+    private static final HolderLookup<Block> BLOCK_HOLDER_LOOKUP = BuiltInRegistries.BLOCK.asLookup();
     private final Set<BlockPos> defaultSpawns = new HashSet<>();
     private StructureTemplate template;
     private String name;
@@ -44,7 +48,7 @@ public class ConfiguredTemplate {
             nbt = file.toString().endsWith(".snbt")
                     ? NbtUtils.snbtToStructure(IOUtils.toString(Files.newBufferedReader(file)))
                     : NbtIo.readCompressed(file.toFile());
-            template.load(nbt);
+            template.load(BLOCK_HOLDER_LOOKUP, nbt);
         } catch (IOException | CommandSyntaxException e) {
             SkyblockBuilder.getLogger().error("Template with name " + info.file() + " is incorrect.", e);
         }
@@ -117,9 +121,9 @@ public class ConfiguredTemplate {
         ListTag spawns = new ListTag();
         for (BlockPos pos : this.defaultSpawns) {
             CompoundTag posTag = new CompoundTag();
-            posTag.putDouble("posX", pos.getX() + 0.5);
-            posTag.putDouble("posY", pos.getY());
-            posTag.putDouble("posZ", pos.getZ() + 0.5);
+            posTag.putInt("posX", pos.getX());
+            posTag.putInt("posY", pos.getY());
+            posTag.putInt("posZ", pos.getZ());
 
             spawns.add(posTag);
         }
@@ -147,14 +151,14 @@ public class ConfiguredTemplate {
     public void read(CompoundTag nbt) {
         if (nbt == null) return;
         StructureTemplate template = new StructureTemplate();
-        template.load(nbt.getCompound("Template"));
+        template.load(BLOCK_HOLDER_LOOKUP, nbt.getCompound("Template"));
         this.template = template;
 
         ListTag spawns = nbt.getList("Spawns", Tag.TAG_COMPOUND);
         this.defaultSpawns.clear();
         for (Tag pos : spawns) {
             CompoundTag posTag = (CompoundTag) pos;
-            this.defaultSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
+            this.defaultSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ")));
         }
 
         this.name = nbt.getString("Name");

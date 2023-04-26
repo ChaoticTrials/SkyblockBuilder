@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
@@ -12,7 +13,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
@@ -69,7 +70,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), new BlockPos(event.getExplosion().getPosition()))) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), BlockPos.containing(event.getExplosion().getPosition()))) {
             event.setCanceled(true);
         }
     }
@@ -145,7 +146,7 @@ public class SpawnProtectionEvents {
     }
 
     @SubscribeEvent
-    public void mobSpawnAttempt(LivingSpawnEvent.CheckSpawn event) {
+    public void mobSpawn(MobSpawnEvent.FinalizeSpawn event) {
         if (SpawnProtectionEvents.ignore(Type.MOBS_SPAWN)) {
             return;
         }
@@ -153,27 +154,12 @@ public class SpawnProtectionEvents {
         Level level;
         if (event.getLevel() instanceof Level) level = (Level) event.getLevel();
         else level = event.getEntity().level;
-        if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
+        if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity())
+                && event.getSpawnType() != MobSpawnType.SPAWN_EGG && event.getSpawnType() != MobSpawnType.BUCKET
+                && event.getSpawnType() != MobSpawnType.MOB_SUMMONED && event.getSpawnType() != MobSpawnType.COMMAND) {
+            event.setCanceled(true);
+            event.setSpawnCancelled(true);
             event.setResult(Event.Result.DENY);
-        }
-    }
-
-    @SubscribeEvent
-    public void mobSpawn(LivingSpawnEvent.SpecialSpawn event) {
-        if (SpawnProtectionEvents.ignore(Type.MOBS_SPAWN_EGG)) {
-            return;
-        }
-
-        Level level;
-        if (event.getLevel() instanceof Level) level = (Level) event.getLevel();
-        else level = event.getEntity().level;
-        if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
-            if (event.getSpawnReason() != MobSpawnType.SPAWN_EGG && event.getSpawnReason() != MobSpawnType.BUCKET
-                    && event.getSpawnReason() != MobSpawnType.MOB_SUMMONED && event.getSpawnReason() != MobSpawnType.COMMAND) {
-                if (event.isCancelable()) {
-                    event.setCanceled(true);
-                }
-            }
         }
     }
 
@@ -183,7 +169,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (!event.getSource().isBypassInvul() && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (!(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
+        if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (!(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
             event.setCanceled(true);
         }
     }
@@ -194,7 +180,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (!event.getSource().isBypassInvul() && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (event.getEntity() instanceof Player || !(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
+        if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (event.getEntity() instanceof Player || !(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
             event.setCanceled(true);
         }
     }

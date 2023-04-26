@@ -2,7 +2,6 @@ package de.melanx.skyblockbuilder.client;
 
 import de.melanx.skyblockbuilder.world.SkyblockWorldPresets;
 import net.minecraft.client.gui.screens.worldselection.PresetEditor;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraftforge.api.distmarker.Dist;
@@ -20,7 +19,7 @@ public class ClientSetup {
 
     public static void clientSetup() {
         Map<Optional<ResourceKey<WorldPreset>>, PresetEditor> editorMap = new HashMap<>(PresetEditor.EDITORS);
-        editorMap.put(BuiltinRegistries.WORLD_PRESET.getResourceKey(SkyblockWorldPresets.skyblock), (parent, context) -> new ScreenCustomizeSkyblock(parent));
+        editorMap.put(Optional.of(SkyblockWorldPresets.skyblockKey), (parent, context) -> new ScreenCustomizeSkyblock(parent));
         try {
             Field editors = ObfuscationReflectionHelper.findField(PresetEditor.class, "f_232950_");
             ReflectionHacks.setFinalField(editors, null, editorMap);

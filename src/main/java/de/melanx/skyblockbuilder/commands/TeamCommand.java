@@ -34,11 +34,11 @@ public class TeamCommand {
                 // Let plays add/remove spawn points
                 .then(Commands.literal("spawns")
                         .then(Commands.literal("add")
-                                .executes(context -> addSpawn(context.getSource(), new BlockPos(context.getSource().getPosition())))
+                                .executes(context -> addSpawn(context.getSource(), BlockPos.containing(context.getSource().getPosition())))
                                 .then(Commands.argument("pos", BlockPosArgument.blockPos())
                                         .executes(context -> addSpawn(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos")))))
                         .then(Commands.literal("remove")
-                                .executes(context -> removeSpawn(context.getSource(), new BlockPos(context.getSource().getPosition())))
+                                .executes(context -> removeSpawn(context.getSource(), BlockPos.containing(context.getSource().getPosition())))
                                 .then(Commands.argument("pos", BlockPosArgument.blockPos()).suggests(Suggestions.SPAWN_POSITIONS)
                                         .executes(context -> removeSpawn(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos")))))
                         .then(Commands.literal("reset")

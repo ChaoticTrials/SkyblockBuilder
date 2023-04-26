@@ -51,18 +51,24 @@ public class ScreenCustomizeSkyblock extends Screen {
 
     @Override
     protected void init() {
-        //noinspection ConstantConditions
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.list = new TemplateList();
         this.addWidget(this.list);
 
-        this.doneButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, button -> {
-            this.applyTemplate.accept(this.template);
-            this.minecraft.setScreen(this.parent);
-        }));
-        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
-            this.minecraft.setScreen(this.parent);
-        }));
+        this.doneButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
+                    this.applyTemplate.accept(this.template);
+                    //noinspection ConstantConditions
+                    this.minecraft.setScreen(this.parent);
+                })
+                .pos(this.width / 2 - 155, this.height - 28)
+                .size(150, 20)
+                .build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
+                    //noinspection ConstantConditions
+                    this.minecraft.setScreen(this.parent);
+                })
+                .pos(this.width / 2 + 5, this.height - 28)
+                .size(150, 20)
+                .build());
         if (this.template != null) {
             this.list.setSelected(this.list.children().stream()
                     .filter(entry -> Objects.equals(entry.template.getTemplate(), this.template.getTemplate()))
@@ -77,7 +83,7 @@ public class ScreenCustomizeSkyblock extends Screen {
 
     @Override
     public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(poseStack);
         this.list.render(poseStack, mouseX, mouseY, partialTick);
         Screen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
         Screen.drawCenteredString(poseStack, this.font, Component.translatable("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
@@ -97,7 +103,7 @@ public class ScreenCustomizeSkyblock extends Screen {
         }
 
         @Override
-        protected boolean isFocused() {
+        public boolean isFocused() {
             return ScreenCustomizeSkyblock.this.getFocused() == this;
         }
 

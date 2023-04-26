@@ -378,9 +378,9 @@ public class Team {
         ListTag spawns = new ListTag();
         for (BlockPos pos : this.possibleSpawns) {
             CompoundTag posTag = new CompoundTag();
-            posTag.putDouble("posX", pos.getX() + 0.5);
-            posTag.putDouble("posY", pos.getY());
-            posTag.putDouble("posZ", pos.getZ() + 0.5);
+            posTag.putInt("posX", pos.getX());
+            posTag.putInt("posY", pos.getY());
+            posTag.putInt("posZ", pos.getZ());
 
             spawns.add(posTag);
         }
@@ -388,9 +388,9 @@ public class Team {
         ListTag defaultSpawns = new ListTag();
         for (BlockPos pos : this.defaultPossibleSpawns) {
             CompoundTag posTag = new CompoundTag();
-            posTag.putDouble("posX", pos.getX() + 0.5);
-            posTag.putDouble("posY", pos.getY());
-            posTag.putDouble("posZ", pos.getZ() + 0.5);
+            posTag.putInt("posX", pos.getX());
+            posTag.putInt("posY", pos.getY());
+            posTag.putInt("posZ", pos.getZ());
 
             defaultSpawns.add(posTag);
         }
@@ -430,14 +430,14 @@ public class Team {
         this.possibleSpawns.clear();
         for (Tag pos : spawns) {
             CompoundTag posTag = (CompoundTag) pos;
-            this.possibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
+            this.possibleSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ")));
         }
 
         ListTag defaultSpawns = nbt.getList("DefaultSpawns", Tag.TAG_COMPOUND);
         this.defaultPossibleSpawns.clear();
         for (Tag pos : defaultSpawns) {
             CompoundTag posTag = (CompoundTag) pos;
-            this.defaultPossibleSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
+            this.defaultPossibleSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ")));
         }
 
         ListTag joinRequests = nbt.getList("JoinRequests", Tag.TAG_COMPOUND);

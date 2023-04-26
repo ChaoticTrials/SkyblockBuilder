@@ -8,7 +8,7 @@ apply plugin: 'org.moddingx.modgradle.cursedep'
 repositories {
     maven {
         name = "JEI"
-        url = "https://dvs1.progwml6.com/files/maven/"
+        url = "https://maven.blamejared.com/"
     }
     maven {
         name = "MelanX Maven"
@@ -21,13 +21,13 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor "org.moddingx:LibX:1.19.2-4.2.6"
+    annotationProcessor "org.moddingx:LibX:1.19.4-4.4.2"
 
-    implementation fg.deobf("org.moddingx:LibX:1.19.2-4.2.6")
-    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.19.2-5.1.1.0")
-    compileOnly fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.19.1-2.1.0")
+    implementation fg.deobf("org.moddingx:LibX:1.19.4-4.4.2")
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.19.4-5.1.5.1")
+    compileOnly fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.19.4-2.3.0")
 
-    runtimeOnly fg.deobf("mezz.jei:jei-1.19.1-forge:11.2.0.241")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.19.4-forge:13.1.0.6")
 
 //    runtimeOnly curse.mod(556904, 4016840) # Cosmopolis Mod 1.19.X-12.0
 }

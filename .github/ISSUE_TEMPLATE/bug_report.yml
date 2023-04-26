@@ -2,32 +2,34 @@ name: Bug Report
 description: Report an issue with supported versions of Skyblock Builder
 labels: [ bug ]
 body:
-  - type: input
+  - type: dropdown
     id: mc-version
     attributes:
       label: Minecraft version
-      placeholder: eg. 1.18.2
+      options:
+        - 1.18.2
+        - 1.19.4
     validations:
       required: true
   - type: input
     id: libx-version
     attributes:
       label: LibX version
-      placeholder: eg. 1.18.2-3.2.0
+      placeholder: eg. 1.19.4-4.4.0
     validations:
       required: true
   - type: input
     id: mod-version
     attributes:
       label: Skyblock Builder version
-      placeholder: eg. 1.18.2-3.3.0
+      placeholder: eg. 1.19.4-4.3.0
     validations:
       required: true
   - type: input
     id: forge-version
     attributes:
       label: Forge version
-      placeholder: eg. 40.0.2
+      placeholder: eg. 45.0.49
     validations:
       required: true
   - type: input

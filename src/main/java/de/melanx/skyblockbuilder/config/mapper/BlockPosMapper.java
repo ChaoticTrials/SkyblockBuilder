@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -121,9 +122,9 @@ public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
 
             @Override
             public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-                drawString(poseStack, this.font, "X", this.x, this.y + 6, Color.GRAY.getRGB());
-                drawString(poseStack, this.font, "Y", this.x + 63, this.y + 6, Color.GRAY.getRGB());
-                drawString(poseStack, this.font, "Z", this.x + 128, this.y + 6, Color.GRAY.getRGB());
+                GuiComponent.drawString(poseStack, this.font, "X", this.posX, this.posY + 6, Color.GRAY.getRGB());
+                GuiComponent.drawString(poseStack, this.font, "Y", this.posX + 63, this.posY + 6, Color.GRAY.getRGB());
+                GuiComponent.drawString(poseStack, this.font, "Z", this.posX + 128, this.posY + 6, Color.GRAY.getRGB());
                 super.render(poseStack, mouseX, mouseY, partialTicks);
             }
         }

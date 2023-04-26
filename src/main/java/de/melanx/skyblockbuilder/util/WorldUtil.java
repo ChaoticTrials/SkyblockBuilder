@@ -13,7 +13,7 @@ import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGe
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -73,7 +73,7 @@ public class WorldUtil {
 
     public static ServerLevel getConfiguredLevel(MinecraftServer server) {
         ResourceLocation location = ConfigHandler.Spawn.dimension.location();
-        ResourceKey<Level> worldKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, location);
+        ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, location);
         ServerLevel configLevel = server.getLevel(worldKey);
 
         if (configLevel == null) {

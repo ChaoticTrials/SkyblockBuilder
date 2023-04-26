@@ -104,7 +104,7 @@ public class EventListener {
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         if (event.getEntity() instanceof LightningBolt lightning && WorldUtil.isSkyblock(event.getLevel())) {
             ServerLevel level = (ServerLevel) event.getLevel();
-            BlockPos pos = new BlockPos(lightning.position().x, level.getSeaLevel(), lightning.position().z);
+            BlockPos pos = new BlockPos((int) lightning.position().x, level.getSeaLevel(), (int) lightning.position().z);
             Optional<BlockPos> rodPos = level.findLightningRod(pos);
             rodPos.ifPresent(blockPos -> lightning.moveTo(Vec3.atBottomCenterOf(blockPos)));
         }

@@ -57,8 +57,9 @@ public class SpawnsCommand {
             }
 
             String folderName = "skyblock_exports";
+            Path exportsPath = Paths.get(folderName);
             try {
-                Files.createDirectories(Paths.get(folderName));
+                Files.createDirectories(exportsPath);
             } catch (IOException e) {
                 throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", folderName)).create();
             }
@@ -76,7 +77,7 @@ public class SpawnsCommand {
             }
 
             json.add("islandSpawns", spawns);
-            Path file = Paths.get(folderName).resolve(filePath.split("/")[1]);
+            Path file = exportsPath.resolve(filePath.split("/")[1]);
             try {
                 BufferedWriter w = Files.newBufferedWriter(file, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
                 w.write(SkyblockBuilder.PRETTY_GSON.toJson(json));

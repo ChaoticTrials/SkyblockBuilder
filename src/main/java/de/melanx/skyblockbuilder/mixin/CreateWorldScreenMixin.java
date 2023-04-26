@@ -33,10 +33,7 @@ import java.util.List;
 @Mixin(CreateWorldScreen.class)
 public class CreateWorldScreenMixin {
 
-    @Inject(
-            method = "onCreate",
-            at = @At(value = "HEAD")
-    )
+    @Inject(method = "onCreate", at = @At(value = "HEAD"))
     public void applyDataPacksToSkyblockPreset(CallbackInfo ci) {
         CreateWorldScreen screen = (CreateWorldScreen) (Object) this;
 
