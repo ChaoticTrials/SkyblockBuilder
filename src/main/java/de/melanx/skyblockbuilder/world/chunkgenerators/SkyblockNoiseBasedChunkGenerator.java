@@ -50,8 +50,11 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                             BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                             NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
                             Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
-                            FlatLayerInfo.CODEC.listOf().optionalFieldOf("layers", new InvalidList()).forGetter(generator -> generator.layerInfos) // todo 1.20 change to #fieldOf
-                    )).apply(instance, instance.stable(SkyblockNoiseBasedChunkGenerator::new)));
+                            FlatLayerInfo.CODEC.listOf().optionalFieldOf("layers").forGetter(generator -> Optional.ofNullable(generator.layerInfos)) // todo 1.20 change to #fieldOf
+                    )).apply(instance, instance.stable((structureSets, noises, biomeSource, generatorSettings, dimension, layerInfos) -> {
+                        List<FlatLayerInfo> flatLayerInfos = layerInfos.orElseGet(() -> SkyblockPreset.getLayers(dimension));
+                        return new SkyblockNoiseBasedChunkGenerator(structureSets, noises, biomeSource, generatorSettings, dimension, flatLayerInfos);
+                    })));
 
     public final Registry<NormalNoise.NoiseParameters> noises;
     public final Holder<NoiseGeneratorSettings> generatorSettings;
@@ -66,7 +69,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         this.generatorSettings = generatorSettings;
         this.parent = new NoiseBasedChunkGenerator(structureSets, this.noises, biomeSource, generatorSettings);
         this.dimension = dimension;
-        this.layerInfos = !(layerInfos instanceof InvalidList) ? layerInfos : SkyblockPreset.getLayers(dimension); // todo 1.19.4
+        this.layerInfos = layerInfos;
         this.layerHeight = WorldUtil.calculateHeightFromLayers(this.layerInfos);
     }
 
@@ -299,10 +302,5 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     public List<FlatLayerInfo> getLayerInfos() {
         return this.layerInfos;
-    }
-
-    // todo 1.19.4 remove
-    protected static class InvalidList extends ArrayList<FlatLayerInfo> {
-
     }
 }

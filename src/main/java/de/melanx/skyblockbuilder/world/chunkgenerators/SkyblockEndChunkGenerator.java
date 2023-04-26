@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.world.chunkgenerators;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -43,8 +45,11 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
                             BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                             NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
                             Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
-                            FlatLayerInfo.CODEC.listOf().optionalFieldOf("layers", new InvalidList()).forGetter(generator -> generator.layerInfos) // todo 1.20 change to #fieldOf
-                    )).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
+                            FlatLayerInfo.CODEC.listOf().optionalFieldOf("layers").forGetter(generator -> Optional.ofNullable(generator.layerInfos)) // todo 1.20 change to #fieldOf
+                    )).apply(instance, instance.stable((structureSets, noises, biomeSource, generatorSettings, dimension, layerInfos) -> {
+                        List<FlatLayerInfo> flatLayerInfos = layerInfos.orElseGet(() -> SkyblockPreset.getLayers(dimension));
+                        return new SkyblockEndChunkGenerator(structureSets, noises, biomeSource, generatorSettings, dimension, flatLayerInfos);
+                    })));
 
     public SkyblockEndChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
         super(structureSets, noises, biomeSource, generatorSettings, dimension, layerInfos);
