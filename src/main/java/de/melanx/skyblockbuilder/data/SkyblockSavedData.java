@@ -556,7 +556,8 @@ public class SkyblockSavedData extends SavedData {
         }
 
         StructureTemplate template = configuredTemplate.getTemplate();
-        BoundingBox box = new BoundingBox(zero.getX(), zero.getY(), zero.getZ(), zero.getX() + template.size.getX(), zero.getY() + template.size.getY(), zero.getZ() + template.size.getZ());
+        BoundingBox box = new BoundingBox(zero.getX(), zero.getY(), zero.getZ(),
+                zero.getX() + template.size.getX() - 1, zero.getY() + template.size.getY() - 1, zero.getZ() + template.size.getZ() - 1);
         BoundingBox outside = box.inflatedBy(configuredTemplate.getSurroundingMargin());
         RandomSource random = RandomSource.create();
         BlockPos.betweenClosedStream(outside).forEach(blockPos -> {
