@@ -13,6 +13,7 @@ import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
@@ -195,6 +196,17 @@ public class SpawnProtectionEvents {
         }
 
         if (!event.getSource().isBypassInvul() && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (event.getEntity() instanceof Player || !(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public void attackEntity(AttackEntityEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.DAMAGE) || SpawnProtectionEvents.ignore(Type.INTERACT_ENTITIES)) {
+            return;
+        }
+
+        if (SpawnProtectionEvents.isOnSpawn(event.getTarget()) && !event.getEntity().hasPermissions(2)) {
             event.setCanceled(true);
         }
     }
