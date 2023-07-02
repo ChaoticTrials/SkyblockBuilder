@@ -1,9 +1,9 @@
 package de.melanx.skyblockbuilder.config.mapper;
 
 import com.google.gson.JsonArray;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -120,11 +120,11 @@ public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
             }
 
             @Override
-            public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-                drawString(poseStack, this.font, "X", this.x, this.y + 6, Color.GRAY.getRGB());
-                drawString(poseStack, this.font, "Y", this.x + 63, this.y + 6, Color.GRAY.getRGB());
-                drawString(poseStack, this.font, "Z", this.x + 128, this.y + 6, Color.GRAY.getRGB());
-                super.render(poseStack, mouseX, mouseY, partialTicks);
+            public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                guiGraphics.drawString(this.font, "X", this.getX(), this.getY() + 6, Color.GRAY.getRGB()); // todo check shadow
+                guiGraphics.drawString(this.font, "Y", this.getX() + 63, this.getY() + 6, Color.GRAY.getRGB());
+                guiGraphics.drawString(this.font, "Z", this.getX() + 128, this.getY() + 6, Color.GRAY.getRGB());
+                super.render(guiGraphics, mouseX, mouseY, partialTick);
             }
         }
     }

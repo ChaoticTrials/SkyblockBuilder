@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -13,7 +14,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.io.IOUtils;
-import org.moddingx.libx.annotation.meta.RemoveIn;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -32,7 +32,6 @@ public class ConfiguredTemplate {
     private String desc;
     private WorldUtil.Directions direction;
     private TemplateInfo.Offset offset;
-    private int offsetY;
     private int surroundingMargin;
     private List<Block> surroundingBlocks;
 
@@ -44,7 +43,8 @@ public class ConfiguredTemplate {
             nbt = file.toString().endsWith(".snbt")
                     ? NbtUtils.snbtToStructure(IOUtils.toString(Files.newBufferedReader(file)))
                     : NbtIo.readCompressed(file.toFile());
-            template.load(nbt);
+            //noinspection deprecation
+            template.load(BuiltInRegistries.BLOCK.asLookup(), nbt); // todo check
         } catch (IOException | CommandSyntaxException e) {
             SkyblockBuilder.getLogger().error("Template with name " + info.file() + " is incorrect.", e);
         }
@@ -55,7 +55,6 @@ public class ConfiguredTemplate {
         this.desc = info.desc();
         this.direction = info.direction();
         this.offset = info.offset();
-        this.offsetY = info.offsetY(); // todo 1.20 remove
         this.surroundingMargin = info.surroundingMargin();
         List<Block> blockPalette = TemplateConfig.surroundingBlocks.get(info.surroundingBlocks());
         if (blockPalette != null) {
@@ -96,12 +95,6 @@ public class ConfiguredTemplate {
         return this.offset;
     }
 
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.20")
-    public int getOffsetY() {
-        return this.offsetY;
-    }
-
     public int getSurroundingMargin() {
         return this.surroundingMargin;
     }
@@ -130,7 +123,7 @@ public class ConfiguredTemplate {
         nbt.putString("Desc", this.desc);
         nbt.putString("Direction", this.direction == null ? WorldUtil.Directions.SOUTH.toString() : this.direction.toString());
         nbt.putInt("OffsetX", this.offset.x());
-        nbt.putInt("OffsetY", this.offsetY); // todo 1.20
+        nbt.putInt("OffsetY", this.offset.y());
         nbt.putInt("OffsetZ", this.offset.z());
         nbt.putInt("SurroundingMargin", this.surroundingMargin);
 
@@ -147,21 +140,21 @@ public class ConfiguredTemplate {
     public void read(CompoundTag nbt) {
         if (nbt == null) return;
         StructureTemplate template = new StructureTemplate();
-        template.load(nbt.getCompound("Template"));
+        //noinspection deprecation
+        template.load(BuiltInRegistries.BLOCK.asLookup(), nbt.getCompound("Template")); // todo check
         this.template = template;
 
         ListTag spawns = nbt.getList("Spawns", Tag.TAG_COMPOUND);
         this.defaultSpawns.clear();
         for (Tag pos : spawns) {
             CompoundTag posTag = (CompoundTag) pos;
-            this.defaultSpawns.add(new BlockPos(posTag.getDouble("posX"), posTag.getDouble("posY"), posTag.getDouble("posZ")));
+            this.defaultSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"))); // todo double
         }
 
         this.name = nbt.getString("Name");
         this.desc = nbt.getString("Desc");
         this.direction = WorldUtil.Directions.valueOf(nbt.getString("Direction"));
-        this.offset = new TemplateInfo.Offset(nbt.getInt("OffsetX"), nbt.getInt("OffsetZ"));
-        this.offsetY = nbt.getInt("OffsetY");
+        this.offset = new TemplateInfo.Offset(nbt.getInt("OffsetX"), nbt.getInt("OffsetY"), nbt.getInt("OffsetZ"));
         this.surroundingMargin = nbt.getInt("SurroundingMargin");
 
         ListTag surroundingBlocks = nbt.getList("SurroundingBlocks", Tag.TAG_STRING);

@@ -1,11 +1,18 @@
 package de.melanx.skyblockbuilder.world;
 
-import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
+import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import org.moddingx.libx.annotation.registration.RegisterClass;
 
-@RegisterClass(registry = "WORLD_PRESET_REGISTRY")
+@RegisterClass(registry = "WORLD_PRESET")
 public class SkyblockWorldPresets {
 
-    public static final WorldPreset skyblock = new SkyblockPreset();
+//    private static DataResult<WorldPreset> requireOverworld(WorldPreset preset) {
+//        preset = SkyblockPreset.register(preset);
+//
+//    }
+
+    public static void register(BootstapContext<WorldPreset> context) {
+
+    }
 }

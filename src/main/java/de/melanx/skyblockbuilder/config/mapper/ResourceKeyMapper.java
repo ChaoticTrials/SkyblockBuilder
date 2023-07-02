@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.config.mapper;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +23,7 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
 
         @Override
         public ResourceKey<Level> defaultValue() {
-            return ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("overworld"));
+            return ResourceKeyMapper.getResourceKey("overworld");
         }
 
         @Override
@@ -38,7 +38,7 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
 
         @Override
         public ResourceKey<Level> valueOf(String str) {
-            return ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(str));
+            return ResourceKeyMapper.getResourceKey(str);
         }
 
         @Override
@@ -49,7 +49,7 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
 
     @Override
     public ResourceKey<Level> fromJson(JsonPrimitive json) {
-        return ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(json.getAsString()));
+        return ResourceKeyMapper.getResourceKey(json.getAsString());
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
 
     @Override
     public ResourceKey<Level> fromNetwork(FriendlyByteBuf buffer) {
-        return ResourceKey.create(Registry.DIMENSION_REGISTRY, buffer.readResourceLocation());
+        return ResourceKeyMapper.getResourceKey(buffer.readResourceLocation());
     }
 
     @Override
@@ -71,6 +71,7 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
     public ConfigEditor<ResourceKey<Level>> createEditor(ValidatorInfo<?> validator) {
         return ConfigEditor.input(INPUT, validator);
     }
+
 
     @Override
     public Class<ResourceKey<Level>> type() {
@@ -86,5 +87,13 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
     @Override
     public Optional<ResourceKey<Level>> correct(JsonElement json, ConfigCorrection<ResourceKey<Level>> correction) {
         return ValueMapper.super.correct(json, correction);
+    }
+
+    private static ResourceKey<Level> getResourceKey(String str) {
+        return ResourceKeyMapper.getResourceKey(new ResourceLocation(str));
+    }
+
+    private static ResourceKey<Level> getResourceKey(ResourceLocation location) {
+        return ResourceKey.create(Registries.DIMENSION, location);
     }
 }

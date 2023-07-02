@@ -35,29 +35,29 @@ public class InviteCommand {
 
         Team team = data.getTeamFromPlayer(player);
         if (team == null) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         Team invitedPlayersTeam = data.getTeamFromPlayer(invitePlayer);
         if (invitedPlayersTeam != null) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.player_has_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_has_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         if (data.hasInviteFrom(team, invitePlayer)) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.player_already_invited").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_already_invited").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         SkyblockInvitationEvent.Invite event = SkyblockHooks.onInvite(invitePlayer, team, player);
         switch (event.getResult()) {
             case DENY:
-                source.sendSuccess(Component.translatable("skyblockbuilder.command.denied.invite_player").withStyle(ChatFormatting.RED), false);
+                source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.invite_player").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
-                    source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.send_invitations").withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.send_invitations").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 break;

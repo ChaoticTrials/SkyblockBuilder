@@ -30,7 +30,7 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean ignoreA
                 return true;
             }
 
-            ServerLevel level = player.getLevel();
+            ServerLevel level = (ServerLevel) player.level();
             String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.ignoreAir, msg.asSnbt, msg.name);
             ItemStack stack = ItemStructureSaver.removeTags(msg.stack);
             player.setItemInHand(InteractionHand.MAIN_HAND, stack);

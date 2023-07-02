@@ -3,11 +3,8 @@ package de.melanx.skyblockbuilder.world.chunkgenerators;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
-import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
@@ -24,12 +21,9 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -39,20 +33,15 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
 
     // [VanillaCopy] overworld chunk generator codec
     public static final Codec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.create(
-            (instance) -> ChunkGenerator.commonCodec(instance)
-                    .and(instance.group(
-                            RegistryOps.retrieveRegistry(Registry.NOISE_REGISTRY).forGetter(generator -> generator.noises),
-                            BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
-                            NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
-                            Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
-                            FlatLayerInfo.CODEC.listOf().optionalFieldOf("layers").forGetter(generator -> Optional.ofNullable(generator.layerInfos)) // todo 1.20 change to #fieldOf
-                    )).apply(instance, instance.stable((structureSets, noises, biomeSource, generatorSettings, dimension, layerInfos) -> {
-                        List<FlatLayerInfo> flatLayerInfos = layerInfos.orElseGet(() -> SkyblockPreset.getLayers(dimension));
-                        return new SkyblockEndChunkGenerator(structureSets, noises, biomeSource, generatorSettings, dimension, flatLayerInfos);
-                    })));
+            (instance) -> instance.group(
+                    BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
+                    NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
+                    Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
+                    FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(generator -> generator.layerInfos)
+            ).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
 
-    public SkyblockEndChunkGenerator(Registry<StructureSet> structureSets, Registry<NormalNoise.NoiseParameters> noises, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
-        super(structureSets, noises, biomeSource, generatorSettings, dimension, layerInfos);
+    public SkyblockEndChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
+        super(biomeSource, generatorSettings, dimension, layerInfos);
     }
 
     @Nonnull

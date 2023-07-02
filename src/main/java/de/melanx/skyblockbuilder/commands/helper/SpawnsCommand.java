@@ -85,7 +85,7 @@ public class SpawnsCommand {
                 throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_file", file)).create();
             }
 
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.success.export_spawns", filePath).withStyle(ChatFormatting.GOLD), true);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.export_spawns", filePath).withStyle(ChatFormatting.GOLD), true);
             return 1;
         }
 

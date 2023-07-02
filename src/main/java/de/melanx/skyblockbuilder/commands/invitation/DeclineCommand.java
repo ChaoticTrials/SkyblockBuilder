@@ -33,22 +33,22 @@ public class DeclineCommand {
         Team team = data.getTeam(teamName);
 
         if (team == null) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         if (!data.hasInvites(player)) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.no_invitations").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.no_invitations").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onDecline(player, team)) {
             case DENY:
-                source.sendSuccess(Component.translatable("skyblockbuilder.command.denied.decline_invitations").withStyle(ChatFormatting.RED), false);
+                source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.decline_invitations").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
-                    source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.decline_invitations").withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.decline_invitations").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -57,11 +57,11 @@ public class DeclineCommand {
         }
 
         if (!data.declineInvite(team, player)) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.decline_invitations").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.decline_invitations").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
-        source.sendSuccess(Component.translatable("skyblockbuilder.command.success.declined_invitation", team.getName()).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.declined_invitation", team.getName()).withStyle(ChatFormatting.GOLD), true);
         return 1;
     }
 }

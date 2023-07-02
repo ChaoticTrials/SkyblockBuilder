@@ -20,7 +20,7 @@ public class TeamMention implements SpecialMention {
 
     @Override
     public Predicate<ServerPlayer> selectPlayers(ServerPlayer sender) {
-        SkyblockSavedData data = SkyblockSavedData.get(sender.getLevel());
+        SkyblockSavedData data = SkyblockSavedData.get(sender.level());
         Team team = data.getTeamFromPlayer(sender);
 
         if (team == null) return player -> false;
@@ -30,6 +30,6 @@ public class TeamMention implements SpecialMention {
 
     @Override
     public boolean available(ServerPlayer sender) {
-        return SkyblockSavedData.get(sender.getLevel()).hasPlayerTeam(sender);
+        return SkyblockSavedData.get(sender.level()).hasPlayerTeam(sender);
     }
 }

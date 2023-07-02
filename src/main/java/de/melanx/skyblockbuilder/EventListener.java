@@ -104,7 +104,7 @@ public class EventListener {
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         if (event.getEntity() instanceof LightningBolt lightning && WorldUtil.isSkyblock(event.getLevel())) {
             ServerLevel level = (ServerLevel) event.getLevel();
-            BlockPos pos = new BlockPos(lightning.position().x, level.getSeaLevel(), lightning.position().z);
+            BlockPos pos = new BlockPos((int) lightning.position().x, level.getSeaLevel(), (int) lightning.position().z);
             Optional<BlockPos> rodPos = level.findLightningRod(pos);
             rodPos.ifPresent(blockPos -> lightning.moveTo(Vec3.atBottomCenterOf(blockPos)));
         }
@@ -113,7 +113,7 @@ public class EventListener {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         SkyblockBuilder.getNetwork().updateData(event.getEntity(), null);
-        Level level = event.getEntity().level;
+        Level level = event.getEntity().level();
         SkyblockBuilder.getNetwork().updateProfiles(level);
         SkyblockBuilder.getNetwork().updateTemplateNames(event.getEntity(), TemplateLoader.getTemplateNames());
         if (level instanceof ServerLevel && WorldUtil.isSkyblock(level) && SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
@@ -159,11 +159,11 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (!event.getEntity().level.isClientSide) {
+        if (!event.getEntity().level().isClientSide) {
             ServerPlayer player = (ServerPlayer) event.getEntity();
             BlockPos pos = player.getRespawnPosition();
 
-            ServerLevel level = player.getLevel();
+            ServerLevel level = (ServerLevel) player.level();
 
             if (!WorldUtil.isSkyblock(level)) {
                 return;

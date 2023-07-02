@@ -8,7 +8,7 @@ import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 public class CuriosCompat {
 
     public static void dropInventory(Player player) {
-        if (player.level.isClientSide) {
+        if (player.level().isClientSide) {
             return;
         }
 

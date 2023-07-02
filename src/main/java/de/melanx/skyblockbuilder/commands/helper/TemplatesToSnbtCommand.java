@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
@@ -36,10 +37,11 @@ public class TemplatesToSnbtCommand {
                 StructureTemplate template = new StructureTemplate();
                 try {
                     CompoundTag nbt = NbtIo.readCompressed(original);
-                    template.load(nbt);
+                    //noinspection deprecation
+                    template.load(BuiltInRegistries.BLOCK.asLookup(), nbt); // todo check?
                     Files.writeString(converted, NbtUtils.structureToSnbt(nbt));
 
-                    context.getSource().sendSuccess(Component.translatable("skyblockbuilder.command.success.convert_template", fileName, convertedName), true);
+                    context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName, convertedName), true);
                 } catch (IOException e) {
                     SkyblockBuilder.getLogger().error("Failed to convert " + original + " to " + convertedName, e);
                 }

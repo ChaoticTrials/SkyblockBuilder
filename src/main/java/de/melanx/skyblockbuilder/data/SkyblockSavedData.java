@@ -6,7 +6,6 @@ import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.config.TemplateConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
-import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
@@ -33,7 +32,6 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraftforge.common.util.BlockSnapshot;
 import org.apache.commons.lang3.tuple.Pair;
-import org.moddingx.libx.annotation.meta.RemoveIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -489,30 +487,6 @@ public class SkyblockSavedData extends SavedData {
         this.setDirty();
     }
 
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.20")
-    public SkyMeta getMetaInfo(Player player) {
-        return this.getOrCreateMetaInfo(player);
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.20")
-    public SkyMeta getMetaInfo(UUID id) {
-        return this.getOrCreateMetaInfo(id);
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.20")
-    public SkyMeta addMetaInfo(Player player) {
-        return this.getOrCreateMetaInfo(player);
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.20")
-    public SkyMeta addMetaInfo(UUID id) {
-        return this.getOrCreateMetaInfo(id);
-    }
-
     public SkyMeta getOrCreateMetaInfo(Player player) {
         return this.getOrCreateMetaInfo(player.getGameProfile().getId());
     }
@@ -521,24 +495,12 @@ public class SkyblockSavedData extends SavedData {
         return this.metaInfo.computeIfAbsent(id, meta -> new SkyMeta(this, id));
     }
 
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.20")
-    public Set<BlockPos> getPossibleSpawns(IslandPos pos) {
-        return this.getPossibleSpawns(pos, TemplateLoader.getConfiguredTemplate());
-    }
-
     public Set<BlockPos> getPossibleSpawns(IslandPos pos, ConfiguredTemplate template) {
         if (!this.skyblockPositions.containsValue(pos)) {
             return initialPossibleSpawns(pos.getCenter(), template);
         }
 
         return this.skyblocks.get(this.skyblockPositions.inverse().get(pos)).getPossibleSpawns();
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.20")
-    public static Set<BlockPos> initialPossibleSpawns(BlockPos center) {
-        return initialPossibleSpawns(center, TemplateLoader.getConfiguredTemplate());
     }
 
     public static Set<BlockPos> initialPossibleSpawns(BlockPos center, ConfiguredTemplate template) {

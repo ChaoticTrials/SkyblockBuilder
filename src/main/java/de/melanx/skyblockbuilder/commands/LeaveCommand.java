@@ -29,17 +29,17 @@ public class LeaveCommand {
         ServerPlayer player = source.getPlayerOrException();
 
         if (!data.hasPlayerTeam(player)) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         switch (SkyblockHooks.onLeave(player, data.getTeamFromPlayer(player))) {
             case DENY:
-                source.sendSuccess(Component.translatable("skyblockbuilder.command.denied.leave_team").withStyle(ChatFormatting.RED), false);
+                source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.leave_team").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
-                    source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.manage_teams").withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.manage_teams").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -51,7 +51,7 @@ public class LeaveCommand {
             RandomUtility.dropInventories(player);
         }
         data.removePlayerFromTeam(player);
-        source.sendSuccess(Component.translatable("skyblockbuilder.command.success.left_team").withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.left_team").withStyle(ChatFormatting.GOLD), true);
         WorldUtil.teleportToIsland(player, data.getSpawn());
         return 1;
     }

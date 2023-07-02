@@ -47,19 +47,20 @@ public class CreateCommand {
         }
 
         if (SkyblockHooks.onCreateTeam(name)) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.denied.create_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.create_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         if (players.isEmpty() && source.getEntity() instanceof ServerPlayer && data.hasPlayerTeam((ServerPlayer) source.getEntity())) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
         Team team = data.createTeam(name);
 
+        String finalName = name;
         if (team == null) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.team_already_exist", name).withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.team_already_exist", finalName).withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
@@ -69,7 +70,7 @@ public class CreateCommand {
         } else {
             players.forEach(player -> {
                 if (data.getTeamFromPlayer(player) != null) {
-                    source.sendSuccess(Component.translatable("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).withStyle(ChatFormatting.RED), false);
                 } else {
                     data.addPlayerToTeam(team, player);
                     WorldUtil.teleportToIsland(player, team);
@@ -77,7 +78,7 @@ public class CreateCommand {
             });
         }
 
-        source.sendSuccess(Component.translatable("skyblockbuilder.command.success.create_team", name).withStyle(ChatFormatting.GREEN), true);
+        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.create_team", finalName).withStyle(ChatFormatting.GREEN), true);
         return 1;
     }
 }

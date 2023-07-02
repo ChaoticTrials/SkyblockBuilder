@@ -56,7 +56,7 @@ public class Suggestions {
 
     // Lists all teams except spawn
     public static final SuggestionProvider<CommandSourceStack> ALL_TEAMS = (context, builder) -> SharedSuggestionProvider
-            .suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().getLevel())
+            .suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().level())
                     .getTeams().stream()
                     .filter(team -> !team.isSpawn())
                     .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
@@ -64,7 +64,7 @@ public class Suggestions {
 
     // Lists all teams which allow visiting
     public static final SuggestionProvider<CommandSourceStack> VISIT_TEAMS = (context, builder) -> SharedSuggestionProvider
-            .suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().getLevel())
+            .suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().level())
                     .getTeams().stream()
                     .filter(team -> team.allowsVisits() || context.getSource().hasPermission(2))
                     .filter(team -> !team.isSpawn())

@@ -13,7 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.PacketDistributor;
-import org.moddingx.libx.annotation.meta.RemoveIn;
 import org.moddingx.libx.network.NetworkX;
 
 import javax.annotation.Nullable;
@@ -41,26 +40,12 @@ public class SkyNetwork extends NetworkX {
         this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new UpdateTemplateNamesMessage.Serializer(), () -> UpdateTemplateNamesMessage.Handler::new);
     }
 
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.20")
-    public void updateData(Level level) {
-        if (!level.isClientSide) {
-            this.updateData(level, SkyblockSavedData.get(level));
-        }
-    }
-
     public void updateData(Level level, SkyblockSavedData data) {
         if (!level.isClientSide) {
             for (ServerPlayer player : ((ServerLevel) level).getServer().getPlayerList().getPlayers()) {
                 this.updateData(player, data);
             }
         }
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.20")
-    public void updateData(Player player) {
-        this.updateData(player, null);
     }
 
     public void updateData(Player player, @Nullable SkyblockSavedData data) {
@@ -94,7 +79,7 @@ public class SkyNetwork extends NetworkX {
     }
 
     public void updateTemplateNames(Player player, List<String> names) {
-        if (player.level.isClientSide) {
+        if (player.level().isClientSide) {
             return;
         }
 

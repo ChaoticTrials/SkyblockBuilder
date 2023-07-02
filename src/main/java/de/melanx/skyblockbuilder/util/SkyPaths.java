@@ -5,8 +5,7 @@ import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -63,11 +62,11 @@ public class SkyPaths {
 
             copyTemplateFile();
             generateStarterItemsFile();
-            generateFeatureInformation(server);
-            generateStructureInformation(server);
-            generateBiomeInformation(server);
-            generateCarversInformation(server);
             if (server != null) {
+                generateFeatureInformation(server);
+                generateStructureInformation(server);
+                generateBiomeInformation(server);
+                generateCarversInformation(server);
                 generateDimensionInformation(server);
             }
 
@@ -102,15 +101,9 @@ public class SkyPaths {
         w.close();
     }
 
-    public static void generateFeatureInformation(@Nullable MinecraftServer server) throws IOException {
+    public static void generateFeatureInformation(MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(FEATURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-
-        Stream<Holder.Reference<ConfiguredFeature<?, ?>>> stream;
-        if (server != null) {
-            stream = server.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY).holders();
-        } else {
-            stream = BuiltinRegistries.CONFIGURED_FEATURE.holders();
-        }
+        Stream<Holder.Reference<ConfiguredFeature<?, ?>>> stream = server.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).holders();
 
         //noinspection DuplicatedCode
         stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
@@ -124,15 +117,9 @@ public class SkyPaths {
         w.close();
     }
 
-    public static void generateStructureInformation(@Nullable MinecraftServer server) throws IOException {
+    public static void generateStructureInformation(MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(STRUCTURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-
-        Stream<Holder.Reference<Structure>> stream;
-        if (server != null) {
-            stream = server.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).holders();
-        } else {
-            stream = BuiltinRegistries.STRUCTURES.holders();
-        }
+        Stream<Holder.Reference<Structure>> stream = server.registryAccess().registryOrThrow(Registries.STRUCTURE).holders();
 
         //noinspection DuplicatedCode
         stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
@@ -146,16 +133,9 @@ public class SkyPaths {
         w.close();
     }
 
-    public static void generateBiomeInformation(@Nullable MinecraftServer server) throws IOException {
+    public static void generateBiomeInformation(MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(BIOMES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-
-        Stream<Holder.Reference<Biome>> stream;
-        if (server != null) {
-            stream = server.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).holders();
-        } else {
-            //noinspection deprecation
-            stream = BuiltinRegistries.BIOME.holders();
-        }
+        Stream<Holder.Reference<Biome>> stream = server.registryAccess().registryOrThrow(Registries.BIOME).holders();
 
         //noinspection DuplicatedCode
         stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
@@ -169,15 +149,9 @@ public class SkyPaths {
         w.close();
     }
 
-    public static void generateCarversInformation(@Nullable MinecraftServer server) throws IOException {
+    public static void generateCarversInformation(MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(CARVERS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-
-        Stream<Holder.Reference<ConfiguredWorldCarver<?>>> stream;
-        if (server != null) {
-            stream = server.registryAccess().registryOrThrow(Registry.CONFIGURED_CARVER_REGISTRY).holders();
-        } else {
-            stream = BuiltinRegistries.CONFIGURED_CARVER.holders();
-        }
+        Stream<Holder.Reference<ConfiguredWorldCarver<?>>> stream = server.registryAccess().registryOrThrow(Registries.CONFIGURED_CARVER).holders();
 
         //noinspection DuplicatedCode
         stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {

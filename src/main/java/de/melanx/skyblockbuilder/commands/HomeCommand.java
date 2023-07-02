@@ -32,7 +32,7 @@ public class HomeCommand {
         Team team = data.getTeamFromPlayer(player);
 
         if (team == null) {
-            source.sendSuccess(Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
@@ -42,23 +42,23 @@ public class HomeCommand {
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !ConfigHandler.Utility.Teleports.teleportationDimensions.test(player.getLevel().dimension().location())) {
+        if (!player.hasPermissions(2) && !ConfigHandler.Utility.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !ConfigHandler.Utility.Teleports.crossDimensionTeleportation && player.getLevel() != data.getLevel()) {
+        if (!player.hasPermissions(2) && !ConfigHandler.Utility.Teleports.crossDimensionTeleportation && player.level() != data.getLevel()) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
             return 0;
         }
 
         switch (SkyblockHooks.onHome(player, team)) {
             case DENY:
-                source.sendSuccess(Component.translatable("skyblockbuilder.command.denied.teleport_home").withStyle(ChatFormatting.RED), false);
+                source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.teleport_home").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
                 if (!ConfigHandler.Utility.Teleports.home && !source.hasPermission(2)) {
-                    source.sendSuccess(Component.translatable("skyblockbuilder.command.disabled.teleport_home").withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.teleport_home").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 break;
@@ -67,7 +67,7 @@ public class HomeCommand {
         }
 
         data.getOrCreateMetaInfo(player).setLastHomeTeleport(level.getGameTime());
-        source.sendSuccess(Component.translatable("skyblockbuilder.command.success.teleport_home").withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.teleport_home").withStyle(ChatFormatting.GOLD), true);
         WorldUtil.teleportToIsland(player, team);
         return 1;
     }

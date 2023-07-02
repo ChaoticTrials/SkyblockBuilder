@@ -3,16 +3,18 @@ package de.melanx.skyblockbuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -57,7 +59,7 @@ public class SpawnProtectionEvents {
         }
 
         //noinspection ConstantConditions
-        if (event.getEntity() != null && event.getEntity().level != null && event.getEntity().level.dimension() != null) {
+        if (event.getEntity() != null && event.getEntity().level() != null && event.getEntity().level().dimension() != null) {
             if (SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
                 event.setResult(Event.Result.DENY);
             }
@@ -70,7 +72,8 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), new BlockPos(event.getExplosion().getPosition()))) {
+        Vec3 position = event.getExplosion().getPosition();
+        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), new BlockPos((int) position.x, (int) position.y, (int) position.z))) {
             event.setCanceled(true);
         }
     }
@@ -146,31 +149,17 @@ public class SpawnProtectionEvents {
     }
 
     @SubscribeEvent
-    public void mobSpawnAttempt(LivingSpawnEvent.CheckSpawn event) {
-        if (SpawnProtectionEvents.ignore(Type.MOBS_SPAWN)) {
-            return;
-        }
-
-        Level level;
-        if (event.getLevel() instanceof Level) level = (Level) event.getLevel();
-        else level = event.getEntity().level;
-        if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
-            event.setResult(Event.Result.DENY);
-        }
-    }
-
-    @SubscribeEvent
-    public void mobSpawn(LivingSpawnEvent.SpecialSpawn event) {
+    public void mobSpawn(MobSpawnEvent.FinalizeSpawn event) {
         if (SpawnProtectionEvents.ignore(Type.MOBS_SPAWN_EGG)) {
             return;
         }
 
         Level level;
         if (event.getLevel() instanceof Level) level = (Level) event.getLevel();
-        else level = event.getEntity().level;
+        else level = event.getEntity().level();
         if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
-            if (event.getSpawnReason() != MobSpawnType.SPAWN_EGG && event.getSpawnReason() != MobSpawnType.BUCKET
-                    && event.getSpawnReason() != MobSpawnType.MOB_SUMMONED && event.getSpawnReason() != MobSpawnType.COMMAND) {
+            if (event.getSpawnType() != MobSpawnType.SPAWN_EGG && event.getSpawnType() != MobSpawnType.BUCKET
+                    && event.getSpawnType() != MobSpawnType.MOB_SUMMONED && event.getSpawnType() != MobSpawnType.COMMAND) {
                 if (event.isCancelable()) {
                     event.setCanceled(true);
                 }
@@ -184,7 +173,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (!event.getSource().isBypassInvul() && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (!(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
+        if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (!(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
             event.setCanceled(true);
         }
     }
@@ -195,7 +184,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (!event.getSource().isBypassInvul() && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (event.getEntity() instanceof Player || !(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
+        if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (event.getEntity() instanceof Player || !(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
             event.setCanceled(true);
         }
     }
@@ -217,7 +206,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (!event.player.level.isClientSide && !event.player.isDeadOrDying() && event.player.tickCount % 20 == 0 && SpawnProtectionEvents.isOnSpawn(event.player)) {
+        if (!event.player.level().isClientSide && !event.player.isDeadOrDying() && event.player.tickCount % 20 == 0 && SpawnProtectionEvents.isOnSpawn(event.player)) {
             event.player.setHealth(20);
             event.player.getFoodData().setFoodLevel(20);
             event.player.setAirSupply(event.player.getMaxAirSupply());
@@ -237,7 +226,7 @@ public class SpawnProtectionEvents {
 
     private static boolean isOnSpawn(Entity entity) {
         ChunkPos pos = new ChunkPos(entity.blockPosition());
-        return WorldUtil.isSkyblock(entity.level) && ConfigHandler.Spawn.dimension == entity.level.dimension()
+        return WorldUtil.isSkyblock(entity.level()) && ConfigHandler.Spawn.dimension == entity.level().dimension()
                 && Math.abs(pos.x) < ConfigHandler.Spawn.spawnProtectionRadius && Math.abs(pos.z) < ConfigHandler.Spawn.spawnProtectionRadius;
     }
 }
