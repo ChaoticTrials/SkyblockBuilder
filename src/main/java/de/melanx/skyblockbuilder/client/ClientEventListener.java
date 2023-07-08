@@ -1,8 +1,6 @@
 package de.melanx.skyblockbuilder.client;
 
-import de.melanx.skyblockbuilder.SkyblockBuilder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
+import de.melanx.skyblockbuilder.Registration;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterPresetEditorsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -13,6 +11,6 @@ public class ClientEventListener {
 
     @SubscribeEvent
     public static void onRegisterPresetEditors(RegisterPresetEditorsEvent event) {
-        event.register(ResourceKey.create(Registries.WORLD_PRESET, SkyblockBuilder.getInstance().resource("skyblock")), ScreenCustomizeSkyblock::new);
+        event.register(Registration.skyblockKey, ScreenCustomizeSkyblock::new);
     }
 }

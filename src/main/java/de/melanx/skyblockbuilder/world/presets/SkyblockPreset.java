@@ -1,7 +1,5 @@
 package de.melanx.skyblockbuilder.world.presets;
 
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Lifecycle;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.util.BiomeSourceConverter;
 import de.melanx.skyblockbuilder.util.WorldPresetUtil;
@@ -10,8 +8,8 @@ import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.*;
@@ -29,42 +27,34 @@ import java.util.Map;
 
 public class SkyblockPreset extends WorldPreset {
 
-    public static DataResult<WorldPreset> register(WorldPreset preset) {
-        return preset.overworld().isEmpty()
-                ? DataResult.success(new SkyblockPreset(), Lifecycle.experimental())
-                : DataResult.success(preset, Lifecycle.stable());
+    public SkyblockPreset(RegistryAccess registryAccess) {
+        super(SkyblockPreset.dimensions(registryAccess));
     }
 
-    public SkyblockPreset() {
-        super(SkyblockPreset.dimensions());
-    }
+    public static Map<ResourceKey<LevelStem>, LevelStem> dimensions(RegistryAccess registryAccess) {
+        HolderGetter<DimensionType> dimensionTypes = registryAccess.lookupOrThrow(Registries.DIMENSION_TYPE);
 
-    public static Map<ResourceKey<LevelStem>, LevelStem> dimensions() {
-        HolderGetter.Provider lookupProvider = VanillaRegistries.createLookup().asGetterLookup();
-//        HolderGetter<DimensionType> dimensionTypes = context.lookup(Registries.DIMENSION_TYPE);
-        HolderGetter<DimensionType> dimensionTypes = lookupProvider.lookupOrThrow(Registries.DIMENSION_TYPE);
-
-        HolderGetter<MultiNoiseBiomeSourceParameterList> noises = lookupProvider.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-        HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings = lookupProvider.lookupOrThrow(Registries.NOISE_SETTINGS);
-        HolderGetter<Biome> biomes = lookupProvider.lookupOrThrow(Registries.BIOME);
+        HolderGetter<MultiNoiseBiomeSourceParameterList> noises = registryAccess.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.lookupOrThrow(Registries.NOISE_SETTINGS);
+        HolderGetter<Biome> biomes = registryAccess.lookupOrThrow(Registries.BIOME);
 
         return Map.of(
                 LevelStem.OVERWORLD, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.OVERWORLD),
-                        configuredOverworldChunkGenerator(lookupProvider)),
+                        configuredOverworldChunkGenerator(registryAccess)),
                 LevelStem.NETHER, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.NETHER),
                         ConfigHandler.Dimensions.Nether.Default ?
-                                WorldPresetUtil.defaultNetherGenerator(lookupProvider)
+                                WorldPresetUtil.defaultNetherGenerator(registryAccess)
                                 : netherChunkGenerator(noises, noiseGeneratorSettings)),
                 LevelStem.END, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.END),
                         ConfigHandler.Dimensions.End.Default ?
-                                WorldPresetUtil.defaultEndGenerator(lookupProvider)
+                                WorldPresetUtil.defaultEndGenerator(registryAccess)
                                 : endChunkGenerator(biomes, noiseGeneratorSettings))
         );
     }
 
-    public static ChunkGenerator configuredOverworldChunkGenerator(HolderGetter.Provider lookupProvider) {
-        HolderGetter<MultiNoiseBiomeSourceParameterList> noises = lookupProvider.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-        HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings = lookupProvider.lookupOrThrow(Registries.NOISE_SETTINGS);
+    public static ChunkGenerator configuredOverworldChunkGenerator(RegistryAccess registryAccess) {
+        HolderGetter<MultiNoiseBiomeSourceParameterList> noises = registryAccess.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.lookupOrThrow(Registries.NOISE_SETTINGS);
 
         return ConfigHandler.Dimensions.Overworld.Default ?
                 new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD))
