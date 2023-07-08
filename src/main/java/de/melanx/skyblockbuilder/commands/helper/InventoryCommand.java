@@ -41,7 +41,7 @@ public class InventoryCommand {
         } catch (IOException e) {
             throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", folderName)).create();
         }
-        String filePath = RandomUtility.getFilePath(folderName, "starter_item", "json");
+        String filePath = RandomUtility.getFilePath(folderName, "starter_inventory", "json5");
 
         JsonObject json = new JsonObject();
         JsonArray items = new JsonArray();
