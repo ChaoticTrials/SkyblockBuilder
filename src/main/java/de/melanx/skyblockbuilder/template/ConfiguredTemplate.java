@@ -44,7 +44,7 @@ public class ConfiguredTemplate {
                     ? NbtUtils.snbtToStructure(IOUtils.toString(Files.newBufferedReader(file)))
                     : NbtIo.readCompressed(file.toFile());
             //noinspection deprecation
-            template.load(BuiltInRegistries.BLOCK.asLookup(), nbt); // todo check
+            template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
         } catch (IOException | CommandSyntaxException e) {
             SkyblockBuilder.getLogger().error("Template with name " + info.file() + " is incorrect.", e);
         }
@@ -141,7 +141,7 @@ public class ConfiguredTemplate {
         if (nbt == null) return;
         StructureTemplate template = new StructureTemplate();
         //noinspection deprecation
-        template.load(BuiltInRegistries.BLOCK.asLookup(), nbt.getCompound("Template")); // todo check
+        template.load(BuiltInRegistries.BLOCK.asLookup(), nbt.getCompound("Template"));
         this.template = template;
 
         ListTag spawns = nbt.getList("Spawns", Tag.TAG_COMPOUND);

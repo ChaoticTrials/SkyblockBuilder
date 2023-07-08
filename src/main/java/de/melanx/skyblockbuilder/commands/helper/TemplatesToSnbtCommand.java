@@ -6,11 +6,13 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import java.io.File;
@@ -37,8 +39,8 @@ public class TemplatesToSnbtCommand {
                 StructureTemplate template = new StructureTemplate();
                 try {
                     CompoundTag nbt = NbtIo.readCompressed(original);
-                    //noinspection deprecation
-                    template.load(BuiltInRegistries.BLOCK.asLookup(), nbt); // todo check?
+                    HolderLookup.RegistryLookup<Block> blockRegistryLookup = context.getSource().getServer().registryAccess().registryOrThrow(Registries.BLOCK).asLookup();
+                    template.load(blockRegistryLookup, nbt);
                     Files.writeString(converted, NbtUtils.structureToSnbt(nbt));
 
                     context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName, convertedName), true);

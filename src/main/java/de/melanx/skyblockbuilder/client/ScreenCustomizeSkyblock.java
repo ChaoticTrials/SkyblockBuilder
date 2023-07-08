@@ -89,7 +89,7 @@ public class ScreenCustomizeSkyblock extends Screen {
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
         guiGraphics.drawCenteredString(this.font, Component.translatable("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-        this.list.renderEntries(guiGraphics, partialTick);
+        this.list.renderEntries(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     private class TemplateList extends ObjectSelectionList<TemplateList.TemplateEntry> {
@@ -138,8 +138,8 @@ public class ScreenCustomizeSkyblock extends Screen {
             // delayed to #renderEntries to call it later
         }
 
-        protected void renderEntries(@Nonnull GuiGraphics guiGraphics, float partialTick) {
-            super.renderList(guiGraphics, this.getRowLeft(), this.y0 + 4 - (int) this.getScrollAmount(), partialTick);
+        protected void renderEntries(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            super.renderList(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         private class TemplateEntry extends ObjectSelectionList.Entry<TemplateEntry> {
@@ -172,7 +172,7 @@ public class ScreenCustomizeSkyblock extends Screen {
                 guiGraphics.drawString(ScreenCustomizeSkyblock.this.font, this.name, left + 5, top + 7, Color.WHITE.getRGB());
                 guiGraphics.drawString(ScreenCustomizeSkyblock.this.font, this.desc, left + 5, top + 22, Color.GRAY.getRGB());
                 if (isMouseOver && this.tooLong) {
-                    guiGraphics.renderTooltip(ScreenCustomizeSkyblock.this.font, this.template.getDescriptionComponent(), mouseX, mouseY); // todo check
+                    guiGraphics.renderTooltip(ScreenCustomizeSkyblock.this.font, this.template.getDescriptionComponent(), mouseX, mouseY);
                 }
             }
 

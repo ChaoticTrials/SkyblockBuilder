@@ -121,7 +121,7 @@ public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
 
             @Override
             public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                guiGraphics.drawString(this.font, "X", this.getX(), this.getY() + 6, Color.GRAY.getRGB()); // todo check shadow
+                guiGraphics.drawString(this.font, "X", this.getX(), this.getY() + 6, Color.GRAY.getRGB());
                 guiGraphics.drawString(this.font, "Y", this.getX() + 63, this.getY() + 6, Color.GRAY.getRGB());
                 guiGraphics.drawString(this.font, "Z", this.getX() + 128, this.getY() + 6, Color.GRAY.getRGB());
                 super.render(guiGraphics, mouseX, mouseY, partialTick);
