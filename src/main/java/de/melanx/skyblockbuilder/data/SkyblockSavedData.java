@@ -4,7 +4,7 @@ import com.google.common.collect.*;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.config.StartingInventory;
-import de.melanx.skyblockbuilder.config.TemplateConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -79,7 +79,7 @@ public class SkyblockSavedData extends SavedData {
         }
 
         SkyblockBuilder.getLogger().info("Successfully generated spawn.");
-        Team team = this.createTeam("Spawn", TemplateConfig.spawn.flatMap(templateInfo -> Optional.of(new ConfiguredTemplate(templateInfo))).orElse(TemplateData.get(this.level).getConfiguredTemplate()));
+        Team team = this.createTeam("Spawn", TemplatesConfig.spawn.flatMap(templateInfo -> Optional.of(new ConfiguredTemplate(templateInfo))).orElse(TemplateData.get(this.level).getConfiguredTemplate()));
         //noinspection ConstantConditions
         team.addPlayer(Util.NIL_UUID);
 

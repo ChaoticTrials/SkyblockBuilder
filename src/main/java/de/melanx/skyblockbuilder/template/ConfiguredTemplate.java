@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.template;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.TemplateConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
@@ -50,13 +50,13 @@ public class ConfiguredTemplate {
         }
 
         this.template = template;
-        this.defaultSpawns.addAll(TemplateConfig.spawns.get(info.spawns()));
+        this.defaultSpawns.addAll(TemplatesConfig.spawns.get(info.spawns()));
         this.name = info.name();
         this.desc = info.desc();
         this.direction = info.direction();
         this.offset = info.offset();
         this.surroundingMargin = info.surroundingMargin();
-        List<Block> blockPalette = TemplateConfig.surroundingBlocks.get(info.surroundingBlocks());
+        List<Block> blockPalette = TemplatesConfig.surroundingBlocks.get(info.surroundingBlocks());
         if (blockPalette != null) {
             this.surroundingBlocks = List.copyOf(blockPalette);
         } else {

@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.data;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -97,7 +97,7 @@ public class SkyMeta {
     }
 
     public boolean canTeleportHome(long gameTime) {
-        return (this.lastHomeTeleport == 0 ? ConfigHandler.Utility.Teleports.homeCooldown : gameTime) - this.getLastHomeTeleport() >= ConfigHandler.Utility.Teleports.homeCooldown;
+        return (this.lastHomeTeleport == 0 ? PermissionsConfig.Teleports.homeCooldown : gameTime) - this.getLastHomeTeleport() >= PermissionsConfig.Teleports.homeCooldown;
     }
 
     public long getLastSpawnTeleport() {
@@ -112,7 +112,7 @@ public class SkyMeta {
     }
 
     public boolean canTeleportSpawn(long gameTime) {
-        return (this.lastSpawnTeleport == 0 ? ConfigHandler.Utility.Teleports.spawnCooldown : gameTime) - this.getLastSpawnTeleport() >= ConfigHandler.Utility.Teleports.spawnCooldown;
+        return (this.lastSpawnTeleport == 0 ? PermissionsConfig.Teleports.spawnCooldown : gameTime) - this.getLastSpawnTeleport() >= PermissionsConfig.Teleports.spawnCooldown;
     }
 
     public SkyMeta load(@Nonnull CompoundTag nbt) {

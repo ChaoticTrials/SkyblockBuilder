@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder;
 
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.DamageTypeTags;
@@ -41,7 +41,7 @@ public class SpawnProtectionEvents {
     public void onInteract(PlayerInteractEvent event) {
         if (SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !event.getEntity().hasPermissions(2)) {
             if (event instanceof PlayerInteractEvent.EntityInteract entityInteract &&
-                    (ConfigHandler.Spawn.interactionEntitiesInSpawnProtection.test(ForgeRegistries.ENTITY_TYPES.getKey(entityInteract.getTarget().getType()))
+                    (SpawnConfig.interactionEntitiesInSpawnProtection.test(ForgeRegistries.ENTITY_TYPES.getKey(entityInteract.getTarget().getType()))
                             || SpawnProtectionEvents.ignore(Type.INTERACT_ENTITIES))) {
                 return;
             }
@@ -215,18 +215,18 @@ public class SpawnProtectionEvents {
     }
 
     private static boolean ignore(Type type) {
-        return !ConfigHandler.Spawn.spawnProtectionEvents.contains(type);
+        return !SpawnConfig.spawnProtectionEvents.contains(type);
     }
 
     private static boolean isOnSpawn(Level level, BlockPos blockPos) {
         ChunkPos pos = new ChunkPos(blockPos);
-        return WorldUtil.isSkyblock(level) && ConfigHandler.Spawn.dimension == level.dimension()
-                && Math.abs(pos.x) < ConfigHandler.Spawn.spawnProtectionRadius && Math.abs(pos.z) < ConfigHandler.Spawn.spawnProtectionRadius;
+        return WorldUtil.isSkyblock(level) && SpawnConfig.dimension == level.dimension()
+                && Math.abs(pos.x) < SpawnConfig.spawnProtectionRadius && Math.abs(pos.z) < SpawnConfig.spawnProtectionRadius;
     }
 
     private static boolean isOnSpawn(Entity entity) {
         ChunkPos pos = new ChunkPos(entity.blockPosition());
-        return WorldUtil.isSkyblock(entity.level()) && ConfigHandler.Spawn.dimension == entity.level().dimension()
-                && Math.abs(pos.x) < ConfigHandler.Spawn.spawnProtectionRadius && Math.abs(pos.z) < ConfigHandler.Spawn.spawnProtectionRadius;
+        return WorldUtil.isSkyblock(entity.level()) && SpawnConfig.dimension == entity.level().dimension()
+                && Math.abs(pos.x) < SpawnConfig.spawnProtectionRadius && Math.abs(pos.z) < SpawnConfig.spawnProtectionRadius;
     }
 }

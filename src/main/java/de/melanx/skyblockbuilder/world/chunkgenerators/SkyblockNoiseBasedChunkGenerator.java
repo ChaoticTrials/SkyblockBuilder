@@ -3,7 +3,8 @@ package de.melanx.skyblockbuilder.world.chunkgenerators;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.StructuresConfig;
+import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -73,7 +74,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return ConfigHandler.World.seaHeight;
+        return WorldConfig.seaHeight;
     }
 
     @Override
@@ -112,10 +113,10 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     @Nullable
     @Override
     public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(@Nonnull ServerLevel level, @Nonnull HolderSet<Structure> structureHolderSet, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
-        List<Holder<Structure>> holders = structureHolderSet.stream().filter(holder -> holder.unwrapKey().isPresent() && ConfigHandler.Structures.generationStructures.test(holder.unwrapKey().get().location())).toList();
+        List<Holder<Structure>> holders = structureHolderSet.stream().filter(holder -> holder.unwrapKey().isPresent() && StructuresConfig.generationStructures.test(holder.unwrapKey().get().location())).toList();
         HolderSet.Direct<Structure> modifiedStructureHolderSet = HolderSet.direct(holders);
         for (Holder<Structure> holder : modifiedStructureHolderSet) {
-            if (holder.unwrapKey().isPresent() && ConfigHandler.Structures.generationStructures.test(holder.unwrapKey().get().location())) {
+            if (holder.unwrapKey().isPresent() && StructuresConfig.generationStructures.test(holder.unwrapKey().get().location())) {
                 return super.findNearestMapStructure(level, modifiedStructureHolderSet, pos, searchRadius, skipKnownStructures);
             }
         }
@@ -125,7 +126,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Override
     public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level, @Nonnull RandomState randomState) {
-        if (ConfigHandler.World.surface) {
+        if (WorldConfig.surface) {
             return level.getMinBuildHeight() + this.layerHeight;
         }
 
@@ -160,7 +161,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                 int l = 0;
                 for (Holder<ConfiguredWorldCarver<?>> holder : biomeGenerationSettings.getCarvers(step)) {
                     // my change
-                    if (holder.unwrapKey().isPresent() && !ConfigHandler.World.carvers.get(this.dimension.location().toString()).test(holder.unwrapKey().get().location())) {
+                    if (holder.unwrapKey().isPresent() && !WorldConfig.carvers.get(this.dimension.location().toString()).test(holder.unwrapKey().get().location())) {
                         continue;
                     }
 
@@ -215,7 +216,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                 if (structureManager.shouldGenerateStructures()) {
                     for (Structure structure : map.getOrDefault(i, Collections.emptyList())) {
                         ResourceLocation location = level.registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(structure);
-                        if (!ConfigHandler.Structures.generationStructures.test(location)) {
+                        if (!StructuresConfig.generationStructures.test(location)) {
                             continue;
                         }
 
@@ -261,7 +262,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                         PlacedFeature placedfeature = stepFeatureData.features().get(featureIndex);
                         // The only reason why I needed to copy the code - checking if it should be placed
                         Optional<ResourceKey<ConfiguredFeature<?, ?>>> optionalResourceKey = placedfeature.feature().unwrapKey();
-                        if (optionalResourceKey.isPresent() && !ConfigHandler.Structures.generationFeatures.test(optionalResourceKey.get().location())) {
+                        if (optionalResourceKey.isPresent() && !StructuresConfig.generationFeatures.test(optionalResourceKey.get().location())) {
                             continue;
                         }
 

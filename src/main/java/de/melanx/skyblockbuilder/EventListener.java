@@ -15,9 +15,9 @@ import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.config.StartingInventory;
-import de.melanx.skyblockbuilder.config.TemplateConfig;
+import de.melanx.skyblockbuilder.config.common.InventoryConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
@@ -123,7 +123,7 @@ public class EventListener {
             GameProfileCache.addProfiles(Set.of(player.getGameProfile()));
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
                 if (!data.hasPlayerTeam(player) && !spawn.hasPlayer(player)) {
-                    if (ConfigHandler.Inventory.dropItems) {
+                    if (InventoryConfig.dropItems) {
                         RandomUtility.dropInventories(player);
                     }
 
@@ -136,7 +136,7 @@ public class EventListener {
             player.getPersistentData().putBoolean(SPAWNED_TAG, true);
             data.getOrCreateMetaInfo(player);
 
-            if (ConfigHandler.Inventory.clearInv) {
+            if (InventoryConfig.clearInv) {
                 player.getInventory().clearContent();
             }
 
@@ -223,7 +223,7 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onConfigChange(ConfigLoadedEvent event) {
-        if (event.getConfigClass() == TemplateConfig.class) {
+        if (event.getConfigClass() == TemplatesConfig.class) {
             StartingInventory.loadStarterItems();
             if (event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
                 TemplateLoader.updateTemplates();

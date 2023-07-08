@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.commands.invitation;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -56,7 +56,7 @@ public class InviteCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.invite_player").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if (!PermissionsConfig.selfManage && !source.hasPermission(2)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.send_invitations").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }

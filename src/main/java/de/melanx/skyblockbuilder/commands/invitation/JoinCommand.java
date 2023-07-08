@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.Suggestions;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -50,7 +50,7 @@ public class JoinCommand {
                 return 0;
             case DEFAULT:
                 if (!source.hasPermission(2)) {
-                    if (!ConfigHandler.Utility.selfManage) {
+                    if (!PermissionsConfig.selfManage) {
                         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED), false);
                         return 0;
                     }

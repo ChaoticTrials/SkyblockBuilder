@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.world.chunkgenerators;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
@@ -64,7 +64,7 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager manager, @Nonnull ChunkAccess chunk) {
         ChunkPos chunkPos = chunk.getPos();
-        if (ConfigHandler.Dimensions.End.mainIsland && Mth.abs(chunkPos.x) <= MAIN_ISLAND_DISTANCE && Mth.abs(chunkPos.z) <= MAIN_ISLAND_DISTANCE) {
+        if (DimensionsConfig.End.mainIsland && Mth.abs(chunkPos.x) <= MAIN_ISLAND_DISTANCE && Mth.abs(chunkPos.z) <= MAIN_ISLAND_DISTANCE) {
             return this.parent.fillFromNoise(executor, blender, randomState, manager, chunk);
         }
 

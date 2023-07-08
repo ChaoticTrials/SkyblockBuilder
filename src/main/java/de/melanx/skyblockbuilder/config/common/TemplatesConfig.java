@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.config;
+package de.melanx.skyblockbuilder.config.common;
 
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegisterConfig("templates")
-public class TemplateConfig {
+public class TemplatesConfig {
 
     @Config("The list of templates being available. The first entry is the default template.")
     public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", "default", WorldUtil.Directions.SOUTH, new TemplateInfo.Offset(0, 0, 0)));

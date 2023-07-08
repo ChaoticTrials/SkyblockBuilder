@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.world;
 
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -31,7 +31,7 @@ public final class IslandPos {
         this.x = x;
         this.z = z;
         this.offset = offset;
-        this.center = new BlockPos(this.x * ConfigHandler.World.islandDistance + offset.x(), y, this.z * ConfigHandler.World.islandDistance + offset.z());
+        this.center = new BlockPos(this.x * WorldConfig.islandDistance + offset.x(), y, this.z * WorldConfig.islandDistance + offset.z());
     }
 
     public BlockPos getCenter() {
@@ -43,7 +43,7 @@ public final class IslandPos {
     }
 
     public static IslandPos fromTag(CompoundTag tag) {
-        return new IslandPos(tag.getInt("IslandX"), tag.getInt("Height"), tag.getInt("IslandZ"), new TemplateInfo.Offset(tag.contains("OffsetX") ? tag.getInt("OffsetX") : ConfigHandler.World.offset, tag.contains("OffsetY") ? tag.getInt("OffsetY") : 0, tag.contains("OffsetZ") ? tag.getInt("OffsetZ") : ConfigHandler.World.offset));
+        return new IslandPos(tag.getInt("IslandX"), tag.getInt("Height"), tag.getInt("IslandZ"), new TemplateInfo.Offset(tag.contains("OffsetX") ? tag.getInt("OffsetX") : WorldConfig.offset, tag.contains("OffsetY") ? tag.getInt("OffsetY") : 0, tag.contains("OffsetZ") ? tag.getInt("OffsetZ") : WorldConfig.offset));
     }
 
     public CompoundTag toTag() {

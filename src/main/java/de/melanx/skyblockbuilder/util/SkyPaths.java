@@ -36,7 +36,7 @@ public class SkyPaths {
     public static final Path DATA_DIR = MOD_CONFIG.resolve("data");
 
     // files
-    public static final Path ITEMS_FILE = MOD_CONFIG.resolve("starter_item.json");
+    public static final Path ITEMS_FILE = MOD_CONFIG.resolve("starter_inventory.json5");
     public static final Path SCHEMATIC_FILE = TEMPLATES_DIR.resolve("default.nbt");
     private static final Path FEATURES_FILE = DATA_DIR.resolve("features.txt");
     private static final Path STRUCTURES_FILE = DATA_DIR.resolve("structures.txt");
@@ -97,6 +97,8 @@ public class SkyPaths {
         object.add("items", items);
 
         BufferedWriter w = Files.newBufferedWriter(ITEMS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+        w.write("// See here for more information:\n");
+        w.write("// https://melanx.github.io/SkyblockBuilder/1.20.x/config/inventory/#starting-inventory\n");
         w.write(SkyblockBuilder.PRETTY_GSON.toJson(object));
         w.close();
     }

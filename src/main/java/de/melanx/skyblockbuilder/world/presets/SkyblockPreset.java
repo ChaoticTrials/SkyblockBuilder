@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.world.presets;
 
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
+import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.util.BiomeSourceConverter;
 import de.melanx.skyblockbuilder.util.WorldPresetUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -42,11 +43,11 @@ public class SkyblockPreset extends WorldPreset {
                 LevelStem.OVERWORLD, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.OVERWORLD),
                         configuredOverworldChunkGenerator(registryAccess)),
                 LevelStem.NETHER, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.NETHER),
-                        ConfigHandler.Dimensions.Nether.Default ?
+                        DimensionsConfig.Nether.Default ?
                                 WorldPresetUtil.defaultNetherGenerator(registryAccess)
                                 : netherChunkGenerator(noises, noiseGeneratorSettings)),
                 LevelStem.END, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.END),
-                        ConfigHandler.Dimensions.End.Default ?
+                        DimensionsConfig.End.Default ?
                                 WorldPresetUtil.defaultEndGenerator(registryAccess)
                                 : endChunkGenerator(biomes, noiseGeneratorSettings))
         );
@@ -56,7 +57,7 @@ public class SkyblockPreset extends WorldPreset {
         HolderGetter<MultiNoiseBiomeSourceParameterList> noises = registryAccess.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
         HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.lookupOrThrow(Registries.NOISE_SETTINGS);
 
-        return ConfigHandler.Dimensions.Overworld.Default ?
+        return DimensionsConfig.Overworld.Default ?
                 new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD))
                 : overworldChunkGenerator(noises, noiseGeneratorSettings);
     }
@@ -83,8 +84,8 @@ public class SkyblockPreset extends WorldPreset {
     }
 
     public static List<FlatLayerInfo> getLayers(ResourceKey<Level> levelKey) {
-        return ConfigHandler.World.surface
-                ? WorldUtil.layersInfoFromString(ConfigHandler.World.surfaceSettings.get(levelKey.location().toString()))
+        return WorldConfig.surface
+                ? WorldUtil.layersInfoFromString(WorldConfig.surfaceSettings.get(levelKey.location().toString()))
                 : List.of();
     }
 }

@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.template;
 
-import de.melanx.skyblockbuilder.config.TemplateConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -22,12 +22,12 @@ public class TemplateLoader {
             SkyPaths.copyTemplateFile();
             Set<String> takenNames = new HashSet<>();
 
-            for (TemplateInfo info : TemplateConfig.templates) {
-                if (!TemplateConfig.spawns.containsKey(info.spawns())) {
+            for (TemplateInfo info : TemplatesConfig.templates) {
+                if (!TemplatesConfig.spawns.containsKey(info.spawns())) {
                     throw new IllegalArgumentException("Spawn configuration \"" + info.spawns() + "\" is not defined: " + info.name());
                 }
 
-                if (!TemplateConfig.surroundingBlocks.containsKey(info.surroundingBlocks()) && !info.surroundingBlocks().isEmpty()) {
+                if (!TemplatesConfig.surroundingBlocks.containsKey(info.surroundingBlocks()) && !info.surroundingBlocks().isEmpty()) {
                     throw new IllegalArgumentException("Surrounding blocks configuration \"" + info.surroundingBlocks() + "\" is not defined: " + info.name());
                 }
 

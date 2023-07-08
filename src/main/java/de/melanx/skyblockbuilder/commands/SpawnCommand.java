@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.RandomUtility;
@@ -17,7 +17,7 @@ public class SpawnCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Teleports the player to spawn
-        return Commands.literal("spawn").requires(source -> ConfigHandler.Utility.Teleports.spawn || source.hasPermission(2))
+        return Commands.literal("spawn").requires(source -> PermissionsConfig.Teleports.spawn || source.hasPermission(2))
                 .executes(context -> spawn(context.getSource()));
     }
 
@@ -31,16 +31,16 @@ public class SpawnCommand {
 
         if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleportSpawn(level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(ConfigHandler.Utility.Teleports.spawnCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastSpawnTeleport()))));
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.spawnCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastSpawnTeleport()))));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !ConfigHandler.Utility.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
+        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !ConfigHandler.Utility.Teleports.crossDimensionTeleportation && player.level() != data.getLevel()) {
+        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.crossDimensionTeleportation && player.level() != data.getLevel()) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
             return 0;
         }

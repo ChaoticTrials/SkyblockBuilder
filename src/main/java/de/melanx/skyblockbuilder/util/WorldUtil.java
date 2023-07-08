@@ -5,8 +5,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
+import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
+import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
@@ -48,16 +49,16 @@ public class WorldUtil {
 
         MinecraftServer server = ((ServerLevel) level).getServer();
 
-        if (!ConfigHandler.Dimensions.Overworld.Default) {
+        if (!DimensionsConfig.Overworld.Default) {
             return server.overworld().getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
         }
 
-        if (!ConfigHandler.Dimensions.Nether.Default) {
+        if (!DimensionsConfig.Nether.Default) {
             ServerLevel nether = server.getLevel(Level.NETHER);
             return nether != null && nether.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
         }
 
-        if (!ConfigHandler.Dimensions.End.Default) {
+        if (!DimensionsConfig.End.Default) {
             ServerLevel end = server.getLevel(Level.END);
             return end != null && end.getChunkSource().getGenerator() instanceof SkyblockEndChunkGenerator;
         }
@@ -72,7 +73,7 @@ public class WorldUtil {
     }
 
     public static ServerLevel getConfiguredLevel(MinecraftServer server) {
-        ResourceLocation location = ConfigHandler.Spawn.dimension.location();
+        ResourceLocation location = SpawnConfig.dimension.location();
         ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, location);
         ServerLevel configLevel = server.getLevel(worldKey);
 
@@ -97,7 +98,7 @@ public class WorldUtil {
 
         BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(team.getIsland().getCenter());
 
-        return PositionHelper.findPos(pos, blockPos -> isValidSpawn(level, blockPos), ConfigHandler.Spawn.radius);
+        return PositionHelper.findPos(pos, blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radius);
     }
 
     public static boolean isValidSpawn(Level level, BlockPos pos) {
@@ -113,16 +114,16 @@ public class WorldUtil {
     }
 
     public static int calcSpawnHeight(Level level, int x, int z) {
-        int top = ConfigHandler.Spawn.Height.range.top();
-        int bottom = ConfigHandler.Spawn.Height.range.bottom();
+        int top = SpawnConfig.Height.range.top();
+        int bottom = SpawnConfig.Height.range.bottom();
 
         int height;
-        switch (ConfigHandler.Spawn.Height.spawnType) {
+        switch (SpawnConfig.Height.spawnType) {
             case RANGE_TOP, RANGE_BOTTOM -> {
                 BlockPos.MutableBlockPos spawn = new BlockPos.MutableBlockPos(x, top, z);
                 while (!WorldUtil.isValidSpawn(level, spawn, bottom, top)) {
                     if (spawn.getY() <= level.getMinBuildHeight()) {
-                        if (ConfigHandler.Spawn.Height.spawnType == SpawnSettings.Type.RANGE_TOP) {
+                        if (SpawnConfig.Height.spawnType == SpawnSettings.Type.RANGE_TOP) {
                             spawn.setY(top);
                         } else {
                             spawn.setY(bottom);
@@ -132,7 +133,7 @@ public class WorldUtil {
 
                     spawn.move(Direction.DOWN, 1);
                 }
-                height = spawn.getY() + ConfigHandler.Spawn.Height.offset;
+                height = spawn.getY() + SpawnConfig.Height.offset;
             }
             // SpawnSettings.Type.SET
             default -> height = bottom;

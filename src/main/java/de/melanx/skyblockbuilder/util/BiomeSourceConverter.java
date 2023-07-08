@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.util;
 
 import com.mojang.datafixers.util.Pair;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class BiomeSourceConverter {
 
     public static BiomeSource customBiomeSource(ResourceKey<Level> level, BiomeSource baseSource) {
-        ResourceList resourceList = ConfigHandler.World.biomes.get(level.location().toString());
+        ResourceList resourceList = WorldConfig.biomes.get(level.location().toString());
         if (resourceList != null) {
             Set<Holder<Biome>> newBiomes = new HashSet<>();
             for (Holder<Biome> possibleBiome : baseSource.possibleBiomes()) {

@@ -2,7 +2,8 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.InventoryConfig;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.RandomUtility;
@@ -38,7 +39,7 @@ public class LeaveCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.leave_team").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if (!PermissionsConfig.selfManage && !source.hasPermission(2)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.manage_teams").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -47,7 +48,7 @@ public class LeaveCommand {
                 break;
         }
 
-        if (ConfigHandler.Inventory.dropItems) {
+        if (InventoryConfig.dropItems) {
             RandomUtility.dropInventories(player);
         }
         data.removePlayerFromTeam(player);

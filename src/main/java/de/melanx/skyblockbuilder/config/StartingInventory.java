@@ -30,7 +30,7 @@ public class StartingInventory {
 
         try {
             String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
-            JsonObject json = GsonHelper.parse(s);
+            JsonObject json = GsonHelper.parse(s, true);
 
             if (json.has("items")) {
                 JsonArray items = json.getAsJsonArray("items");

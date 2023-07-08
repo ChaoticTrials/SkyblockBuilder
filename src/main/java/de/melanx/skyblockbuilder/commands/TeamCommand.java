@@ -4,7 +4,8 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
+import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
@@ -100,7 +101,7 @@ public class TeamCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.accept_join_request").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if (!PermissionsConfig.selfManage && !source.hasPermission(2)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.accept_join_request").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -141,7 +142,7 @@ public class TeamCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.deny_join_request").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.selfManage && !source.hasPermission(2)) {
+                if (!PermissionsConfig.selfManage && !source.hasPermission(2)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.deny_join_request").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -239,7 +240,7 @@ public class TeamCommand {
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
         // check for overworld
-        if (level != source.getServer().getLevel(ConfigHandler.Spawn.dimension)) {
+        if (level != source.getServer().getLevel(SpawnConfig.dimension)) {
             source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.wrong_position").withStyle(ChatFormatting.RED), false);
             return 0;
         }
@@ -263,14 +264,14 @@ public class TeamCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.create_spawn").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.Spawns.modifySpawns && !source.hasPermission(2)) {
+                if (!PermissionsConfig.Spawns.modifySpawns && !source.hasPermission(2)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
                 Vec3i templateSize = TemplateData.get(level).getConfiguredTemplate().getTemplate().getSize();
                 BlockPos center = team.getIsland().getCenter().mutable();
                 center.offset(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
-                if (!pos.closerThan(center, ConfigHandler.Utility.Spawns.range)) {
+                if (!pos.closerThan(center, PermissionsConfig.Spawns.range)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.position_too_far_away").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -290,7 +291,7 @@ public class TeamCommand {
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
         // check for overworld
-        if (level != source.getServer().getLevel(ConfigHandler.Spawn.dimension)) {
+        if (level != source.getServer().getLevel(SpawnConfig.dimension)) {
             source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.wrong_position").withStyle(ChatFormatting.RED), false);
             return 0;
         }
@@ -312,7 +313,7 @@ public class TeamCommand {
                 source.sendSuccess(() -> component.withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.Spawns.modifySpawns && !source.hasPermission(2)) {
+                if (!PermissionsConfig.Spawns.modifySpawns && !source.hasPermission(2)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -369,7 +370,7 @@ public class TeamCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.reset_spawns").withStyle(ChatFormatting.GOLD), false);
                 return 0;
             case DEFAULT:
-                if (!ConfigHandler.Utility.Spawns.modifySpawns && !source.hasPermission(2)) {
+                if (!PermissionsConfig.Spawns.modifySpawns && !source.hasPermission(2)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.modify_spawns").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -399,7 +400,7 @@ public class TeamCommand {
             SkyblockManageTeamEvent.Rename event = SkyblockHooks.onRename(null, team, newName);
             switch (event.getResult()) {
                 case DENY:
-                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.denied_rename_team").withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.rename_team").withStyle(ChatFormatting.RED), false);
                     return 0;
                 case DEFAULT:
                     if (!source.hasPermission(2)) {
@@ -424,7 +425,7 @@ public class TeamCommand {
             SkyblockManageTeamEvent.Rename event = SkyblockHooks.onRename(player, team, newName);
             switch (event.getResult()) {
                 case DENY:
-                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.denied_rename_team").withStyle(ChatFormatting.RED), false);
+                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.rename_team").withStyle(ChatFormatting.RED), false);
                     return 0;
                 case DEFAULT:
                 case ALLOW:

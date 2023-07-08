@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.config.mapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import org.moddingx.libx.annotation.config.RegisterMapper;
@@ -42,7 +42,7 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             desc = json.get("desc").getAsString();
         }
 
-        TemplateInfo.Offset offset = new TemplateInfo.Offset(ConfigHandler.World.offset, 0, ConfigHandler.World.offset);
+        TemplateInfo.Offset offset = new TemplateInfo.Offset(WorldConfig.offset, 0, WorldConfig.offset);
         if (json.has("offset")) {
             JsonArray offsetArray = json.get("offset").getAsJsonArray();
             offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt(), offsetArray.get(1).getAsInt(), offsetArray.get(2).getAsInt());
@@ -83,7 +83,7 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
         json.addProperty("spawns", templateInfo.spawns());
         json.addProperty("direction", templateInfo.direction().name().toLowerCase(Locale.ROOT));
 
-        if (templateInfo.offset().x() != ConfigHandler.World.offset || templateInfo.offset().z() != ConfigHandler.World.offset) {
+        if (templateInfo.offset().x() != WorldConfig.offset || templateInfo.offset().z() != WorldConfig.offset) {
             JsonArray offsetArray = new JsonArray();
             offsetArray.add(templateInfo.offset().x());
             offsetArray.add(templateInfo.offset().y());
