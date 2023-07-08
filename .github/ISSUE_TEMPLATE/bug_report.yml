@@ -2,11 +2,13 @@ name: Bug Report
 description: Report an issue with supported versions of Skyblock Builder
 labels: [ bug ]
 body:
-  - type: input
+  - type: dropdown
     id: mc-version
     attributes:
       label: Minecraft version
-      placeholder: eg. 1.18.2
+      options:
+        - 1.19.2
+        - 1.20.1
     validations:
       required: true
   - type: input
