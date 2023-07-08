@@ -148,7 +148,7 @@ public class ConfiguredTemplate {
         this.defaultSpawns.clear();
         for (Tag pos : spawns) {
             CompoundTag posTag = (CompoundTag) pos;
-            this.defaultSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"))); // todo double
+            this.defaultSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ")));
         }
 
         this.name = nbt.getString("Name");

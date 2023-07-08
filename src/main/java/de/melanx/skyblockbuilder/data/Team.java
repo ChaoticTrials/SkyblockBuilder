@@ -430,14 +430,14 @@ public class Team {
         this.possibleSpawns.clear();
         for (Tag pos : spawns) {
             CompoundTag posTag = (CompoundTag) pos;
-            this.possibleSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"))); // todo double
+            this.possibleSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ")));
         }
 
         ListTag defaultSpawns = nbt.getList("DefaultSpawns", Tag.TAG_COMPOUND);
         this.defaultPossibleSpawns.clear();
         for (Tag pos : defaultSpawns) {
             CompoundTag posTag = (CompoundTag) pos;
-            this.defaultPossibleSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"))); // todo double
+            this.defaultPossibleSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ")));
         }
 
         ListTag joinRequests = nbt.getList("JoinRequests", Tag.TAG_COMPOUND);
