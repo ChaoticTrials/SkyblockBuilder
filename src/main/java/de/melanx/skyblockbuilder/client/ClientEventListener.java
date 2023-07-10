@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.client;
 
+import de.melanx.skyblockbuilder.ModBlocks;
 import de.melanx.skyblockbuilder.ModItems;
 import de.melanx.skyblockbuilder.Registration;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -21,6 +22,7 @@ public class ClientEventListener {
     public static void buildCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(() -> ModItems.structureSaver);
+            event.accept(() -> ModBlocks.spawnBlock);
         }
     }
 }
