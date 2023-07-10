@@ -3,7 +3,9 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
+import de.melanx.skyblockbuilder.ModBlocks;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.Util;
@@ -17,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.fml.ModList;
 
@@ -86,8 +89,12 @@ public class RandomUtility {
         return profiles;
     }
 
+    /**
+     * @return Set of set spawn points
+     */
     // [Vanilla copy]
-    public static void fillTemplateFromWorld(StructureTemplate template, Level level, BlockPos pos, Vec3i box, boolean withEntities, Collection<Block> toIgnore) {
+    public static Set<TemplatesConfig.Spawn> fillTemplateFromWorld(StructureTemplate template, Level level, BlockPos pos, Vec3i box, boolean withEntities, Collection<Block> toIgnore) {
+        Set<TemplatesConfig.Spawn> spawns = new HashSet<>();
         if (box.getX() >= 1 && box.getY() >= 1 && box.getZ() >= 1) {
             BlockPos blockpos = pos.offset(box).offset(-1, -1, -1);
             List<StructureTemplate.StructureBlockInfo> specialBlocks = Lists.newArrayList();
@@ -101,6 +108,10 @@ public class RandomUtility {
                 BlockPos relPos = actPos.subtract(minPos);
                 BlockState state = level.getBlockState(actPos);
                 if (toIgnore.isEmpty() || !toIgnore.contains(state.getBlock())) {
+                    if (state.is(ModBlocks.spawnBlock)) {
+                        WorldUtil.Directions direction = WorldUtil.Directions.fromDirection(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
+                        spawns.add(new TemplatesConfig.Spawn(relPos, direction));
+                    }
                     BlockEntity blockEntity = level.getBlockEntity(actPos);
                     StructureTemplate.StructureBlockInfo blockInfo;
                     if (blockEntity != null) {
@@ -122,6 +133,8 @@ public class RandomUtility {
                 template.entityInfoList.clear();
             }
         }
+
+        return spawns;
     }
 
     public static String normalize(String s) {

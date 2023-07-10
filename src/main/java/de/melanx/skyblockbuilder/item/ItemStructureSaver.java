@@ -1,13 +1,15 @@
 package de.melanx.skyblockbuilder.item;
 
 import com.google.common.collect.Sets;
-import de.melanx.skyblockbuilder.ModBlocks;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
@@ -24,7 +26,6 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -36,10 +37,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class ItemStructureSaver extends Item {
 
@@ -157,24 +156,41 @@ public class ItemStructureSaver extends Item {
         BlockPos origin = new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
         BlockPos bounds = new BlockPos(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
 
-        HashSet<Block> toIgnore = Sets.newHashSet(Blocks.STRUCTURE_VOID);
+        Set<Block> toIgnore = Sets.newHashSet(Blocks.STRUCTURE_VOID);
         if (ignoreAir) {
             toIgnore.add(Blocks.AIR);
         }
-        RandomUtility.fillTemplateFromWorld(template, level, origin, bounds, true, toIgnore);
-        Map<BlockPos, Direction> spawnBlocks = new HashMap<>();
-           outerloop:
-        for (StructureTemplate.Palette palette : template.palettes) {
-            for (StructureTemplate.StructureBlockInfo block : palette.blocks()) {
-                if (block.state().is(ModBlocks.spawnBlock)) {
-                    spawnBlocks.put(block.pos(), block.state().getValue(BlockStateProperties.HORIZONTAL_FACING));
+        Set<TemplatesConfig.Spawn> spawnPositions = RandomUtility.fillTemplateFromWorld(template, level, origin, bounds, true, toIgnore);
+
+        if (!spawnPositions.isEmpty()) {
+            Path spawns = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name + "_spawns", "json"));
+            JsonArray north = new JsonArray();
+            JsonArray east = new JsonArray();
+            JsonArray south = new JsonArray();
+            JsonArray west = new JsonArray();
+            for (TemplatesConfig.Spawn spawnPosition : spawnPositions) {
+                JsonArray position = new JsonArray();
+                position.add(spawnPosition.pos().getX());
+                position.add(spawnPosition.pos().getY());
+                position.add(spawnPosition.pos().getZ());
+                switch (spawnPosition.direction()) {
+                    case NORTH -> north.add(position);
+                    case EAST -> east.add(position);
+                    case SOUTH -> south.add(position);
+                    case WEST -> west.add(position);
                 }
             }
-        }
-
-        if (!spawnBlocks.isEmpty()) {
-            Path spawns = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name + "_spawns", "json"));
-
+            JsonObject json = new JsonObject();
+            json.add("north", north);
+            json.add("east", east);
+            json.add("south", south);
+            json.add("west", west);
+            try {
+                Files.writeString(spawns, SkyblockBuilder.PRETTY_GSON.toJson(json));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
         Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name, asSnbt ? "snbt" : "nbt"));
         CompoundTag tag = template.save(new CompoundTag());
