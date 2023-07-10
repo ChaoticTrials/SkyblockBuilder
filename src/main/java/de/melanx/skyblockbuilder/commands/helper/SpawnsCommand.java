@@ -11,6 +11,7 @@ import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -23,12 +24,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.moddingx.libx.command.EnumArgument2;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Set;
 
 public class SpawnsCommand {
@@ -57,37 +55,40 @@ public class SpawnsCommand {
                 team = data.getSpawn();
             }
 
-            String folderName = "skyblock_exports";
+            String folderName = SkyPaths.MOD_EXPORTS.getFileName().toString();
             try {
-                Files.createDirectories(Paths.get(folderName));
+                Files.createDirectories(SkyPaths.MOD_EXPORTS);
             } catch (IOException e) {
                 throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", folderName)).create();
             }
             String filePath = RandomUtility.getFilePath(folderName, "spawns", "json");
 
-            JsonObject json = new JsonObject();
-            JsonArray spawns = new JsonArray();
+            JsonArray north = new JsonArray();
+            JsonArray east = new JsonArray();
+            JsonArray south = new JsonArray();
+            JsonArray west = new JsonArray();
             Set<TemplatesConfig.Spawn> possibleSpawns = team.getPossibleSpawns();
             for (TemplatesConfig.Spawn spawn : possibleSpawns) {
-                JsonObject object = new JsonObject();
-                JsonArray arr = new JsonArray();
-                BlockPos pos = spawn.pos();
-                arr.add(pos.getX() % WorldConfig.islandDistance);
-                arr.add(pos.getY() - team.getIsland().getCenter().getY());
-                arr.add(pos.getZ() % WorldConfig.islandDistance);
-
-                object.add("positions", arr);
-                object.addProperty("direction", spawn.direction().name());
-
-                spawns.add(object);
+                JsonArray position = new JsonArray();
+                position.add(spawn.pos().getX() % WorldConfig.islandDistance);
+                position.add(spawn.pos().getY() - team.getIsland().getCenter().getY());
+                position.add(spawn.pos().getZ() % WorldConfig.islandDistance);
+                switch (spawn.direction()) {
+                    case NORTH -> north.add(position);
+                    case EAST -> east.add(position);
+                    case SOUTH -> south.add(position);
+                    case WEST -> west.add(position);
+                }
             }
+            JsonObject json = new JsonObject();
+            json.add("north", north);
+            json.add("east", east);
+            json.add("south", south);
+            json.add("west", west);
 
-            json.add("islandSpawns", spawns);
-            Path file = Paths.get(folderName).resolve(filePath.split("/")[1]);
+            Path file = SkyPaths.MOD_EXPORTS.resolve(filePath.split("/")[1]);
             try {
-                BufferedWriter w = Files.newBufferedWriter(file, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-                w.write(SkyblockBuilder.PRETTY_GSON.toJson(json));
-                w.close();
+                Files.writeString(file, SkyblockBuilder.PRETTY_GSON.toJson(json));
             } catch (IOException e) {
                 throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_file", file)).create();
             }

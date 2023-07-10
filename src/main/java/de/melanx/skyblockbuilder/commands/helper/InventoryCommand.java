@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -21,7 +22,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 public class InventoryCommand {
@@ -35,9 +35,9 @@ public class InventoryCommand {
 
     private static int exportInventory(CommandSourceStack source) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
-        String folderName = "skyblock_exports";
+        String folderName = SkyPaths.MOD_EXPORTS.getFileName().toString();
         try {
-            Files.createDirectories(Paths.get(folderName));
+            Files.createDirectories(SkyPaths.MOD_EXPORTS);
         } catch (IOException e) {
             throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", folderName)).create();
         }
@@ -75,7 +75,7 @@ public class InventoryCommand {
         }
 
         json.add("items", items);
-        Path file = Paths.get(folderName).resolve(filePath.split("/")[1]);
+        Path file = SkyPaths.MOD_EXPORTS.resolve(filePath.split("/")[1]);
         try {
             BufferedWriter w = Files.newBufferedWriter(file, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
             w.write(SkyblockBuilder.PRETTY_GSON.toJson(json));
