@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.data;
 
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.ChatFormatting;
@@ -28,8 +29,8 @@ public class Team {
     private final SkyblockSavedData data;
     private final Set<UUID> players;
     private final Set<UUID> joinRequests;
-    private final Set<BlockPos> possibleSpawns;
-    private final Set<BlockPos> defaultPossibleSpawns;
+    private final Set<TemplatesConfig.Spawn> possibleSpawns;
+    private final Set<TemplatesConfig.Spawn> defaultPossibleSpawns;
     private UUID teamId;
     private IslandPos island;
     private String name;
@@ -37,17 +38,16 @@ public class Team {
     private boolean allowJoinRequests;
     private long createdAt;
     private long lastChanged;
-    private WorldUtil.Directions direction;
 
     private Team(SkyblockSavedData data) {
-        this(data, null, null, null);
+        this(data, null, null);
     }
 
-    public Team(SkyblockSavedData data, IslandPos island, WorldUtil.Directions direction) {
-        this(data, island, UUID.randomUUID(), direction);
+    public Team(SkyblockSavedData data, IslandPos island) {
+        this(data, island, UUID.randomUUID());
     }
 
-    public Team(SkyblockSavedData data, IslandPos island, UUID teamId, WorldUtil.Directions direction) {
+    public Team(SkyblockSavedData data, IslandPos island, UUID teamId) {
         this.data = data;
         this.island = island;
         this.players = new HashSet<>();
@@ -58,7 +58,6 @@ public class Team {
         this.allowVisits = false;
         this.createdAt = System.currentTimeMillis();
         this.lastChanged = System.currentTimeMillis();
-        this.direction = direction;
     }
 
     public static Team create(SkyblockSavedData data, CompoundTag tag) {
@@ -114,15 +113,15 @@ public class Team {
         this.data.setDirty();
     }
 
-    public Set<BlockPos> getPossibleSpawns() {
+    public Set<TemplatesConfig.Spawn> getPossibleSpawns() {
         return Set.copyOf(this.possibleSpawns);
     }
 
-    public Set<BlockPos> getDefaultPossibleSpawns() {
+    public Set<TemplatesConfig.Spawn> getDefaultPossibleSpawns() {
         return Set.copyOf(this.defaultPossibleSpawns);
     }
 
-    public void setPossibleSpawns(Collection<BlockPos> spawns) {
+    public void setPossibleSpawns(Collection<TemplatesConfig.Spawn> spawns) {
         this.possibleSpawns.clear();
         this.defaultPossibleSpawns.clear();
         this.possibleSpawns.addAll(spawns);
@@ -131,8 +130,8 @@ public class Team {
         this.data.setDirty();
     }
 
-    public void addPossibleSpawn(BlockPos pos) {
-        this.possibleSpawns.add(pos);
+    public void addPossibleSpawn(BlockPos pos, WorldUtil.Directions direction) {
+        this.possibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
         this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
     }
@@ -142,11 +141,17 @@ public class Team {
             return false;
         }
 
-        boolean remove = this.possibleSpawns.remove(pos);
-        this.lastChanged = System.currentTimeMillis();
-        this.data.setDirty();
+        for (TemplatesConfig.Spawn possibleSpawn : this.possibleSpawns) {
+            if (possibleSpawn.pos().equals(pos)) {
+                boolean remove = this.possibleSpawns.remove(possibleSpawn);
+                this.lastChanged = System.currentTimeMillis();
+                this.data.setDirty();
 
-        return remove;
+                return remove;
+            }
+        }
+
+        return false;
     }
 
     public boolean allowsVisits() {
@@ -326,14 +331,6 @@ public class Team {
         this.data.setDirty();
     }
 
-    public void setDirection(WorldUtil.Directions direction) {
-        this.direction = direction;
-    }
-
-    public WorldUtil.Directions getDirection() {
-        return this.direction;
-    }
-
     @Nullable
     public ServerLevel getLevel() {
         return this.data.getLevel();
@@ -365,7 +362,6 @@ public class Team {
         nbt.putBoolean("AllowJoinRequests", this.allowJoinRequests);
         nbt.putLong("CreatedAt", this.createdAt);
         nbt.putLong("LastChanged", this.lastChanged);
-        nbt.putString("SpawnPointDirection", this.direction.name());
 
         ListTag players = new ListTag();
         for (UUID player : this.players) {
@@ -376,23 +372,27 @@ public class Team {
         }
 
         ListTag spawns = new ListTag();
-        for (BlockPos pos : this.possibleSpawns) {
+        for (TemplatesConfig.Spawn spawn : this.possibleSpawns) {
             CompoundTag posTag = new CompoundTag();
-            posTag.putDouble("posX", pos.getX() + 0.5);
-            posTag.putDouble("posY", pos.getY());
-            posTag.putDouble("posZ", pos.getZ() + 0.5);
+            BlockPos pos = spawn.pos();
+            posTag.putInt("posX", pos.getX());
+            posTag.putInt("posY", pos.getY());
+            posTag.putInt("posZ", pos.getZ());
+            posTag.putString("Direction", spawn.direction().name());
 
             spawns.add(posTag);
         }
 
         ListTag defaultSpawns = new ListTag();
-        for (BlockPos pos : this.defaultPossibleSpawns) {
+        for (TemplatesConfig.Spawn spawn : this.defaultPossibleSpawns) {
             CompoundTag posTag = new CompoundTag();
-            posTag.putDouble("posX", pos.getX() + 0.5);
-            posTag.putDouble("posY", pos.getY());
-            posTag.putDouble("posZ", pos.getZ() + 0.5);
+            BlockPos pos = spawn.pos();
+            posTag.putInt("posX", pos.getX());
+            posTag.putInt("posY", pos.getY());
+            posTag.putInt("posZ", pos.getZ());
+            posTag.putString("Direction", spawn.direction().name());
 
-            defaultSpawns.add(posTag);
+            spawns.add(posTag);
         }
 
         ListTag joinRequests = new ListTag();
@@ -418,7 +418,6 @@ public class Team {
         this.allowJoinRequests = nbt.getBoolean("AllowJoinRequests");
         this.createdAt = nbt.getLong("CreatedAt");
         this.lastChanged = nbt.getLong("LastChanged");
-        this.direction = WorldUtil.Directions.valueOf(nbt.getString("SpawnPointDirection"));
 
         ListTag players = nbt.getList("Players", Tag.TAG_COMPOUND);
         this.players.clear();
@@ -428,16 +427,20 @@ public class Team {
 
         ListTag spawns = nbt.getList("Spawns", Tag.TAG_COMPOUND);
         this.possibleSpawns.clear();
-        for (Tag pos : spawns) {
-            CompoundTag posTag = (CompoundTag) pos;
-            this.possibleSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ")));
+        for (Tag tag : spawns) {
+            CompoundTag posTag = (CompoundTag) tag;
+            BlockPos pos = new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"));
+            WorldUtil.Directions direction = WorldUtil.Directions.valueOf(posTag.getString("Direction"));
+            this.possibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
         }
 
         ListTag defaultSpawns = nbt.getList("DefaultSpawns", Tag.TAG_COMPOUND);
         this.defaultPossibleSpawns.clear();
-        for (Tag pos : defaultSpawns) {
-            CompoundTag posTag = (CompoundTag) pos;
-            this.defaultPossibleSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ")));
+        for (Tag tag : defaultSpawns) {
+            CompoundTag posTag = (CompoundTag) tag;
+            BlockPos pos = new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"));
+            WorldUtil.Directions direction = WorldUtil.Directions.valueOf(posTag.getString("Direction"));
+            this.defaultPossibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
         }
 
         ListTag joinRequests = nbt.getList("JoinRequests", Tag.TAG_COMPOUND);

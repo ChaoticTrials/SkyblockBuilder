@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -66,13 +67,19 @@ public class SpawnsCommand {
 
             JsonObject json = new JsonObject();
             JsonArray spawns = new JsonArray();
-            Set<BlockPos> possibleSpawns = team.getPossibleSpawns();
-            for (BlockPos pos : possibleSpawns) {
+            Set<TemplatesConfig.Spawn> possibleSpawns = team.getPossibleSpawns();
+            for (TemplatesConfig.Spawn spawn : possibleSpawns) {
+                JsonObject object = new JsonObject();
                 JsonArray arr = new JsonArray();
+                BlockPos pos = spawn.pos();
                 arr.add(pos.getX() % WorldConfig.islandDistance);
                 arr.add(pos.getY() - team.getIsland().getCenter().getY());
                 arr.add(pos.getZ() % WorldConfig.islandDistance);
-                spawns.add(arr);
+
+                object.add("positions", arr);
+                object.addProperty("direction", spawn.direction().name());
+
+                spawns.add(object);
             }
 
             json.add("islandSpawns", spawns);
@@ -90,8 +97,9 @@ public class SpawnsCommand {
         }
 
         for (Team team : data.getTeams()) {
-            Set<BlockPos> posSet = mode == Mode.NORMAL ? team.getDefaultPossibleSpawns() : team.getPossibleSpawns();
-            for (BlockPos pos : posSet) {
+            Set<TemplatesConfig.Spawn> spawns = mode == Mode.NORMAL ? team.getDefaultPossibleSpawns() : team.getPossibleSpawns();
+            for (TemplatesConfig.Spawn spawn : spawns) {
+                BlockPos pos = spawn.pos();
                 if (source.getEntity() instanceof ServerPlayer) {
                     level.sendParticles(source.getPlayerOrException(), ParticleTypes.HAPPY_VILLAGER, true, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);
                 } else {

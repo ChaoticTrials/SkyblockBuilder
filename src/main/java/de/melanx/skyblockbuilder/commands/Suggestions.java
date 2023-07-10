@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
@@ -8,7 +9,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -25,8 +25,8 @@ public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> SPAWN_POSITIONS = (context, builder) -> {
         Team team = SkyblockSavedData.get(context.getSource().getLevel()).getTeamFromPlayer(context.getSource().getPlayerOrException());
         if (team != null) {
-            Set<BlockPos> possibleSpawns = team.getPossibleSpawns();
-            possibleSpawns.forEach(spawn -> builder.suggest(String.format("%s %s %s", spawn.getX(), spawn.getY(), spawn.getZ())));
+            Set<TemplatesConfig.Spawn> possibleSpawns = team.getPossibleSpawns();
+            possibleSpawns.forEach(spawn -> builder.suggest(String.format("%s %s %s", spawn.pos().getX(), spawn.pos().getY(), spawn.pos().getZ())));
         }
 
         return BlockPosArgument.blockPos().listSuggestions(context, builder);

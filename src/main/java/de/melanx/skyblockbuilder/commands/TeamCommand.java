@@ -280,7 +280,8 @@ public class TeamCommand {
                 break;
         }
 
-        team.addPossibleSpawn(pos);
+        WorldUtil.Directions direction = WorldUtil.Directions.fromDirection(player.getDirection());
+        team.addPossibleSpawn(pos, direction);
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.spawn_added", pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.GOLD), false);
         return 1;
     }

@@ -19,18 +19,14 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class ConfiguredTemplate {
 
-    private final Set<BlockPos> defaultSpawns = new HashSet<>();
+    private final Set<TemplatesConfig.Spawn> defaultSpawns = new HashSet<>();
     private StructureTemplate template;
     private String name;
     private String desc;
-    private WorldUtil.Directions direction;
     private TemplateInfo.Offset offset;
     private int surroundingMargin;
     private List<Block> surroundingBlocks;
@@ -50,10 +46,9 @@ public class ConfiguredTemplate {
         }
 
         this.template = template;
-        this.defaultSpawns.addAll(TemplatesConfig.spawns.get(info.spawns()));
+        this.defaultSpawns.addAll(ConfiguredTemplate.collectSpawns(TemplatesConfig.spawns.get(info.spawns())));
         this.name = info.name();
         this.desc = info.desc();
-        this.direction = info.direction();
         this.offset = info.offset();
         this.surroundingMargin = info.surroundingMargin();
         List<Block> blockPalette = TemplatesConfig.surroundingBlocks.get(info.surroundingBlocks());
@@ -67,11 +62,21 @@ public class ConfiguredTemplate {
     private ConfiguredTemplate() {
     }
 
+    private static Set<TemplatesConfig.Spawn> collectSpawns(Map<String, Set<BlockPos>> spawnMap) {
+        Set<TemplatesConfig.Spawn> spawns = new HashSet<>();
+        for (Map.Entry<String, Set<BlockPos>> entry : spawnMap.entrySet()) {
+            WorldUtil.Directions direction = WorldUtil.Directions.valueOf(entry.getKey().toUpperCase(Locale.ROOT));
+            entry.getValue().forEach(pos -> spawns.add(new TemplatesConfig.Spawn(pos, direction)));
+        }
+
+        return spawns;
+    }
+
     public StructureTemplate getTemplate() {
         return this.template;
     }
 
-    public Set<BlockPos> getDefaultSpawns() {
+    public Set<TemplatesConfig.Spawn> getDefaultSpawns() {
         return this.defaultSpawns;
     }
 
@@ -85,10 +90,6 @@ public class ConfiguredTemplate {
 
     public Component getDescriptionComponent() {
         return (this.desc.startsWith("{") && this.desc.endsWith("}")) ? Component.translatable(this.desc) : Component.literal(this.desc);
-    }
-
-    public WorldUtil.Directions getDirection() {
-        return this.direction;
     }
 
     public TemplateInfo.Offset getOffset() {
@@ -108,11 +109,13 @@ public class ConfiguredTemplate {
         CompoundTag template = this.template.save(new CompoundTag());
 
         ListTag spawns = new ListTag();
-        for (BlockPos pos : this.defaultSpawns) {
+        for (TemplatesConfig.Spawn spawn : this.defaultSpawns) {
+            BlockPos pos = spawn.pos();
             CompoundTag posTag = new CompoundTag();
-            posTag.putDouble("posX", pos.getX() + 0.5);
-            posTag.putDouble("posY", pos.getY());
-            posTag.putDouble("posZ", pos.getZ() + 0.5);
+            posTag.putInt("posX", pos.getX());
+            posTag.putInt("posY", pos.getY());
+            posTag.putInt("posZ", pos.getZ());
+            posTag.putString("Direction", spawn.direction().name());
 
             spawns.add(posTag);
         }
@@ -121,7 +124,6 @@ public class ConfiguredTemplate {
         nbt.put("Spawns", spawns);
         nbt.putString("Name", this.name);
         nbt.putString("Desc", this.desc);
-        nbt.putString("Direction", this.direction == null ? WorldUtil.Directions.SOUTH.toString() : this.direction.toString());
         nbt.putInt("OffsetX", this.offset.x());
         nbt.putInt("OffsetY", this.offset.y());
         nbt.putInt("OffsetZ", this.offset.z());
@@ -146,14 +148,15 @@ public class ConfiguredTemplate {
 
         ListTag spawns = nbt.getList("Spawns", Tag.TAG_COMPOUND);
         this.defaultSpawns.clear();
-        for (Tag pos : spawns) {
-            CompoundTag posTag = (CompoundTag) pos;
-            this.defaultSpawns.add(new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ")));
+        for (Tag tag : spawns) {
+            CompoundTag posTag = (CompoundTag) tag;
+            BlockPos pos = new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"));
+            WorldUtil.Directions direction = WorldUtil.Directions.valueOf(posTag.getString("Direction"));
+            this.defaultSpawns.add(new TemplatesConfig.Spawn(pos, direction));
         }
 
         this.name = nbt.getString("Name");
         this.desc = nbt.getString("Desc");
-        this.direction = WorldUtil.Directions.valueOf(nbt.getString("Direction"));
         this.offset = new TemplateInfo.Offset(nbt.getInt("OffsetX"), nbt.getInt("OffsetY"), nbt.getInt("OffsetZ"));
         this.surroundingMargin = nbt.getInt("SurroundingMargin");
 

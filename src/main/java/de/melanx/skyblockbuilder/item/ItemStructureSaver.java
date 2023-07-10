@@ -1,11 +1,13 @@
 package de.melanx.skyblockbuilder.item;
 
 import com.google.common.collect.Sets;
+import de.melanx.skyblockbuilder.ModBlocks;
 import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
@@ -22,6 +24,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -33,8 +36,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public class ItemStructureSaver extends Item {
 
@@ -157,7 +162,20 @@ public class ItemStructureSaver extends Item {
             toIgnore.add(Blocks.AIR);
         }
         RandomUtility.fillTemplateFromWorld(template, level, origin, bounds, true, toIgnore);
+        Map<BlockPos, Direction> spawnBlocks = new HashMap<>();
+           outerloop:
+        for (StructureTemplate.Palette palette : template.palettes) {
+            for (StructureTemplate.StructureBlockInfo block : palette.blocks()) {
+                if (block.state().is(ModBlocks.spawnBlock)) {
+                    spawnBlocks.put(block.pos(), block.state().getValue(BlockStateProperties.HORIZONTAL_FACING));
+                }
+            }
+        }
 
+        if (!spawnBlocks.isEmpty()) {
+            Path spawns = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name + "_spawns", "json"));
+
+        }
         Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name, asSnbt ? "snbt" : "nbt"));
         CompoundTag tag = template.save(new CompoundTag());
         try {

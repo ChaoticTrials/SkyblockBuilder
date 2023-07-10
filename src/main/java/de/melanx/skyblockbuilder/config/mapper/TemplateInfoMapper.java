@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
-import de.melanx.skyblockbuilder.util.WorldUtil;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
 import org.moddingx.libx.config.mapper.ValueMapper;
@@ -16,7 +15,6 @@ import org.moddingx.libx.impl.config.mappers.special.RecordValueMapper;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Locale;
 
 @RegisterMapper
 public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject> {
@@ -48,17 +46,6 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt(), offsetArray.get(1).getAsInt(), offsetArray.get(2).getAsInt());
         }
 
-        WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
-        if (json.has("direction")) {
-            String str = json.get("direction").getAsString().toLowerCase(Locale.ROOT).strip();
-            for (WorldUtil.Directions value : WorldUtil.Directions.values()) {
-                if (value.name().toLowerCase(Locale.ROOT).equals(str)) {
-                    direction = value;
-                    break;
-                }
-            }
-        }
-
         String surroundingBlocks = "";
         if (json.has("surroundingBlocks")) {
             surroundingBlocks = json.get("surroundingBlocks").getAsString();
@@ -69,7 +56,7 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             surroundingMargin = json.get("surroundingMargin").getAsInt();
         }
 
-        return new TemplateInfo(name, desc, file, spawns, direction, offset, surroundingBlocks, surroundingMargin);
+        return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, surroundingMargin);
     }
 
     @Override
@@ -83,7 +70,6 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
 
         json.addProperty("file", templateInfo.file());
         json.addProperty("spawns", templateInfo.spawns());
-        json.addProperty("direction", templateInfo.direction().name().toLowerCase(Locale.ROOT));
 
         if (templateInfo.offset().x() != WorldConfig.offset || templateInfo.offset().z() != WorldConfig.offset) {
             JsonArray offsetArray = new JsonArray();

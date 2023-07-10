@@ -141,7 +141,9 @@ public class EventListener {
             }
 
             data.addPlayerToTeam(spawn, player);
-            ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), spawn.getDirection().getYRot());
+            //noinspection OptionalGetWithoutIsPresent
+            WorldUtil.Directions direction = spawn.getDefaultPossibleSpawns().stream().findFirst().get().direction();
+            ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), direction.getYRot());
             WorldUtil.teleportToIsland(player, spawn);
         }
     }

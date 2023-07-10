@@ -96,16 +96,16 @@ public class SkyblockSavedData extends SavedData {
         Team team;
         if (teamName.equalsIgnoreCase("spawn")) {
             islandPos = new IslandPos(this.level, 0, 0, template);
-            team = new Team(this, islandPos, SPAWN_ID, template.getDirection());
+            team = new Team(this, islandPos, SPAWN_ID);
         } else {
             do {
                 int[] pos = this.spiral.next();
                 islandPos = new IslandPos(this.level, pos[0], pos[1], template);
             } while (this.skyblockPositions.containsValue(islandPos));
-            team = new Team(this, islandPos, template.getDirection());
+            team = new Team(this, islandPos);
         }
 
-        Set<BlockPos> positions = initialPossibleSpawns(islandPos.getCenter(), template);
+        Set<TemplatesConfig.Spawn> positions = initialPossibleSpawns(islandPos.getCenter(), template);
 
         team.setPossibleSpawns(positions);
         team.setName(teamName);
@@ -258,9 +258,8 @@ public class SkyblockSavedData extends SavedData {
 
         Pair<IslandPos, Team> pair = this.create(teamName, template);
         Team team = pair.getRight();
-        List<BlockPos> possibleSpawns = new ArrayList<>(this.getPossibleSpawns(team.getIsland(), template));
+        List<TemplatesConfig.Spawn> possibleSpawns = new ArrayList<>(this.getPossibleSpawns(team.getIsland(), template));
         team.setPossibleSpawns(possibleSpawns);
-        team.setDirection(template.getDirection());
 
         StructurePlaceSettings settings = new StructurePlaceSettings().setKnownShape(true);
         BlockPos center = team.getIsland().getCenter();
@@ -495,7 +494,7 @@ public class SkyblockSavedData extends SavedData {
         return this.metaInfo.computeIfAbsent(id, meta -> new SkyMeta(this, id));
     }
 
-    public Set<BlockPos> getPossibleSpawns(IslandPos pos, ConfiguredTemplate template) {
+    public Set<TemplatesConfig.Spawn> getPossibleSpawns(IslandPos pos, ConfiguredTemplate template) {
         if (!this.skyblockPositions.containsValue(pos)) {
             return initialPossibleSpawns(pos.getCenter(), template);
         }
@@ -503,10 +502,10 @@ public class SkyblockSavedData extends SavedData {
         return this.skyblocks.get(this.skyblockPositions.inverse().get(pos)).getPossibleSpawns();
     }
 
-    public static Set<BlockPos> initialPossibleSpawns(BlockPos center, ConfiguredTemplate template) {
-        Set<BlockPos> positions = Sets.newHashSet();
-        for (BlockPos pos : template.getDefaultSpawns()) {
-            positions.add(center.offset(pos.immutable()));
+    public static Set<TemplatesConfig.Spawn> initialPossibleSpawns(BlockPos center, ConfiguredTemplate template) {
+        Set<TemplatesConfig.Spawn> positions = new HashSet<>();
+        for (TemplatesConfig.Spawn spawn : template.getDefaultSpawns()) {
+            positions.add(new TemplatesConfig.Spawn(center.offset(spawn.pos().immutable()), spawn.direction()));
         }
 
         return positions;
