@@ -88,7 +88,7 @@ public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
 
             public BlockPosWidget(Screen screen, BlockPos value, @Nullable AbstractWidget xWidget, @Nullable AbstractWidget yWidget,
                                   @Nullable AbstractWidget zWidget, WidgetProperties<BlockPos> properties) {
-                super(screen, properties.x(), properties.y(), properties.width(), properties.height());
+                super(properties.x(), properties.y(), properties.width(), properties.height());
                 this.font = Minecraft.getInstance().font;
                 this.posX = value.getX();
                 this.posY = value.getY();
