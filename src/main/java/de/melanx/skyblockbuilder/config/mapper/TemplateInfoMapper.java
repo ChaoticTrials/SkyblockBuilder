@@ -54,12 +54,14 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             offsetY = json.get("offsetY").getAsInt();
         }
 
-        String str = json.get("direction").getAsString().toLowerCase(Locale.ROOT).strip();
         WorldUtil.Directions direction = WorldUtil.Directions.SOUTH;
-        for (WorldUtil.Directions value : WorldUtil.Directions.values()) {
-            if (value.name().toLowerCase(Locale.ROOT).equals(str)) {
-                direction = value;
-                break;
+        if (json.has("direction")) {
+            String str = json.get("direction").getAsString().toLowerCase(Locale.ROOT).strip();
+            for (WorldUtil.Directions value : WorldUtil.Directions.values()) {
+                if (value.name().toLowerCase(Locale.ROOT).equals(str)) {
+                    direction = value;
+                    break;
+                }
             }
         }
 
