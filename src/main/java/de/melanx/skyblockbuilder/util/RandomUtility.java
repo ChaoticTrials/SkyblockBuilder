@@ -111,6 +111,7 @@ public class RandomUtility {
                     if (state.is(ModBlocks.spawnBlock)) {
                         WorldUtil.Directions direction = WorldUtil.Directions.fromDirection(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
                         spawns.add(new TemplatesConfig.Spawn(relPos, direction));
+                        continue;
                     }
                     BlockEntity blockEntity = level.getBlockEntity(actPos);
                     StructureTemplate.StructureBlockInfo blockInfo;
