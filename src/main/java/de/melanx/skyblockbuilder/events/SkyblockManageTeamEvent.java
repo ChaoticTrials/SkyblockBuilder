@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.events;
 
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
@@ -114,10 +115,12 @@ public abstract class SkyblockManageTeamEvent extends Event {
     public static class AddSpawn extends SkyblockManageTeamEvent {
 
         private BlockPos pos;
+        private Direction direction;
 
-        public AddSpawn(@Nonnull ServerPlayer player, Team team, BlockPos pos) {
+        public AddSpawn(@Nonnull ServerPlayer player, Team team, BlockPos pos, Direction direction) {
             super(player, team);
             this.pos = pos;
+            this.direction = direction;
         }
 
         /**
@@ -143,6 +146,22 @@ public abstract class SkyblockManageTeamEvent extends Event {
          */
         public AddSpawn setPos(BlockPos pos) {
             this.pos = pos;
+            return this;
+        }
+
+        /**
+         * @return Facing direction for the spawn
+         */
+        public Direction getDirection() {
+            return this.direction;
+        }
+
+        /**
+         * @param direction Another direction for the future spawn point
+         * @return This {@link AddSpawn} event
+         */
+        public AddSpawn setDirection(@Nonnull Direction direction) {
+            this.direction = direction;
             return this;
         }
     }

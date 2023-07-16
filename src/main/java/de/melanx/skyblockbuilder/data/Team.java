@@ -130,10 +130,14 @@ public class Team {
         this.data.setDirty();
     }
 
-    public void addPossibleSpawn(BlockPos pos, WorldUtil.Directions direction) {
-        this.possibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
+    public void addPossibleSpawn(TemplatesConfig.Spawn spawn) {
+        this.possibleSpawns.add(spawn);
         this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
+    }
+
+    public void addPossibleSpawn(BlockPos pos, WorldUtil.Directions direction) {
+        this.addPossibleSpawn(new TemplatesConfig.Spawn(pos, direction));
     }
 
     public boolean removePossibleSpawn(BlockPos pos) {
