@@ -16,6 +16,7 @@
   "skyblockbuilder.command.error.cooldown": "Réessayez dans %s min.",
   "skyblockbuilder.command.error.creating_file": "Échec de la création du fichier %s",
   "skyblockbuilder.command.error.creating_path": "Échec de la création du chemin %s",
+  "skyblockbuilder.command.error.overwrite_config": "Impossible de remplacer la configuration %s",
   "skyblockbuilder.command.error.team_not_exist": "Cette équipe n'existe pas !",
   "skyblockbuilder.command.error.team_already_exist": "L'équipe %s existe déjà ! Veuillez choisir un autre nom !",
   "skyblockbuilder.command.error.user_has_team": "Vous êtes déjà dans une équipe !",
@@ -84,6 +85,7 @@
 
   "skyblockbuilder.command.success.reset_island": "Définition réussit de la forme de l'île de %s.",
   "skyblockbuilder.command.success.export_spawns": "Exportation réussie des points d'apparitions actuels vers %s.",
+  "skyblockbuilder.command.success.export_spawns_to_config": "Exportation réussie des points d'apparition actuels vers la configuration, en utilisant la clé '%s'",
   "skyblockbuilder.command.success.export_inventory": "Inventaire exporté à %s avec succès",
   "skyblockbuilder.command.success.joined_team": "Adhésion à l'équipe %s réussit.",
   "skyblockbuilder.command.success.declined_invitation": "Suppression de l'invitation de l'équipe %s réussit.",

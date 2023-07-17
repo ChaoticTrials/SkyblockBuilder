@@ -16,6 +16,7 @@
   "skyblockbuilder.command.error.cooldown": "%s分钟后再试。",
   "skyblockbuilder.command.error.creating_file": "无法创建文件 %s",
   "skyblockbuilder.command.error.creating_path": "无法创建路径 %s",
+  "skyblockbuilder.command.error.overwrite_config": "无法覆盖配置文件 %s",
   "skyblockbuilder.command.error.team_not_exist": "该队伍不存在！",
   "skyblockbuilder.command.error.team_already_exist": "队伍 %s 已经存在！请选择其他名称！",
   "skyblockbuilder.command.error.user_has_team": "你已经在一个队伍中了！",
@@ -84,6 +85,7 @@
 
   "skyblockbuilder.command.success.reset_island": "成功将岛屿形状设置为 %s",
   "skyblockbuilder.command.success.export_spawns": "成功将当前出生点导出到 %s",
+  "skyblockbuilder.command.success.export_spawns_to_config": "成功将当前生成点导出到配置文件，使用密钥 '%s'",
   "skyblockbuilder.command.success.export_inventory": "成功将当前库存导出到 %s",
   "skyblockbuilder.command.success.joined_team": "成功加入队伍 %s。",
   "skyblockbuilder.command.success.declined_invitation": "成功销毁了队伍 %s 的邀请。",

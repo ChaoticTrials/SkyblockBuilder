@@ -16,6 +16,7 @@
   "skyblockbuilder.command.error.cooldown": "%s分後に再試行してください。",
   "skyblockbuilder.command.error.creating_file": "ファイル%sの作成に失敗しました。",
   "skyblockbuilder.command.error.creating_path": "パス%sの作成に失敗しました。",
+  "skyblockbuilder.command.error.overwrite_config": "設定%sを上書きできませんでした。",
   "skyblockbuilder.command.error.team_not_exist": "このチームは存在しない!",
   "skyblockbuilder.command.error.team_already_exist": "チーム %s はすでに存在しています。別の名前を選択してください.",
   "skyblockbuilder.command.error.user_has_team": "あなたはすでにチームに参加しています.",
@@ -84,6 +85,7 @@
 
   "skyblockbuilder.command.success.reset_island": "島の形状を%sに設定しました。",
   "skyblockbuilder.command.success.export_spawns": "現在のスポーンを%sに正常にエクスポートしました。",
+  "skyblockbuilder.command.success.export_spawns_to_config": "現在のスポーンを設定に正常にエクスポートしました。キー'%s'を使用しています。",
   "skyblockbuilder.command.success.export_inventory": "現在のインベントリを%sに正常にエクスポートしました。",
   "skyblockbuilder.command.success.joined_team": "チーム %s への参加に成功しました.",
   "skyblockbuilder.command.success.declined_invitation": "チーム%sの招待を正常に破棄しました。",

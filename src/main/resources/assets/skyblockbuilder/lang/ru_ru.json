@@ -16,6 +16,7 @@
   "skyblockbuilder.command.error.cooldown": "Попробуй ещё раз через %s минут",
   "skyblockbuilder.command.error.creating_file": "Файл %s не был создан",
   "skyblockbuilder.command.error.creating_path": "Путь %s не был создан",
+  "skyblockbuilder.command.error.overwrite_config": "Не удалось перезаписать конфигурацию %s",
   "skyblockbuilder.command.error.team_not_exist": "Такой команды не существует",
   "skyblockbuilder.command.error.team_already_exist": "Команда %s уже существует! Пожалуйста введи другое имя!",
   "skyblockbuilder.command.error.user_has_team": "Ты уже в команде!",
@@ -84,6 +85,7 @@
 
   "skyblockbuilder.command.success.reset_island": "Форма острова успешно установлена: %s",
   "skyblockbuilder.command.success.export_spawns": "Текущие спавны успешно экспортированы в %s",
+  "skyblockbuilder.command.success.export_spawns_to_config": "Успешно экспортированы текущие точки спавна в конфигурацию, используя ключ '%s'",
   "skyblockbuilder.command.success.export_inventory": "Успешно передан текущий инвентарь игроку %s",
   "skyblockbuilder.command.success.joined_team": "Присоединение к команде %s произошло успешно.",
   "skyblockbuilder.command.success.declined_invitation": "Успешно отменено прилагшение команды %s.",
