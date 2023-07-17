@@ -1,4 +1,5 @@
 {
+  "block.skyblockbuilder.spawn_block": "Bloc de spawn",
   "item.skyblockbuilder.structure_saver": "Structure sauvegarder",
   "screen.skyblockbuilder.structure_saver": "Structure sauvegarder",
   "screen.skyblockbuilder.select_template": "Veuillez sélectionner un modèle",
@@ -12,6 +13,7 @@
   "skyblockbuilder.command.argument.disabled": "désactivé",
 
   "skyblockbuilder.error.no_skyblock": "Cette commande ne peut être utilisée que dans un monde de skyblock.",
+  "skyblockbuilder.command.error.cooldown": "Réessayez dans %s min.",
   "skyblockbuilder.command.error.creating_file": "Échec de la création du fichier %s",
   "skyblockbuilder.command.error.creating_path": "Échec de la création du chemin %s",
   "skyblockbuilder.command.error.team_not_exist": "Cette équipe n'existe pas !",
@@ -32,6 +34,8 @@
   "skyblockbuilder.command.error.remove_spawn0": "Vous ne pouvez pas supprimer ce point d'apparition. %s",
   "skyblockbuilder.command.error.remove_spawn1": "Il ne reste plus assez de points d'apparition.",
   "skyblockbuilder.command.error.user_no_player": "Vous n'êtes pas un joueur, mais un simple menteur !",
+  "skyblockbuilder.command.error.teleport_across_dimensions": "Vous n'êtes pas autorisé à vous téléporter entre les dimensions.",
+  "skyblockbuilder.command.error.teleportation_not_allowed_dimension": "Vous n'êtes pas autorisé à vous téléporter dans cette dimension.",
 
   "skyblockbuilder.command.denied.accept_invitations": "Vous ne pouvez pas accepter cette invitation !",
   "skyblockbuilder.command.denied.decline_invitations": "Vous ne pouvez pas refuser cette invitation !",
@@ -101,6 +105,7 @@
   "skyblockbuilder.command.success.spawn_removed": "Suppression du point d'apparition en x %s, y %s, z %s.",
   "skyblockbuilder.command.success.reset_spawns": "Tous les points d'apparition possible ont été remis à zéro avec succès.",
   "skyblockbuilder.command.success.rename_team": "L'équipe à été renommée en %s avec succès.",
+  "skyblockbuilder.command.success.convert_template": "Converti %s en %s.",
 
   "skyblockbuilder.command.warning.edit_spawn_spawns": "[ATTENTION] Vous éditez le point d'apparition de l'île.",
 
@@ -118,6 +123,7 @@
   "skyblockbuilder.item.structure_saver.save.tooltip": "Clic droit pour sauvegarder le schéma",
   "skyblockbuilder.item.structure_saver.position.tooltip": "Position %s: x %s, y %s, z %s",
   "skyblockbuilder.item.structure_saver.ignore_air.tooltip": "Ignorer l'air",
+  "skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip": "Enregistrer sous format .snbt",
   "skyblockbuilder.screen.button.save": "sauvegarder",
   "skyblockbuilder.screen.button.delete": "Supprimer",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Dossier ouvert",

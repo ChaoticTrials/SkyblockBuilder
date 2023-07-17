@@ -1,4 +1,5 @@
 {
+  "block.skyblockbuilder.spawn_block": "Bloque de Aparición",
   "item.skyblockbuilder.structure_saver": "Guarda Estructuras",
   "screen.skyblockbuilder.structure_saver": "Guarda Estructuras",
   "screen.skyblockbuilder.select_template": "Selecciona una plantilla",
@@ -33,6 +34,8 @@
   "skyblockbuilder.command.error.remove_spawn0": "No es posible eliminar ese punto de aparación.%s",
   "skyblockbuilder.command.error.remove_spawn1": "No quedan suficientes puntos de aparación.",
   "skyblockbuilder.command.error.user_no_player": "¡No eres un jugador, sinó un mentiroso!",
+  "skyblockbuilder.command.error.teleport_across_dimensions": "No tienes permitido teletransportarte entre dimensiones.",
+  "skyblockbuilder.command.error.teleportation_not_allowed_dimension": "No tienes permitido teletransportarte en esta dimensión.",
 
   "skyblockbuilder.command.denied.accept_invitations": "¡No puedes aceptar ésta invitación!",
   "skyblockbuilder.command.denied.decline_invitations": "¡No puedes declinar ésta invitación!",
