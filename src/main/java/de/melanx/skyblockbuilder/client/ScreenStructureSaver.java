@@ -23,6 +23,12 @@ import java.awt.Color;
 public class ScreenStructureSaver extends Screen {
 
     private static final ResourceLocation SCREEN_LOCATION = new ResourceLocation(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
+    private static final Component SAVE_TO_CONFIG = Component.translatable("skyblockbuilder.item.structure_saver.save_to_config.tooltip");
+    private static final Component IGNORE_AIR = Component.translatable("skyblockbuilder.item.structure_saver.ignore_air.tooltip");
+    private static final Component SNBT = Component.translatable("skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip");
+    private static final Component SAVE_TO_CONFIG_DESC = Component.translatable("skyblockbuilder.item.structure_saver.save_to_config.desc");
+    private static final Component IGNORE_AIR_DESC = Component.translatable("skyblockbuilder.item.structure_saver.ignore_air.desc");
+    private static final Component SNBT_DESC = Component.translatable("skyblockbuilder.item.structure_saver.nbt_to_snbt.desc");
 
     private final int xSize;
     private final int ySize;
@@ -32,11 +38,12 @@ public class ScreenStructureSaver extends Screen {
     private EditBox name;
     private Checkbox ignoreAir;
     private Checkbox nbtToSnbt;
+    private Checkbox saveToConfig;
 
     public ScreenStructureSaver(ItemStack stack, Component title) {
         super(title);
-        this.xSize = 196;
-        this.ySize = 85;
+        this.xSize = 174;
+        this.ySize = 127;
         this.stack = stack;
     }
 
@@ -49,7 +56,7 @@ public class ScreenStructureSaver extends Screen {
         this.name.setFocused(true);
         this.name.setValue(this.name.getValue());
         this.addRenderableWidget(Button.builder(Component.translatable("skyblockbuilder.screen.button.save"), button -> {
-                    SkyblockBuilder.getNetwork().saveStructure(this.stack, this.name.getValue().isEmpty() ? "template" : this.name.getValue(), this.ignoreAir.selected(), this.nbtToSnbt.selected());
+                    SkyblockBuilder.getNetwork().saveStructure(this.stack, this.name.getValue().isEmpty() ? "template" : this.name.getValue(), this.saveToConfig.selected(), this.ignoreAir.selected(), this.nbtToSnbt.selected());
                     this.onClose();
                 })
                 .pos(this.relX + 10, this.relY + 55)
@@ -69,8 +76,9 @@ public class ScreenStructureSaver extends Screen {
                 .size(20, 20)
                 .tooltip(Tooltip.create(Component.translatable("skyblockbuilder.screen.button.open_folder.tooltip")))
                 .build());
-        this.ignoreAir = this.addRenderableWidget(new Checkbox(this.relX + 144, this.relY + 55, 20, 20, Component.empty(), false, false));
-        this.nbtToSnbt = this.addRenderableWidget(new Checkbox(this.relX + 169, this.relY + 55, 20, 20, Component.empty(), false, false));
+        this.saveToConfig = this.addRenderableWidget(new SizeableCheckbox(this.relX + 10, this.relY + 80, 10, false));
+        this.ignoreAir = this.addRenderableWidget(new SizeableCheckbox(this.relX + 10, this.relY + 95, 10, false));
+        this.nbtToSnbt = this.addRenderableWidget(new SizeableCheckbox(this.relX + 10, this.relY + 110, 10, false));
     }
 
     @Override
@@ -87,10 +95,20 @@ public class ScreenStructureSaver extends Screen {
 
         guiGraphics.blit(SCREEN_LOCATION, this.relX + 147, this.relY + 25, 0, this.ySize, 14, 14);
 
-        if (this.ignoreAir.isHoveredOrFocused()) {
-            guiGraphics.renderTooltip(this.font, Component.translatable("skyblockbuilder.item.structure_saver.ignore_air.tooltip"), mouseX, mouseY);
-        } else if (this.nbtToSnbt.isHoveredOrFocused()) {
-            guiGraphics.renderTooltip(this.font, Component.translatable("skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip"), mouseX, mouseY);
+        guiGraphics.pose().pushPose();
+        float scale = 0.9f;
+        guiGraphics.pose().scale(scale, scale, scale);
+        guiGraphics.drawString(this.font, SAVE_TO_CONFIG, (int) ((this.saveToConfig.getX() + 13) / scale), (int) ((this.saveToConfig.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, IGNORE_AIR, (int) ((this.ignoreAir.getX() + 13) / scale), (int) ((this.ignoreAir.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, SNBT, (int) ((this.nbtToSnbt.getX() + 13) / scale), (int) ((this.nbtToSnbt.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.pose().popPose();
+
+        if (this.saveToConfig.isHovered()) {
+            guiGraphics.renderTooltip(this.font, SAVE_TO_CONFIG_DESC, mouseX, mouseY);
+        } else if (this.ignoreAir.isHovered()) {
+            guiGraphics.renderTooltip(this.font, IGNORE_AIR_DESC, mouseX, mouseY);
+        } else if (this.nbtToSnbt.isHovered()) {
+            guiGraphics.renderTooltip(this.font, SNBT_DESC, mouseX, mouseY);
         }
     }
 

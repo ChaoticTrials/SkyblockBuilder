@@ -61,17 +61,16 @@ public class SpawnsCommand {
             }
 
             if (mode == Mode.EXPORT) {
-                String folderName = SkyPaths.MOD_EXPORTS.getFileName().toString();
                 try {
                     Files.createDirectories(SkyPaths.MOD_EXPORTS);
                 } catch (IOException e) {
-                    throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", folderName)).create();
+                    throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", SkyPaths.MOD_EXPORTS)).create();
                 }
-                String filePath = RandomUtility.getFilePath(folderName, "spawns", "json");
+                Path filePath = RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS, "spawns", "json");
 
                 JsonObject json = TemplateUtil.possibleSpawnsAsJson(team);
 
-                Path file = SkyPaths.MOD_EXPORTS.resolve(filePath.split("/")[1]);
+                Path file = SkyPaths.MOD_EXPORTS.resolve(filePath.getFileName());
                 try {
                     Files.writeString(file, SkyblockBuilder.PRETTY_GSON.toJson(json));
                 } catch (IOException e) {

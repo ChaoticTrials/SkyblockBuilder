@@ -25,7 +25,7 @@ import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.*;
 
 public class RandomUtility {
@@ -142,19 +142,19 @@ public class RandomUtility {
         return s.toLowerCase(Locale.ROOT).replaceAll("\\W+", "_");
     }
 
-    public static String getFilePath(String folderPath, String name) {
-        return getFilePath(folderPath, name, "nbt");
+    public static Path getFilePath(Path parentFolder, String name) {
+        return getFilePath(parentFolder, name, "nbt");
     }
 
-    public static String getFilePath(String folderPath, String name, String extension) {
+    public static Path getFilePath(Path parentFolder, String name, String extension) {
         int index = 0;
         String filename;
-        String filepath;
+        Path filepath;
         do {
             filename = (name == null ? "template" : RandomUtility.normalize(name)) + ((index == 0) ? "" : "_" + index) + "." + extension;
             index++;
-            filepath = folderPath + "/" + filename;
-        } while (Files.exists(Paths.get(filepath)));
+            filepath = parentFolder.resolve(filename);
+        } while (Files.exists(filepath));
 
         return filepath;
     }

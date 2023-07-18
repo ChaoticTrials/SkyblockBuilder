@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.network;
 
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -14,7 +15,7 @@ import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 
-public record SaveStructureMessage(ItemStack stack, String name, boolean ignoreAir, boolean asSnbt) {
+public record SaveStructureMessage(ItemStack stack, String name, boolean saveToConfig, boolean ignoreAir, boolean asSnbt) {
 
     public static class Handler implements PacketHandler<SaveStructureMessage> {
 
@@ -31,7 +32,11 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean ignoreA
             }
 
             ServerLevel level = (ServerLevel) player.level();
-            String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.ignoreAir, msg.asSnbt, msg.name);
+            String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.saveToConfig, msg.ignoreAir, msg.asSnbt, msg.name);
+            if (name == null) {
+                player.displayClientMessage(Component.literal("Failed to save, look at latest.log for more information").withStyle(ChatFormatting.RED), false);
+                return true;
+            }
             ItemStack stack = ItemStructureSaver.removeTags(msg.stack);
             player.setItemInHand(InteractionHand.MAIN_HAND, stack);
             MutableComponent component = Component.translatable("skyblockbuilder.schematic.saved", name);
@@ -51,13 +56,14 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean ignoreA
         public void encode(SaveStructureMessage msg, FriendlyByteBuf buffer) {
             buffer.writeItem(msg.stack);
             buffer.writeUtf(msg.name);
+            buffer.writeBoolean(msg.saveToConfig);
             buffer.writeBoolean(msg.ignoreAir);
             buffer.writeBoolean(msg.asSnbt);
         }
 
         @Override
         public SaveStructureMessage decode(FriendlyByteBuf buffer) {
-            return new SaveStructureMessage(buffer.readItem(), buffer.readUtf(Short.MAX_VALUE), buffer.readBoolean(), buffer.readBoolean());
+            return new SaveStructureMessage(buffer.readItem(), buffer.readUtf(Short.MAX_VALUE), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean());
         }
     }
 }
