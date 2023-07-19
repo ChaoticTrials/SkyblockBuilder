@@ -1,8 +1,11 @@
 package de.melanx.skyblockbuilder.events;
 
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
@@ -27,10 +30,10 @@ public class SkyblockHooks {
         return Pair.of(event.getResult(), event.shouldAllowVisits());
     }
 
-    public static Pair<Event.Result, BlockPos> onAddSpawn(ServerPlayer player, Team team, BlockPos pos) {
-        SkyblockManageTeamEvent.AddSpawn event = new SkyblockManageTeamEvent.AddSpawn(player, team, pos);
+    public static Pair<Event.Result, TemplatesConfig.Spawn> onAddSpawn(ServerPlayer player, Team team, BlockPos pos, Direction direction) {
+        SkyblockManageTeamEvent.AddSpawn event = new SkyblockManageTeamEvent.AddSpawn(player, team, pos, direction);
         MinecraftForge.EVENT_BUS.post(event);
-        return Pair.of(event.getResult(), event.getPos());
+        return Pair.of(event.getResult(), new TemplatesConfig.Spawn(event.getPos(), WorldUtil.Directions.fromDirection(event.getDirection())));
     }
 
     public static Event.Result onRemoveSpawn(ServerPlayer player, Team team, BlockPos pos) {

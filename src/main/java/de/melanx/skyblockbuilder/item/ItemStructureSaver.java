@@ -1,13 +1,17 @@
 package de.melanx.skyblockbuilder.item;
 
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
+import de.melanx.skyblockbuilder.util.TemplateUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -24,17 +28,19 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.moddingx.libx.config.ConfigManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.HashSet;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
 
 public class ItemStructureSaver extends Item {
 
@@ -137,11 +143,11 @@ public class ItemStructureSaver extends Item {
         return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    public static String saveSchematic(Level level, ItemStack stack, boolean ignoreAir, boolean asSnbt) {
-        return saveSchematic(level, stack, ignoreAir, asSnbt, null);
+    public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt) {
+        return saveSchematic(level, stack, saveToConfig, ignoreAir, asSnbt, null);
     }
 
-    public static String saveSchematic(Level level, ItemStack stack, boolean ignoreAir, boolean asSnbt, @Nullable String name) {
+    public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, @Nullable String name) {
         StructureTemplate template = new StructureTemplate();
         BoundingBox boundingBox = getArea(stack);
 
@@ -152,28 +158,89 @@ public class ItemStructureSaver extends Item {
         BlockPos origin = new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
         BlockPos bounds = new BlockPos(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
 
-        HashSet<Block> toIgnore = Sets.newHashSet(Blocks.STRUCTURE_VOID);
+        Set<Block> toIgnore = Sets.newHashSet(Blocks.STRUCTURE_VOID);
         if (ignoreAir) {
             toIgnore.add(Blocks.AIR);
         }
-        RandomUtility.fillTemplateFromWorld(template, level, origin, bounds, true, toIgnore);
+        Set<TemplatesConfig.Spawn> spawnPositions = RandomUtility.fillTemplateFromWorld(template, level, origin, bounds, true, toIgnore);
 
-        Path path = Paths.get(RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS.getFileName().toString(), name, asSnbt ? "snbt" : "nbt"));
+        if (saveToConfig) {
+            JsonObject json = TemplateUtil.spawnsAsJson(spawnPositions);
+
+            Path configFile = SkyPaths.MOD_CONFIG.resolve("templates.json5");
+            try {
+                JsonObject config = SkyblockBuilder.PRETTY_GSON.fromJson(Files.readString(configFile), JsonObject.class);
+                // add spawns
+                if (!config.has("spawns")) {
+                    config.add("spawns", new JsonObject());
+                }
+
+                JsonObject spawns = config.getAsJsonObject("spawns");
+                Calendar calendar = Calendar.getInstance();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+                String formattedDate = dateFormat.format(calendar.getTime());
+                String spawnsName = "exported_at_" + formattedDate;
+                spawns.add(spawnsName, json);
+                config.add("spawns", spawns);
+
+                // add template
+                Path templatePath = RandomUtility.getFilePath(SkyPaths.TEMPLATES_DIR, name, asSnbt ? "snbt" : "nbt");
+                CompoundTag tag = template.save(new CompoundTag());
+                try {
+                    TemplateUtil.writeTemplate(templatePath, tag, asSnbt);
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+
+                String fileName = templatePath.getFileName().toFile().getName();
+                int dot = fileName.lastIndexOf(".");
+                String templateName = fileName.substring(0, dot);
+
+                JsonObject templateObject = new JsonObject();
+                templateObject.addProperty("name", templateName);
+                templateObject.addProperty("file", fileName);
+                templateObject.addProperty("spawns", spawnsName);
+
+                if (!config.has("templates")) {
+                    config.add("templates", new JsonObject());
+                }
+
+                JsonArray templates = config.getAsJsonArray("templates");
+                templates.add(templateObject);
+                config.add("templates", templates);
+
+                // write and reload config
+                Files.writeString(configFile, SkyblockBuilder.PRETTY_GSON.toJson(config));
+                ConfigManager.reloadConfig(TemplatesConfig.class);
+                if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+                    ConfigManager.forceResync(null);
+                }
+
+                return configFile.getFileName().toString();
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to overwrite config " + configFile.getFileName());
+            }
+        }
+
+        if (!spawnPositions.isEmpty()) {
+            Path spawns = RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS, name + "_spawns", "json");
+            JsonObject json = TemplateUtil.spawnsAsJson(spawnPositions);
+            try {
+                Files.writeString(spawns, SkyblockBuilder.PRETTY_GSON.toJson(json));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        Path path = RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS, name, asSnbt ? "snbt" : "nbt");
         CompoundTag tag = template.save(new CompoundTag());
         try {
-            if (asSnbt) {
-                String snbt = NbtUtils.structureToSnbt(tag);
-                Files.writeString(path, snbt);
-            } else {
-                OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE);
-                NbtIo.writeCompressed(tag, outputStream);
-                outputStream.close();
-            }
-        } catch (IOException e) {
+            TemplateUtil.writeTemplate(path, tag, asSnbt);
+        } catch (IllegalStateException e) {
             e.printStackTrace();
             return null;
         }
-
 
         return path.getFileName().toString();
     }

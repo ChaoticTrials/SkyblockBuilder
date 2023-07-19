@@ -1,4 +1,5 @@
 {
+  "block.skyblockbuilder.spawn_block": "Bloque de Aparición",
   "item.skyblockbuilder.structure_saver": "Guarda Estructuras",
   "screen.skyblockbuilder.structure_saver": "Guarda Estructuras",
   "screen.skyblockbuilder.select_template": "Selecciona una plantilla",
@@ -15,6 +16,7 @@
   "skyblockbuilder.command.error.cooldown": "Prueba otra vez en %smin.",
   "skyblockbuilder.command.error.creating_file": "La creación del archivo %s falló",
   "skyblockbuilder.command.error.creating_path": "La creación de la ruta %s falló",
+  "skyblockbuilder.command.error.overwrite_config": "Error al sobrescribir la configuración %s",
   "skyblockbuilder.command.error.team_not_exist": "¡Éste equipo no existe!",
   "skyblockbuilder.command.error.team_already_exist": "¡El equipo %s ya existe! Escoge otro nombre por favor!",
   "skyblockbuilder.command.error.user_has_team": "¡Ya estás en un equipo!",
@@ -33,6 +35,8 @@
   "skyblockbuilder.command.error.remove_spawn0": "No es posible eliminar ese punto de aparación.%s",
   "skyblockbuilder.command.error.remove_spawn1": "No quedan suficientes puntos de aparación.",
   "skyblockbuilder.command.error.user_no_player": "¡No eres un jugador, sinó un mentiroso!",
+  "skyblockbuilder.command.error.teleport_across_dimensions": "No tienes permitido teletransportarte entre dimensiones.",
+  "skyblockbuilder.command.error.teleportation_not_allowed_dimension": "No tienes permitido teletransportarte en esta dimensión.",
 
   "skyblockbuilder.command.denied.accept_invitations": "¡No puedes aceptar ésta invitación!",
   "skyblockbuilder.command.denied.decline_invitations": "¡No puedes declinar ésta invitación!",
@@ -81,6 +85,7 @@
 
   "skyblockbuilder.command.success.reset_island": "Forma de la isla establecida a %s con éxito",
   "skyblockbuilder.command.success.export_spawns": "Puntos de reaparación exportados a %s con éxito",
+  "skyblockbuilder.command.success.export_spawns_to_config": "Éxito al exportar los puntos de aparición actuales a la configuración, utilizando la clave '%s'",
   "skyblockbuilder.command.success.export_inventory": "Inventario actual exportado a  %s con éxito",
   "skyblockbuilder.command.success.joined_team": "Te uniste al equipo %s.",
   "skyblockbuilder.command.success.declined_invitation": "Invitación del equipo %s destruida con éxito.",
@@ -121,6 +126,10 @@
   "skyblockbuilder.item.structure_saver.position.tooltip": "Posición %s: x %s, y %s, z %s",
   "skyblockbuilder.item.structure_saver.ignore_air.tooltip": "Ignorar Aire",
   "skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip": "Guardar como archivo .snbt",
+  "skyblockbuilder.item.structure_saver.save_to_config.tooltip": "Guardar en configuración",
+  "skyblockbuilder.item.structure_saver.ignore_air.desc": "Cada bloque de aire en el área seleccionada se ignorará y no se guardará en la plantilla",
+  "skyblockbuilder.item.structure_saver.nbt_to_snbt.desc": "El archivo generado será un archivo .snbt, lo que significa que se puede editar en un editor estándar",
+  "skyblockbuilder.item.structure_saver.save_to_config.desc": "La plantilla (incluidos los puntos de generación) se agregará automáticamente a la configuración templates.json5",
   "skyblockbuilder.screen.button.save": "Guardar",
   "skyblockbuilder.screen.button.delete": "Eliminar",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Abrir Carpeta",

@@ -2,7 +2,6 @@ package de.melanx.skyblockbuilder.template;
 
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nullable;
@@ -101,7 +100,7 @@ public class TemplateLoader {
         return TEMPLATE;
     }
 
-    public static Set<BlockPos> getCurrentSpawns() {
+    public static Set<TemplatesConfig.Spawn> getCurrentSpawns() {
         return TEMPLATE.getDefaultSpawns();
     }
 }

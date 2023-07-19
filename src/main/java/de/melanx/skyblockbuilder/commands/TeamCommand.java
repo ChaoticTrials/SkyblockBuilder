@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
@@ -258,7 +259,7 @@ public class TeamCommand {
             team = data.getSpawn();
         }
 
-        Pair<Event.Result, BlockPos> result = SkyblockHooks.onAddSpawn(player, team, pos);
+        Pair<Event.Result, TemplatesConfig.Spawn> result = SkyblockHooks.onAddSpawn(player, team, pos, player.getDirection());
         switch (result.getLeft()) {
             case DENY:
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.create_spawn").withStyle(ChatFormatting.RED), false);
@@ -271,7 +272,7 @@ public class TeamCommand {
                 Vec3i templateSize = TemplateData.get(level).getConfiguredTemplate().getTemplate().getSize();
                 BlockPos center = team.getIsland().getCenter().mutable();
                 center.offset(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
-                if (!pos.closerThan(center, PermissionsConfig.Spawns.range)) {
+                if (!result.getValue().pos().closerThan(center, PermissionsConfig.Spawns.range)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.position_too_far_away").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
@@ -280,7 +281,7 @@ public class TeamCommand {
                 break;
         }
 
-        team.addPossibleSpawn(pos);
+        team.addPossibleSpawn(result.getValue());
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.spawn_added", pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.GOLD), false);
         return 1;
     }

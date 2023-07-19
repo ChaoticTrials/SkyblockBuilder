@@ -1,0 +1,54 @@
+# This workflow was generated with the help of OpenAI's GPT.
+
+name: Check Localization Files
+on:
+  pull_request:
+    paths:
+      - 'src/main/resources/assets/**/lang/*.json'
+
+jobs:
+  check-localization:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Check localization files
+        run: |
+          # Get the list of added or modified localization files
+          FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E "src/main/resources/assets/.*/lang/.*.json")
+          # Initialize an array to store the missing keys
+          MISSING_KEYS=()
+          # Iterate over each file
+          for FILE in $FILES; do
+            # Check if the file is not the default English translation
+            if [[ $FILE != *"en_us.json" ]]; then
+              # Get the modid and language key from the file path
+              MODID=$(echo $FILE | cut -d'/' -f5)
+              LANGUAGE_KEY=$(echo $FILE | cut -d'/' -f7 | cut -d'.' -f1)
+              # Check if all keys from the default English translation are included in this file
+              KEYS=$(jq --argfile en src/main/resources/assets/$MODID/lang/en_us.json '[.[] as $k | select($en[$k] == null) | $k]' $FILE)
+              if [[ $KEYS != "[]" ]]; then
+                MISSING_KEYS+=("$LANGUAGE_KEY: $KEYS")
+              fi
+            fi
+          done
+
+          # Post a comment on the pull request with the missing keys or a success message
+          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          if [[ ${#MISSING_KEYS[@]} -gt 0 ]]; then
+            COMMENT="🚨 Missing translation keys:\n\n"
+            for MISSING_KEY in "${MISSING_KEYS[@]}"; do
+              COMMENT+="$MISSING_KEY\n"
+            done
+
+            # Request changes on the pull request
+            gh pr review $PR_NUMBER --request-changes --body "$COMMENT"
+          else
+            COMMENT="✅ All localization files have been checked and are complete!"
+
+            # Approve the pull request
+            gh pr review $PR_NUMBER --approve --body "$COMMENT"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

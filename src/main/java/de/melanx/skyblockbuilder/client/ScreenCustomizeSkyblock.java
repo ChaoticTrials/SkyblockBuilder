@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
+import de.melanx.skyblockbuilder.template.TemplateRenderer;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.Util;
@@ -26,10 +27,7 @@ import javax.annotation.Nullable;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class ScreenCustomizeSkyblock extends Screen {
@@ -94,7 +92,8 @@ public class ScreenCustomizeSkyblock extends Screen {
 
     private class TemplateList extends ObjectSelectionList<TemplateList.TemplateEntry> {
 
-        private static final ResourceLocation ICON_MISSING = new ResourceLocation("minecraft", "textures/misc/unknown_server.png");
+        private final Set<File> loggedLocations = new HashSet<>();
+        private transient final Map<String, TemplateRenderer> structureCache = new HashMap<>();
 
         public TemplateList() {
             super(Objects.requireNonNull(ScreenCustomizeSkyblock.this.minecraft), ScreenCustomizeSkyblock.this.width, ScreenCustomizeSkyblock.this.height, 40, ScreenCustomizeSkyblock.this.height - 37, 40);
@@ -126,9 +125,19 @@ public class ScreenCustomizeSkyblock extends Screen {
             if (this.getSelected() != null) {
                 RenderSystem.enableBlend();
                 int size = (this.width - 220) / 2 - 40;
-                //noinspection ConstantConditions
-                int iconSize = this.getSelected().icon != null ? this.getSelected().icon.getPixels().getHeight() : 16;
-                guiGraphics.blit(this.getSelected().icon != null ? this.getSelected().iconLocation : ICON_MISSING, 20, 85, size, size, 0.0F, 0.0F, iconSize, iconSize, iconSize, iconSize);
+                boolean useIcon = this.getSelected().icon != null;
+
+                if (useIcon) {
+                    //noinspection ConstantConditions
+                    int iconSize = this.getSelected().icon.getPixels().getHeight();
+                    guiGraphics.blit(this.getSelected().iconLocation, 20, 85, size, size, 0, 0, iconSize, iconSize, iconSize, iconSize);
+                } else {
+                    String templateName = this.getSelected().name.getString();
+                    if (!this.structureCache.containsKey(templateName)) {
+                        this.structureCache.put(templateName, new TemplateRenderer(this.getSelected().template.getTemplate(), size));
+                    }
+                    this.structureCache.get(templateName).render(guiGraphics, 103, 182);
+                }
                 RenderSystem.disableBlend();
             }
         }
@@ -160,7 +169,10 @@ public class ScreenCustomizeSkyblock extends Screen {
                 this.iconLocation = SkyblockBuilder.getInstance().resource(Util.sanitizeName(template.getName(), ResourceLocation::validPathChar) + "/icon");
                 this.iconFile = SkyPaths.ICONS_DIR.resolve(template.getName().toLowerCase(Locale.ROOT) + ".png").toFile();
                 if (!this.iconFile.isFile()) {
-                    SkyblockBuilder.getLogger().info("No icon set for template '" + template.getName() + "'. Should be at this location: '" + this.iconFile + "'");
+                    if (!TemplateList.this.loggedLocations.contains(this.iconFile)) {
+                        TemplateList.this.loggedLocations.add(this.iconFile);
+                        SkyblockBuilder.getLogger().info("No icon set for template '" + template.getName() + "'. Should be at this location: '" + this.iconFile + "'");
+                    }
                     this.iconFile = null;
                 }
 

@@ -1,4 +1,5 @@
 {
+  "block.skyblockbuilder.spawn_block": "Spawn Block",
   "item.skyblockbuilder.structure_saver": "Structure Saver",
   "screen.skyblockbuilder.structure_saver": "Structure Saver",
   "screen.skyblockbuilder.select_template": "Please select a template",
@@ -15,6 +16,7 @@
   "skyblockbuilder.command.error.cooldown": "Try again in %smin.",
   "skyblockbuilder.command.error.creating_file": "Failed to create file %s",
   "skyblockbuilder.command.error.creating_path": "Failed to create path %s",
+  "skyblockbuilder.command.error.overwrite_config": "Failed to overwrite config %s",
   "skyblockbuilder.command.error.team_not_exist": "This team doesn't exist!",
   "skyblockbuilder.command.error.team_already_exist": "Team %s already exists! Please choose another name!",
   "skyblockbuilder.command.error.user_has_team": "You are already in a team!",
@@ -83,6 +85,7 @@
 
   "skyblockbuilder.command.success.reset_island": "Successfully set island shape to %s",
   "skyblockbuilder.command.success.export_spawns": "Successfully exported current spawns to %s",
+  "skyblockbuilder.command.success.export_spawns_to_config": "Successfully exported current spawns to config, using key '%s'",
   "skyblockbuilder.command.success.export_inventory": "Successfully exported current inventory to %s",
   "skyblockbuilder.command.success.joined_team": "Successfully joined team %s.",
   "skyblockbuilder.command.success.declined_invitation": "Successfully destroyed the invitation of team %s.",
@@ -123,6 +126,10 @@
   "skyblockbuilder.item.structure_saver.position.tooltip": "Position %s: x %s, y %s, z %s",
   "skyblockbuilder.item.structure_saver.ignore_air.tooltip": "Ignore Air",
   "skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip": "Save as .snbt file",
+  "skyblockbuilder.item.structure_saver.save_to_config.tooltip": "Save to config",
+  "skyblockbuilder.item.structure_saver.ignore_air.desc": "Each air block in the selected area will be ignored and not saved to the template",
+  "skyblockbuilder.item.structure_saver.nbt_to_snbt.desc": "The generated file will be a .snbt file, that means editable in a standard editor",
+  "skyblockbuilder.item.structure_saver.save_to_config.desc": "The template (and including spawns) will automatically added to the templates.json5 config",
   "skyblockbuilder.screen.button.save": "Save",
   "skyblockbuilder.screen.button.delete": "Delete",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Open Folder",

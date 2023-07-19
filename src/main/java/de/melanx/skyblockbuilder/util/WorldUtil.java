@@ -8,6 +8,7 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
@@ -39,9 +40,9 @@ public class WorldUtil {
         //noinspection ConstantConditions
         ServerLevel level = getConfiguredLevel(server);
 
-        BlockPos spawn = validPosition(level, team);
-        player.teleportTo(level, spawn.getX() + 0.5, spawn.getY() + 0.2, spawn.getZ() + 0.5, team.getDirection().getYRot(), 0);
-        player.setRespawnPosition(level.dimension(), spawn, 0, true, false);
+        TemplatesConfig.Spawn spawn = validPosition(level, team);
+        player.teleportTo(level, spawn.pos().getX() + 0.5, spawn.pos().getY() + 0.2, spawn.pos().getZ() + 0.5, spawn.direction().getYRot(), 0);
+        player.setRespawnPosition(level.dimension(), spawn.pos(), spawn.direction().getYRot(), true, false);
     }
 
     public static boolean isSkyblock(Level level) {
@@ -84,21 +85,21 @@ public class WorldUtil {
         return configLevel != null ? configLevel : server.overworld();
     }
 
-    private static BlockPos validPosition(ServerLevel level, Team team) {
-        List<BlockPos> spawns = new ArrayList<>(team.getPossibleSpawns());
+    private static TemplatesConfig.Spawn validPosition(ServerLevel level, Team team) {
+        List<TemplatesConfig.Spawn> spawns = new ArrayList<>(team.getPossibleSpawns());
         Random random = new Random();
         while (!spawns.isEmpty()) {
-            BlockPos pos = spawns.get(random.nextInt(spawns.size()));
-            if (isValidSpawn(level, pos)) {
-                return pos;
+            TemplatesConfig.Spawn spawn = spawns.get(random.nextInt(spawns.size()));
+            if (isValidSpawn(level, spawn.pos())) {
+                return spawn;
             }
 
-            spawns.remove(pos);
+            spawns.remove(spawn);
         }
 
-        BlockPos pos = team.getPossibleSpawns().stream().findAny().orElse(team.getIsland().getCenter());
+        TemplatesConfig.Spawn spawn = team.getPossibleSpawns().stream().findAny().orElse(new TemplatesConfig.Spawn(team.getIsland().getCenter(), Directions.SOUTH));
 
-        return PositionHelper.findPos(pos, blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radius);
+        return new TemplatesConfig.Spawn(PositionHelper.findPos(spawn.pos(), blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radius), spawn.direction());
     }
 
     public static boolean isValidSpawn(Level level, BlockPos pos) {
@@ -220,6 +221,15 @@ public class WorldUtil {
 
         Directions(int yaw) {
             this.yRot = yaw;
+        }
+
+        public static Directions fromDirection(Direction direction) {
+            return switch (direction) {
+                case NORTH -> NORTH;
+                case EAST -> EAST;
+                case WEST -> WEST;
+                default -> SOUTH;
+            };
         }
 
         public int getYRot() {

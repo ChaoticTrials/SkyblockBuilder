@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "skyblockbuilder:block/spawn_block",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "skyblockbuilder:block/spawn_block"
+    },
+    "facing=south": {
+      "model": "skyblockbuilder:block/spawn_block",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "skyblockbuilder:block/spawn_block",
+      "y": 270
+    }
+  }
+}

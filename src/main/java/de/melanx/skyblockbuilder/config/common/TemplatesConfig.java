@@ -7,19 +7,20 @@ import net.minecraft.world.level.block.Block;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RegisterConfig("templates")
 public class TemplatesConfig {
 
     @Config("The list of templates being available. The first entry is the default template.")
-    public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", "default", WorldUtil.Directions.SOUTH, new TemplateInfo.Offset(0, 0, 0)));
+    public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", "default", new TemplateInfo.Offset(0, 0, 0)));
 
     @Config
-    public static Map<String, List<BlockPos>> spawns = Map.of("default", List.of(
-            new BlockPos(6, 3, 5)
+    public static Map<String, Map<String, Set<BlockPos>>> spawns = Map.of("default", Map.of(
+            WorldUtil.Directions.SOUTH.name().toLowerCase(Locale.ROOT), Set.of(new BlockPos(6, 3, 5)),
+            WorldUtil.Directions.WEST.name().toLowerCase(Locale.ROOT), Set.of(),
+            WorldUtil.Directions.NORTH.name().toLowerCase(Locale.ROOT), Set.of(),
+            WorldUtil.Directions.EAST.name().toLowerCase(Locale.ROOT), Set.of()
     ));
 
     @Config("A list of blocks which can be used to surround islands/caves.")
@@ -32,11 +33,12 @@ public class TemplatesConfig {
             "    \"desc\": \"\",",
             "    \"file\": \"default.nbt\",",
             "    \"spawns\": \"default\",",
-            "    \"direction\": \"south\",",
-            "    \"offset\": [ 0, 0 ],",
-            "    \"offsetY\": 0,",
+            "    \"offset\": [ 0, 0, 0 ],",
             "    \"surroundingMargin\": 0,",
             "    \"surroundingBlocks\": \"default\"",
             "}"})
     public static Optional<TemplateInfo> spawn = Optional.empty();
+
+    public record Spawn(BlockPos pos, WorldUtil.Directions direction) {
+    }
 }
