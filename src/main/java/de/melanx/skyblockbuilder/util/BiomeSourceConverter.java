@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.*;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.moddingx.libx.util.data.ResourceList;
 
 import java.util.*;
@@ -31,10 +30,8 @@ public class BiomeSourceConverter {
             }
 
             if (newBiomes.isEmpty()) {
-                ForgeRegistries.BIOMES.getEntries().stream().map(Map.Entry::getKey).filter(key -> resourceList.test(key.location())).forEach(key -> {
-                    Optional<Holder<Biome>> optHolder = ForgeRegistries.BIOMES.getHolder(key);
-                    optHolder.ifPresent(newBiomes::add);
-                });
+                SkyblockBuilder.getLogger().warn("Skipping biome filtering as all biomes were filtered out: " + level);
+                newBiomes.addAll(baseSource.possibleBiomes());
             }
 
             if (newBiomes.isEmpty()) {

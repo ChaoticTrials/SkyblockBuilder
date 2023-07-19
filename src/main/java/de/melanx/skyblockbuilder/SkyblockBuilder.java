@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.datagen.ItemModelProvider;
 import de.melanx.skyblockbuilder.datagen.ModTagProvider;
+import de.melanx.skyblockbuilder.datagen.WorldPresetProvider;
 import de.melanx.skyblockbuilder.network.SkyNetwork;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.Util;
@@ -42,6 +43,7 @@ public final class SkyblockBuilder extends ModXRegistration {
         MinecraftForge.EVENT_BUS.register(new SpawnProtectionEvents());
 
         DatagenSystem.create(this, system -> {
+            system.addRegistryProvider(WorldPresetProvider::new);
             system.addDataProvider(ItemModelProvider::new);
             system.addDataProvider(ModTagProvider::new);
         });
