@@ -20,7 +20,7 @@ public class CoreUtil {
                 RegistryOps.retrieveGetter(Registries.DIMENSION_TYPE),
                 RegistryOps.retrieveGetter(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST),
                 RegistryOps.retrieveGetter(Registries.NOISE_SETTINGS),
-                RegistryOps.retrieveGetter(Registries.BIOME)
+                RegistryOps.retrieveRegistryLookup(Registries.BIOME).forGetter(SkyblockPreset::getBiomes)
         ).apply(instance, SkyblockPreset::new));
         
         MapCodec<Unit> skyblockCodecId = Codec.STRING.fieldOf("type").flatXmap(

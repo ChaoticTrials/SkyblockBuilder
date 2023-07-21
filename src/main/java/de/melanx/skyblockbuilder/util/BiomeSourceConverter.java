@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class BiomeSourceConverter {
 
-    public static BiomeSource customBiomeSource(ResourceKey<Level> level, BiomeSource baseSource) {
+    public static BiomeSource customBiomeSource(ResourceKey<Level> level, BiomeSource baseSource, HolderLookup<Biome> biomes) {
         ResourceList resourceList = WorldConfig.biomes.get(level.location().toString());
         if (resourceList != null) {
             Set<Holder<Biome>> newBiomes = new HashSet<>();
@@ -30,6 +31,8 @@ public class BiomeSourceConverter {
             }
 
             if (newBiomes.isEmpty()) {
+                biomes.listElementIds().filter(lol -> resourceList.test(lol.location())).forEach(key -> newBiomes.add(biomes.getOrThrow(key)));
+            } else {
                 SkyblockBuilder.getLogger().warn("Skipping biome filtering as all biomes were filtered out: " + level);
                 newBiomes.addAll(baseSource.possibleBiomes());
             }
