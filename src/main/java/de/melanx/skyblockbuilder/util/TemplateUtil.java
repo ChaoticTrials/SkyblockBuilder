@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.data.Team;
@@ -9,6 +10,7 @@ import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
+import org.apache.commons.io.IOUtils;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -96,6 +98,14 @@ public class TemplateUtil {
             }
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create template file", e);
+        }
+    }
+
+    public static CompoundTag readTemplate(Path path, boolean snbt) throws IOException, CommandSyntaxException {
+        if (snbt) {
+            return NbtUtils.snbtToStructure(IOUtils.toString(Files.newBufferedReader(path)));
+        } else {
+            return NbtIo.readCompressed(path.toFile());
         }
     }
 }

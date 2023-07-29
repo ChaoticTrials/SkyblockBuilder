@@ -6,10 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.melanx.skyblockbuilder.api.SkyblockBuilderAPI;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.commands.*;
-import de.melanx.skyblockbuilder.commands.helper.InventoryCommand;
-import de.melanx.skyblockbuilder.commands.helper.ListCommand;
-import de.melanx.skyblockbuilder.commands.helper.SpawnsCommand;
-import de.melanx.skyblockbuilder.commands.helper.TemplatesToSnbtCommand;
+import de.melanx.skyblockbuilder.commands.helper.*;
 import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
 import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
@@ -83,6 +80,7 @@ public class EventListener {
         event.getDispatcher().register(Commands.literal("skyblock")
                 .requires(source -> SkyblockBuilderAPI.teamManagementEnabled())
                 .then(AcceptCommand.register())
+                .then(ConvertCommand.register())
                 .then(CreateCommand.register())
                 .then(DeclineCommand.register())
                 .then(HomeCommand.register())

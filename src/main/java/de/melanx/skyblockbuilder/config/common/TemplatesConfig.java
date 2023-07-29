@@ -39,6 +39,5 @@ public class TemplatesConfig {
             "}"})
     public static Optional<TemplateInfo> spawn = Optional.empty();
 
-    public record Spawn(BlockPos pos, WorldUtil.Directions direction) {
-    }
+    public record Spawn(BlockPos pos, WorldUtil.Directions direction) {}
 }

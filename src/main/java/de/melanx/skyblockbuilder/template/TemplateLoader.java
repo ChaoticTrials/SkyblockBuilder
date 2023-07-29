@@ -44,7 +44,7 @@ public class TemplateLoader {
                 TEMPLATE_MAP.put(info.name().toLowerCase(Locale.ROOT), template);
             }
 
-            if (TEMPLATE_MAP.size() == 0) {
+            if (TEMPLATE_MAP.isEmpty()) {
                 throw new IllegalStateException("You need at least one configured template.");
             }
 

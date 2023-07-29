@@ -6,14 +6,11 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+@RemoveIn(minecraft = "1.20.2")
+@Deprecated(forRemoval = true) // use ConvertCommand instead
 public class TemplatesToSnbtCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
@@ -36,11 +35,8 @@ public class TemplatesToSnbtCommand {
                 String convertedName = fileName.toString().substring(0, fileName.toString().length() - ".nbt".length()) + ".snbt";
                 Path converted = SkyPaths.TEMPLATES_DIR.resolve(convertedName);
 
-                StructureTemplate template = new StructureTemplate();
                 try {
                     CompoundTag nbt = NbtIo.readCompressed(original);
-                    HolderLookup.RegistryLookup<Block> blockRegistryLookup = context.getSource().getServer().registryAccess().registryOrThrow(Registries.BLOCK).asLookup();
-                    template.load(blockRegistryLookup, nbt);
                     Files.writeString(converted, NbtUtils.structureToSnbt(nbt));
 
                     context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName, convertedName), true);
@@ -49,6 +45,7 @@ public class TemplatesToSnbtCommand {
                 }
             }
         }
+        context.getSource().sendSystemMessage(Component.literal("This command will be removed, use \"/skyblock convert\" in future"));
 
         return 1;
     }

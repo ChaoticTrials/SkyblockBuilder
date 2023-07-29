@@ -30,7 +30,10 @@ public class SkyPaths {
 
     // paths
     public static final Path MOD_CONFIG = FMLPaths.CONFIGDIR.get().resolve("skyblockbuilder");
-    public static final Path MOD_EXPORTS = FMLPaths.GAMEDIR.get().resolve("skyblock_exports");
+    public static final Path SKYBLOCK_UTILS = FMLPaths.GAMEDIR.get().resolve("skyblockbuilder");
+    public static final Path MOD_EXPORTS = SKYBLOCK_UTILS.resolve("exports");
+    public static final Path CONVERT_INPUT = SKYBLOCK_UTILS.resolve("convert_input");
+    public static final Path CONVERT_OUTPUT = SKYBLOCK_UTILS.resolve("convert_output");
     public static final Path TEMPLATES_DIR = MOD_CONFIG.resolve("templates");
     public static final Path ICONS_DIR = TEMPLATES_DIR.resolve("icons");
     public static final Path DATA_DIR = MOD_CONFIG.resolve("data");
@@ -47,7 +50,10 @@ public class SkyPaths {
     public static void createDirectories() {
         try {
             Files.createDirectories(MOD_CONFIG);
+            Files.createDirectories(SKYBLOCK_UTILS);
             Files.createDirectories(MOD_EXPORTS);
+            Files.createDirectories(CONVERT_INPUT);
+            Files.createDirectories(CONVERT_OUTPUT);
             Files.createDirectories(TEMPLATES_DIR);
             Files.createDirectories(ICONS_DIR);
             Files.createDirectories(DATA_DIR);
