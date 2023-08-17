@@ -31,7 +31,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraftforge.common.util.BlockSnapshot;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -265,13 +264,7 @@ public class SkyblockSavedData extends SavedData {
 
         StructurePlaceSettings settings = new StructurePlaceSettings().setKnownShape(true);
         BlockPos center = team.getIsland().getCenter();
-        //noinspection unchecked
-        List<BlockSnapshot> capturedBlockSnapshots = (List<BlockSnapshot>) this.level.capturedBlockSnapshots.clone();
-        this.level.capturedBlockSnapshots.clear();
-        this.level.captureBlockSnapshots = true;
         template.getTemplate().placeInWorld(this.level, center, center, settings, new Random(), Block.UPDATE_CLIENTS);
-        this.level.captureBlockSnapshots = false;
-        this.level.capturedBlockSnapshots.addAll(capturedBlockSnapshots);
 
         this.skyblocks.put(team.getId(), team);
         this.skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
