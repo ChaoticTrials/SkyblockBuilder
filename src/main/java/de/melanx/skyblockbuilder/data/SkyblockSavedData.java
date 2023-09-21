@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.config.StartingInventory;
+import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.util.Spiral;
@@ -95,7 +96,11 @@ public class SkyblockSavedData extends SavedData {
         IslandPos islandPos;
         Team team;
         if (teamName.equalsIgnoreCase("spawn")) {
-            islandPos = new IslandPos(this.level, 0, 0, template);
+            int[] pos = new int[]{0, 0};
+            if (SpawnConfig.skipCenterIslandCreation) {
+                pos = this.spiral.next();
+            }
+            islandPos = new IslandPos(this.level, pos[0], pos[1], template);
             team = new Team(this, islandPos, SPAWN_ID);
         } else {
             do {

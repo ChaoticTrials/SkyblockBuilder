@@ -51,6 +51,10 @@ public class SpawnConfig {
     @Config({"The dimension the islands will be generated in."})
     public static ResourceKey<Level> dimension = Level.OVERWORLD;
 
+    @Config({"If set to true, the first island will not be generated at 0 ~ 0, but start with the next coordinate.",
+            "Useful if end dimension is used for spawns."})
+    public static boolean skipCenterIslandCreation = false;
+
     public static class Height {
 
         @Config({"set:",
