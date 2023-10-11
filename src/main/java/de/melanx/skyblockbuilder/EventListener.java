@@ -14,6 +14,7 @@ import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.config.common.InventoryConfig;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -227,6 +228,10 @@ public class EventListener {
             StartingInventory.loadStarterItems();
             if (event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
                 TemplateLoader.updateTemplates();
+            }
+
+            if (PermissionsConfig.forceSkyblockCheck) {
+                SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled, no support for failures");
             }
         }
     }

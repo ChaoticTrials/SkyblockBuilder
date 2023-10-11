@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.datagen.BlockStatesProvider;
 import de.melanx.skyblockbuilder.datagen.ItemModelProvider;
 import de.melanx.skyblockbuilder.datagen.ModTagProvider;
@@ -61,6 +62,10 @@ public final class SkyblockBuilder extends ModXRegistration {
         Registration.registerCodecs();
         TemplateLoader.updateTemplates();
         SkyPaths.generateDefaultFiles(null);
+
+        if (PermissionsConfig.forceSkyblockCheck) {
+            SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled, no support for failures");
+        }
     }
 
     @Override

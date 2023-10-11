@@ -7,6 +7,7 @@ import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.Team;
@@ -46,6 +47,7 @@ public class WorldUtil {
     }
 
     public static boolean isSkyblock(Level level) {
+        if (PermissionsConfig.forceSkyblockCheck) return true;
         if (!(level instanceof ServerLevel)) return false;
 
         MinecraftServer server = ((ServerLevel) level).getServer();
