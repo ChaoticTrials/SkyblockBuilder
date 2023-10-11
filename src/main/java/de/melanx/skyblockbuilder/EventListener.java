@@ -228,6 +228,10 @@ public class EventListener {
             if (event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
                 TemplateLoader.updateTemplates();
             }
+
+            if (ConfigHandler.Utility.forceSkyblockCheck) {
+                SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled, no support for failures");
+            }
         }
     }
 }

@@ -173,6 +173,11 @@ public class ConfigHandler {
 
     public static class Utility {
 
+        @Config({"Force the check if the world is skyblock",
+                "This enables the commands in worlds without any skyblock dimension",
+                "USE AT YOUR OWN RISK, NO SUPPORT FOR DEFAULT WORLDS WITH THIS ENABLED"})
+        public static boolean forceSkyblockCheck = false;
+
         @Config("Should players be able to leave their team or invite others? [default: true]")
         public static boolean selfManage = true;
 

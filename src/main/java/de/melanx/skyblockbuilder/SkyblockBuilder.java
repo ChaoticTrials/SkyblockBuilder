@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.melanx.skyblockbuilder.client.ClientSetup;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
+import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.network.SkyNetwork;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.Util;
@@ -49,6 +50,10 @@ public final class SkyblockBuilder extends ModXRegistration {
 
         Registration.registerCodecs();
         SkyPaths.generateDefaultFiles(null);
+
+        if (ConfigHandler.Utility.forceSkyblockCheck) {
+            SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled, no support for failures");
+        }
     }
 
     @Override
