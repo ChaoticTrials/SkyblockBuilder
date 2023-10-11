@@ -44,6 +44,8 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
         if (json.has("offset")) {
             JsonArray offsetArray = json.get("offset").getAsJsonArray();
             offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt(), offsetArray.get(1).getAsInt(), offsetArray.get(2).getAsInt());
+        } else if (WorldConfig.offset != 0) {
+            offset = new TemplateInfo.Offset(WorldConfig.offset, 0, WorldConfig.offset);
         }
 
         String surroundingBlocks = "";
