@@ -46,6 +46,8 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
         if (json.has("offset")) {
             JsonArray offsetArray = json.get("offset").getAsJsonArray();
             offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt(), offsetArray.get(1).getAsInt());
+        } else if (ConfigHandler.World.offset != 0) {
+            offset = new TemplateInfo.Offset(ConfigHandler.World.offset, ConfigHandler.World.offset);
         }
 
         // todo 1.20 merge with normal offset
