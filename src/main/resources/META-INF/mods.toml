@@ -5,7 +5,7 @@ issueTrackerURL="https://www.github.com/MelanX/SkyblockBuilder/issues/"
 
 [[mods]]
 modId="skyblockbuilder"
-version="${file.jarVersion}"
+version="${version}"
 displayName="Skyblock Builder"
 updateJSONURL="https://assets.melanx.de/updates/skyblock-builder.json"
 displayURL="www.curseforge.com/members/melanx/"
