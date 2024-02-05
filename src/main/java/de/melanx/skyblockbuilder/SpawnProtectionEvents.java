@@ -207,7 +207,7 @@ public class SpawnProtectionEvents {
         }
 
         if (!event.player.level().isClientSide && !event.player.isDeadOrDying() && event.player.tickCount % 20 == 0 && SpawnProtectionEvents.isOnSpawn(event.player)) {
-            event.player.setHealth(20);
+            event.player.setHealth(event.player.getMaxHealth());
             event.player.getFoodData().setFoodLevel(20);
             event.player.setAirSupply(event.player.getMaxAirSupply());
             event.player.setRemainingFireTicks(0);
