@@ -264,7 +264,7 @@ public class SkyblockSavedData extends SavedData {
         team.setPossibleSpawns(possibleSpawns);
         team.setDirection(template.getDirection());
 
-        StructurePlaceSettings settings = new StructurePlaceSettings().setKnownShape(true);
+        StructurePlaceSettings settings = new StructurePlaceSettings().setKnownShape(true).setKeepLiquids(false);
         BlockPos center = team.getIsland().getCenter();
         List<BlockSnapshot> capturedBlockSnapshots = (List<BlockSnapshot>) this.level.capturedBlockSnapshots.clone();
         this.level.captureBlockSnapshots = true;
