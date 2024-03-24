@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.ClientUtility;
+import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
@@ -70,7 +71,7 @@ public class ScreenStructureSaver extends Screen {
                 .size(60, 20)
                 .build());
         this.addRenderableWidget(Button.builder(Component.empty(), button -> {
-                    ClientUtility.openPath("skyblock_exports");
+                    ClientUtility.openPath(SkyPaths.MOD_EXPORTS);
                 })
                 .pos(this.relX + 144, this.relY + 23)
                 .size(20, 20)

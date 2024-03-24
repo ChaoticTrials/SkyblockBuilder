@@ -11,19 +11,17 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class ClientUtility {
 
     @OnlyIn(Dist.CLIENT)
-    public static void openPath(String path) {
+    public static void openPath(Path dir) {
         try {
-            Path dir = Paths.get(path);
             Files.createDirectories(dir);
             Util.getPlatform().openUri(dir.toUri());
         } catch (IOException e) {
             //noinspection ConstantConditions
-            Minecraft.getInstance().player.displayClientMessage(Component.translatable("skyblockbuilder.screen.open_folder.error", path), false);
+            Minecraft.getInstance().player.displayClientMessage(Component.translatable("skyblockbuilder.screen.open_folder.error", dir.toString()), false);
         }
     }
 
