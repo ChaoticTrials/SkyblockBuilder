@@ -18,6 +18,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -46,6 +47,7 @@ public class ItemStructureSaver extends Item {
 
     private static final MutableComponent TOOLTIP_INFO = Component.translatable("skyblockbuilder.item.structure_saver.info.tooltip").withStyle(ChatFormatting.GOLD);
     private static final MutableComponent TOOLTIP_SAVE = Component.translatable("skyblockbuilder.item.structure_saver.save.tooltip").withStyle(ChatFormatting.GOLD);
+    private static final MutableComponent TOOLTIP_RESTORE = Component.translatable("skyblockbuilder.item.structure_saver.restore.tooltip").withStyle(ChatFormatting.GOLD);
 
     public ItemStructureSaver() {
         super(new Properties());
@@ -63,6 +65,7 @@ public class ItemStructureSaver extends Item {
 
             if (!tag.contains("Position1")) {
                 tag.put("Position1", NbtUtils.writeBlockPos(pos));
+                tag.remove("PreviousPositions");
                 player.displayClientMessage(Component.translatable("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
                 return InteractionResult.SUCCESS;
             }
@@ -75,6 +78,16 @@ public class ItemStructureSaver extends Item {
         }
 
         return InteractionResult.PASS;
+    }
+
+    @Override
+    public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
+        CompoundTag tag = stack.getOrCreateTag();
+        if (tag.contains("PreviousPositions") && entity.isShiftKeyDown()) {
+            ItemStructureSaver.restorePositions(stack);
+        }
+
+        return super.onEntitySwing(stack, entity);
     }
 
     @Nonnull
@@ -120,6 +133,10 @@ public class ItemStructureSaver extends Item {
             tooltip.add(TOOLTIP_SAVE);
         } else {
             tooltip.add(TOOLTIP_INFO);
+        }
+
+        if (nbt.contains("PreviousPositions")) {
+            tooltip.add(TOOLTIP_RESTORE);
         }
     }
 
@@ -245,8 +262,32 @@ public class ItemStructureSaver extends Item {
         return path.getFileName().toString();
     }
 
+    public static ItemStack restorePositions(ItemStack stack) {
+        CompoundTag tag = stack.getOrCreateTag();
+        if (!tag.contains("PreviousPositions")) {
+            return stack;
+        }
+
+        CompoundTag last = tag.getCompound("PreviousPositions");
+        tag.put("Position1", last.getCompound("Position1"));
+        tag.put("Position2", last.getCompound("Position2"));
+        tag.putBoolean("CanSave", true);
+        tag.remove("PreviousPositions");
+
+        stack.setTag(tag);
+        return stack;
+    }
+
     public static ItemStack removeTags(ItemStack stack) {
         CompoundTag tag = stack.getOrCreateTag();
+
+        if (tag.contains("Position1") && tag.contains("Position2")) {
+            CompoundTag last = new CompoundTag();
+            last.put("Position1", tag.getCompound("Position1"));
+            last.put("Position2", tag.getCompound("Position2"));
+            tag.put("PreviousPositions", last);
+        }
+
         tag.remove("Position1");
         tag.remove("Position2");
         tag.remove("CanSave");
