@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.melanx.skyblockbuilder.client.ClientEventListener;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.datagen.BlockStatesProvider;
@@ -12,7 +13,9 @@ import de.melanx.skyblockbuilder.network.SkyNetwork;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.Util;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -41,6 +44,8 @@ public final class SkyblockBuilder extends ModXRegistration {
         instance = this;
         this.network = new SkyNetwork();
         this.logger = LoggerFactory.getLogger(SkyblockBuilder.class);
+
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientEventListener::new);
 
         SkyPaths.createDirectories();
         MinecraftForge.EVENT_BUS.register(new SpawnProtectionEvents());
