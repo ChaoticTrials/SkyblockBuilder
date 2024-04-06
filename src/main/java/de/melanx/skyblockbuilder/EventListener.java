@@ -62,6 +62,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.moddingx.libx.event.ConfigLoadedEvent;
 import org.moddingx.libx.render.RenderHelperLevel;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -145,9 +146,16 @@ public class EventListener {
             }
 
             data.addPlayerToTeam(spawn, player);
-            //noinspection OptionalGetWithoutIsPresent
-            WorldUtil.Directions direction = spawn.getDefaultPossibleSpawns().stream().findFirst().get().direction();
-            ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), direction.getYRot());
+            try {
+                //noinspection OptionalGetWithoutIsPresent
+                WorldUtil.Directions direction = !spawn.getDefaultPossibleSpawns().isEmpty() ?
+                        spawn.getDefaultPossibleSpawns().stream().findFirst().get().direction() :
+                        spawn.getPossibleSpawns().stream().findFirst().get().direction();
+                ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), direction.getYRot());
+            } catch (NoSuchElementException e) {
+                throw new IllegalStateException("No possible spawn point set for spawn", e);
+            }
+
             WorldUtil.teleportToIsland(player, spawn);
         }
     }
