@@ -13,6 +13,7 @@ import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.config.StartingInventory;
+import de.melanx.skyblockbuilder.config.common.CustomizationConfig;
 import de.melanx.skyblockbuilder.config.common.InventoryConfig;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
@@ -24,6 +25,7 @@ import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -32,6 +34,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -193,6 +198,32 @@ public class EventListener {
             if (SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
                 SkyblockSavedData.get(server.overworld()).getSpawn();
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onTabListName(PlayerEvent.TabListNameFormat event) {
+        if (!CustomizationConfig.showTeamInTabList) {
+            return;
+        }
+
+        Player player = event.getEntity();
+        Team team = SkyblockSavedData.get(player.level()).getTeamFromPlayer(player);
+        if (team != null) {
+            MutableComponent name = (MutableComponent) player.getDisplayName();
+            Style style = name.getStyle();
+            if (style.getColor() == null) {
+                style.withColor(ChatFormatting.WHITE);
+            }
+            MutableComponent teamName = Component.literal(team.getName()).withStyle(ChatFormatting.AQUA);
+            event.setDisplayName(Component.empty()
+                    .append(Component.literal("[").withStyle(style))
+                    .append(teamName.withStyle(ChatFormatting.AQUA))
+                    .append(Component.literal("] ").withStyle(style))
+                    .append(name.withStyle(style))
+            );
+        } else {
+            event.setDisplayName(null);
         }
     }
 

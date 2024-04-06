@@ -538,6 +538,9 @@ public class SkyblockSavedData extends SavedData {
         super.setDirty();
         if (this.level != null) {
             SkyblockBuilder.getNetwork().updateData(this.level, this);
+            for (ServerPlayer player : this.level.getServer().getPlayerList().getPlayers()) {
+                player.refreshTabListName();
+            }
         }
     }
 
