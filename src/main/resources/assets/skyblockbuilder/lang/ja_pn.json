@@ -77,9 +77,7 @@
   "skyblockbuilder.command.info.team_detailed": "%sには、%sプレーヤーが含まれています.",
   "skyblockbuilder.command.info.invited_to_team0": "%sは、あなたを%sに招待しま. タイプ ",
   "skyblockbuilder.command.info.invited_to_team1": " に参加することができます.",
-  "skyblockbuilder.command.info.visit_status": "他のプレイヤーの訪問は現在 %s です.",
   "skyblockbuilder.command.info.toggle_visit": "他のプレイヤーからの訪問を受ける能力が %s になりました.",
-  "skyblockbuilder.command.info.request_status": "他のプレーヤーによる参加リクエストは現在%sです。",
   "skyblockbuilder.command.info.toggle_request": "他のプレーヤーによる参加リクエストは現在%sです。",
   "skyblockbuilder.command.info.click_to_copy": "クリックしてコピー",
 

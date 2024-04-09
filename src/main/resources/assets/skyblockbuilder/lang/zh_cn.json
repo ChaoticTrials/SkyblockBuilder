@@ -77,9 +77,7 @@
   "skyblockbuilder.command.info.team_detailed": "%s 包括 %s 名玩家。",
   "skyblockbuilder.command.info.invited_to_team0": "%s 邀请您加入 %s。输入 ",
   "skyblockbuilder.command.info.invited_to_team1": " 加入队伍。",
-  "skyblockbuilder.command.info.visit_status": "其他玩家的访问目前处于 %s 状态。",
   "skyblockbuilder.command.info.toggle_visit": "其他玩家的访问现在处于 %s 状态。",
-  "skyblockbuilder.command.info.request_status": "其他玩家的加入请求目前处于 %s 状态。",
   "skyblockbuilder.command.info.toggle_request": "其他玩家的加入请求现在处于 %s 状态。",
   "skyblockbuilder.command.info.click_to_copy": "点击复制",
 

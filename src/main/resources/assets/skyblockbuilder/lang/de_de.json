@@ -77,9 +77,7 @@
   "skyblockbuilder.command.info.team_detailed": "Team %s hat %s Spieler.",
   "skyblockbuilder.command.info.invited_to_team0": "%s lädt dich ein, %s beizutreten. Gib ",
   "skyblockbuilder.command.info.invited_to_team1": " ein, um dem Team beizutreten.",
-  "skyblockbuilder.command.info.visit_status": "Besuche anderer Spieler sind aktuell %s.",
   "skyblockbuilder.command.info.toggle_visit": "Besuche anderer Spieler sind nun %s.",
-  "skyblockbuilder.command.info.request_status": "Beitrittsanfragen anderer Spieler sind aktuell %s.",
   "skyblockbuilder.command.info.toggle_request": "Beitrittsanfragen anderer Spieler sind nun %s.",
   "skyblockbuilder.command.info.click_to_copy": "Klicke zum Kopieren",
 

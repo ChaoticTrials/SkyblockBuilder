@@ -57,13 +57,13 @@ public class TeamCommand {
 
                 // Toggle permission to visit the teams island
                 .then(Commands.literal("allowVisit")
-                        .executes(context -> showVisitInformation(context.getSource()))
+                        .executes(context -> toggleAllowVisit(context.getSource()))
                         .then(Commands.argument("enabled", BoolArgumentType.bool())
                                 .executes(context -> toggleAllowVisit(context.getSource(), BoolArgumentType.getBool(context, "enabled")))))
 
                 // Toggle permission to send join requests to your team
                 .then(Commands.literal("allowRequests")
-                        .executes(context -> showRequestInformation(context.getSource()))
+                        .executes(context -> toggleAllowRequest(context.getSource()))
                         .then(Commands.argument("enabled", BoolArgumentType.bool())
                                 .executes(context -> toggleAllowRequest(context.getSource(), BoolArgumentType.getBool(context, "enabled")))))
 
@@ -158,7 +158,7 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int showVisitInformation(CommandSourceStack source) throws CommandSyntaxException {
+    private static int toggleAllowVisit(CommandSourceStack source) throws CommandSyntaxException {
         WorldUtil.checkSkyblock(source);
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
@@ -170,8 +170,7 @@ public class TeamCommand {
         }
 
         boolean enabled = team.allowsVisits();
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.info.visit_status", Component.translatable("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).withStyle(ChatFormatting.GOLD), false);
-        return 1;
+        return TeamCommand.toggleAllowVisit(source, enabled);
     }
 
     private static int toggleAllowVisit(CommandSourceStack source, boolean enabled) throws CommandSyntaxException {
@@ -197,7 +196,7 @@ public class TeamCommand {
         }
     }
 
-    private static int showRequestInformation(CommandSourceStack source) throws CommandSyntaxException {
+    private static int toggleAllowRequest(CommandSourceStack source) throws CommandSyntaxException {
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
@@ -208,8 +207,7 @@ public class TeamCommand {
         }
 
         boolean enabled = team.allowsVisits();
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.info.visit_status", Component.translatable("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).withStyle(ChatFormatting.GOLD), false);
-        return 1;
+        return TeamCommand.toggleAllowRequest(source, enabled);
     }
 
     private static int toggleAllowRequest(CommandSourceStack source, boolean enabled) throws CommandSyntaxException {

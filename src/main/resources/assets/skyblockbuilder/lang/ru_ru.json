@@ -77,9 +77,7 @@
   "skyblockbuilder.command.info.team_detailed": "В %s %s игроков.",
   "skyblockbuilder.command.info.invited_to_team0": "%s пригласил тебя в команду %s. Напиши ",
   "skyblockbuilder.command.info.invited_to_team1": " для присоединения к команде.",
-  "skyblockbuilder.command.info.visit_status": "Визиты от других игроков сейчас %s.",
   "skyblockbuilder.command.info.toggle_visit": "Визиты от других игроков теперь %s.",
-  "skyblockbuilder.command.info.request_status": "Запросы на присоединение от других игроков сейчас %s.",
   "skyblockbuilder.command.info.toggle_request": "Запросы на присоединение от других игроков теперь %s.",
   "skyblockbuilder.command.info.click_to_copy": "Нажми что бы скопировать",
 
