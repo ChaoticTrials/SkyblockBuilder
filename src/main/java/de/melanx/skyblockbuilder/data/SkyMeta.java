@@ -22,6 +22,7 @@ public class SkyMeta {
     private UUID teamId = SkyblockSavedData.SPAWN_ID;
     private long lastHomeTeleport;
     private long lastSpawnTeleport;
+    private long lastVisitTeleport;
 
     public static SkyMeta get(SkyblockSavedData data, @Nonnull CompoundTag nbt) {
         return new SkyMeta(data, null).load(nbt);
@@ -115,6 +116,21 @@ public class SkyMeta {
         return (this.lastSpawnTeleport == 0 ? PermissionsConfig.Teleports.spawnCooldown : gameTime) - this.getLastSpawnTeleport() >= PermissionsConfig.Teleports.spawnCooldown;
     }
 
+    public long getLastVisitTeleport() {
+        return this.lastVisitTeleport;
+    }
+
+    public void setLastVisitTeleport(long gameTime) {
+        this.lastVisitTeleport = gameTime;
+        if (this.data != null) {
+            this.data.setDirtySilently();
+        }
+    }
+
+    public boolean canVisit(long gameTime) {
+        return (this.lastVisitTeleport == 0 ? PermissionsConfig.Teleports.visitCooldown : gameTime) - this.getLastVisitTeleport() >= PermissionsConfig.Teleports.visitCooldown;
+    }
+
     public SkyMeta load(@Nonnull CompoundTag nbt) {
         this.owner = nbt.getUUID("OwnerId");
         this.teamId = nbt.getUUID("TeamId");
@@ -131,6 +147,7 @@ public class SkyMeta {
 
         this.lastHomeTeleport = nbt.getLong("LastHomeTeleport");
         this.lastSpawnTeleport = nbt.getLong("LastSpawnTeleport");
+        this.lastVisitTeleport = nbt.getLong("LastVisitTeleport");
 
         return this;
     }
@@ -155,6 +172,7 @@ public class SkyMeta {
         nbt.put("Invitations", invitationTeams);
         nbt.putLong("LastHomeTeleport", this.lastHomeTeleport);
         nbt.putLong("LastSpawnTeleport", this.lastSpawnTeleport);
+        nbt.putLong("LastVisitTeleport", this.lastVisitTeleport);
         return nbt;
     }
 }

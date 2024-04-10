@@ -29,6 +29,9 @@ public class PermissionsConfig {
         @Config("Should players be able to visit other island? [default: true]")
         public static boolean allowVisits = true;
 
+        @Config("Cooldown in ticks for visiting other islands. [default: 3600 = 3min]")
+        public static int visitCooldown = 3600;
+
         @Config("Should players be able to teleport to their home island? [default: true]")
         public static boolean home = true;
 

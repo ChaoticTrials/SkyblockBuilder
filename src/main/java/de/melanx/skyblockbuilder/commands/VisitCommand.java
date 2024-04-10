@@ -7,6 +7,7 @@ import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -34,6 +35,12 @@ public class VisitCommand {
 
         if (team == null) {
             source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+            return 0;
+        }
+
+        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canVisit(level.getGameTime())) {
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.visitCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastVisitTeleport()))));
             return 0;
         }
 
@@ -72,6 +79,7 @@ public class VisitCommand {
         }
 
         WorldUtil.teleportToIsland(player, team);
+        data.getOrCreateMetaInfo(player).setLastVisitTeleport(level.getGameTime());
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.visit_team", name).withStyle(ChatFormatting.GOLD), true);
         return 1;
     }
