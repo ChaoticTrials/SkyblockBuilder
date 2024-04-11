@@ -38,7 +38,7 @@ public class AcceptCommand {
         }
 
         if (data.hasPlayerTeam(player)) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_has_team").withStyle(ChatFormatting.RED), false);
             return 0;
         }
 

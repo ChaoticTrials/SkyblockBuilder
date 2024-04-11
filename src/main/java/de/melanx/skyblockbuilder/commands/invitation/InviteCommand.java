@@ -41,7 +41,7 @@ public class InviteCommand {
 
         Team invitedPlayersTeam = data.getTeamFromPlayer(invitePlayer);
         if (invitedPlayersTeam != null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_has_team").withStyle(ChatFormatting.RED), false);
+            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_has_team", invitePlayer.getName().getString()).withStyle(ChatFormatting.RED), false);
             return 0;
         }
 
