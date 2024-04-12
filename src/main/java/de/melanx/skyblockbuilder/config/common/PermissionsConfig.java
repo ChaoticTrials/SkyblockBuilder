@@ -23,6 +23,9 @@ public class PermissionsConfig {
         @Config("Should fall damage be removed when teleporting? [default: false]")
         public static boolean noFallDamage = false;
 
+        @Config("Should teleporting be prevented while falling? [default: false]")
+        public static boolean preventWhileFalling = false;
+
         @Config("Should players be able to teleport to spawn? [default: true]")
         public static boolean spawn = true;
 

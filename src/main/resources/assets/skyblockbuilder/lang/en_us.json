@@ -37,6 +37,7 @@
   "skyblockbuilder.command.error.user_no_player": "You are not a player, but a mere liar!",
   "skyblockbuilder.command.error.teleport_across_dimensions": "You are not allowed to teleport across dimensions.",
   "skyblockbuilder.command.error.teleportation_not_allowed_dimension": "You are not allowed to teleport in this dimension.",
+  "skyblockbuilder.command.error.prevent_while_falling": "You are not allowed to teleport while falling.",
 
   "skyblockbuilder.command.denied.accept_invitations": "You cannot accept this invitation!",
   "skyblockbuilder.command.denied.decline_invitations": "You cannot decline this invitation!",

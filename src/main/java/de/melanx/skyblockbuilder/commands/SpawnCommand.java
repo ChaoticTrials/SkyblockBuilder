@@ -45,6 +45,11 @@ public class SpawnCommand {
             return 0;
         }
 
+        if (!player.hasPermissions(2) && PermissionsConfig.Teleports.preventWhileFalling && player.fallDistance > 1) {
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.prevent_while_falling"));
+            return 0;
+        }
+
         data.getOrCreateMetaInfo(player).setLastSpawnTeleport(level.getGameTime());
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.teleport_to_spawn"), false);
         WorldUtil.teleportToIsland(player, team);

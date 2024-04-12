@@ -52,6 +52,11 @@ public class HomeCommand {
             return 0;
         }
 
+        if (!player.hasPermissions(2) && PermissionsConfig.Teleports.preventWhileFalling && player.fallDistance > 1) {
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.prevent_while_falling"));
+            return 0;
+        }
+
         switch (SkyblockHooks.onHome(player, team)) {
             case DENY:
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.teleport_home").withStyle(ChatFormatting.RED), false);
