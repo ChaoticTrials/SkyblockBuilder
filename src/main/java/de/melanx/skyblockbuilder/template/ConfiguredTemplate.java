@@ -85,11 +85,11 @@ public class ConfiguredTemplate {
     }
 
     public Component getNameComponent() {
-        return (this.name.startsWith("{") && this.name.endsWith("}")) ? Component.translatable(this.name) : Component.literal(this.name);
+        return (this.name.startsWith("{") && this.name.endsWith("}")) ? Component.translatable(this.name.substring(1, this.name.length() - 1)) : Component.literal(this.name);
     }
 
     public Component getDescriptionComponent() {
-        return (this.desc.startsWith("{") && this.desc.endsWith("}")) ? Component.translatable(this.desc) : Component.literal(this.desc);
+        return (this.desc.startsWith("{") && this.desc.endsWith("}")) ? Component.translatable(this.desc.substring(1, this.desc.length() - 1)) : Component.literal(this.desc);
     }
 
     public TemplateInfo.Offset getOffset() {
