@@ -44,6 +44,9 @@ public class WorldUtil {
         TemplatesConfig.Spawn spawn = validPosition(level, team);
         player.teleportTo(level, spawn.pos().getX() + 0.5, spawn.pos().getY() + 0.2, spawn.pos().getZ() + 0.5, spawn.direction().getYRot(), 0);
         player.setRespawnPosition(level.dimension(), spawn.pos(), spawn.direction().getYRot(), true, false);
+        if (PermissionsConfig.Teleports.noFallDamage) {
+            player.fallDistance = 0;
+        }
     }
 
     public static boolean isSkyblock(Level level) {

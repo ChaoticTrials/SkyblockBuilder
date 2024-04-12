@@ -20,6 +20,9 @@ public class PermissionsConfig {
 
     public static class Teleports {
 
+        @Config("Should fall damage be removed when teleporting? [default: false]")
+        public static boolean noFallDamage = false;
+
         @Config("Should players be able to teleport to spawn? [default: true]")
         public static boolean spawn = true;
 
