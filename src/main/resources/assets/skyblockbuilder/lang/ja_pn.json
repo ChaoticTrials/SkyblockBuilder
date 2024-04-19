@@ -32,7 +32,7 @@
   "skyblockbuilder.command.error.no_player_added": "チームに選手が追加されていない!",
   "skyblockbuilder.command.error.wrong_position": "位置はオーバーワールドにある必要があります.",
   "skyblockbuilder.command.error.position_too_far_away": "このポジションは、チームの島から遠すぎます.",
-  "skyblockbuilder.command.error.remove_spawn0": "このスポーンポイントを削除することはできません.%s",
+  "skyblockbuilder.command.error.remove_spawn0": "このスポーンポイントを削除することはできません.",
   "skyblockbuilder.command.error.remove_spawn1": "スポーンポイントの数が足りません.",
   "skyblockbuilder.command.error.user_no_player": "あなたはプレーヤーではなく、ただの嘘つきです!",
   "skyblockbuilder.command.error.teleport_across_dimensions": "異なる次元にテレポートすることは許可されていません。",

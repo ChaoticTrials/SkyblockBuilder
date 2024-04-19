@@ -309,6 +309,7 @@ public class TeamCommand {
                 if (team.getPossibleSpawns().size() <= 1) {
                     component.append(" ").append(Component.translatable("skyblockbuilder.command.denied.modify_spawns1"));
                 }
+
                 source.sendSuccess(() -> component.withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
@@ -321,11 +322,12 @@ public class TeamCommand {
         }
 
         if (!team.removePossibleSpawn(pos)) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.remove_spawn0",
-                    (team.getPossibleSpawns().size() <= 1
-                            ? Component.literal(" ").append(Component.translatable("skyblockbuilder.command.error.remove_spawn1"))
-                            : "")
-            ).withStyle(ChatFormatting.RED), false);
+            MutableComponent component = Component.translatable("skyblockbuilder.command.error.remove_spawn0");
+            if (team.getPossibleSpawns().size() <= 1) {
+                component.append(" ").append(Component.translatable("skyblockbuilder.command.error.remove_spawn1"));
+            }
+
+            source.sendSuccess(() -> component.withStyle(ChatFormatting.RED), false);
             return 0;
         }
 

@@ -32,7 +32,7 @@
   "skyblockbuilder.command.error.no_player_added": "Игрок не был добавлен в команду!",
   "skyblockbuilder.command.error.wrong_position": "Позиция должна быть в измерении спавна.",
   "skyblockbuilder.command.error.position_too_far_away": "Позиция слишком далеко от острова команды.",
-  "skyblockbuilder.command.error.remove_spawn0": "Ты не можешь удалить эту точку спавна. %s",
+  "skyblockbuilder.command.error.remove_spawn0": "Ты не можешь удалить эту точку спавна.",
   "skyblockbuilder.command.error.remove_spawn1": "Недостаточно точек спавна.",
   "skyblockbuilder.command.error.user_no_player": "Ты не игрок, а простой лжец!",
   "skyblockbuilder.command.error.teleport_across_dimensions": "Вам запрещено перемещаться между измерениями.",

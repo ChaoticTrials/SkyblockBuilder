@@ -32,7 +32,7 @@
   "skyblockbuilder.command.error.no_player_added": "No player added to the team!",
   "skyblockbuilder.command.error.wrong_position": "Position needs to be in the spawn dimension.",
   "skyblockbuilder.command.error.position_too_far_away": "This position is too far away from the team island.",
-  "skyblockbuilder.command.error.remove_spawn0": "You cannot remove that spawn point.%s",
+  "skyblockbuilder.command.error.remove_spawn0": "You cannot remove that spawn point.",
   "skyblockbuilder.command.error.remove_spawn1": "There are not enough spawn points left.",
   "skyblockbuilder.command.error.user_no_player": "You are not a player, but a mere liar!",
   "skyblockbuilder.command.error.teleport_across_dimensions": "You are not allowed to teleport across dimensions.",

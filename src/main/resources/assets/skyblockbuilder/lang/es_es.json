@@ -32,7 +32,7 @@
   "skyblockbuilder.command.error.no_player_added": "¡Ningún jugador fue añadido al equipo!",
   "skyblockbuilder.command.error.wrong_position": "La posición debe estar en la dimensión de aparición.",
   "skyblockbuilder.command.error.position_too_far_away": "Ésta posición está demasiado lejos de la isla del equipo.",
-  "skyblockbuilder.command.error.remove_spawn0": "No es posible eliminar ese punto de aparación.%s",
+  "skyblockbuilder.command.error.remove_spawn0": "No es posible eliminar ese punto de aparación.",
   "skyblockbuilder.command.error.remove_spawn1": "No quedan suficientes puntos de aparación.",
   "skyblockbuilder.command.error.user_no_player": "¡No eres un jugador, sinó un mentiroso!",
   "skyblockbuilder.command.error.teleport_across_dimensions": "No tienes permitido teletransportarte entre dimensiones.",

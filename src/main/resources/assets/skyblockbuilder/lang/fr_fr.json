@@ -32,7 +32,7 @@
   "skyblockbuilder.command.error.no_player_added": "Aucun joueur ajouté à l'équipe !",
   "skyblockbuilder.command.error.wrong_position": "La position doit être dans l'overworld.",
   "skyblockbuilder.command.error.position_too_far_away": "Cette position est trop éloignée de l'île de l'équipe.",
-  "skyblockbuilder.command.error.remove_spawn0": "Vous ne pouvez pas supprimer ce point d'apparition. %s",
+  "skyblockbuilder.command.error.remove_spawn0": "Vous ne pouvez pas supprimer ce point d'apparition.",
   "skyblockbuilder.command.error.remove_spawn1": "Il ne reste plus assez de points d'apparition.",
   "skyblockbuilder.command.error.user_no_player": "Vous n'êtes pas un joueur, mais un simple menteur !",
   "skyblockbuilder.command.error.teleport_across_dimensions": "Vous n'êtes pas autorisé à vous téléporter entre les dimensions.",

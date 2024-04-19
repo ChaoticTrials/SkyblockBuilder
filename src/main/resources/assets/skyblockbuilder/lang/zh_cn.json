@@ -32,7 +32,7 @@
   "skyblockbuilder.command.error.no_player_added": "没有玩家被添加到队伍中！",
   "skyblockbuilder.command.error.wrong_position": "位置需要在出生维度内。",
   "skyblockbuilder.command.error.position_too_far_away": "此位置离队伍岛屿太远。",
-  "skyblockbuilder.command.error.remove_spawn0": "你不能删除该出生点。%s",
+  "skyblockbuilder.command.error.remove_spawn0": "你不能删除该出生点。",
   "skyblockbuilder.command.error.remove_spawn1": "剩余出生点不足。",
   "skyblockbuilder.command.error.user_no_player": "你不是玩家，而是一个骗子！",
   "skyblockbuilder.command.error.teleport_across_dimensions": "你不能跨维度传送。",
