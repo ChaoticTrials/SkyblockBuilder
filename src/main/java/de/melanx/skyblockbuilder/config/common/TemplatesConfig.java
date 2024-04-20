@@ -30,7 +30,7 @@ public class TemplatesConfig {
             "Instead of \"minOffset\" and \"maxOffset\" with same values, you could also just use \"offset\".",
             "Example: ",
             "{",
-            "    \"file\": \"water_cave.nbt\",",
+            "    \"file\": \"default.nbt\",",
             "    \"minOffset\": [ -6, 3, 5 ],",
             "    \"maxOffset\": [ 4, 10, 3 ]",
             "}"})
