@@ -23,19 +23,27 @@ import java.awt.Color;
 @RegisterMapper
 public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
 
-    @Override
-    public BlockPos fromJson(JsonArray json) {
+    public static BlockPos fromJsonArray(JsonArray json) {
         if (json.size() != 3) throw new IllegalStateException("Invalid BlockPos: " + json);
         return new BlockPos(json.get(0).getAsInt(), json.get(1).getAsInt(), json.get(2).getAsInt());
     }
 
-    @Override
-    public JsonArray toJson(BlockPos value) {
+    public static JsonArray toJsonArray(BlockPos value) {
         JsonArray array = new JsonArray();
         array.add(value.getX());
         array.add(value.getY());
         array.add(value.getZ());
         return array;
+    }
+
+    @Override
+    public BlockPos fromJson(JsonArray json) {
+        return BlockPosMapper.fromJsonArray(json);
+    }
+
+    @Override
+    public JsonArray toJson(BlockPos value) {
+        return BlockPosMapper.toJsonArray(value);
     }
 
     @Override

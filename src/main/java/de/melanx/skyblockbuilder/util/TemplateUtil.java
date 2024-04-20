@@ -101,6 +101,10 @@ public class TemplateUtil {
         }
     }
 
+    public static CompoundTag readTemplate(Path path) throws IOException, CommandSyntaxException {
+        return TemplateUtil.readTemplate(path, path.toString().endsWith(".snbt"));
+    }
+
     public static CompoundTag readTemplate(Path path, boolean snbt) throws IOException, CommandSyntaxException {
         if (snbt) {
             return NbtUtils.snbtToStructure(IOUtils.toString(Files.newBufferedReader(path)));

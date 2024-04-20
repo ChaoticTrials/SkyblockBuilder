@@ -58,7 +58,12 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             surroundingMargin = json.get("surroundingMargin").getAsInt();
         }
 
-        return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, surroundingMargin);
+        String spreads = "";
+        if (json.has("spreads")) {
+            spreads = json.get("spreads").getAsString();
+        }
+
+        return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, spreads, surroundingMargin);
     }
 
     @Override
@@ -87,6 +92,10 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
 
         if (templateInfo.surroundingMargin() > 0) {
             json.addProperty("surroundingMargin", templateInfo.surroundingMargin());
+        }
+
+        if (!templateInfo.spreads().isEmpty()) {
+            json.addProperty("spreads", templateInfo.spreads());
         }
 
         return json;

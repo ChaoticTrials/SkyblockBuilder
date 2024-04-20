@@ -4,20 +4,25 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
+import de.melanx.skyblockbuilder.util.TemplateUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.apache.commons.io.IOUtils;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -30,15 +35,14 @@ public class ConfiguredTemplate {
     private TemplateInfo.Offset offset;
     private int surroundingMargin;
     private List<Block> surroundingBlocks;
+    private List<SpreadConfig> spreads;
 
     public ConfiguredTemplate(TemplateInfo info) {
         StructureTemplate template = new StructureTemplate();
         CompoundTag nbt;
         try {
             Path file = SkyPaths.TEMPLATES_DIR.resolve(info.file());
-            nbt = file.toString().endsWith(".snbt")
-                    ? NbtUtils.snbtToStructure(IOUtils.toString(Files.newBufferedReader(file)))
-                    : NbtIo.readCompressed(file.toFile());
+            nbt = TemplateUtil.readTemplate(file);
             //noinspection deprecation
             template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
         } catch (IOException | CommandSyntaxException e) {
@@ -57,10 +61,17 @@ public class ConfiguredTemplate {
         } else {
             this.surroundingBlocks = List.of();
         }
+        List<TemplateInfo.SpreadInfo> spreadInfos = TemplatesConfig.spreads.get(info.spreads());
+        List<SpreadConfig> spreadConfigs = new ArrayList<>();
+        if (spreadInfos != null) {
+            for (TemplateInfo.SpreadInfo spreadInfo : spreadInfos) {
+                spreadConfigs.add(new SpreadConfig(spreadInfo));
+            }
+        }
+        this.spreads = List.copyOf(spreadConfigs);
     }
 
-    private ConfiguredTemplate() {
-    }
+    private ConfiguredTemplate() {}
 
     private static Set<TemplatesConfig.Spawn> collectSpawns(Map<String, Set<BlockPos>> spawnMap) {
         Set<TemplatesConfig.Spawn> spawns = new HashSet<>();
@@ -70,6 +81,17 @@ public class ConfiguredTemplate {
         }
 
         return spawns;
+    }
+
+    public boolean placeInWorld(ServerLevelAccessor serverLevel, BlockPos pos, BlockPos otherPos, StructurePlaceSettings settings, RandomSource random, int flags) {
+        for (SpreadConfig spread : this.spreads) {
+            for (int i = 0; i < 50; i++) {
+                System.out.println(spread.getRandomOffset());
+            }
+            BlockPos offset = spread.getRandomOffset(random);
+            spread.getTemplate().placeInWorld(serverLevel, pos.offset(offset), otherPos.offset(offset), settings, random, flags);
+        }
+        return this.template.placeInWorld(serverLevel, pos, otherPos, settings, random, flags);
     }
 
     public StructureTemplate getTemplate() {
@@ -136,6 +158,27 @@ public class ConfiguredTemplate {
         });
         nbt.put("SurroundingBlocks", surroundingBlocks);
 
+        ListTag spreads = new ListTag();
+        this.spreads.forEach(spread -> {
+            CompoundTag minPos = new CompoundTag();
+            minPos.putInt("posX", spread.minOffset.getX());
+            minPos.putInt("posY", spread.minOffset.getY());
+            minPos.putInt("posZ", spread.minOffset.getZ());
+
+            CompoundTag maxPos = new CompoundTag();
+            maxPos.putInt("posX", spread.maxOffset.getX());
+            maxPos.putInt("posY", spread.maxOffset.getY());
+            maxPos.putInt("posZ", spread.maxOffset.getZ());
+
+            CompoundTag tag = new CompoundTag();
+            tag.putString("File", spread.fileName);
+            tag.put("minOffset", minPos);
+            tag.put("maxOffset", maxPos);
+
+            spreads.add(tag);
+        });
+        nbt.put("Spreads", spreads);
+
         return nbt;
     }
 
@@ -167,6 +210,21 @@ public class ConfiguredTemplate {
             blocks.add(value);
         }
         this.surroundingBlocks = List.copyOf(blocks);
+
+        ListTag spreads = nbt.getList("Spreads", Tag.TAG_COMPOUND);
+        List<SpreadConfig> spreadConfigs = new ArrayList<>();
+        for (Tag spread : spreads) {
+            String file = ((CompoundTag) spread).getString("File");
+
+            CompoundTag minPos = ((CompoundTag) spread).getCompound("minOffset");
+            BlockPos minOffset = new BlockPos(minPos.getInt("posX"), minPos.getInt("posY"), minPos.getInt("posZ"));
+
+            CompoundTag maxPos = ((CompoundTag) spread).getCompound("maxOffset");
+            BlockPos maxOffset = new BlockPos(maxPos.getInt("posX"), maxPos.getInt("posY"), maxPos.getInt("posZ"));
+
+            spreadConfigs.add(new SpreadConfig(file, minOffset, maxOffset));
+        }
+        this.spreads = List.copyOf(spreadConfigs);
     }
 
     public ConfiguredTemplate copy() {
@@ -181,5 +239,78 @@ public class ConfiguredTemplate {
         ConfiguredTemplate info = new ConfiguredTemplate();
         info.read(nbt);
         return info;
+    }
+
+    public static class SpreadConfig {
+
+        private final String fileName;
+        private final BlockPos minOffset;
+        private final BlockPos maxOffset;
+        private final StructureTemplate template;
+
+        public SpreadConfig(TemplateInfo.SpreadInfo info) {
+            this(info.file(), info.minOffset(), info.maxOffset());
+        }
+
+        public SpreadConfig(String fileName, BlockPos minOffset, BlockPos maxOffset) {
+            StructureTemplate template = new StructureTemplate();
+            CompoundTag nbt;
+            try {
+                Path file = SkyPaths.SPREADS_DIR.resolve(fileName);
+                nbt = TemplateUtil.readTemplate(file);
+                //noinspection deprecation
+                template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
+            } catch (IOException | CommandSyntaxException e) {
+                SkyblockBuilder.getLogger().error("Template with file name {} is incorrect.", fileName, e);
+            }
+
+            this.fileName = fileName;
+            this.minOffset = minOffset;
+            this.maxOffset = maxOffset;
+            this.template = template;
+        }
+
+        public String getFileName() {
+            return this.fileName;
+        }
+
+        public BlockPos getMinOffset() {
+            return this.minOffset;
+        }
+
+        public BlockPos getMaxOffset() {
+            return this.maxOffset;
+        }
+
+        public BlockPos getRandomOffset() {
+            return this.getRandomOffset(RandomSource.create());
+        }
+
+        public BlockPos getRandomOffset(long seed) {
+            return this.getRandomOffset(RandomSource.create(seed));
+        }
+
+        public BlockPos getRandomOffset(RandomSource random) {
+            return new BlockPos(
+                    getRandomBetween(random, this.minOffset.getX(), this.maxOffset.getX()),
+                    getRandomBetween(random, this.minOffset.getY(), this.maxOffset.getY()),
+                    getRandomBetween(random, this.minOffset.getZ(), this.maxOffset.getZ())
+            );
+        }
+
+        public StructureTemplate getTemplate() {
+            return this.template;
+        }
+
+        private static int getRandomBetween(RandomSource random, int i, int j) {
+            if (i == j) {
+                return i;
+            }
+
+            int min = Math.min(i, j);
+            int max = Math.max(i, j);
+
+            return random.nextIntBetweenInclusive(min, max);
+        }
     }
 }

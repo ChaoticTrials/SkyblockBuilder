@@ -26,6 +26,16 @@ public class TemplatesConfig {
     @Config("A list of blocks which can be used to surround islands/caves.")
     public static Map<String, List<Block>> surroundingBlocks = Map.of("default", List.of());
 
+    @Config({"A list of file names for templates which should spread around an island",
+            "Instead of \"minOffset\" and \"maxOffset\" with same values, you could also just use \"offset\".",
+            "Example: ",
+            "{",
+            "    \"file\": \"water_cave.nbt\",",
+            "    \"minOffset\": [ -6, 3, 5 ],",
+            "    \"maxOffset\": [ 4, 10, 3 ]",
+            "}"})
+    public static Map<String, List<TemplateInfo.SpreadInfo>> spreads = Map.of("default", List.of());
+
     @Config({"The template which will be used for spawn only",
             "Example: ",
             "{",

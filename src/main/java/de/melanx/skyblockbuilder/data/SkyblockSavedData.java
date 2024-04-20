@@ -270,7 +270,7 @@ public class SkyblockSavedData extends SavedData {
         BlockPos center = team.getIsland().getCenter();
         List<BlockSnapshot> capturedBlockSnapshots = (List<BlockSnapshot>) this.level.capturedBlockSnapshots.clone();
         this.level.captureBlockSnapshots = true;
-        template.getTemplate().placeInWorld(this.level, center, center, settings, RandomSource.create(), Block.UPDATE_CLIENTS);
+        template.placeInWorld(this.level, center, center, settings, RandomSource.create(), Block.UPDATE_CLIENTS);
         SkyblockSavedData.surround(this.level, team.getIsland().getCenter(), template);
         this.level.captureBlockSnapshots = false;
         this.level.capturedBlockSnapshots.clear();

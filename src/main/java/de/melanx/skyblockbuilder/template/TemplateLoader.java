@@ -30,6 +30,10 @@ public class TemplateLoader {
                     throw new IllegalArgumentException("Surrounding blocks configuration \"" + info.surroundingBlocks() + "\" is not defined: " + info.name());
                 }
 
+                if (!TemplatesConfig.spreads.containsKey(info.spreads()) && !info.spreads().isEmpty()) {
+                    throw new IllegalArgumentException("Spreads configuration \"" + info.spreads() + "\" is not defined: " + info.name());
+                }
+
                 if (!SkyPaths.TEMPLATES_DIR.resolve(info.file()).toFile().exists()) {
                     throw new IllegalArgumentException("Template file \"" + info.file() + "\" does not exist: " + info.name());
                 }
