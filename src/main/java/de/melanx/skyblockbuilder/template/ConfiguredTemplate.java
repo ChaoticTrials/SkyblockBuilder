@@ -85,9 +85,6 @@ public class ConfiguredTemplate {
 
     public boolean placeInWorld(ServerLevelAccessor serverLevel, BlockPos pos, BlockPos otherPos, StructurePlaceSettings settings, RandomSource random, int flags) {
         for (SpreadConfig spread : this.spreads) {
-            for (int i = 0; i < 50; i++) {
-                System.out.println(spread.getRandomOffset());
-            }
             BlockPos offset = spread.getRandomOffset(random);
             spread.getTemplate().placeInWorld(serverLevel, pos.offset(offset), otherPos.offset(offset), settings, random, flags);
         }
