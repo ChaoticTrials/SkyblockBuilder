@@ -218,15 +218,14 @@ public class SpawnProtectionEvents {
         return !SpawnConfig.spawnProtectionEvents.contains(type);
     }
 
+    private static boolean isOnSpawn(Entity entity) {
+        return SpawnProtectionEvents.isOnSpawn(entity.level(), entity.blockPosition());
+    }
+
     private static boolean isOnSpawn(Level level, BlockPos blockPos) {
         ChunkPos pos = new ChunkPos(blockPos);
         return WorldUtil.isSkyblock(level) && SpawnConfig.dimension == level.dimension()
-                && Math.abs(pos.x) < SpawnConfig.spawnProtectionRadius && Math.abs(pos.z) < SpawnConfig.spawnProtectionRadius;
-    }
-
-    private static boolean isOnSpawn(Entity entity) {
-        ChunkPos pos = new ChunkPos(entity.blockPosition());
-        return WorldUtil.isSkyblock(entity.level()) && SpawnConfig.dimension == entity.level().dimension()
-                && Math.abs(pos.x) < SpawnConfig.spawnProtectionRadius && Math.abs(pos.z) < SpawnConfig.spawnProtectionRadius;
+                && Math.abs(pos.x) < SpawnConfig.spawnProtectionRadius && Math.abs(pos.z) < SpawnConfig.spawnProtectionRadius
+                && !level.isOutsideBuildHeight(blockPos);
     }
 }
