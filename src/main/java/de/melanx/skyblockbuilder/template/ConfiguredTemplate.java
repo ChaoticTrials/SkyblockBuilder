@@ -86,6 +86,9 @@ public class ConfiguredTemplate {
     public boolean placeInWorld(ServerLevelAccessor serverLevel, BlockPos pos, BlockPos otherPos, StructurePlaceSettings settings, RandomSource random, int flags) {
         for (SpreadConfig spread : this.spreads) {
             BlockPos offset = spread.getRandomOffset(random);
+            if (spread.getOrigin() != TemplateInfo.SpreadInfo.Origin.ZERO) {
+                offset = offset.offset(TemplateInfo.SpreadInfo.Origin.originOffset(spread.getOrigin(), this.template));
+            }
             spread.getTemplate().placeInWorld(serverLevel, pos.offset(offset), otherPos.offset(offset), settings, random, flags);
         }
         return this.template.placeInWorld(serverLevel, pos, otherPos, settings, random, flags);
@@ -169,6 +172,7 @@ public class ConfiguredTemplate {
 
             CompoundTag tag = new CompoundTag();
             tag.putString("File", spread.fileName);
+            tag.putString("Origin", spread.origin.name());
             tag.put("minOffset", minPos);
             tag.put("maxOffset", maxPos);
 
@@ -212,6 +216,7 @@ public class ConfiguredTemplate {
         List<SpreadConfig> spreadConfigs = new ArrayList<>();
         for (Tag spread : spreads) {
             String file = ((CompoundTag) spread).getString("File");
+            TemplateInfo.SpreadInfo.Origin origin = TemplateInfo.SpreadInfo.Origin.valueOf(((CompoundTag) spread).getString("Origin"));
 
             CompoundTag minPos = ((CompoundTag) spread).getCompound("minOffset");
             BlockPos minOffset = new BlockPos(minPos.getInt("posX"), minPos.getInt("posY"), minPos.getInt("posZ"));
@@ -219,7 +224,7 @@ public class ConfiguredTemplate {
             CompoundTag maxPos = ((CompoundTag) spread).getCompound("maxOffset");
             BlockPos maxOffset = new BlockPos(maxPos.getInt("posX"), maxPos.getInt("posY"), maxPos.getInt("posZ"));
 
-            spreadConfigs.add(new SpreadConfig(file, minOffset, maxOffset));
+            spreadConfigs.add(new SpreadConfig(file, minOffset, maxOffset, origin));
         }
         this.spreads = List.copyOf(spreadConfigs);
     }
@@ -244,12 +249,13 @@ public class ConfiguredTemplate {
         private final BlockPos minOffset;
         private final BlockPos maxOffset;
         private final StructureTemplate template;
+        private final TemplateInfo.SpreadInfo.Origin origin;
 
         public SpreadConfig(TemplateInfo.SpreadInfo info) {
-            this(info.file(), info.minOffset(), info.maxOffset());
+            this(info.file(), info.minOffset(), info.maxOffset(), info.origin());
         }
 
-        public SpreadConfig(String fileName, BlockPos minOffset, BlockPos maxOffset) {
+        public SpreadConfig(String fileName, BlockPos minOffset, BlockPos maxOffset, TemplateInfo.SpreadInfo.Origin origin) {
             StructureTemplate template = new StructureTemplate();
             CompoundTag nbt;
             try {
@@ -265,6 +271,7 @@ public class ConfiguredTemplate {
             this.minOffset = minOffset;
             this.maxOffset = maxOffset;
             this.template = template;
+            this.origin = origin;
         }
 
         public String getFileName() {
@@ -288,11 +295,21 @@ public class ConfiguredTemplate {
         }
 
         public BlockPos getRandomOffset(RandomSource random) {
-            return new BlockPos(
+            BlockPos offset = new BlockPos(
                     getRandomBetween(random, this.minOffset.getX(), this.maxOffset.getX()),
                     getRandomBetween(random, this.minOffset.getY(), this.maxOffset.getY()),
                     getRandomBetween(random, this.minOffset.getZ(), this.maxOffset.getZ())
             );
+
+            if (this.getOrigin() != TemplateInfo.SpreadInfo.Origin.ZERO) {
+                offset = offset.subtract(TemplateInfo.SpreadInfo.Origin.originOffset(this.origin, this.template));
+            }
+
+            return offset;
+        }
+
+        public TemplateInfo.SpreadInfo.Origin getOrigin() {
+            return this.origin;
         }
 
         public StructureTemplate getTemplate() {

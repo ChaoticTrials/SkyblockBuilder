@@ -43,7 +43,12 @@ public class SpreadInfoMapper implements ValueMapper<TemplateInfo.SpreadInfo, Js
             throw new IllegalArgumentException("No offset provided: " + json);
         }
 
-        return new TemplateInfo.SpreadInfo(json.get("file").getAsString(), minOffset, maxOffset);
+        TemplateInfo.SpreadInfo.Origin origin = TemplateInfo.SpreadInfo.Origin.ZERO;
+        if (json.has("origin")) {
+            origin = TemplateInfo.SpreadInfo.Origin.valueOf(json.get("origin").getAsString());
+        }
+
+        return new TemplateInfo.SpreadInfo(json.get("file").getAsString(), minOffset, maxOffset, origin);
     }
 
     @Override
@@ -55,6 +60,10 @@ public class SpreadInfoMapper implements ValueMapper<TemplateInfo.SpreadInfo, Js
         } else {
             json.add("minOffset", BlockPosMapper.toJsonArray(value.minOffset()));
             json.add("maxOffset", BlockPosMapper.toJsonArray(value.maxOffset()));
+        }
+
+        if (value.origin() != TemplateInfo.SpreadInfo.Origin.ZERO) {
+            json.addProperty("origin", value.origin().name());
         }
 
         return json;
