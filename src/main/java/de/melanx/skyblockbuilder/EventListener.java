@@ -11,6 +11,7 @@ import de.melanx.skyblockbuilder.commands.invitation.AcceptCommand;
 import de.melanx.skyblockbuilder.commands.invitation.DeclineCommand;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
+import de.melanx.skyblockbuilder.commands.operator.GenerateCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.config.common.CustomizationConfig;
@@ -90,6 +91,7 @@ public class EventListener {
                 .then(ConvertCommand.register())
                 .then(CreateCommand.register())
                 .then(DeclineCommand.register())
+                .then(GenerateCommand.register())
                 .then(HomeCommand.register())
                 .then(InventoryCommand.register())
                 .then(InviteCommand.register())

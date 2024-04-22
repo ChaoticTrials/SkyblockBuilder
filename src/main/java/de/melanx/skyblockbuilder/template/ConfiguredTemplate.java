@@ -83,15 +83,15 @@ public class ConfiguredTemplate {
         return spawns;
     }
 
-    public boolean placeInWorld(ServerLevelAccessor serverLevel, BlockPos pos, BlockPos otherPos, StructurePlaceSettings settings, RandomSource random, int flags) {
+    public boolean placeInWorld(ServerLevelAccessor serverLevel, BlockPos pos, StructurePlaceSettings settings, RandomSource random, int flags) {
         for (SpreadConfig spread : this.spreads) {
             BlockPos offset = spread.getRandomOffset(random);
             if (spread.getOrigin() != TemplateInfo.SpreadInfo.Origin.ZERO) {
                 offset = offset.offset(TemplateInfo.SpreadInfo.Origin.originOffset(spread.getOrigin(), this.template));
             }
-            spread.getTemplate().placeInWorld(serverLevel, pos.offset(offset), otherPos.offset(offset), settings, random, flags);
+            spread.getTemplate().placeInWorld(serverLevel, pos.offset(offset), pos.offset(offset), settings, random, flags);
         }
-        return this.template.placeInWorld(serverLevel, pos, otherPos, settings, random, flags);
+        return this.template.placeInWorld(serverLevel, pos, pos, settings, random, flags);
     }
 
     public StructureTemplate getTemplate() {

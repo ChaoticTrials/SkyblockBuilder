@@ -270,7 +270,7 @@ public class SkyblockSavedData extends SavedData {
         BlockPos center = team.getIsland().getCenter();
         List<BlockSnapshot> capturedBlockSnapshots = (List<BlockSnapshot>) this.level.capturedBlockSnapshots.clone();
         this.level.captureBlockSnapshots = true;
-        template.placeInWorld(this.level, center, center, settings, RandomSource.create(), Block.UPDATE_CLIENTS);
+        template.placeInWorld(this.level, center, settings, RandomSource.create(), Block.UPDATE_CLIENTS);
         SkyblockSavedData.surround(this.level, team.getIsland().getCenter(), template);
         this.level.captureBlockSnapshots = false;
         this.level.capturedBlockSnapshots.clear();
@@ -515,7 +515,7 @@ public class SkyblockSavedData extends SavedData {
         return positions;
     }
 
-    private static void surround(ServerLevel level, BlockPos zero, ConfiguredTemplate configuredTemplate) {
+    public static void surround(ServerLevel level, BlockPos zero, ConfiguredTemplate configuredTemplate) {
         if (configuredTemplate.getSurroundingBlocks().isEmpty() || configuredTemplate.getSurroundingMargin() <= 0) {
             return;
         }

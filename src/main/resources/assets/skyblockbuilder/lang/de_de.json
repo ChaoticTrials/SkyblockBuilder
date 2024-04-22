@@ -12,6 +12,9 @@
   "skyblockbuilder.command.argument.disable": "deaktivieren",
   "skyblockbuilder.command.argument.disabled": "deaktiviert",
 
+  "skyblockbuilder.command.generated": "%s an %s generiert",
+  "skyblockbuilder.command.generated.fail": "Diese Vorlage existiert nicht.",
+
   "skyblockbuilder.error.no_skyblock": "Dieser Befehl kann nur in SkyBlock Welten verwendet werden.",
   "skyblockbuilder.command.error.cooldown": "Versuche es in %s Minuten noch einmal.",
   "skyblockbuilder.command.error.creating_file": "Fehlgeschlagen, folgende Datei zu erstellen: %s",

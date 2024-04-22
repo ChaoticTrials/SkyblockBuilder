@@ -5,6 +5,7 @@ import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
+import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -13,6 +14,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -52,7 +55,20 @@ public class Suggestions {
     // Lists all templates
     public static final SuggestionProvider<CommandSourceStack> TEMPLATES = ((context, builder) -> SharedSuggestionProvider
             .suggest(TemplateLoader.getTemplateNames().stream()
-                    .map(s -> s.split(" ").length == 1 ? s : "\"" + s + "\""), builder));
+                    .map(s -> "\"" + s + "\""), builder));
+
+    public static final SuggestionProvider<CommandSourceStack> SPREADS = (((context, builder) -> {
+        try {
+            //noinspection resource
+            return SharedSuggestionProvider.suggest(
+                    Files.list(SkyPaths.SPREADS_DIR)
+                            .filter(s -> s.toString().endsWith(".nbt") || s.toString().endsWith(".snbt"))
+                            .filter(Files::isRegularFile)
+                            .map(s -> "\"" + SkyPaths.SPREADS_DIR.relativize(s) + "\""), builder);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }));
 
     // Lists all teams except spawn
     public static final SuggestionProvider<CommandSourceStack> ALL_TEAMS = (context, builder) -> SharedSuggestionProvider
