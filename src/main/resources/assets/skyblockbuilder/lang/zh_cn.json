@@ -133,7 +133,7 @@
   "skyblockbuilder.screen.button.open_folder.tooltip": "打开文件夹",
   "skyblockbuilder.screen.widget.structure_name": "结构名称",
   "skyblockbuilder.screen.open_folder.error": "无法打开文件夹：%s",
-  "skyblockbuilder.schematic.saved": "原理图保存在 skyblock_exports/%s 中",
+  "skyblockbuilder.schematic.saved": "原理图保存在 %s 中",
   "skyblockbuilder.structure_saver.pos": "位置 %s 设置在 x %s，y %s，z %s 处",
 
   "skyblockbuilder.compat.disabled_management": "%s 禁用了此项和所有其他团队管理功能。",

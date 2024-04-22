@@ -133,7 +133,7 @@
   "skyblockbuilder.screen.button.open_folder.tooltip": "Abrir Carpeta",
   "skyblockbuilder.screen.widget.structure_name": "Nombre de la Estructura",
   "skyblockbuilder.screen.open_folder.error": "No se pudo abrir la carpeta: %s",
-  "skyblockbuilder.schematic.saved": "Diagrama guardado en skyblock_exports/%s",
+  "skyblockbuilder.schematic.saved": "Diagrama guardado en %s",
   "skyblockbuilder.structure_saver.pos": "Posición %s establecida en x %s, y %s, z %s",
 
   "skyblockbuilder.compat.disabled_management": "Esto y todo otra administración del equipo fue desactivada por %s.",

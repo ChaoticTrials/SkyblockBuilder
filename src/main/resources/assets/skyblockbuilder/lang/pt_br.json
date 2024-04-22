@@ -133,7 +133,7 @@
   "skyblockbuilder.screen.button.open_folder.tooltip": "Abrir pasta",
   "skyblockbuilder.screen.widget.structure_name": "Nome da estrutura",
   "skyblockbuilder.screen.open_folder.error": "Não pode abrir a pasta: %s",
-  "skyblockbuilder.schematic.saved": "\"Schematic\" salva em \"skyblock_exports/%s\"",
+  "skyblockbuilder.schematic.saved": "\"Schematic\" salva em \"%s\"",
   "skyblockbuilder.structure_saver.pos": "Posição %s setada em X %s, Y %s, Z %s",
 
   "skyblockbuilder.compat.disabled_management": "Esse e todos os outros gerenciamentos de equipe foram desabilitados por %s.",

@@ -133,7 +133,7 @@
   "skyblockbuilder.screen.button.open_folder.tooltip": "Открыть папку",
   "skyblockbuilder.screen.widget.structure_name": "Имя структуры",
   "skyblockbuilder.screen.open_folder.error": "Невозможно открыть папку: %s",
-  "skyblockbuilder.schematic.saved": "Схема сохранена в папке skyblock_exports/%s",
+  "skyblockbuilder.schematic.saved": "Схема сохранена в папке %s",
   "skyblockbuilder.structure_saver.pos": "Координаты %s установлены в x %s, y %s, z %s",
 
   "skyblockbuilder.compat.disabled_management": "Это и все остальные средства управления командой отключены %s.",

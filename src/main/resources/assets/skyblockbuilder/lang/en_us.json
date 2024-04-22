@@ -135,7 +135,7 @@
   "skyblockbuilder.screen.button.open_folder.tooltip": "Open Folder",
   "skyblockbuilder.screen.widget.structure_name": "Structure Name",
   "skyblockbuilder.screen.open_folder.error": "Could not open folder: %s",
-  "skyblockbuilder.schematic.saved": "Schematic saved in skyblock_exports/%s",
+  "skyblockbuilder.schematic.saved": "Schematic saved in %s",
   "skyblockbuilder.structure_saver.pos": "Position %s set at x %s, y %s, z %s",
 
   "skyblockbuilder.compat.disabled_management": "This and all other team management is disabled by %s.",

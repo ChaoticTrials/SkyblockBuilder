@@ -133,7 +133,7 @@
   "skyblockbuilder.screen.button.open_folder.tooltip": "Dossier ouvert",
   "skyblockbuilder.screen.widget.structure_name": "Nom de la structure",
   "skyblockbuilder.screen.open_folder.error": "Impossible d'ouvrir le dossier : %s",
-  "skyblockbuilder.schematic.saved": "Schéma enregistré dans skyblock_exports/%s",
+  "skyblockbuilder.schematic.saved": "Schéma enregistré dans %s",
   "skyblockbuilder.structure_saver.pos": "Position %s définie à x %s,y %s,z %s",
 
   "skyblockbuilder.compat.disabled_management": "Cette gestion d'équipe et toutes les autres sont désactivées par %s.",

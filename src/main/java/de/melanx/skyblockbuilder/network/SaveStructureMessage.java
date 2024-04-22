@@ -1,6 +1,8 @@
 package de.melanx.skyblockbuilder.network;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
+import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -9,10 +11,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkEvent;
 import org.moddingx.libx.network.PacketHandler;
 import org.moddingx.libx.network.PacketSerializer;
 
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public record SaveStructureMessage(ItemStack stack, String name, boolean saveToConfig, boolean ignoreAir, boolean asSnbt) {
@@ -39,7 +43,10 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean saveToC
             }
             ItemStack stack = ItemStructureSaver.removeTags(msg.stack);
             player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-            MutableComponent component = Component.translatable("skyblockbuilder.schematic.saved", name);
+            Path fullPath = msg.saveToConfig ? SkyPaths.MOD_CONFIG.resolve(name) : SkyPaths.MOD_EXPORTS.resolve(name);
+            Path savedPath = FMLPaths.GAMEDIR.get().relativize(fullPath);
+            MutableComponent component = Component.translatable("skyblockbuilder.schematic.saved", savedPath.toString().replace('\\', '/'));
+            SkyblockBuilder.getLogger().info("Saved structure (and spawn points) to: {}", fullPath);
             player.displayClientMessage(component, true);
             return true;
         }

@@ -133,7 +133,7 @@
   "skyblockbuilder.screen.button.open_folder.tooltip": "フォルダを開く",
   "skyblockbuilder.screen.widget.structure_name": "構造名",
   "skyblockbuilder.screen.open_folder.error": "フォルダを開けませんでした：%s",
-  "skyblockbuilder.schematic.saved": "スキーマがskyblock_exports/%sに保存されました。",
+  "skyblockbuilder.schematic.saved": "スキーマが%sに保存されました。",
   "skyblockbuilder.structure_saver.pos": "位置%sがx%s、y%s、z%sに設定されました。",
 
   "skyblockbuilder.compat.disabled_management": "これと他のすべてのチーム管理が%sによって無効にされています。",
