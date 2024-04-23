@@ -396,7 +396,7 @@ public class Team {
             posTag.putInt("posZ", pos.getZ());
             posTag.putString("Direction", spawn.direction().name());
 
-            spawns.add(posTag);
+            defaultSpawns.add(posTag);
         }
 
         ListTag joinRequests = new ListTag();
