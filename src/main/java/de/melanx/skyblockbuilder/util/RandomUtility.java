@@ -4,7 +4,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.ModBlocks;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
+import de.melanx.skyblockbuilder.config.common.CustomizationConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -48,6 +50,13 @@ public class RandomUtility {
         String sec = String.format("%02d", realTime % 60);
 
         return String.format("%s:%s", min, sec);
+    }
+
+    public static void deleteTeamIfEmpty(SkyblockSavedData data, Team team) {
+        if (team.isEmpty() && CustomizationConfig.deleteTeamsAutomatically) {
+            data.deleteTeam(team.getId());
+            SkyblockBuilder.getLogger().info("Team {} ({}) was deleted. No player left.", team.getName(), team.getId());
+        }
     }
 
     public static Set<GameProfile> getGameProfiles(ServerLevel level) {

@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.common.InventoryConfig;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -34,7 +35,8 @@ public class LeaveCommand {
             return 0;
         }
 
-        switch (SkyblockHooks.onLeave(player, data.getTeamFromPlayer(player))) {
+        Team team = data.getTeamFromPlayer(player);
+        switch (SkyblockHooks.onLeave(player, team)) {
             case DENY:
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.leave_team").withStyle(ChatFormatting.RED), false);
                 return 0;
@@ -53,6 +55,7 @@ public class LeaveCommand {
         }
         data.removePlayerFromTeam(player);
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.left_team").withStyle(ChatFormatting.GOLD), true);
+        RandomUtility.deleteTeamIfEmpty(data, team);
         WorldUtil.teleportToIsland(player, data.getSpawn());
         return 1;
     }

@@ -120,6 +120,7 @@ public class ManageCommand {
 
         int i = team.getPlayers().size();
         data.removeAllPlayersFromTeam(team);
+        RandomUtility.deleteTeamIfEmpty(data, team);
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.remove_all_players_from_team", i).withStyle(ChatFormatting.RED), true);
         return 1;
     }
@@ -285,6 +286,7 @@ public class ManageCommand {
                 i += 1;
             }
         }
+        RandomUtility.deleteTeamIfEmpty(data, team);
         int playerAmount = i;
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.remove_multiple_players", playerAmount, teamName).withStyle(ChatFormatting.GREEN), true);
         return 1;
