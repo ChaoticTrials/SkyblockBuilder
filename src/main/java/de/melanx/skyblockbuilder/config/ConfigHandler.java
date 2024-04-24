@@ -76,7 +76,8 @@ public class ConfigHandler {
         @Config("Should a surface be generated in the dimensions? [default: false]")
         public static boolean surface = false;
 
-        @Config({"The block settings for generating the different dimensions surfaces.", "Same format as flat world generation settings (blocks only)"})
+        @Config({"The block settings for generating the different dimensions surfaces.", "Same format as flat world generation settings (blocks only)",
+                "WARNING: Does not work with modded blocks, see https://github.com/MelanX/SkyblockBuilder/issues/133#issuecomment-2075351219"})
         public static Map<String, String> surfaceSettings = Util.make(Maps.newHashMap(), map -> {
             map.put(Level.OVERWORLD.location().toString(), "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block");
             map.put(Level.NETHER.location().toString(), "");
