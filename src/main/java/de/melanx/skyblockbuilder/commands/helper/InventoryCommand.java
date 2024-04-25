@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
@@ -17,12 +18,17 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.ModList;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
+import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Map;
 
 public class InventoryCommand {
 
@@ -38,13 +44,31 @@ public class InventoryCommand {
         try {
             Files.createDirectories(SkyPaths.MOD_EXPORTS);
         } catch (IOException e) {
-            throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", SkyPaths.MOD_EXPORTS)).create();
+            throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", SkyPaths.MOD_EXPORTS.toString())).create();
         }
         Path filePath = RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS, "starter_inventory", "json5");
 
         JsonObject json = new JsonObject();
-        JsonArray items = new JsonArray();
 
+        json.add("items", InventoryCommand.vanillaInventory(player));
+        if (ModList.get().isLoaded(CuriosCompat.MODID)) {
+            json.add("curios_items", InventoryCommand.curiosInventory(player));
+        }
+        Path file = SkyPaths.MOD_EXPORTS.resolve(filePath.getFileName());
+        try {
+            BufferedWriter w = Files.newBufferedWriter(file, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+            w.write(SkyblockBuilder.PRETTY_GSON.toJson(json));
+            w.close();
+        } catch (IOException e) {
+            throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_file", file.toString())).create();
+        }
+
+        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.export_inventory", filePath.toString()).withStyle(ChatFormatting.GOLD), true);
+        return 1;
+    }
+
+    private static JsonArray vanillaInventory(ServerPlayer player) {
+        JsonArray items = new JsonArray();
         Inventory inventory = player.getInventory();
 
         for (ItemStack stack : inventory.items) {
@@ -73,17 +97,27 @@ public class InventoryCommand {
             }
         }
 
-        json.add("items", items);
-        Path file = SkyPaths.MOD_EXPORTS.resolve(filePath.getFileName());
-        try {
-            BufferedWriter w = Files.newBufferedWriter(file, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-            w.write(SkyblockBuilder.PRETTY_GSON.toJson(json));
-            w.close();
-        } catch (IOException e) {
-            throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_file", file)).create();
-        }
+        return items;
+    }
 
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.export_inventory", filePath).withStyle(ChatFormatting.GOLD), true);
-        return 1;
+    private static JsonArray curiosInventory(ServerPlayer player) {
+        JsonArray items = new JsonArray();
+        CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
+            Map<String, ICurioStacksHandler> curios = handler.getCurios();
+            for (Map.Entry<String, ICurioStacksHandler> entry : curios.entrySet()) {
+                String identifier = entry.getKey();
+                IDynamicStackHandler stacks = entry.getValue().getStacks();
+                for (int i = 0; i < stacks.getSlots(); i++) {
+                    ItemStack stack = stacks.getStackInSlot(i);
+                    if (stack.isEmpty()) {
+                        continue;
+                    }
+
+                    items.add(CuriosCompat.serializeItem(stack, identifier));
+                }
+            }
+        });
+
+        return items;
     }
 }

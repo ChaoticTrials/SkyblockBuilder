@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -92,5 +93,12 @@ public class CuriosCompat {
         player.sendSystemMessage(Component.literal("Something went wrong, look at the log for more information. " +
                         "If you're not the pack author, report it to them.")
                 .withStyle(ChatFormatting.RED));
+    }
+
+    public static JsonObject serializeItem(ItemStack stack, String identifier) {
+        JsonObject json = RandomUtility.serializeItem(stack);
+        json.addProperty("Slot", identifier);
+
+        return json;
     }
 }

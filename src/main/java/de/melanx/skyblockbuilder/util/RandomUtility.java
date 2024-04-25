@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.ModBlocks;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
@@ -15,11 +16,13 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -35,6 +38,29 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class RandomUtility {
+
+    public static JsonObject serializeItem(ItemStack stack) {
+        JsonObject json = new JsonObject();
+        CompoundTag tag = stack.serializeNBT();
+        json.addProperty("item", tag.getString("id"));
+
+        int count = tag.getInt("Count");
+        if (count > 1) {
+            json.addProperty("count", count);
+        }
+
+        if (tag.contains("tag")) {
+            //noinspection ConstantConditions
+            json.addProperty("nbt", tag.get("tag").toString());
+        }
+
+        if (tag.contains("ForgeCaps")) {
+            //noinspection ConstantConditions
+            json.addProperty("ForgeCaps", tag.get("ForgeCaps").toString());
+        }
+
+        return json;
+    }
 
     public static void dropInventories(Player player) {
         if (player.isSpectator() || player.isCreative()) {

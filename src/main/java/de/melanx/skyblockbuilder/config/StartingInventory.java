@@ -5,8 +5,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -76,25 +76,7 @@ public class StartingInventory {
     }
 
     public static JsonObject serializeItem(ItemStack stack, EquipmentSlot slot) {
-        JsonObject json = new JsonObject();
-        CompoundTag tag = stack.serializeNBT();
-        json.addProperty("item", tag.getString("id"));
-
-        int count = tag.getInt("Count");
-        if (count > 1) {
-            json.addProperty("count", count);
-        }
-
-        if (tag.contains("tag")) {
-            //noinspection ConstantConditions
-            json.addProperty("nbt", tag.get("tag").toString());
-        }
-
-        if (tag.contains("ForgeCaps")) {
-            //noinspection ConstantConditions
-            json.addProperty("ForgeCaps", tag.get("ForgeCaps").toString());
-        }
-
+        JsonObject json = RandomUtility.serializeItem(stack);
         if (slot != EquipmentSlot.MAINHAND) {
             json.addProperty("Slot", slot.toString().toLowerCase(Locale.ROOT));
         }
