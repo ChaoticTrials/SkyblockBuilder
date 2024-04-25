@@ -4,12 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.fml.ModList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -26,10 +28,10 @@ public class StartingInventory {
     public static void loadStarterItems() {
         StartingInventory.STARTER_ITEMS.clear();
 
-        File spawns = new File(SkyPaths.ITEMS_FILE.toUri());
+        File startInventoryConfig = new File(SkyPaths.ITEMS_FILE.toUri());
 
         try {
-            String s = IOUtils.toString(new InputStreamReader(new FileInputStream(spawns)));
+            String s = IOUtils.toString(new InputStreamReader(new FileInputStream(startInventoryConfig)));
             JsonObject json = GsonHelper.parse(s, true);
 
             if (json.has("items")) {
@@ -55,6 +57,10 @@ public class StartingInventory {
                     }
                     StartingInventory.STARTER_ITEMS.add(Pair.of(slot, stack));
                 }
+            }
+
+            if (ModList.get().isLoaded(CuriosCompat.MODID) && json.has("curios_items")) {
+                CuriosCompat.loadStarterInventory(json.getAsJsonArray("curios_items"));
             }
         } catch (IOException e) {
             throw new IllegalStateException("Unable to read starting inventory", e);

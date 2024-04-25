@@ -6,6 +6,7 @@ import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.ModBlocks;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
+import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.config.common.CustomizationConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
@@ -16,6 +17,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -39,8 +42,27 @@ public class RandomUtility {
         }
 
         player.getInventory().dropAll();
-        if (ModList.get().isLoaded("curios")) {
+        if (ModList.get().isLoaded(CuriosCompat.MODID)) {
             CuriosCompat.dropInventory(player);
+        }
+    }
+
+    public static void setStartInventory(ServerPlayer player) {
+        if (player.isSpectator() || player.isCreative()) {
+            return;
+        }
+
+        // vanilla inventory
+        StartingInventory.getStarterItems().forEach(entry -> {
+            if (entry.getLeft() == EquipmentSlot.MAINHAND) {
+                player.getInventory().add(entry.getRight().copy());
+            } else {
+                player.setItemSlot(entry.getLeft(), entry.getRight().copy());
+            }
+        });
+
+        if (ModList.get().isLoaded(CuriosCompat.MODID)) {
+            CuriosCompat.setStartInventory(player);
         }
     }
 
