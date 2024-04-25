@@ -32,7 +32,6 @@ public class ManageCommand {
         return Commands.literal("manage").requires(source -> source.hasPermission(2))
                 // refreshes the island shape
                 .then(Commands.literal("islandShape")
-                        .requires(source -> source.hasPermission(3))
                         .then(Commands.argument("template", StringArgumentType.string()).suggests(Suggestions.TEMPLATES)
                                 .executes(context -> refreshIsland(context.getSource(), StringArgumentType.getString(context, "template")))))
 
