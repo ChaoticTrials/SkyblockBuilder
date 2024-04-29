@@ -41,7 +41,7 @@ public class TemplatesToSnbtCommand {
 
                     context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName, convertedName), true);
                 } catch (IOException e) {
-                    SkyblockBuilder.getLogger().error("Failed to convert " + original + " to " + convertedName, e);
+                    SkyblockBuilder.getLogger().error("Failed to convert {} to {}", original, convertedName, e);
                 }
             }
         }

@@ -49,7 +49,6 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                     FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(generator -> generator.layerInfos)
             ).apply(instance, instance.stable(SkyblockNoiseBasedChunkGenerator::new)));
 
-    //    public final Registry<NormalNoise.NoiseParameters> noises;
     public final Holder<NoiseGeneratorSettings> generatorSettings;
     public final ResourceKey<Level> dimension;
     protected final NoiseBasedChunkGenerator parent;
@@ -58,7 +57,6 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     public SkyblockNoiseBasedChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
         super(biomeSource, generatorSettings);
-//        this.noises = noises;
         this.generatorSettings = generatorSettings;
         this.parent = new NoiseBasedChunkGenerator(biomeSource, generatorSettings);
         this.dimension = dimension;

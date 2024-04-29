@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.template;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -48,6 +49,7 @@ public class TemplateLoader {
                 ConfiguredTemplate template = new ConfiguredTemplate(info);
                 TEMPLATE_NAMES.add(info.name());
                 TEMPLATE_MAP.put(info.name().toLowerCase(Locale.ROOT), template);
+                SkyblockBuilder.getLogger().info("Loaded template \"{}\" from \"{}\".", info.name(), info.file());
             }
 
             if (TEMPLATE_MAP.isEmpty()) {

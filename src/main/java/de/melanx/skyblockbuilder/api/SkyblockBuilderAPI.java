@@ -23,12 +23,12 @@ public class SkyblockBuilderAPI {
     public static void disableAllTeamManagement(String modid) {
         teamManagementDisablingMods.add(modid);
         teamManagementDisablingMods.sort(Comparator.naturalOrder());
-        SkyblockBuilder.getLogger().warn(modid + " disabled all team management features.");
+        SkyblockBuilder.getLogger().warn("{} disabled all team management features.", modid);
     }
 
     public static void disableSpawnTeleport(String modid) {
         spawnTeleportEnabled = false;
-        SkyblockBuilder.getLogger().warn(modid + " disabled teleporting to spawn on world join.");
+        SkyblockBuilder.getLogger().warn("{} disabled teleporting to spawn on world join.", modid);
     }
 
     public static void checkTeamManagement() throws CommandSyntaxException {

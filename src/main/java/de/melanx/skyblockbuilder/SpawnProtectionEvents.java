@@ -103,19 +103,6 @@ public class SpawnProtectionEvents {
     }
 
     @SubscribeEvent
-    public void blockMultiPlace(BlockEvent.EntityMultiPlaceEvent event) {
-        if (SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
-            return;
-        }
-
-        if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
-            if (!(event.getEntity() instanceof Player) || !event.getEntity().hasPermissions(2)) {
-                event.setCanceled(true);
-            }
-        }
-    }
-
-    @SubscribeEvent
     public void farmlandTrample(BlockEvent.FarmlandTrampleEvent event) {
         if (SpawnProtectionEvents.ignore(Type.MOB_GRIEFING)) {
             return;

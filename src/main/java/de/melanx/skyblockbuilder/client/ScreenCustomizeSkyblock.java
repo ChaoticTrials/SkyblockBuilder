@@ -171,7 +171,7 @@ public class ScreenCustomizeSkyblock extends Screen {
                 if (!this.iconFile.isFile()) {
                     if (!TemplateList.this.loggedLocations.contains(this.iconFile)) {
                         TemplateList.this.loggedLocations.add(this.iconFile);
-                        SkyblockBuilder.getLogger().info("No icon set for template '" + template.getName() + "'. Should be at this location: '" + this.iconFile + "'");
+                        SkyblockBuilder.getLogger().info("No icon set for template '{}'. Should be at this location: '{}'", template.getName(), this.iconFile);
                     }
                     this.iconFile = null;
                 }

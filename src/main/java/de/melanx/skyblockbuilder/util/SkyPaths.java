@@ -123,7 +123,7 @@ public class SkyPaths {
             try {
                 w.write(holder.key().location() + "\n");
             } catch (IOException e) {
-                SkyblockBuilder.getLogger().error("Failed to write '" + holder.key().location() + "' to file", e);
+                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().location(), e);
             }
         });
 
@@ -139,7 +139,7 @@ public class SkyPaths {
             try {
                 w.write(holder.key().location() + "\n");
             } catch (IOException e) {
-                SkyblockBuilder.getLogger().error("Failed to write '" + holder.key().location() + "' to file", e);
+                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().location(), e);
             }
         });
 
@@ -155,7 +155,7 @@ public class SkyPaths {
             try {
                 w.write(holder.key().location() + "\n");
             } catch (IOException e) {
-                SkyblockBuilder.getLogger().error("Failed to write '" + holder.key().location() + "' to file", e);
+                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().location(), e);
             }
         });
 
@@ -171,7 +171,7 @@ public class SkyPaths {
             try {
                 w.write(holder.key().location() + "\n");
             } catch (IOException e) {
-                SkyblockBuilder.getLogger().error("Failed to write '" + holder.key().location() + "' to file", e);
+                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().location(), e);
             }
         });
 

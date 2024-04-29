@@ -46,7 +46,7 @@ public class ConfiguredTemplate {
             //noinspection deprecation
             template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
         } catch (IOException | CommandSyntaxException e) {
-            SkyblockBuilder.getLogger().error("Template with name " + info.file() + " is incorrect.", e);
+            SkyblockBuilder.getLogger().error("Template with name {} is incorrect.", info.file(), e);
         }
 
         this.template = template;

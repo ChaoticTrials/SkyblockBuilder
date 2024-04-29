@@ -24,11 +24,7 @@ public record TemplateInfo(String name, String desc, String file, String spawns,
             ZERO;
 
             public static BlockPos originOffset(Origin origin, StructureTemplate template) {
-                return switch (origin) {
-                    case CENTER ->
-                            new BlockPos(template.size.getX() / 2, template.size.getY() / 2, template.size.getZ() / 2);
-                    default -> BlockPos.ZERO;
-                };
+                return origin == CENTER ? new BlockPos(template.size.getX() / 2, template.size.getY() / 2, template.size.getZ() / 2) : BlockPos.ZERO;
             }
         }
     }

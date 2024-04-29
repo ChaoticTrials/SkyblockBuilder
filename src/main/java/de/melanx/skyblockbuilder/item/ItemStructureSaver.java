@@ -225,6 +225,7 @@ public class ItemStructureSaver extends Item {
                 CompoundTag tag = template.save(new CompoundTag());
                 try {
                     TemplateUtil.writeTemplate(templatePath, tag, asSnbt);
+                    SkyblockBuilder.getLogger().info("Saved template at {}", templatePath.toAbsolutePath());
                 } catch (IllegalStateException e) {
                     e.printStackTrace();
                     return null;
@@ -265,6 +266,7 @@ public class ItemStructureSaver extends Item {
             JsonObject json = TemplateUtil.spawnsAsJson(spawnPositions);
             try {
                 Files.writeString(spawns, SkyblockBuilder.PRETTY_GSON.toJson(json));
+                SkyblockBuilder.getLogger().info("Saved spawns at {}", spawns.toAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -274,6 +276,7 @@ public class ItemStructureSaver extends Item {
         CompoundTag tag = template.save(new CompoundTag());
         try {
             TemplateUtil.writeTemplate(path, tag, asSnbt);
+            SkyblockBuilder.getLogger().info("Saved template at {}", path.toAbsolutePath());
         } catch (IllegalStateException e) {
             e.printStackTrace();
             return null;

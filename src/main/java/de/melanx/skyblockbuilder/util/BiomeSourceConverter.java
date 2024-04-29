@@ -31,9 +31,9 @@ public class BiomeSourceConverter {
             }
 
             if (newBiomes.isEmpty()) {
-                biomes.listElementIds().filter(lol -> resourceList.test(lol.location())).forEach(key -> newBiomes.add(biomes.getOrThrow(key)));
+                biomes.listElementIds().filter(biomeKey -> resourceList.test(biomeKey.location())).forEach(key -> newBiomes.add(biomes.getOrThrow(key)));
             } else {
-                SkyblockBuilder.getLogger().warn("Skipping biome filtering as all biomes were filtered out: " + level);
+                SkyblockBuilder.getLogger().warn("Skipping biome filtering as all biomes were filtered out: {}", level);
                 newBiomes.addAll(baseSource.possibleBiomes());
             }
 

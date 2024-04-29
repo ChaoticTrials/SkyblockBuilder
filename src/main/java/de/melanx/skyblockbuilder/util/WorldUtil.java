@@ -84,7 +84,7 @@ public class WorldUtil {
         ServerLevel configLevel = server.getLevel(worldKey);
 
         if (configLevel == null) {
-            SkyblockBuilder.getLogger().warn("Configured dimension for spawn does not exist: " + location);
+            SkyblockBuilder.getLogger().warn("Configured dimension for spawn does not exist: {}", location);
         }
 
         return configLevel != null ? configLevel : server.overworld();
@@ -102,6 +102,7 @@ public class WorldUtil {
             spawns.remove(spawn);
         }
 
+        SkyblockBuilder.getLogger().info("No valid spawn position found, searching...");
         TemplatesConfig.Spawn spawn = team.getPossibleSpawns().stream().findAny().orElse(new TemplatesConfig.Spawn(team.getIsland().getCenter(), Directions.SOUTH));
 
         return new TemplatesConfig.Spawn(PositionHelper.findPos(spawn.pos(), blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radius), spawn.direction());

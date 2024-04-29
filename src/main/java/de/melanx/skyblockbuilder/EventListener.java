@@ -136,6 +136,7 @@ public class EventListener {
 
                     WorldUtil.teleportToIsland(player, spawn);
                     data.addPlayerToTeam(SkyblockSavedData.SPAWN_ID, player);
+                    SkyblockBuilder.getLogger().info("Put {} back into spawn team.", player.getDisplayName());
                 }
 
                 return;
@@ -147,6 +148,7 @@ public class EventListener {
                 player.getInventory().clearContent();
             }
 
+            SkyblockBuilder.getLogger().info("First time {} joined. Putting into spawn team.", player.getDisplayName());
             data.addPlayerToTeam(spawn, player);
             try {
                 //noinspection OptionalGetWithoutIsPresent
@@ -197,6 +199,7 @@ public class EventListener {
     public static void onServerStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
         if (WorldUtil.isSkyblock(server.overworld())) {
+            SkyblockBuilder.getLogger().info("Successfully loaded Skyblock!");
             SkyPaths.generateDefaultFiles(server);
             TemplateLoader.updateTemplates();
             SkyblockBuilder.getNetwork().updateTemplateNames(TemplateLoader.getTemplateNames());

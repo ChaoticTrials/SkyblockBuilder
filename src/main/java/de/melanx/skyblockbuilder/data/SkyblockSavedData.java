@@ -272,6 +272,7 @@ public class SkyblockSavedData extends SavedData {
         this.skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
         this.skyblockPositions.put(team.getId(), team.getIsland());
 
+        SkyblockBuilder.getLogger().info("Created team {} ({}) at {} with template {}", team.getName(), team.getId(), center, template.getName());
         this.setDirty();
         return team;
     }

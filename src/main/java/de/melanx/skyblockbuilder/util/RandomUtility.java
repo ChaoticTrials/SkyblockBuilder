@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.fml.ModList;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Files;
@@ -115,6 +116,7 @@ public class RandomUtility {
         Set<UUID> handledIds = Sets.newHashSet(Util.NIL_UUID);
 
         // load the cache and look for all profiles
+        //noinspection DataFlowIssue
         profileCache.load().forEach(profileInfo -> {
             GameProfile profile = profileInfo.getProfile();
             profiles.add(profile);
@@ -138,6 +140,7 @@ public class RandomUtility {
                         profileCache.add(profile);
                         profiles.add(profile);
                     } else {
+                        SkyblockBuilder.getLogger().info("No profile found for id {}", id);
                         profiles.add(new GameProfile(profile.getId(), "Unknown"));
                     }
                 }
@@ -205,6 +208,8 @@ public class RandomUtility {
         return s.toLowerCase(Locale.ROOT).replaceAll("\\W+", "_");
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.21")
     public static Path getFilePath(Path parentFolder, String name) {
         return getFilePath(parentFolder, name, "nbt");
     }

@@ -37,7 +37,7 @@ public class ConvertCommand {
 
                     context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName, convertedName), true);
                 } catch (IOException | CommandSyntaxException e) {
-                    SkyblockBuilder.getLogger().error("Failed to convert " + original + " to " + convertedName, e);
+                    SkyblockBuilder.getLogger().error("Failed to convert {} to {}", original, convertedName, e);
                 }
             } else if (original.toString().endsWith(".snbt")) {
                 String convertedName = fileName.toString().substring(0, fileName.toString().length() - ".snbt".length()) + ".nbt";
@@ -49,7 +49,7 @@ public class ConvertCommand {
 
                     context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName, convertedName), true);
                 } catch (IOException | CommandSyntaxException e) {
-                    SkyblockBuilder.getLogger().error("Failed to convert " + original + " to " + convertedName, e);
+                    SkyblockBuilder.getLogger().error("Failed to convert {} to {}", original, convertedName, e);
                 }
             }
         }
