@@ -21,15 +21,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.moddingx.libx.command.CommandUtil;
 
 import java.io.IOException;
 
 public class GenerateCommand {
-
-    private static final StructurePlaceSettings SETTINGS = new StructurePlaceSettings().setKnownShape(true).setKeepLiquids(false);
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("generate").requires(source -> source.hasPermission(2))
@@ -67,9 +64,9 @@ public class GenerateCommand {
             return 0;
         }
         if (spreads) {
-            configuredTemplate.placeInWorld(level, pos, SETTINGS, level.random, Block.UPDATE_CLIENTS);
+            configuredTemplate.placeInWorld(level, pos, TemplateLoader.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
         } else {
-            configuredTemplate.getTemplate().placeInWorld(level, pos, pos, SETTINGS, level.random, Block.UPDATE_CLIENTS);
+            configuredTemplate.getTemplate().placeInWorld(level, pos, pos, TemplateLoader.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
         }
 
         if (border) {
@@ -99,7 +96,7 @@ public class GenerateCommand {
         template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
 
         ServerLevel level = context.getSource().getLevel();
-        template.placeInWorld(level, pos, pos, SETTINGS, level.random, Block.UPDATE_CLIENTS);
+        template.placeInWorld(level, pos, pos, TemplateLoader.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
         showLocationResult(context.getSource(), file, pos);
 
         return 1;

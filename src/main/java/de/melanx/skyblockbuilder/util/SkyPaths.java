@@ -18,12 +18,14 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class SkyPaths {
@@ -47,6 +49,8 @@ public class SkyPaths {
     private static final Path BIOMES_FILE = DATA_DIR.resolve("biomes.txt");
     private static final Path CARVERS_FILE = DATA_DIR.resolve("carvers.txt");
     private static final Path DIMENSIONS_FILE = DATA_DIR.resolve("dimensions.txt");
+
+    public static final Predicate<File> NBT_OR_SNBT = file -> file.isFile() && (file.getName().endsWith(".nbt") || file.getName().endsWith(".snbt"));
 
     public static void createDirectories() {
         try {
@@ -86,8 +90,7 @@ public class SkyPaths {
 
     public static void copyTemplateFile() throws IOException {
         //noinspection ConstantConditions
-        if (Arrays.stream(TEMPLATES_DIR.toFile().listFiles())
-                .anyMatch(file -> file.isFile() && (file.getName().endsWith(".nbt") || file.getName().endsWith(".snbt")))) {
+        if (Arrays.stream(TEMPLATES_DIR.toFile().listFiles()).anyMatch(NBT_OR_SNBT)) {
             return;
         }
 

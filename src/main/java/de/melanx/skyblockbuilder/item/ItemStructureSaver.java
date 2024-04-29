@@ -29,8 +29,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 import org.moddingx.libx.config.ConfigManager;
 
 import javax.annotation.Nonnull;
@@ -160,15 +162,33 @@ public class ItemStructureSaver extends Item {
         return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.21")
     public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt) {
-        return saveSchematic(level, stack, saveToConfig, ignoreAir, asSnbt, null);
+        return saveSchematic(level, stack, saveToConfig, ignoreAir, asSnbt, false, null);
     }
 
+    public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, boolean netherValidation) {
+        return saveSchematic(level, stack, saveToConfig, ignoreAir, asSnbt, netherValidation, null);
+    }
+
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.21")
     public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, @Nullable String name) {
+        return saveSchematic(level, stack, saveToConfig, ignoreAir, asSnbt, false, name);
+    }
+
+    public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, boolean netherValidation, @Nullable String name) {
         StructureTemplate template = new StructureTemplate();
         BoundingBox boundingBox = getArea(stack);
 
         if (boundingBox == null) {
+            SkyblockBuilder.getLogger().error("No bounding box found for schematic!");
+            return null;
+        }
+
+        if (netherValidation && level.getBlockStates(AABB.of(boundingBox)).noneMatch(state -> state.is(Blocks.NETHER_PORTAL))) {
+            SkyblockBuilder.getLogger().error("No portals found for schematic!");
             return null;
         }
 

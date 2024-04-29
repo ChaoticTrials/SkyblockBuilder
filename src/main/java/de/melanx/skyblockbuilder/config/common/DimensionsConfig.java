@@ -1,7 +1,10 @@
 package de.melanx.skyblockbuilder.config.common;
 
+import de.melanx.skyblockbuilder.template.NetherPortalTemplate;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
+
+import java.util.Optional;
 
 @RegisterConfig("dimensions")
 public class DimensionsConfig {
@@ -16,6 +19,9 @@ public class DimensionsConfig {
 
         @Config("Should nether generate as in default world type? [default: false]")
         public static boolean Default = false;
+
+        @Config("File name in template directory of a valid template containing a nether portal")
+        public static Optional<NetherPortalTemplate> netherPortalStructure = Optional.empty();
     }
 
     public static class End {

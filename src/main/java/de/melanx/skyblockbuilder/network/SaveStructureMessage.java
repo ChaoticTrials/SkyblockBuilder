@@ -19,7 +19,7 @@ import org.moddingx.libx.network.PacketSerializer;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
-public record SaveStructureMessage(ItemStack stack, String name, boolean saveToConfig, boolean ignoreAir, boolean asSnbt) {
+public record SaveStructureMessage(ItemStack stack, String name, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, boolean netherValidation) {
 
     public static class Handler implements PacketHandler<SaveStructureMessage> {
 
@@ -36,7 +36,7 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean saveToC
             }
 
             ServerLevel level = (ServerLevel) player.level();
-            String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.saveToConfig, msg.ignoreAir, msg.asSnbt, msg.name);
+            String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.saveToConfig, msg.ignoreAir, msg.asSnbt, msg.netherValidation, msg.name);
             if (name == null) {
                 player.displayClientMessage(Component.literal("Failed to save, look at latest.log for more information").withStyle(ChatFormatting.RED), false);
                 return true;
@@ -66,11 +66,12 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean saveToC
             buffer.writeBoolean(msg.saveToConfig);
             buffer.writeBoolean(msg.ignoreAir);
             buffer.writeBoolean(msg.asSnbt);
+            buffer.writeBoolean(msg.netherValidation);
         }
 
         @Override
         public SaveStructureMessage decode(FriendlyByteBuf buffer) {
-            return new SaveStructureMessage(buffer.readItem(), buffer.readUtf(Short.MAX_VALUE), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean());
+            return new SaveStructureMessage(buffer.readItem(), buffer.readUtf(Short.MAX_VALUE), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean());
         }
     }
 }

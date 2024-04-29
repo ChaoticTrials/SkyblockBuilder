@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
+import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.Spiral;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -26,7 +27,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -259,11 +259,10 @@ public class SkyblockSavedData extends SavedData {
         List<TemplatesConfig.Spawn> possibleSpawns = new ArrayList<>(this.getPossibleSpawns(team.getIsland(), template));
         team.setPossibleSpawns(possibleSpawns);
 
-        StructurePlaceSettings settings = new StructurePlaceSettings().setKnownShape(true).setKeepLiquids(false);
         BlockPos center = team.getIsland().getCenter();
         List<BlockSnapshot> capturedBlockSnapshots = (List<BlockSnapshot>) this.level.capturedBlockSnapshots.clone();
         this.level.captureBlockSnapshots = true;
-        template.placeInWorld(this.level, center, settings, RandomSource.create(), Block.UPDATE_CLIENTS);
+        template.placeInWorld(this.level, center, TemplateLoader.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
         SkyblockSavedData.surround(this.level, team.getIsland().getCenter(), template);
         this.level.captureBlockSnapshots = false;
         this.level.capturedBlockSnapshots.clear();

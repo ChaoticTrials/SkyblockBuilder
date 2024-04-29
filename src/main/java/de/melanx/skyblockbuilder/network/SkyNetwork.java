@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.PacketDistributor;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 import org.moddingx.libx.network.NetworkX;
 
 import javax.annotation.Nullable;
@@ -58,8 +59,14 @@ public class SkyNetwork extends NetworkX {
         this.channel.sendToServer(new DeleteTagsMessage(stack));
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.21")
     public void saveStructure(ItemStack stack, String name, boolean saveToConfig, boolean ignoreAir, boolean asSnbt) {
-        this.channel.sendToServer(new SaveStructureMessage(stack, name, saveToConfig, ignoreAir, asSnbt));
+        this.saveStructure(stack, name, saveToConfig, ignoreAir, asSnbt, false);
+    }
+
+    public void saveStructure(ItemStack stack, String name, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, boolean netherValidation) {
+        this.channel.sendToServer(new SaveStructureMessage(stack, name, saveToConfig, ignoreAir, asSnbt, netherValidation));
     }
 
     public void updateProfiles(Player player) {

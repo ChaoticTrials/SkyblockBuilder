@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.template;
 
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nullable;
@@ -10,6 +11,7 @@ import java.util.*;
 
 public class TemplateLoader {
 
+    public static final StructurePlaceSettings STRUCTURE_PLACE_SETTINGS = new StructurePlaceSettings().setKnownShape(true).setKeepLiquids(false);
     private static final List<String> TEMPLATE_NAMES = new ArrayList<>();
     private static final Map<String, ConfiguredTemplate> TEMPLATE_MAP = new HashMap<>();
     private static ConfiguredTemplate TEMPLATE;

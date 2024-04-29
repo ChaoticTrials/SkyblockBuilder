@@ -7,11 +7,25 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
+import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
+import net.minecraft.BlockUtil;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.NetherPortalBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import org.moddingx.libx.codec.MoreCodecs;
+
+import java.util.Optional;
 
 public class CoreUtil {
 
@@ -22,17 +36,41 @@ public class CoreUtil {
                 RegistryOps.retrieveGetter(Registries.NOISE_SETTINGS),
                 RegistryOps.retrieveRegistryLookup(Registries.BIOME).forGetter(SkyblockPreset::getBiomes)
         ).apply(instance, SkyblockPreset::new));
-        
+
         MapCodec<Unit> skyblockCodecId = Codec.STRING.fieldOf("type").flatXmap(
                 str -> "skyblockbuilder:skyblock".equals(str) ? DataResult.success(Unit.INSTANCE) : DataResult.error(() -> "Wrong type"),
                 unit -> DataResult.success("skyblockbuilder:skyblock")
         );
-        
+
         Codec<SkyblockPreset> skyblockCodec = MoreCodecs.extend(skyblockCodecBase, skyblockCodecId, preset -> Pair.of(preset, Unit.INSTANCE), (preset, unit) -> preset);
-        
+
         return new SkyblockPresetCodec(codec, skyblockCodec);
     }
-    
+
+    public static Optional<BlockUtil.FoundRectangle> getExitPortal(ServerPlayer player, ServerLevel destination, BlockPos findFrom, boolean isToNether, WorldBorder worldBorder) {
+        Direction.Axis portalAxis = player.level().getBlockState(player.portalEntrancePos).getOptionalValue(NetherPortalBlock.AXIS).orElse(Direction.Axis.X);
+        if (!isToNether || DimensionsConfig.Nether.netherPortalStructure.isEmpty()) { // handle vanilla logic
+            Optional<BlockUtil.FoundRectangle> portal = destination.getPortalForcer().createPortal(findFrom, portalAxis);
+            if (portal.isEmpty()) {
+                SkyblockBuilder.getLogger().error("Unable to create a portal, likely target out of worldborder");
+            }
+
+            return portal;
+        }
+
+        Direction dir = Direction.get(Direction.AxisDirection.POSITIVE, portalAxis);
+        Rotation rotation = dir == Direction.SOUTH ? Rotation.CLOCKWISE_90 : Rotation.NONE;
+
+        BlockPos startPos = findFrom.offset(DimensionsConfig.Nether.netherPortalStructure.get().getPortalOffset().rotate(rotation));
+        DimensionsConfig.Nether.netherPortalStructure.get().getStructure().placeInWorld(destination,
+                startPos, startPos,
+                TemplateLoader.STRUCTURE_PLACE_SETTINGS.copy().setRotation(rotation),
+                destination.random,
+                Block.UPDATE_ALL);
+
+        return Optional.of(new BlockUtil.FoundRectangle(findFrom, 2, 3));
+    }
+
     private record SkyblockPresetCodec(Codec<WorldPreset> base, Codec<SkyblockPreset> skyblock) implements Codec<WorldPreset> {
 
         @Override
