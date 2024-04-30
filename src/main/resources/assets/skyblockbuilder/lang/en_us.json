@@ -84,6 +84,7 @@
   "skyblockbuilder.command.info.toggle_visit": "Visits by other players are now %s.",
   "skyblockbuilder.command.info.toggle_request": "Join requests by other players are now %s.",
   "skyblockbuilder.command.info.click_to_copy": "Click to copy",
+  "skyblockbuilder.command.info.show_team_spawns": "The spawns for team %s:",
 
   "skyblockbuilder.command.success.reset_island": "Successfully set island shape to %s",
   "skyblockbuilder.command.success.export_spawns": "Successfully exported current spawns to %s",

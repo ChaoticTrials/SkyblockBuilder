@@ -9,16 +9,16 @@ import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -103,10 +103,7 @@ public class GenerateCommand {
     }
 
     private static void showLocationResult(CommandSourceStack source, String structureName, BlockPos generatedAt) {
-        MutableComponent coords = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", generatedAt.getX(), generatedAt.getY(), generatedAt.getZ()).withStyle(style -> style
-                .withColor(ChatFormatting.GREEN)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + generatedAt.getX() + " " + generatedAt.getY() + " " + generatedAt.getZ()))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))));
+        Component coords = RandomUtility.getFormattedPos(generatedAt);
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.generated", structureName, coords), true);
     }
 }

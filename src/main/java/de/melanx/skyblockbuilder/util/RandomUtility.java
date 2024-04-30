@@ -12,11 +12,16 @@ import de.melanx.skyblockbuilder.config.common.CustomizationConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -91,6 +96,13 @@ public class RandomUtility {
         if (ModList.get().isLoaded(CuriosCompat.MODID)) {
             CuriosCompat.setStartInventory(player);
         }
+    }
+
+    public static Component getFormattedPos(BlockPos pos) {
+        return ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pos.getX(), pos.getY(), pos.getZ()).withStyle(style -> style
+                .withColor(ChatFormatting.GREEN)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pos.getX() + " " + pos.getY() + " " + pos.getZ()))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))));
     }
 
     public static String formattedCooldown(long ticks) {

@@ -110,15 +110,27 @@ public class SpawnsCommand {
             return 1;
         }
 
-        for (Team team : data.getTeams()) {
-            Set<TemplatesConfig.Spawn> spawns = mode == Mode.NORMAL ? team.getDefaultPossibleSpawns() : team.getPossibleSpawns();
-            for (TemplatesConfig.Spawn spawn : spawns) {
-                BlockPos pos = spawn.pos();
-                if (source.getEntity() instanceof ServerPlayer) {
-                    level.sendParticles(source.getPlayerOrException(), ParticleTypes.HAPPY_VILLAGER, true, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);
-                } else {
-                    level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);
-                }
+        Team team = data.getSpawn();
+        if (source.getEntity() instanceof ServerPlayer player) {
+            team = data.getTeamFromPlayer(player);
+            if (team == null) {
+                team = data.getSpawn();
+            }
+        }
+
+        boolean showDefaultSpawns = team.isSpawn() && mode == Mode.NORMAL;
+        Set<TemplatesConfig.Spawn> spawns = showDefaultSpawns ? team.getDefaultPossibleSpawns() : team.getPossibleSpawns();
+        if (!spawns.isEmpty()) {
+            source.sendSystemMessage(Component.translatable("skyblockbuilder.command.info.show_team_spawns", team.getName()).withStyle(ChatFormatting.GOLD));
+        }
+
+        for (TemplatesConfig.Spawn spawn : spawns) {
+            BlockPos pos = spawn.pos();
+            source.sendSystemMessage(Component.literal(" - ").append(RandomUtility.getFormattedPos(pos)));
+            if (source.getEntity() instanceof ServerPlayer player) {
+                level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, true, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);
+            } else {
+                level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);
             }
         }
 

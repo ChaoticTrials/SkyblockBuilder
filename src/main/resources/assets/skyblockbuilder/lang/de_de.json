@@ -84,6 +84,7 @@
   "skyblockbuilder.command.info.toggle_visit": "Besuche anderer Spieler sind nun %s.",
   "skyblockbuilder.command.info.toggle_request": "Beitrittsanfragen anderer Spieler sind nun %s.",
   "skyblockbuilder.command.info.click_to_copy": "Klicke zum Kopieren",
+  "skyblockbuilder.command.info.show_team_spawns": "Die Spawnpunkte für %s:",
 
   "skyblockbuilder.command.success.reset_island": "Insel-Vorlage erfolgreich gesetzt zu %s",
   "skyblockbuilder.command.success.export_spawns": "Spawns erfolgreich exportiert nach %s",
