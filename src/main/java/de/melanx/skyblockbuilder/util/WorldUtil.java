@@ -17,6 +17,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -215,6 +216,23 @@ public class WorldUtil {
         }
 
         return i;
+    }
+
+    public static CompoundTag getPosTag(BlockPos pos) {
+        CompoundTag posTag = new CompoundTag();
+        posTag.putInt("posX", pos.getX());
+        posTag.putInt("posY", pos.getY());
+        posTag.putInt("posZ", pos.getZ());
+
+        return posTag;
+    }
+
+    public static BlockPos getPosFromTag(CompoundTag posTag) {
+        return new BlockPos(
+                posTag.getInt("posX"),
+                posTag.getInt("posY"),
+                posTag.getInt("posZ")
+        );
     }
 
     public enum Directions {

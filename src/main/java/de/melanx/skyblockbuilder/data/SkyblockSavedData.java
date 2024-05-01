@@ -259,7 +259,7 @@ public class SkyblockSavedData extends SavedData {
         team.setPossibleSpawns(possibleSpawns);
 
         BlockPos center = team.getIsland().getCenter();
-        template.placeInWorld(this.level, center, TemplateLoader.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
+        template.placeInWorld(this.level, team, TemplateLoader.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
         SkyblockSavedData.surround(this.level, center, template);
 
         this.skyblocks.put(team.getId(), team);

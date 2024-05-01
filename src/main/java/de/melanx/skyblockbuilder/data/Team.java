@@ -31,6 +31,7 @@ public class Team {
     private final Set<UUID> joinRequests;
     private final Set<TemplatesConfig.Spawn> possibleSpawns;
     private final Set<TemplatesConfig.Spawn> defaultPossibleSpawns;
+    private final Map<String, Set<PlacedSpread>> placedSpreads;
     private UUID teamId;
     private IslandPos island;
     private String name;
@@ -53,6 +54,7 @@ public class Team {
         this.players = new HashSet<>();
         this.possibleSpawns = new HashSet<>();
         this.defaultPossibleSpawns = new HashSet<>();
+        this.placedSpreads = new HashMap<>();
         this.joinRequests = new HashSet<>();
         this.teamId = teamId;
         this.allowVisits = false;
@@ -311,6 +313,27 @@ public class Team {
         this.data.setDirty();
     }
 
+    public void addSpread(String spreadName, BlockPos pos) {
+        this.addSpread(new PlacedSpread(spreadName, pos));
+    }
+
+    public void addSpread(PlacedSpread placedSpread) {
+        this.placedSpreads.computeIfAbsent(placedSpread.name(), s -> new HashSet<>()).add(placedSpread);
+        this.data.setDirty();
+    }
+
+    public Map<String, Set<PlacedSpread>> getPlacedSpreads() {
+        return this.placedSpreads;
+    }
+
+    public Set<PlacedSpread> getPlacedSpreads(String spreadName) {
+        return this.placedSpreads.get(spreadName);
+    }
+
+    public Set<String> getAllSpreadNames() {
+        return this.placedSpreads.keySet();
+    }
+
     public void sendJoinRequest(Player requestingPlayer) {
         this.addJoinRequest(requestingPlayer.getGameProfile().getId());
         MutableComponent component = Component.translatable("skyblockbuilder.event.join_request0", requestingPlayer.getDisplayName());
@@ -377,11 +400,7 @@ public class Team {
 
         ListTag spawns = new ListTag();
         for (TemplatesConfig.Spawn spawn : this.possibleSpawns) {
-            CompoundTag posTag = new CompoundTag();
-            BlockPos pos = spawn.pos();
-            posTag.putInt("posX", pos.getX());
-            posTag.putInt("posY", pos.getY());
-            posTag.putInt("posZ", pos.getZ());
+            CompoundTag posTag = WorldUtil.getPosTag(spawn.pos());
             posTag.putString("Direction", spawn.direction().name());
 
             spawns.add(posTag);
@@ -389,11 +408,7 @@ public class Team {
 
         ListTag defaultSpawns = new ListTag();
         for (TemplatesConfig.Spawn spawn : this.defaultPossibleSpawns) {
-            CompoundTag posTag = new CompoundTag();
-            BlockPos pos = spawn.pos();
-            posTag.putInt("posX", pos.getX());
-            posTag.putInt("posY", pos.getY());
-            posTag.putInt("posZ", pos.getZ());
+            CompoundTag posTag = WorldUtil.getPosTag(spawn.pos());
             posTag.putString("Direction", spawn.direction().name());
 
             defaultSpawns.add(posTag);
@@ -406,6 +421,19 @@ public class Team {
 
             joinRequests.add(idTag);
         }
+
+        CompoundTag placedSpreads = new CompoundTag();
+        for (Map.Entry<String, Set<PlacedSpread>> entry : this.placedSpreads.entrySet()) {
+            ListTag namedSpreads = new ListTag();
+            for (PlacedSpread placedSpread : entry.getValue()) {
+                CompoundTag tag = new CompoundTag();
+                tag.putString("Name", placedSpread.name());
+                tag.put("Pos", WorldUtil.getPosTag(placedSpread.pos()));
+                namedSpreads.add(tag);
+            }
+            placedSpreads.put(entry.getKey(), namedSpreads);
+        }
+        nbt.put("PlacedSpreads", placedSpreads);
 
         nbt.put("Players", players);
         nbt.put("Spawns", spawns);
@@ -433,7 +461,7 @@ public class Team {
         this.possibleSpawns.clear();
         for (Tag tag : spawns) {
             CompoundTag posTag = (CompoundTag) tag;
-            BlockPos pos = new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"));
+            BlockPos pos = WorldUtil.getPosFromTag(posTag);
             WorldUtil.Directions direction = WorldUtil.Directions.valueOf(posTag.getString("Direction"));
             this.possibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
         }
@@ -442,7 +470,7 @@ public class Team {
         this.defaultPossibleSpawns.clear();
         for (Tag tag : defaultSpawns) {
             CompoundTag posTag = (CompoundTag) tag;
-            BlockPos pos = new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"));
+            BlockPos pos = WorldUtil.getPosFromTag(posTag);
             WorldUtil.Directions direction = WorldUtil.Directions.valueOf(posTag.getString("Direction"));
             this.defaultPossibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
         }
@@ -451,6 +479,22 @@ public class Team {
         this.joinRequests.clear();
         for (Tag id : joinRequests) {
             this.joinRequests.add(((CompoundTag) id).getUUID("Id"));
+        }
+
+        CompoundTag placedSpreads = nbt.getCompound("PlacedSpreads");
+        this.placedSpreads.clear();
+        for (String key : placedSpreads.getAllKeys()) {
+            ListTag list = placedSpreads.getList(key, Tag.TAG_COMPOUND);
+            Set<PlacedSpread> namedSpreads = new HashSet<>();
+            for (Tag tag : list) {
+                CompoundTag ctag = ((CompoundTag) tag);
+                String name = ctag.getString("Name");
+                BlockPos pos = WorldUtil.getPosFromTag(ctag.getCompound("Pos"));
+
+                PlacedSpread placedSpread = new PlacedSpread(name, pos);
+                namedSpreads.add(placedSpread);
+            }
+            this.placedSpreads.put(key, namedSpreads);
         }
     }
 
@@ -472,4 +516,6 @@ public class Team {
         result = 31 * result * this.island.hashCode();
         return result;
     }
+
+    public record PlacedSpread(String name, BlockPos pos) {}
 }

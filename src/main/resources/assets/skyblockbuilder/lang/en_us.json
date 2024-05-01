@@ -21,6 +21,7 @@
   "skyblockbuilder.command.error.creating_path": "Failed to create path %s",
   "skyblockbuilder.command.error.overwrite_config": "Failed to overwrite config %s",
   "skyblockbuilder.command.error.team_not_exist": "This team doesn't exist!",
+  "skyblockbuilder.command.error.spread_not_exist": "This spread doesn't exist (on this team)!",
   "skyblockbuilder.command.error.team_already_exist": "Team %s already exists! Please choose another name!",
   "skyblockbuilder.command.error.user_has_team": "You are already in a team!",
   "skyblockbuilder.command.error.user_has_no_team": "You are currently not in any team!",
@@ -110,6 +111,7 @@
   "skyblockbuilder.command.success.spawn_removed": "Successfully removed spawn point at x %s, y %s, z %s.",
   "skyblockbuilder.command.success.reset_spawns": "Successfully reset all possible spawns.",
   "skyblockbuilder.command.success.rename_team": "Successfully renamed team to %s.",
+  "skyblockbuilder.command.success.located_spread": "Located %s here:",
   "skyblockbuilder.command.success.convert_template": "Converted %s to %s.",
 
   "skyblockbuilder.command.warning.edit_spawn_spawns": "[WARNING] You are editing the spawn island!",

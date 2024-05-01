@@ -13,6 +13,7 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import org.moddingx.libx.command.CommandUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -70,6 +71,18 @@ public class Suggestions {
         }
     }));
 
+    public static final SuggestionProvider<CommandSourceStack> SPREADS_FOR_TEAM = (((context, builder) -> {
+        String teamName = CommandUtil.getArgumentOrDefault(context, "team", String.class, "Spawn");
+        SkyblockSavedData data = SkyblockSavedData.get(context.getSource().getLevel());
+        Team team = data.getTeam(teamName);
+        if (team == null) {
+            throw new RuntimeException("Team " + teamName + " not found");
+        }
+
+        return SharedSuggestionProvider.suggest(team.getAllSpreadNames().stream()
+                .map(s -> s.split(" ").length == 1 ? s : "\"" + s + "\""), builder);
+    }));
+
     // Lists all teams except spawn
     public static final SuggestionProvider<CommandSourceStack> ALL_TEAMS = (context, builder) -> SharedSuggestionProvider
             .suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().level())
@@ -94,7 +107,7 @@ public class Suggestions {
         SkyblockSavedData data = SkyblockSavedData.get(world);
 
         List<UUID> teams = data.getInvites(source.getPlayerOrException());
-        if (teams != null && teams.size() != 0) {
+        if (teams != null && !teams.isEmpty()) {
             return SharedSuggestionProvider.suggest(teams.stream()
                     .map(data::getTeam)
                     .filter(Objects::nonNull)

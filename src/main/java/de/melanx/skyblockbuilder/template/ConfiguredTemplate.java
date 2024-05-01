@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -25,6 +26,7 @@ import net.minecraft.world.ticks.LevelTicks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
@@ -86,15 +88,27 @@ public class ConfiguredTemplate {
         return spawns;
     }
 
+    public void placeInWorld(ServerLevel serverLevel, Team team, StructurePlaceSettings settings, RandomSource random, int flags) {
+        this.placeInWorld(serverLevel, team, team.getIsland().getCenter(), settings, random, flags);
+    }
+
     public void placeInWorld(ServerLevel serverLevel, BlockPos pos, StructurePlaceSettings settings, RandomSource random, int flags) {
+        this.placeInWorld(serverLevel, null, pos, settings, random, flags);
+    }
+
+    public void placeInWorld(ServerLevel serverLevel, @Nullable Team team, BlockPos pos, StructurePlaceSettings settings, RandomSource random, int flags) {
         LevelTicks<Block> blockTicks = serverLevel.getBlockTicks();
         for (SpreadConfig spread : this.spreads) {
             BlockPos offset = spread.getRandomOffset(random);
             if (spread.getOrigin() != TemplateInfo.SpreadInfo.Origin.ZERO) {
                 offset = offset.offset(TemplateInfo.SpreadInfo.Origin.originOffset(spread.getOrigin(), this.template));
             }
-            spread.getTemplate().placeInWorld(serverLevel, pos.offset(offset), pos.offset(offset), settings, random, flags);
-            ConfiguredTemplate.clearBlockTicks(blockTicks, offset, spread.getTemplate());
+            BlockPos offsetPos = pos.offset(offset);
+            spread.getTemplate().placeInWorld(serverLevel, offsetPos, offsetPos, settings, random, flags);
+            ConfiguredTemplate.clearBlockTicks(blockTicks, offsetPos, spread.getTemplate());
+            if (team != null) {
+                team.addSpread(spread.getFileNameWithoutExtension(), offsetPos);
+            }
         }
 
         this.template.placeInWorld(serverLevel, pos, pos, settings, random, flags);
@@ -286,6 +300,10 @@ public class ConfiguredTemplate {
 
         public String getFileName() {
             return this.fileName;
+        }
+
+        public String getFileNameWithoutExtension() {
+            return this.fileName.substring(0, this.fileName.lastIndexOf("."));
         }
 
         public BlockPos getMinOffset() {

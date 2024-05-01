@@ -85,6 +85,7 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(LocateCommand.register());
         event.getDispatcher().register(Commands.literal("skyblock")
                 .requires(source -> SkyblockBuilderAPI.teamManagementEnabled())
                 .then(AcceptCommand.register())
