@@ -48,4 +48,7 @@ public class WorldConfig {
 
     @Config({"The offset from 0, 0 to generate the islands", "Can be used to generate them in the middle of .mca files"})
     public static int offset = 0;
+
+    @Config("Prevent scheduled ticks after generating the island")
+    public static boolean preventScheduledTicks = true;
 }

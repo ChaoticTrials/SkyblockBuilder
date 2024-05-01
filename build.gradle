@@ -31,7 +31,7 @@ dependencies {
     runtimeOnly fg.deobf("mezz.jei:jei-1.20.1-forge:15.0.0.12")
     runtimeOnly fg.deobf("de.melanx:DefaultWorldType:1.20.1-4.0.4")
 
-//    runtimeOnly curse.mod(556904, 4016840) # Cosmopolis Mod 1.19.X-12.0
+//    runtimeOnly curse.mod(556904, 4016840) // Cosmopolis Mod 1.19.X-12.0
 
     coremods 'org.moddingx:CoreModTypes:5.0.2-2'
 }

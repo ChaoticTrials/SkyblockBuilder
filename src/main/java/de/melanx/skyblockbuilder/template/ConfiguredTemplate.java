@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.template;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -14,11 +15,13 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.ticks.LevelTicks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -83,15 +86,25 @@ public class ConfiguredTemplate {
         return spawns;
     }
 
-    public boolean placeInWorld(ServerLevelAccessor serverLevel, BlockPos pos, StructurePlaceSettings settings, RandomSource random, int flags) {
+    public void placeInWorld(ServerLevel serverLevel, BlockPos pos, StructurePlaceSettings settings, RandomSource random, int flags) {
+        LevelTicks<Block> blockTicks = serverLevel.getBlockTicks();
         for (SpreadConfig spread : this.spreads) {
             BlockPos offset = spread.getRandomOffset(random);
             if (spread.getOrigin() != TemplateInfo.SpreadInfo.Origin.ZERO) {
                 offset = offset.offset(TemplateInfo.SpreadInfo.Origin.originOffset(spread.getOrigin(), this.template));
             }
             spread.getTemplate().placeInWorld(serverLevel, pos.offset(offset), pos.offset(offset), settings, random, flags);
+            ConfiguredTemplate.clearBlockTicks(blockTicks, offset, spread.getTemplate());
         }
-        return this.template.placeInWorld(serverLevel, pos, pos, settings, random, flags);
+
+        this.template.placeInWorld(serverLevel, pos, pos, settings, random, flags);
+        ConfiguredTemplate.clearBlockTicks(blockTicks, pos, this.template);
+    }
+
+    private static void clearBlockTicks(LevelTicks<Block> blockTicks, BlockPos pos, StructureTemplate template) {
+        if (WorldConfig.preventScheduledTicks) {
+            blockTicks.clearArea(BoundingBox.fromCorners(pos, pos.offset(template.getSize())));
+        }
     }
 
     public StructureTemplate getTemplate() {
@@ -231,10 +244,7 @@ public class ConfiguredTemplate {
 
     public ConfiguredTemplate copy() {
         CompoundTag nbt = this.write(new CompoundTag());
-        ConfiguredTemplate template = new ConfiguredTemplate();
-        template.read(nbt);
-
-        return template;
+        return ConfiguredTemplate.fromTag(nbt);
     }
 
     public static ConfiguredTemplate fromTag(@Nonnull CompoundTag nbt) {
