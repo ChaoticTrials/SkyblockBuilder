@@ -43,6 +43,7 @@ public class TemplateRenderer {
     private final float maxY;
     private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
     private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
+    private int index = 0;
 
     public TemplateRenderer(StructureTemplate template, float maxSize) {
         this(template, maxSize, maxSize);
@@ -94,6 +95,12 @@ public class TemplateRenderer {
         this.renderElements(guiGraphics, this.template);
 
         guiGraphics.pose().popPose();
+        if (ClientTickHandler.ticksInGame() % 40 == 0) {
+            this.index++;
+            if (this.index >= this.template.palettes.size()) {
+                this.index = 0;
+            }
+        }
     }
 
     private void renderElements(GuiGraphics guiGraphics, StructureTemplate template) {
@@ -110,15 +117,14 @@ public class TemplateRenderer {
     }
 
     private void doWorldRenderPass(GuiGraphics guiGraphics, StructureTemplate template, MultiBufferSource.BufferSource buffers) {
-        for (StructureTemplate.Palette palette : template.palettes) {
-            for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
-                BlockPos pos = blockInfo.pos();
-                BlockState bs = blockInfo.state();
-                guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(pos.getX(), pos.getY(), pos.getZ());
-                this.renderForMultiblock(bs, pos, guiGraphics, buffers);
-                guiGraphics.pose().popPose();
-            }
+        StructureTemplate.Palette palette = template.palettes.get(this.index);
+        for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
+            BlockPos pos = blockInfo.pos();
+            BlockState bs = blockInfo.state();
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(pos.getX(), pos.getY(), pos.getZ());
+            this.renderForMultiblock(bs, pos, guiGraphics, buffers);
+            guiGraphics.pose().popPose();
         }
     }
 
