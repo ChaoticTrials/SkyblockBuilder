@@ -9,6 +9,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
+import de.melanx.skyblockbuilder.template.NetherPortalTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
 import net.minecraft.BlockUtil;
@@ -19,6 +20,7 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.border.WorldBorder;
@@ -61,14 +63,34 @@ public class CoreUtil {
         Direction dir = Direction.get(Direction.AxisDirection.POSITIVE, portalAxis);
         Rotation rotation = dir == Direction.SOUTH ? Rotation.CLOCKWISE_90 : Rotation.NONE;
 
-        BlockPos startPos = findFrom.offset(DimensionsConfig.Nether.netherPortalStructure.get().getPortalOffset().rotate(rotation));
-        DimensionsConfig.Nether.netherPortalStructure.get().getStructure().placeInWorld(destination,
+        NetherPortalTemplate netherPortalTemplate = DimensionsConfig.Nether.netherPortalStructure.get();
+        BlockPos.MutableBlockPos startPos = findFrom.offset(netherPortalTemplate.getPortalOffset().rotate(rotation)).mutable();
+
+        BlockPos.MutableBlockPos topPos = startPos.immutable().above(netherPortalTemplate.getStructure().size.getY()).mutable();
+        int logicalBuildHeight = destination.getMinBuildHeight() + destination.getLogicalHeight();
+        if (logicalBuildHeight < topPos.getY()) {
+            topPos.setY(logicalBuildHeight);
+            int i = 1;
+            while (destination.getBlockState(topPos).is(Blocks.BEDROCK)) {
+                topPos.move(Direction.DOWN);
+                i++;
+            }
+            startPos.setY(logicalBuildHeight - netherPortalTemplate.getStructure().size.getY() - i);
+        }
+
+        if (destination.getMinBuildHeight() > startPos.getY()) {
+            startPos.setY(destination.getMinBuildHeight());
+            while (destination.getBlockState(startPos).is(Blocks.BEDROCK)) {
+                startPos.move(Direction.UP);
+            }
+        }
+        netherPortalTemplate.getStructure().placeInWorld(destination,
                 startPos, startPos,
                 TemplateLoader.STRUCTURE_PLACE_SETTINGS.copy().setRotation(rotation),
                 destination.random,
                 Block.UPDATE_ALL);
 
-        return Optional.of(new BlockUtil.FoundRectangle(findFrom, 2, 3));
+        return !worldBorder.isWithinBounds(startPos) ? Optional.empty() : Optional.of(new BlockUtil.FoundRectangle(startPos.offset(netherPortalTemplate.getPortalOffset().multiply(-1).rotate(rotation)), 2, 3));
     }
 
     private record SkyblockPresetCodec(Codec<WorldPreset> base, Codec<SkyblockPreset> skyblock) implements Codec<WorldPreset> {
