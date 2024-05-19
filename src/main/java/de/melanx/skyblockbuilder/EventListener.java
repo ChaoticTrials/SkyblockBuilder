@@ -199,9 +199,9 @@ public class EventListener {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
+        SkyPaths.generateDefaultFiles(server);
         if (WorldUtil.isSkyblock(server.overworld())) {
             SkyblockBuilder.getLogger().info("Successfully loaded Skyblock!");
-            SkyPaths.generateDefaultFiles(server);
             TemplateLoader.updateTemplates();
             SkyblockBuilder.getNetwork().updateTemplateNames(TemplateLoader.getTemplateNames());
             TemplateData.get(server.overworld());
