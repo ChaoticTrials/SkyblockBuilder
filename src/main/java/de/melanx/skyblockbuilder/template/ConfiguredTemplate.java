@@ -107,7 +107,7 @@ public class ConfiguredTemplate {
             spread.getTemplate().placeInWorld(serverLevel, offsetPos, offsetPos, settings, random, flags);
             ConfiguredTemplate.clearBlockTicks(blockTicks, offsetPos, spread.getTemplate());
             if (team != null) {
-                team.addSpread(spread.getFileNameWithoutExtension(), offsetPos);
+                team.addSpread(spread.getFileNameWithoutExtension(), offsetPos, new BlockPos(spread.template.getSize()));
             }
         }
 

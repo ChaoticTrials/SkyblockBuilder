@@ -147,5 +147,12 @@
 
   "skyblockbuilder.compat.disabled_management": "Diese und andere Teamverwaltungsfunktionen sind aktuell durch %s deaktiviert.",
 
-  "minemention.skyblockbuilder.team": "Erwähne jeden Spieler in deinem Team"
+  "minemention.skyblockbuilder.team": "Erwähne jeden Spieler in deinem Team",
+  "task.skyblockbuilder.spread_location": "\uD83C\uDFDD Ausbreitungsort",
+  "setting.skyblockbuilder.spread_location.title": "Titel",
+  "setting.skyblockbuilder.spread_location.icon": "Symbol",
+  "setting.skyblockbuilder.spread_location.spread": "Ausbreitungsnamen",
+  "setting.skyblockbuilder.spread_location.no_valid_spreads": "Dein Team hat keine der erforderlichen Ausbreitungen.",
+  "setting.skyblockbuilder.spread_location.no_spreads_defined": "Es ist keine Ausbreitung definiert.",
+  "setting.skyblockbuilder.spread_location.visit_spreads": "Besuche eine dieser Ausbreitungen:"
 }

@@ -313,8 +313,8 @@ public class Team {
         this.data.setDirty();
     }
 
-    public void addSpread(String spreadName, BlockPos pos) {
-        this.addSpread(new PlacedSpread(spreadName, pos));
+    public void addSpread(String spreadName, BlockPos pos, BlockPos size) {
+        this.addSpread(new PlacedSpread(spreadName, pos, size));
     }
 
     public void addSpread(PlacedSpread placedSpread) {
@@ -429,6 +429,7 @@ public class Team {
                 CompoundTag tag = new CompoundTag();
                 tag.putString("Name", placedSpread.name());
                 tag.put("Pos", WorldUtil.getPosTag(placedSpread.pos()));
+                tag.put("Size", WorldUtil.getPosTag(placedSpread.size()));
                 namedSpreads.add(tag);
             }
             placedSpreads.put(entry.getKey(), namedSpreads);
@@ -490,8 +491,9 @@ public class Team {
                 CompoundTag ctag = ((CompoundTag) tag);
                 String name = ctag.getString("Name");
                 BlockPos pos = WorldUtil.getPosFromTag(ctag.getCompound("Pos"));
+                BlockPos size = WorldUtil.getPosFromTag(ctag.getCompound("Size"));
 
-                PlacedSpread placedSpread = new PlacedSpread(name, pos);
+                PlacedSpread placedSpread = new PlacedSpread(name, pos, size);
                 namedSpreads.add(placedSpread);
             }
             this.placedSpreads.put(key, namedSpreads);
@@ -517,5 +519,5 @@ public class Team {
         return result;
     }
 
-    public record PlacedSpread(String name, BlockPos pos) {}
+    public record PlacedSpread(String name, BlockPos pos, BlockPos size) {}
 }

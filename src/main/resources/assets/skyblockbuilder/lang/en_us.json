@@ -148,5 +148,12 @@
 
   "skyblockbuilder.compat.disabled_management": "This and all other team management is disabled by %s.",
 
-  "minemention.skyblockbuilder.team": "Mention every player in your team"
+  "minemention.skyblockbuilder.team": "Mention every player in your team",
+  "task.skyblockbuilder.spread_location": "\uD83C\uDFDD Spread Location",
+  "setting.skyblockbuilder.spread_location.title": "Title",
+  "setting.skyblockbuilder.spread_location.icon": "Icon",
+  "setting.skyblockbuilder.spread_location.spread": "Spread names",
+  "setting.skyblockbuilder.spread_location.no_valid_spreads": "Your team doesn't have any of the required spreads.",
+  "setting.skyblockbuilder.spread_location.no_spreads_defined": "There is no spread defined.",
+  "setting.skyblockbuilder.spread_location.visit_spreads": "Visit any of these spreads:"
 }

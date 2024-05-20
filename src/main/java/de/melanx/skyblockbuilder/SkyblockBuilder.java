@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.melanx.skyblockbuilder.client.ClientEventListener;
+import de.melanx.skyblockbuilder.compat.heracles.HeraclesCompat;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.datagen.BlockStatesProvider;
@@ -62,6 +63,10 @@ public final class SkyblockBuilder extends ModXRegistration {
     protected void setup(FMLCommonSetupEvent event) {
         if (ModList.get().isLoaded("minemention")) {
             MineMentionCompat.register();
+        }
+
+        if (ModList.get().isLoaded(HeraclesCompat.MODID)) {
+            HeraclesCompat.registerHeracles();
         }
 
         Registration.registerCodecs();
