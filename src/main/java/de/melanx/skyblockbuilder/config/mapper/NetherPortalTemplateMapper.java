@@ -16,7 +16,7 @@ public class NetherPortalTemplateMapper implements ValueMapper<NetherPortalTempl
 
         @Override
         public NetherPortalTemplate defaultValue() {
-            return null;
+            return new NetherPortalTemplate("default.nbt");
         }
 
         @Override
