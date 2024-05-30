@@ -28,6 +28,7 @@ public class SpawnConfig {
             "   mob_griefing      = Mobs destroying the world",
             "   explosions        = TNT, creeper, or other explosions",
             "   crop_grow         = Crops increasing their growth status",
+            "   apply_bonemeal    = Prevents crops being grown using the bonemeal effect some twerking mods use",
             "   mobs_spawn        = Mobs spawning",
             "   mobs_spawn_egg    = Mobs being summoned using a spawn egg",
             "   damage            = Attacking others, or getting attacked",
@@ -38,6 +39,7 @@ public class SpawnConfig {
         list.add(SpawnProtectionEvents.Type.MOB_GRIEFING);
         list.add(SpawnProtectionEvents.Type.EXPLOSIONS);
         list.add(SpawnProtectionEvents.Type.CROP_GROW);
+        list.add(SpawnProtectionEvents.Type.APPLY_BONEMEAL);
         list.add(SpawnProtectionEvents.Type.MOBS_SPAWN);
         list.add(SpawnProtectionEvents.Type.MOBS_SPAWN_EGG);
         list.add(SpawnProtectionEvents.Type.DAMAGE);

@@ -16,6 +16,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.BonemealEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
@@ -31,6 +32,7 @@ public class SpawnProtectionEvents {
         MOB_GRIEFING,
         EXPLOSIONS,
         CROP_GROW,
+        APPLY_BONEMEAL,
         MOBS_SPAWN,
         MOBS_SPAWN_EGG,
         DAMAGE,
@@ -131,6 +133,17 @@ public class SpawnProtectionEvents {
         }
 
         if (SpawnProtectionEvents.isOnSpawn(event.getContext().getLevel(), event.getPos()) && (event.getPlayer() == null || !event.getPlayer().hasPermissions(2))) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public void applyBonemeal(BonemealEvent event) {
+        if (SpawnProtectionEvents.ignore(Type.APPLY_BONEMEAL)) {
+            return;
+        }
+
+        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), event.getPos()) && (event.getEntity() == null || !event.getEntity().hasPermissions(2))) {
             event.setCanceled(true);
         }
     }
