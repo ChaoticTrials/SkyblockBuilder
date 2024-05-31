@@ -1,8 +1,6 @@
 package de.melanx.skyblockbuilder.template;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.google.gson.*;
 import de.melanx.skyblockbuilder.ModLootItemFunctions;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
@@ -15,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -25,20 +24,19 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SpreadMapFunction extends LootItemConditionalFunction {
 
     public static final MapDecoration.Type DEFAULT_DECORATION = MapDecoration.Type.RED_X;
-    private final String spreadName;
+    private final List<String> spreadNames;
     private final MapDecoration.Type mapDecoration;
     private final byte zoom;
 
-    public SpreadMapFunction(LootItemCondition[] predicates, String spreadName, MapDecoration.Type mapDecoration, byte zoom) {
+    public SpreadMapFunction(LootItemCondition[] predicates, List<String> spreadNames, MapDecoration.Type mapDecoration, byte zoom) {
         super(predicates);
-        this.spreadName = spreadName;
+        this.spreadNames = spreadNames;
         this.mapDecoration = mapDecoration;
         this.zoom = zoom;
     }
@@ -69,14 +67,19 @@ public class SpreadMapFunction extends LootItemConditionalFunction {
             return stack;
         }
 
-        Set<Team.PlacedSpread> placedSpreads = team.getPlacedSpreads(this.spreadName);
+        Set<Team.PlacedSpread> placedSpreads = new HashSet<>();
+        for (String spreadName : this.spreadNames) {
+            placedSpreads.addAll(team.getPlacedSpreads(spreadName));
+        }
+
         if (placedSpreads.isEmpty()) {
-            SkyblockBuilder.getLogger().error("No spread {} for team {}", this.spreadName, team.getName());
+            SkyblockBuilder.getLogger().error("No spread {} for team {}", this.spreadNames, team.getName());
             return stack;
         }
 
         BlockPos middle = SpreadMapFunction.getMiddle(placedSpreads.stream().map(Team.PlacedSpread::pos).collect(Collectors.toSet()));
-        ItemStack map = MapItem.create(level, middle.getX(), middle.getZ(), this.zoom, true, true);
+        middle = middle.offset(0, 0, 0);
+        ItemStack map = SpreadMapFunction.createFixedMap(level, middle.getX(), middle.getZ(), this.zoom, true, true);
         MapItem.renderBiomePreviewMap(level, map);
 
         int i = 0;
@@ -87,14 +90,30 @@ public class SpreadMapFunction extends LootItemConditionalFunction {
         return map;
     }
 
-    private static BlockPos getMiddle(Set<BlockPos> blocks) {
-        int x = 0, z = 0;
+    public static BlockPos getMiddle(Set<BlockPos> blocks) {
+        double x = 0, z = 0;
         for (BlockPos pos : blocks) {
             x += pos.getX();
             z += pos.getZ();
         }
 
-        return new BlockPos(x / blocks.size(), 0, z / blocks.size());
+        int avgX = (int) (x / blocks.size());
+        int avgZ = (int) (z / blocks.size());
+
+        return new BlockPos(avgX, 0, avgZ);
+    }
+
+    // We need to create our own MapItemSavedData since MapItem#create is off-centered when scale is 1 or higher
+    // Sadly, the map will not stay fixed when resizing
+    // Issue here: https://bugs.mojang.com/browse/MC-142694
+    private static ItemStack createFixedMap(Level level, int levelX, int levelZ, byte scale, boolean trackingPosition, boolean unlimitedTracking) {
+        ItemStack map = Items.FILLED_MAP.getDefaultInstance();
+        MapItemSavedData data = new MapItemSavedData(levelX, levelZ, scale, trackingPosition, unlimitedTracking, false, level.dimension());
+        int freeMapId = level.getFreeMapId();
+        level.setMapData("map_" + freeMapId, data);
+        map.getOrCreateTag().putInt("map", freeMapId);
+
+        return map;
     }
 
     @Nonnull
@@ -108,7 +127,16 @@ public class SpreadMapFunction extends LootItemConditionalFunction {
         @Override
         public void serialize(@Nonnull JsonObject json, @Nonnull SpreadMapFunction function, @Nonnull JsonSerializationContext context) {
             super.serialize(json, function, context);
-            json.addProperty("destination", function.spreadName);
+
+            if (function.spreadNames.size() > 1) {
+                json.addProperty("spreads", function.spreadNames.get(0));
+            } else {
+                JsonArray spreadNames = new JsonArray();
+                for (String name : function.spreadNames) {
+                    spreadNames.add(new JsonPrimitive(name));
+                }
+                json.add("spreads", spreadNames);
+            }
 
             if (function.mapDecoration != SpreadMapFunction.DEFAULT_DECORATION) {
                 json.add("decoration", context.serialize(function.mapDecoration.toString().toLowerCase(Locale.ROOT)));
@@ -132,12 +160,22 @@ public class SpreadMapFunction extends LootItemConditionalFunction {
                 SkyblockBuilder.getLogger().error("Error while parsing loot table decoration entry. Found {}. Defaulting to {}", decoration, mapDecorationType);
             }
 
-            String destination = GsonHelper.getAsString(json, "destination");
-            if (destination.isEmpty()) {
+            List<String> spreads = new ArrayList<>();
+            if (json.has("spreads")) {
+                JsonElement element = json.get("spreads");
+                if (element.isJsonArray()) {
+                    JsonArray spreadsArray = element.getAsJsonArray();
+                    for (JsonElement entry : spreadsArray) {
+                        spreads.add(entry.getAsString());
+                    }
+                } else {
+                    spreads.add(element.getAsString());
+                }
+            } else {
                 SkyblockBuilder.getLogger().error("Spread destination is empty");
             }
 
-            return new SpreadMapFunction(conditions, destination, mapDecorationType, zoom);
+            return new SpreadMapFunction(conditions, spreads, mapDecorationType, zoom);
         }
     }
 }
