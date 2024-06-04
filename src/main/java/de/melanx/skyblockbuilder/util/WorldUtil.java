@@ -40,7 +40,7 @@ public class WorldUtil {
 
         if (WorldConfig.leaveToOverworld && team.isSpawn()) {
             Team playersTeam = SkyblockSavedData.get(player.serverLevel()).getTeamFromPlayer(player);
-            if (playersTeam != null && playersTeam.isSpawn()) {
+            if (playersTeam == null || playersTeam.isSpawn()) {
                 //noinspection DataFlowIssue
                 ServerLevel overworld = server.overworld();
                 BlockPos worldSpawn = overworld.getSharedSpawnPos();
