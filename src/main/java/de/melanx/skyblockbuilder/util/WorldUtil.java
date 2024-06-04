@@ -6,10 +6,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
-import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
-import de.melanx.skyblockbuilder.config.common.SpawnConfig;
-import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.common.*;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
@@ -39,6 +37,18 @@ public class WorldUtil {
 
     public static void teleportToIsland(ServerPlayer player, Team team) {
         MinecraftServer server = player.getServer();
+
+        if (WorldConfig.leaveToOverworld && team.isSpawn()) {
+            Team playersTeam = SkyblockSavedData.get(player.serverLevel()).getTeamFromPlayer(player);
+            if (playersTeam != null && playersTeam.isSpawn()) {
+                //noinspection DataFlowIssue
+                ServerLevel overworld = server.overworld();
+                BlockPos worldSpawn = overworld.getSharedSpawnPos();
+                player.teleportTo(overworld, worldSpawn.getX(), worldSpawn.getY(), worldSpawn.getZ(), 0, 0);
+                return;
+            }
+        }
+
         //noinspection ConstantConditions
         ServerLevel level = getConfiguredLevel(server);
 

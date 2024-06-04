@@ -31,7 +31,7 @@ import java.util.Optional;
 
 public class SkyblockPreset extends WorldPreset {
 
-    // Must be lazy as we can't access the full registry while seserialising.
+    // Must be lazy as we can't access the full registry while deserializing.
     private final LazyValue<WorldPreset> actualPreset;
     private final HolderLookup.RegistryLookup<Biome> biomes;
 

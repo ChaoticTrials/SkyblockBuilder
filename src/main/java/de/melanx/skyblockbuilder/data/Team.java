@@ -83,8 +83,7 @@ public class Team {
 
     public void setName(String name) {
         this.name = name;
-        this.lastChanged = System.currentTimeMillis();
-        this.data.setDirty();
+        this.updateLastChanged();
     }
 
     public IslandPos getIsland() {
@@ -93,8 +92,7 @@ public class Team {
 
     public void setIsland(IslandPos island) {
         this.island = island;
-        this.lastChanged = System.currentTimeMillis();
-        this.data.setDirty();
+        this.updateLastChanged();
     }
 
     public Set<UUID> getPlayers() {
@@ -111,8 +109,7 @@ public class Team {
             }
         }
         this.players.addAll(players);
-        this.lastChanged = System.currentTimeMillis();
-        this.data.setDirty();
+        this.updateLastChanged();
     }
 
     public Set<TemplatesConfig.Spawn> getPossibleSpawns() {
@@ -128,14 +125,12 @@ public class Team {
         this.defaultPossibleSpawns.clear();
         this.possibleSpawns.addAll(spawns);
         this.defaultPossibleSpawns.addAll(spawns);
-        this.lastChanged = System.currentTimeMillis();
-        this.data.setDirty();
+        this.updateLastChanged();
     }
 
     public void addPossibleSpawn(TemplatesConfig.Spawn spawn) {
         this.possibleSpawns.add(spawn);
-        this.lastChanged = System.currentTimeMillis();
-        this.data.setDirty();
+        this.updateLastChanged();
     }
 
     public void addPossibleSpawn(BlockPos pos, WorldUtil.Directions direction) {
@@ -150,8 +145,7 @@ public class Team {
         for (TemplatesConfig.Spawn possibleSpawn : this.possibleSpawns) {
             if (possibleSpawn.pos().equals(pos)) {
                 boolean remove = this.possibleSpawns.remove(possibleSpawn);
-                this.lastChanged = System.currentTimeMillis();
-                this.data.setDirty();
+                this.updateLastChanged();
 
                 return remove;
             }
@@ -166,16 +160,14 @@ public class Team {
 
     public boolean toggleAllowVisits() {
         this.allowVisits = !this.allowVisits;
-        this.lastChanged = System.currentTimeMillis();
-        this.data.setDirty();
+        this.updateLastChanged();
         return this.allowVisits;
     }
 
     public void setAllowVisit(boolean enabled) {
         if (this.allowVisits != enabled) {
             this.allowVisits = enabled;
-            this.lastChanged = System.currentTimeMillis();
-            this.data.setDirty();
+            this.updateLastChanged();
         }
     }
 
@@ -189,9 +181,8 @@ public class Team {
             if (!this.isSpawn()) {
                 this.data.getSpawn().removePlayer(player);
             }
-            this.lastChanged = System.currentTimeMillis();
             this.data.getOrCreateMetaInfo(player).setTeamId(this.teamId);
-            this.data.setDirty();
+            this.updateLastChanged();
         }
         return added;
     }
@@ -210,8 +201,7 @@ public class Team {
                     this.data.getOrCreateMetaInfo(id).setTeamId(this.teamId);
                 }
             }
-            this.lastChanged = System.currentTimeMillis();
-            this.data.setDirty();
+            this.updateLastChanged();
         }
 
         return added;
@@ -247,8 +237,7 @@ public class Team {
                 this.data.getOrCreateMetaInfo(id).addPreviousTeamId(this.teamId);
             }
         }
-        this.lastChanged = System.currentTimeMillis();
-        this.data.setDirty();
+        this.updateLastChanged();
     }
 
     public void removeAllPlayers() {
@@ -273,16 +262,14 @@ public class Team {
 
     public boolean toggleAllowJoinRequest() {
         this.allowJoinRequests = !this.allowJoinRequests;
-        this.lastChanged = System.currentTimeMillis();
-        this.data.setDirty();
+        this.updateLastChanged();
         return this.allowJoinRequests;
     }
 
     public void setAllowJoinRequest(boolean enabled) {
         if (this.allowJoinRequests != enabled) {
             this.allowJoinRequests = enabled;
-            this.lastChanged = System.currentTimeMillis();
-            this.data.setDirty();
+            this.updateLastChanged();
         }
     }
 

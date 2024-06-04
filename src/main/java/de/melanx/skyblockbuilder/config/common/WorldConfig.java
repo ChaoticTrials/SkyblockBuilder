@@ -51,4 +51,7 @@ public class WorldConfig {
 
     @Config("Prevent scheduled ticks after generating the island")
     public static boolean preventScheduledTicks = true;
+
+    @Config("If a player is leaving a team, it will teleported to overworld spawn instead of spawn island.")
+    public static boolean leaveToOverworld = false;
 }
