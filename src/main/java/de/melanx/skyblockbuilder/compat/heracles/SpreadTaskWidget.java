@@ -71,6 +71,10 @@ public class SpreadTaskWidget implements DisplayWidget {
 
     @Override
     public int getHeight(int width) {
+        if (this.team == null || this.team.getPlacedSpreads().isEmpty() || this.task.predicate() == SpreadPredicate.ALWAYS_TRUE) {
+            return 42;
+        }
+
         return (this.task.predicate().getSpreads().size() * (Minecraft.getInstance().font.lineHeight + 1)) + 42;
     }
 }
