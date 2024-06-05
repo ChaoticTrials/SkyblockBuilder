@@ -154,5 +154,7 @@
   "setting.skyblockbuilder.spread_location.spread": "Ausbreitungsnamen",
   "setting.skyblockbuilder.spread_location.no_valid_spreads": "Dein Team hat keine der erforderlichen Ausbreitungen.",
   "setting.skyblockbuilder.spread_location.no_spreads_defined": "Es ist keine Ausbreitung definiert.",
-  "setting.skyblockbuilder.spread_location.visit_spreads": "Besuche eine dieser Ausbreitungen:"
+  "setting.skyblockbuilder.spread_location.visit_spreads": "Besuche eine dieser Ausbreitungen:",
+  "task.skyblockbuilder.spread_location.title.singular": "Finde Ausbreitung",
+  "task.skyblockbuilder.spread_location.title.plural": "Finde %s Ausbreitungen"
 }
