@@ -119,7 +119,7 @@ public class SkyPaths {
         Stream<Holder.Reference<ConfiguredFeature<?, ?>>> stream = server.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).holders();
 
         //noinspection DuplicatedCode
-        stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
+        stream.sorted(Comparator.comparing(holder -> holder.key().location().toString())).forEach(holder -> {
             try {
                 w.write(holder.key().location() + "\n");
             } catch (IOException e) {
@@ -135,7 +135,7 @@ public class SkyPaths {
         Stream<Holder.Reference<Structure>> stream = server.registryAccess().registryOrThrow(Registries.STRUCTURE).holders();
 
         //noinspection DuplicatedCode
-        stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
+        stream.sorted(Comparator.comparing(holder -> holder.key().location().toString())).forEach(holder -> {
             try {
                 w.write(holder.key().location() + "\n");
             } catch (IOException e) {
@@ -151,7 +151,7 @@ public class SkyPaths {
         Stream<Holder.Reference<Biome>> stream = server.registryAccess().registryOrThrow(Registries.BIOME).holders();
 
         //noinspection DuplicatedCode
-        stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
+        stream.sorted(Comparator.comparing(holder -> holder.key().location().toString())).forEach(holder -> {
             try {
                 w.write(holder.key().location() + "\n");
             } catch (IOException e) {
@@ -167,7 +167,7 @@ public class SkyPaths {
         Stream<Holder.Reference<ConfiguredWorldCarver<?>>> stream = server.registryAccess().registryOrThrow(Registries.CONFIGURED_CARVER).holders();
 
         //noinspection DuplicatedCode
-        stream.sorted(Comparator.comparing(Holder.Reference::key)).forEach(holder -> {
+        stream.sorted(Comparator.comparing(holder -> holder.key().location().toString())).forEach(holder -> {
             try {
                 w.write(holder.key().location() + "\n");
             } catch (IOException e) {
