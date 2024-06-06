@@ -22,6 +22,7 @@
   "skyblockbuilder.command.error.overwrite_config": "Fehlgeschlagen, folgende Konfigurationsdatei zu überschreiben: %s",
   "skyblockbuilder.command.error.team_not_exist": "Dieses Team existiert nicht!",
   "skyblockbuilder.command.error.spread_not_exist": "Diese Ausbreitung existiert nicht (für dieses Team)!",
+  "skyblockbuilder.command.error.no_spreads": "Das Team hat keine Ausbreitung.",
   "skyblockbuilder.command.error.team_already_exist": "Das Team %s existiert bereits! Bitte wähle einen anderen Namen!",
   "skyblockbuilder.command.error.user_has_team": "Du bist bereits in einem Team!",
   "skyblockbuilder.command.error.user_has_no_team": "Bu bist derzeit in keinem Team!",
