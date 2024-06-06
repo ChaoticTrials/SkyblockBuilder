@@ -80,7 +80,9 @@ public final class SkyblockBuilder extends ModXRegistration {
 
     @Override
     protected void clientSetup(FMLClientSetupEvent event) {
-        // NO-OP
+        if (ModList.get().isLoaded(HeraclesCompat.MODID)) {
+            HeraclesCompat.registerHeraclesClient();
+        }
     }
 
     public static SkyblockBuilder getInstance() {
