@@ -314,7 +314,7 @@ public class Team {
     }
 
     public Set<PlacedSpread> getPlacedSpreads(String spreadName) {
-        return this.placedSpreads.get(spreadName);
+        return this.placedSpreads.containsKey(spreadName) ? this.placedSpreads.get(spreadName) : Set.of();
     }
 
     public Set<String> getAllSpreadNames() {
