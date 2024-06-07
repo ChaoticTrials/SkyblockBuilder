@@ -8,7 +8,6 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.template.NetherPortalTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
@@ -51,7 +50,7 @@ public class CoreUtil {
 
     public static Optional<BlockUtil.FoundRectangle> getExitPortal(ServerPlayer player, ServerLevel destination, BlockPos findFrom, boolean isToNether, WorldBorder worldBorder) {
         Direction.Axis portalAxis = player.level().getBlockState(player.portalEntrancePos).getOptionalValue(NetherPortalBlock.AXIS).orElse(Direction.Axis.X);
-        if (!isToNether || DimensionsConfig.Nether.netherPortalStructure.isEmpty()) { // handle vanilla logic
+        if (!isToNether || TemplateLoader.getNetherPortalTemplate() == null) { // handle vanilla logic
             Optional<BlockUtil.FoundRectangle> portal = destination.getPortalForcer().createPortal(findFrom, portalAxis);
             if (portal.isEmpty()) {
                 SkyblockBuilder.getLogger().error("Unable to create a portal, likely target out of worldborder");
@@ -63,7 +62,7 @@ public class CoreUtil {
         Direction dir = Direction.get(Direction.AxisDirection.POSITIVE, portalAxis);
         Rotation rotation = dir == Direction.SOUTH ? Rotation.CLOCKWISE_90 : Rotation.NONE;
 
-        NetherPortalTemplate netherPortalTemplate = DimensionsConfig.Nether.netherPortalStructure.get();
+        NetherPortalTemplate netherPortalTemplate = TemplateLoader.getNetherPortalTemplate();
         BlockPos.MutableBlockPos startPos = findFrom.offset(netherPortalTemplate.getPortalOffset().rotate(rotation)).mutable();
 
         BlockPos.MutableBlockPos topPos = startPos.immutable().above(netherPortalTemplate.getStructure().size.getY()).mutable();

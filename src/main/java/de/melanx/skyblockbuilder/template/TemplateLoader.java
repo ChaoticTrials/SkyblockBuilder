@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.template;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -16,11 +17,13 @@ public class TemplateLoader {
     private static final List<String> TEMPLATE_NAMES = new ArrayList<>();
     private static final Map<String, ConfiguredTemplate> TEMPLATE_MAP = new HashMap<>();
     private static ConfiguredTemplate TEMPLATE;
+    private static NetherPortalTemplate NETHER_PORTAL;
 
     public static void updateTemplates() {
         try {
             TEMPLATE_NAMES.clear();
             TEMPLATE_MAP.clear();
+            NETHER_PORTAL = null;
             SkyPaths.copyTemplateFile();
             Set<String> takenNames = new HashSet<>();
 
@@ -61,6 +64,8 @@ public class TemplateLoader {
             } else {
                 TEMPLATE = TemplateLoader.getConfiguredTemplate(TEMPLATE.getName());
             }
+
+            DimensionsConfig.Nether.netherPortalStructure.ifPresent(filePath -> NETHER_PORTAL = new NetherPortalTemplate(filePath));
         } catch (IOException e) {
             throw new RuntimeException("Cannot load templates.", e);
         }
@@ -106,6 +111,10 @@ public class TemplateLoader {
 
     public static ConfiguredTemplate getConfiguredTemplate() {
         return TEMPLATE;
+    }
+
+    public static NetherPortalTemplate getNetherPortalTemplate() {
+        return NETHER_PORTAL;
     }
 
     public static Set<TemplatesConfig.Spawn> getCurrentSpawns() {
