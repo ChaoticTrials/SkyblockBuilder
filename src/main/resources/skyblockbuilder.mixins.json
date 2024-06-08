@@ -4,7 +4,9 @@
   "refmap": "skyblockbuilder.refmap.json",
   "package": "de.melanx.skyblockbuilder.mixin",
   "minVersion": "0.8",
-  "client": [],
+  "client": [
+    "LivingEntityRendererMixin"
+  ],
   "server": [],
   "mixins": [
     "PackRepositoryMixin"

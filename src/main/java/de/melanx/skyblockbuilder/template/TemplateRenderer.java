@@ -13,10 +13,14 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -43,6 +47,7 @@ public class TemplateRenderer {
     private final float maxY;
     private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
     private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
+    private final transient Set<Entity> erroredEntities = Collections.newSetFromMap(new WeakHashMap<>());
     private int index = 0;
 
     public TemplateRenderer(StructureTemplate template, float maxSize) {
@@ -111,6 +116,7 @@ public class TemplateRenderer {
         MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
         this.doWorldRenderPass(guiGraphics, template, buffers);
         this.doTileEntityRenderPass(guiGraphics, template, buffers);
+        this.doEntityRenderPass(guiGraphics, template, buffers);
 
         buffers.endBatch();
         guiGraphics.pose().popPose();
@@ -144,36 +150,63 @@ public class TemplateRenderer {
     }
 
     private void doTileEntityRenderPass(GuiGraphics guiGraphics, StructureTemplate template, MultiBufferSource buffers) {
-        for (StructureTemplate.Palette palette : template.palettes) {
-            for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
-                BlockPos pos = blockInfo.pos();
-                BlockState state = blockInfo.state();
+        StructureTemplate.Palette palette = template.palettes.get(this.index);
+        for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
+            BlockPos pos = blockInfo.pos();
+            BlockState state = blockInfo.state();
 
-                BlockEntity te = null;
-                if (state.getBlock() instanceof EntityBlock) {
-                    te = this.teCache.computeIfAbsent(pos.immutable(), p -> ((EntityBlock) state.getBlock()).newBlockEntity(pos, state));
+            BlockEntity te = null;
+            if (state.getBlock() instanceof EntityBlock) {
+                te = this.teCache.computeIfAbsent(pos.immutable(), p -> ((EntityBlock) state.getBlock()).newBlockEntity(pos, state));
+            }
+
+            if (te != null && !this.erroredTiles.contains(te)) {
+                te.setLevel(this.clientLevel);
+
+                // fake cached state in case the renderer checks it as we don't want to query the actual world
+                //noinspection deprecation
+                te.setBlockState(state);
+
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(pos.getX(), pos.getY(), pos.getZ());
+                try {
+                    BlockEntityRenderer<BlockEntity> renderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(te);
+                    if (renderer != null) {
+                        renderer.render(te, 0, guiGraphics.pose(), buffers, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY);
+                    }
+                } catch (Exception e) {
+                    this.erroredTiles.add(te);
+                    SkyblockBuilder.getLogger().error("An exception occurred rendering tile entity", e);
+                } finally {
+                    guiGraphics.pose().popPose();
+                }
+            }
+        }
+    }
+
+    private void doEntityRenderPass(GuiGraphics guiGraphics, StructureTemplate template, MultiBufferSource buffers) {
+        for (StructureTemplate.StructureEntityInfo entityInfo : template.entityInfoList) {
+            Optional<Entity> maybe = EntityType.create(entityInfo.nbt, this.clientLevel);
+            if (maybe.isPresent()) {
+                Vec3 pos = entityInfo.pos;
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(pos.x(), pos.y(), pos.z());
+
+                Entity entity = maybe.get();
+                if (this.erroredEntities.contains(entity)) {
+                    continue;
                 }
 
-                if (te != null && !this.erroredTiles.contains(te)) {
-                    te.setLevel(this.clientLevel);
-
-                    // fake cached state in case the renderer checks it as we don't want to query the actual world
-                    //noinspection deprecation
-                    te.setBlockState(state);
-
-                    guiGraphics.pose().pushPose();
-                    guiGraphics.pose().translate(pos.getX(), pos.getY(), pos.getZ());
-                    try {
-                        BlockEntityRenderer<BlockEntity> renderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(te);
-                        if (renderer != null) {
-                            renderer.render(te, 0, guiGraphics.pose(), buffers, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY);
-                        }
-                    } catch (Exception e) {
-                        this.erroredTiles.add(te);
-                        SkyblockBuilder.getLogger().error("An exception occurred rendering tile entity", e);
-                    } finally {
-                        guiGraphics.pose().popPose();
-                    }
+                try {
+                    EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+                    entityRenderDispatcher.prepare(this.clientLevel, Minecraft.getInstance().gameRenderer.getMainCamera(), entity);
+                    EntityRenderer<? super Entity> renderer = entityRenderDispatcher.getRenderer(entity);
+                    renderer.render(entity, entity.getYRot(), 0, guiGraphics.pose(), buffers, LightTexture.pack(15, 15));
+                } catch (Exception e) {
+                    this.erroredEntities.add(entity);
+                    SkyblockBuilder.getLogger().error("An exception occurred rendering entity", e);
+                } finally {
+                    guiGraphics.pose().popPose();
                 }
             }
         }
