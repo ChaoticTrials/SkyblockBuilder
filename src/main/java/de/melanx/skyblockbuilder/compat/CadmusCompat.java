@@ -49,7 +49,7 @@ public class CadmusCompat {
         //noinspection UnstableApiUsage
         AdminClaimHandler.create(level.getServer(), id, new HashMap<>());
         //noinspection UnstableApiUsage
-        AdminClaimHandler.setFlag(level.getServer(), id, "display-name", new ComponentFlag(Component.literal("SkyblockBuilder Spawn")));
+        AdminClaimHandler.setFlag(level.getServer(), id, "display-name", new ComponentFlag(CadmusConfig.displayName));
 
         ChunkPos pos = level.getChunk(spawnTeam.getIsland().getCenter()).getPos();
         for (int xOffset = -SpawnConfig.spawnProtectionRadius; xOffset <= SpawnConfig.spawnProtectionRadius; xOffset++) {
