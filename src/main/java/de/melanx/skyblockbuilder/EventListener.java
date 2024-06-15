@@ -13,6 +13,7 @@ import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.GenerateCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
+import de.melanx.skyblockbuilder.compat.CadmusCompat;
 import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.config.common.CustomizationConfig;
 import de.melanx.skyblockbuilder.config.common.InventoryConfig;
@@ -59,6 +60,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.moddingx.libx.event.ConfigLoadedEvent;
 import org.moddingx.libx.render.RenderHelperLevel;
@@ -106,6 +108,10 @@ public class EventListener {
                 .then(TemplatesToSnbtCommand.register())
                 .then(VisitCommand.register())
         );
+
+        if (ModList.get().isLoaded(CadmusCompat.MODID)) {
+            event.getDispatcher().register(CadmusCompat.spawnProtectionCommand());
+        }
     }
 
     @SubscribeEvent

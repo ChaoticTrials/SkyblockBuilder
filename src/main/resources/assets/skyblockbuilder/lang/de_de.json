@@ -159,5 +159,6 @@
   "setting.skyblockbuilder.spread_location.visit_spreads": "Besuche eine dieser Ausbreitungen:",
   "task.skyblockbuilder.spread_location.title.singular": "Finde Ausbreitung",
   "task.skyblockbuilder.spread_location.title.plural": "Finde %s Ausbreitungen",
-  "heracles.skyblockbuilder.reset_quest_progress": "Questfortschritt wurde zurückgesetzt."
+  "heracles.skyblockbuilder.reset_quest_progress": "Questfortschritt wurde zurückgesetzt.",
+  "cadmus.skyblockbuilder.claim_spawn": "Spawnchunks erfolgreich geclaimt."
 }
