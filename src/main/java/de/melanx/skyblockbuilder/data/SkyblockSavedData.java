@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.data;
 import com.google.common.collect.*;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
+import de.melanx.skyblockbuilder.compat.CadmusCompat;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
@@ -30,6 +31,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraftforge.fml.ModList;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -81,6 +83,10 @@ public class SkyblockSavedData extends SavedData {
         Team team = this.createTeam("Spawn", TemplatesConfig.spawn.flatMap(templateInfo -> Optional.of(new ConfiguredTemplate(templateInfo))).orElse(TemplateData.get(this.level).getConfiguredTemplate()));
         //noinspection ConstantConditions
         team.addPlayer(Util.NIL_UUID);
+
+        if (ModList.get().isLoaded(CadmusCompat.MODID)) {
+            CadmusCompat.protectSpawn(this.level, team);
+        }
 
         this.setDirty();
         return team;
