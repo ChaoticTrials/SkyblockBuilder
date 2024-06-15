@@ -158,5 +158,6 @@
   "setting.skyblockbuilder.spread_location.no_spreads_defined": "There is no spread defined.",
   "setting.skyblockbuilder.spread_location.visit_spreads": "Visit any of these spreads:",
   "task.skyblockbuilder.spread_location.title.singular": "Find Spread",
-  "task.skyblockbuilder.spread_location.title.plural": "Find %s Spreads"
+  "task.skyblockbuilder.spread_location.title.plural": "Find %s Spreads",
+  "heracles.skyblockbuilder.reset_quest_progress": "Reset quest progression."
 }

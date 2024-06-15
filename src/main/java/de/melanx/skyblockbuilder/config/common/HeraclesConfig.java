@@ -9,4 +9,7 @@ public class HeraclesConfig {
 
     @Config("If a player has no team, or the team does not have any spread, should this complete the task without visiting required locations?")
     public static boolean skipNonExistingSpreads = true;
+
+    @Config("Reset quest progress for non-op players when leaving a team")
+    public static boolean resetQuestProgress = false;
 }

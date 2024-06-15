@@ -112,6 +112,7 @@
   "skyblockbuilder.command.success.spawn_removed": "Erfolgreich Spawnpunkt an x %s, y %s, z %s entfernt.",
   "skyblockbuilder.command.success.reset_spawns": "Erfolgreiche alle möglichen Spawnpunkte zurückgesetzt.",
   "skyblockbuilder.command.success.rename_team": "Team erfolgreich zu %s umbenannt.",
+  "skyblockbuilder.command.success.located_spread": "%s hier lokalisiert:",
   "skyblockbuilder.command.success.convert_template": "Konvertiert: %s zu %s.",
 
   "skyblockbuilder.command.warning.edit_spawn_spawns": "[WARNUNG] Du bearbeitest gerade die Spawn Insel!",
@@ -157,5 +158,6 @@
   "setting.skyblockbuilder.spread_location.no_spreads_defined": "Es ist keine Ausbreitung definiert.",
   "setting.skyblockbuilder.spread_location.visit_spreads": "Besuche eine dieser Ausbreitungen:",
   "task.skyblockbuilder.spread_location.title.singular": "Finde Ausbreitung",
-  "task.skyblockbuilder.spread_location.title.plural": "Finde %s Ausbreitungen"
+  "task.skyblockbuilder.spread_location.title.plural": "Finde %s Ausbreitungen",
+  "heracles.skyblockbuilder.reset_quest_progress": "Questfortschritt wurde zurückgesetzt."
 }
