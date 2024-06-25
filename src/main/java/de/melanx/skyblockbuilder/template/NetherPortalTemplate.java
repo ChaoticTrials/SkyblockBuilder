@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class NetherPortalTemplate {
-
+    // todo config for custom portal overworld -> nether || nether -> overworld
     private final String filePath;
     private final StructureTemplate structure = new StructureTemplate();
     private final BlockPos portalOffset;

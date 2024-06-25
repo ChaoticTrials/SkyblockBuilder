@@ -5,21 +5,27 @@ import java.util.Random;
 public class NameGenerator {
 
     private static final String[] random1 = new String[]{
-            "Del", "Mel", "Nep", "Yog", "Mal", "Fin", "Kat", "Cas", "Kal", "Ag", "Nik", "Tro", "Keg",
-            "Mo", "Pro", "Par", "Sir", "Sah", "Kak", "Dea", "Sta", "Kaz", "Cly", "Ska", "Pal", "Tig", "Mar",
-            "Lau", "Noe", "Nel", "Kal"
+            "Lum", "Zar", "Thal", "Vex", "Ori", "Sol", "Drak", "Aer", "Gor", "Xan", "Yar", "Bel", "Quin",
+            "Nym", "Ryn", "Fay", "Zyn", "Kor", "Lir", "Tyn", "Jor", "Vyr", "Gal", "Eld", "Myr", "Ven", "Kai",
+            "Zul", "Mir", "Thar", "Tel", "Gar", "Hal", "Kor", "Fin", "Dar", "Nik", "Tar", "Pol", "Gre", "Ket",
+            "Ard", "Sar", "Mer", "Lun", "Fel", "Vor", "Xyl", "Jal", "Pyr", "Tav", "Nor", "Kyn", "Des", "Rol",
+            "Vin", "Wyn", "Mal", "Sor", "Tyr", "Dan"
     };
 
     private static final String[] random2 = new String[]{
-            "ran", "ing", "tor", "aga", "hup", "bor", "tat", "ben", "fin", "sola", "salo", "sin", "ava", "ysa",
-            "mel", "craf", "snap", "rod", "app", "kala", "kelo", "zerom", "zoro", "tiri", "var", "pero", "melo",
-            "ra", "ppi", "ebe", "aen"
+            "vyn", "dar", "lix", "nor", "rah", "syl", "ron", "fyr", "mir", "zan", "tor", "lyr", "dor", "ven",
+            "kal", "ryn", "zor", "vak", "nir", "fin", "sal", "tir", "rek", "vas", "mir", "zon", "kil", "mar",
+            "las", "nim", "dur", "lar", "ral", "vos", "kin", "tar", "ris", "vin", "dal", "kor", "tel", "zan",
+            "mel", "sor", "val", "ran", "tin", "mor", "lyn", "ver", "ras", "nol", "vak", "jir", "tol", "ran",
+            "yor", "tas", "vim", "wer", "kyl", "zin"
     };
 
     private static final String[] random3 = new String[]{
-            "cod", "ack", "oid", "lan", "ance", "por", "rec", "jus", "wol", "syn", "bot", "for", "kirim", "goa",
-            "grimm", "law", "worga", "ridan", "weeze", "bas", "rev", "kurt", "make", "poke", "rore", "stri", "kan",
-            "der", "chse", "rit", "da"
+            "dus", "ren", "lyn", "thos", "mir", "van", "thar", "los", "ris", "das", "wor", "lin", "far", "mel",
+            "jor", "vin", "sol", "gar", "tur", "lis", "von", "zar", "ker", "wyn", "rod", "jax", "tir", "val",
+            "rex", "nor", "xis", "jar", "dan", "rul", "tar", "kon", "gar", "lyn", "dor", "mak", "fen", "sol",
+            "rav", "kol", "tak", "zar", "lek", "mon", "zil", "vas", "tum", "vor", "nis", "wen", "tar", "jul",
+            "gor", "lin", "kos", "zar", "ron", "mek"
     };
 
     public static String randomName(Random rand) {

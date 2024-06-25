@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.template;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
@@ -105,20 +106,28 @@ public class ConfiguredTemplate {
             }
             BlockPos offsetPos = pos.offset(offset);
             spread.getTemplate().placeInWorld(serverLevel, offsetPos, offsetPos, settings, random, flags);
-            ConfiguredTemplate.clearBlockTicks(blockTicks, offsetPos, spread.getTemplate());
+            ConfiguredTemplate.clearBlockTicks(serverLevel, blockTicks, offsetPos, spread.getTemplate());
             if (team != null) {
                 team.addSpread(spread.getFileNameWithoutExtension(), offsetPos, new BlockPos(spread.template.getSize()));
             }
         }
 
         this.template.placeInWorld(serverLevel, pos, pos, settings, random, flags);
-        ConfiguredTemplate.clearBlockTicks(blockTicks, pos, this.template);
+        ConfiguredTemplate.clearBlockTicks(serverLevel, blockTicks, pos, this.template);
     }
 
-    private static void clearBlockTicks(LevelTicks<Block> blockTicks, BlockPos pos, StructureTemplate template) {
-        if (WorldConfig.preventScheduledTicks) {
-            blockTicks.clearArea(BoundingBox.fromCorners(pos, pos.offset(template.getSize())));
+    private static void clearBlockTicks(ServerLevel level, LevelTicks<Block> blockTicks, BlockPos startPos, StructureTemplate template) {
+        if (!WorldConfig.preventScheduledTicks) {
+            return;
         }
+
+        BoundingBox box = BoundingBox.fromCorners(startPos, startPos.offset(template.getSize()));
+        BlockPos.betweenClosedStream(box).forEach(pos -> {
+            if (level.getBlockState(pos).is(ModBlockTags.PREVENT_SCHEDULED_TICK)) {
+                BoundingBox oneBlockBox = BoundingBox.fromCorners(pos, pos);
+                blockTicks.clearArea(oneBlockBox);
+            }
+        });
     }
 
     public StructureTemplate getTemplate() {
