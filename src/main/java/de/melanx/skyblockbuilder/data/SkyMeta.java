@@ -86,10 +86,12 @@ public class SkyMeta {
         }
     }
 
+    // todo 1.21 make enum for common method, and specific methods which set the enum by itself
     public long getLastHomeTeleport() {
         return this.lastHomeTeleport;
     }
 
+    // todo 1.21 make enum for common method, and specific methods which set the enum by itself
     public void setLastHomeTeleport(long gameTime) {
         this.lastHomeTeleport = gameTime;
         if (this.data != null) {

@@ -17,7 +17,7 @@ public class SpawnCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Teleports the player to spawn
-        return Commands.literal("spawn").requires(source -> PermissionsConfig.Teleports.spawn || source.hasPermission(2))
+        return Commands.literal("spawn").requires(source -> PermissionsConfig.Teleports.spawn || source.hasPermission(2)) // todo 1.21 check on execution
                 .executes(context -> spawn(context.getSource()));
     }
 
@@ -35,6 +35,7 @@ public class SpawnCommand {
             return 0;
         }
 
+        // todo 1.21 simplify this "player.hasPermission"
         if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
             return 0;
