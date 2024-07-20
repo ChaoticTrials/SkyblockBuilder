@@ -231,7 +231,7 @@ public class SkyblockSavedData extends SavedData {
         }
 
         ServerLevel level = team.getLevel();
-        if (level != null && !this.metaInfo.get(player).getPreviousTeamIds().contains(team.getId())) {
+        if (level != null && !this.getOrCreateMetaInfo(player).getPreviousTeamIds().contains(team.getId())) {
             ServerPlayer onlinePlayer = level.getServer().getPlayerList().getPlayer(player);
             if (onlinePlayer != null && (TemplatesConfig.spawn.isEmpty() || !team.isSpawn())) {
                 RandomUtility.setStartInventory(onlinePlayer);
@@ -389,7 +389,7 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public void addInvite(Team team, Player invitor, UUID id) {
-        SkyMeta meta = this.metaInfo.get(id);
+        SkyMeta meta = this.getOrCreateMetaInfo(id);
 
         if (!meta.getInvites().contains(team.getId())) {
             meta.addInvite(team.getId());
