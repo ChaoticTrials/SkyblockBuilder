@@ -38,6 +38,11 @@ public class TemplatesConfig {
             "}"})
     public static Map<String, List<TemplateInfo.SpreadInfo>> spreads = Map.of("default", List.of());
 
+    @Config({"The default offset from 0, 0 to generate the islands",
+            "Can be used to generate them in the middle of .mca files",
+            "This applies on top of the \"offset\" defined in each template"})
+    public static int defaultOffset = WorldConfig.offset;
+
     @Config({"The template which will be used for spawn only",
             "Example: ",
             "{",

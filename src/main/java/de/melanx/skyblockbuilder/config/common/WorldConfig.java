@@ -46,7 +46,10 @@ public class WorldConfig {
     @IntRange(min = 64, max = 29999900)
     public static int islandDistance = 8192;
 
-    @Config({"The offset from 0, 0 to generate the islands", "Can be used to generate them in the middle of .mca files"})
+    @Config({"UNUSED, USE templates.json5 'defaultOffset' INSTEAD",
+            "",
+            "The offset from 0, 0 to generate the islands",
+            "Can be used to generate them in the middle of .mca files"})
     public static int offset = 0;
 
     @Config("Prevent scheduled ticks after generating the island")

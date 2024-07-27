@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.config.mapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.common.WorldConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
@@ -40,12 +40,12 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             desc = json.get("desc").getAsString();
         }
 
-        TemplateInfo.Offset offset = new TemplateInfo.Offset(WorldConfig.offset, 0, WorldConfig.offset);
+        TemplateInfo.Offset offset = new TemplateInfo.Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset);
         if (json.has("offset")) {
             JsonArray offsetArray = json.get("offset").getAsJsonArray();
-            offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt(), offsetArray.get(1).getAsInt(), offsetArray.get(2).getAsInt());
-        } else if (WorldConfig.offset != 0) {
-            offset = new TemplateInfo.Offset(WorldConfig.offset, 0, WorldConfig.offset);
+            offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt() + TemplatesConfig.defaultOffset, offsetArray.get(1).getAsInt(), offsetArray.get(2).getAsInt() + TemplatesConfig.defaultOffset);
+        } else if (TemplatesConfig.defaultOffset != 0) {
+            offset = new TemplateInfo.Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset);
         }
 
         String surroundingBlocks = "";
@@ -78,7 +78,7 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
         json.addProperty("file", templateInfo.file());
         json.addProperty("spawns", templateInfo.spawns());
 
-        if (templateInfo.offset().x() != WorldConfig.offset || templateInfo.offset().z() != WorldConfig.offset) {
+        if (templateInfo.offset().x() != TemplatesConfig.defaultOffset || templateInfo.offset().z() != TemplatesConfig.defaultOffset) {
             JsonArray offsetArray = new JsonArray();
             offsetArray.add(templateInfo.offset().x());
             offsetArray.add(templateInfo.offset().y());

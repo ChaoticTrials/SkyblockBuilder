@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.world;
 
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
@@ -43,7 +44,7 @@ public final class IslandPos {
     }
 
     public static IslandPos fromTag(CompoundTag tag) {
-        return new IslandPos(tag.getInt("IslandX"), tag.getInt("Height"), tag.getInt("IslandZ"), new TemplateInfo.Offset(tag.contains("OffsetX") ? tag.getInt("OffsetX") : WorldConfig.offset, tag.contains("OffsetY") ? tag.getInt("OffsetY") : 0, tag.contains("OffsetZ") ? tag.getInt("OffsetZ") : WorldConfig.offset));
+        return new IslandPos(tag.getInt("IslandX"), tag.getInt("Height"), tag.getInt("IslandZ"), new TemplateInfo.Offset(tag.contains("OffsetX") ? tag.getInt("OffsetX") : TemplatesConfig.defaultOffset, tag.contains("OffsetY") ? tag.getInt("OffsetY") : 0, tag.contains("OffsetZ") ? tag.getInt("OffsetZ") : TemplatesConfig.defaultOffset));
     }
 
     public CompoundTag toTag() {

@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.template;
 
-import de.melanx.skyblockbuilder.config.common.WorldConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -8,7 +8,7 @@ public record TemplateInfo(String name, String desc, String file, String spawns,
         String surroundingBlocks, String spreads, int surroundingMargin) {
 
     public TemplateInfo(String name, String file, String spawns) {
-        this(name, "", file, spawns, new Offset(WorldConfig.offset, 0, WorldConfig.offset), "default", "default", 0);
+        this(name, "", file, spawns, new Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset), "default", "default", 0);
     }
 
     public TemplateInfo(String name, String file, String spawns, Offset offset) {
