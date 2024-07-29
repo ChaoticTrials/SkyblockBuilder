@@ -160,5 +160,19 @@
   "task.skyblockbuilder.spread_location.title.singular": "Finde Ausbreitung",
   "task.skyblockbuilder.spread_location.title.plural": "Finde %s Ausbreitungen",
   "heracles.skyblockbuilder.reset_quest_progress": "Questfortschritt wurde zurückgesetzt.",
-  "cadmus.skyblockbuilder.claim_spawn": "Spawnchunks erfolgreich geclaimt."
+  "cadmus.skyblockbuilder.claim_spawn": "Spawnchunks erfolgreich geclaimt.",
+
+  "skyblockbuilder.screen.dump.title": "Skyblock Builder Abbild",
+  "skyblockbuilder.screen.dump.text.configs": "Konfigurationen",
+  "skyblockbuilder.screen.dump.text.templates": "Vorlagen und Ausbreitungen",
+  "skyblockbuilder.screen.dump.text.level_dat": "level.dat",
+  "skyblockbuilder.screen.dump.text.latest_log": "latest.log",
+  "skyblockbuilder.screen.dump.text.crash_report": "crash-<letzter>.txt",
+  "skyblockbuilder.screen.dump.text.data_file": "Skyblock Datendatei",
+  "skyblockbuilder.screen.dump.text.create_on_server": "Abbild auf dem Server erstellen",
+  "skyblockbuilder.screen.dump.button.create": "Abbild erstellen",
+  "skyblockbuilder.screen.dump.success": "Erfolgreich erstellt %s",
+  "skyblockbuilder.screen.dump.success.server": "auf dem Server",
+  "skyblockbuilder.screen.dump.create_issue": "Du kannst eine Problemmeldung hier erstellen:",
+  "skyblockbuilder.screen.dump.failure": "Sie haben keine Berechtigung, ein Abbild auf dem Server zu erstellen."
 }

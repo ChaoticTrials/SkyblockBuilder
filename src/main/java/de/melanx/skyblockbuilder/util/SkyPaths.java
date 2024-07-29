@@ -36,6 +36,7 @@ public class SkyPaths {
     public static final Path MOD_EXPORTS = SKYBLOCK_UTILS.resolve("exports");
     public static final Path CONVERT_INPUT = SKYBLOCK_UTILS.resolve("convert_input");
     public static final Path CONVERT_OUTPUT = SKYBLOCK_UTILS.resolve("convert_output");
+    public static final Path DUMPS = SKYBLOCK_UTILS.resolve("dumps");
     public static final Path TEMPLATES_DIR = MOD_CONFIG.resolve("templates");
     public static final Path SPREADS_DIR = TEMPLATES_DIR.resolve("spreads");
     public static final Path ICONS_DIR = TEMPLATES_DIR.resolve("icons");
@@ -59,6 +60,7 @@ public class SkyPaths {
             Files.createDirectories(MOD_EXPORTS);
             Files.createDirectories(CONVERT_INPUT);
             Files.createDirectories(CONVERT_OUTPUT);
+            Files.createDirectories(DUMPS);
             Files.createDirectories(TEMPLATES_DIR);
             Files.createDirectories(SPREADS_DIR);
             Files.createDirectories(ICONS_DIR);

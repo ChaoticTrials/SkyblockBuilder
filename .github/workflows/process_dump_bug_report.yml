@@ -1,0 +1,25 @@
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  lol:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for Dump File
+        id: check_link
+        run: |
+          issue_body=$(jq -r '.issue.body' < $GITHUB_EVENT_PATH)
+          if echo "$issue_body" | grep -q 'https://github\.com/[^/]+/files/[0-9]+/[0-9]{8}-[0-9]{4,6}\.zip'; then
+            echo "Dump file found."
+            echo "found=true" >> $GITHUB_ENV
+          else
+            echo "Dump file not found."
+            echo "found=false" >> $GITHUB_ENV
+          fi
+
+      - name: Add Label if Zip Link is Present
+        if: env.found == 'true'
+        run: |
+          gh api /repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels --field labels='["zip-file-link"]'

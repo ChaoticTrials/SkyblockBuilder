@@ -33,13 +33,6 @@ public record DeleteTagsMessage(ItemStack stack) {
         }
     }
 
-    public static void handle(DeleteTagsMessage msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-
-        });
-        ctx.get().setPacketHandled(true);
-    }
-
     public static class Serializer implements PacketSerializer<DeleteTagsMessage> {
 
         @Override

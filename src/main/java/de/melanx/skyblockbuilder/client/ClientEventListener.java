@@ -4,8 +4,10 @@ import com.mojang.blaze3d.platform.InputConstants;
 import de.melanx.skyblockbuilder.ModBlocks;
 import de.melanx.skyblockbuilder.ModItems;
 import de.melanx.skyblockbuilder.Registration;
+import de.melanx.skyblockbuilder.commands.OpenDumpScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +16,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RegisterPresetEditorsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -26,6 +29,7 @@ public class ClientEventListener {
 
     public ClientEventListener() {
         MinecraftForge.EVENT_BUS.addListener(this::onKeyInput);
+        MinecraftForge.EVENT_BUS.addListener(this::registerClientCommands);
     }
 
     @SubscribeEvent
@@ -39,6 +43,12 @@ public class ClientEventListener {
             event.accept(() -> ModItems.structureSaver);
             event.accept(() -> ModBlocks.spawnBlock);
         }
+    }
+
+    private void registerClientCommands(RegisterClientCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("skyblock")
+                .then(OpenDumpScreen.register())
+        );
     }
 
     private void onKeyInput(InputEvent.Key event) {

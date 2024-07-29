@@ -160,5 +160,19 @@
   "task.skyblockbuilder.spread_location.title.singular": "Find Spread",
   "task.skyblockbuilder.spread_location.title.plural": "Find %s Spreads",
   "heracles.skyblockbuilder.reset_quest_progress": "Reset quest progression.",
-  "cadmus.skyblockbuilder.claim_spawn": "Successfully claimed spawn chunks."
+  "cadmus.skyblockbuilder.claim_spawn": "Successfully claimed spawn chunks.",
+
+  "skyblockbuilder.screen.dump.title": "Skyblock Builder Dump",
+  "skyblockbuilder.screen.dump.text.configs": "Configs",
+  "skyblockbuilder.screen.dump.text.templates": "Templates and Spreads",
+  "skyblockbuilder.screen.dump.text.level_dat": "level.dat",
+  "skyblockbuilder.screen.dump.text.latest_log": "latest.log",
+  "skyblockbuilder.screen.dump.text.crash_report": "crash-<latest>.txt",
+  "skyblockbuilder.screen.dump.text.data_file": "Skyblock Data File",
+  "skyblockbuilder.screen.dump.text.create_on_server": "Create Dump on Server",
+  "skyblockbuilder.screen.dump.button.create": "Create Dump",
+  "skyblockbuilder.screen.dump.success": "Successfully created %s",
+  "skyblockbuilder.screen.dump.success.server": "on server",
+  "skyblockbuilder.screen.dump.create_issue": "You may open an issue here:",
+  "skyblockbuilder.screen.dump.failure": "You do not have permission to create a data dump on the server."
 }

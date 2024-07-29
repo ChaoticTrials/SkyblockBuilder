@@ -1,7 +1,7 @@
 modLoader="javafml"
 loaderVersion="[${fml},)"
 license="Apache License"
-issueTrackerURL="https://www.github.com/MelanX/SkyblockBuilder/issues/"
+issueTrackerURL="https://www.github.com/ChaoticTrials/SkyblockBuilder/issues/"
 
 [[mods]]
 modId="skyblockbuilder"

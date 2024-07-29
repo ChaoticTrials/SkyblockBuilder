@@ -1,4 +1,4 @@
-name: Bug Report (Manual Mode)
+name: Bug Report (Dump Mode)
 description: Report an issue with supported versions of Skyblock Builder
 labels: [ bug ]
 body:
@@ -7,40 +7,14 @@ body:
     attributes:
       label: Minecraft version
       options:
-        - 1.19.2
         - 1.20.1
     validations:
       required: true
-  - type: input
-    id: libx-version
+  - type: textarea
+    id: dump-file
     attributes:
-      label: LibX version
-      placeholder: eg. 1.18.2-3.2.0
-    validations:
-      required: true
-  - type: input
-    id: mod-version
-    attributes:
-      label: Skyblock Builder version
-      placeholder: eg. 1.18.2-3.3.0
-    validations:
-      required: true
-  - type: input
-    id: forge-version
-    attributes:
-      label: Forge version
-      placeholder: eg. 40.0.2
-    validations:
-      required: true
-  - type: input
-    id: log-file
-    attributes:
-      label: The latest.log file
-      description: |
-        Please use a paste site such as [gist](https://gist.github.com/) / [pastebin](https://pastebin.com/) / etc.
-        For more information, see https://git.io/mclogs
-    validations:
-      required: true
+      label: Dump File
+      placeholder: Please only put the dump file in here.
   - type: textarea
     id: description
     attributes:

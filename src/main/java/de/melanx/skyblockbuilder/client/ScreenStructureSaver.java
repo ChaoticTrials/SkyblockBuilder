@@ -11,7 +11,6 @@ import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
 
-public class ScreenStructureSaver extends Screen {
+public class ScreenStructureSaver extends BaseScreen {
 
     private static final ResourceLocation SCREEN_LOCATION = new ResourceLocation(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
     private static final Component SAVE_TO_CONFIG = Component.translatable("skyblockbuilder.item.structure_saver.save_to_config.tooltip");
@@ -34,11 +33,7 @@ public class ScreenStructureSaver extends Screen {
     private static final Component SNBT_DESC = Component.translatable("skyblockbuilder.item.structure_saver.nbt_to_snbt.desc");
     private static final Component NETHER_VALIDATION_DESC = Component.translatable("skyblockbuilder.item.structure_saver.nether_validation.desc");
 
-    private final int xSize;
-    private final int ySize;
     private final ItemStack stack;
-    private int relX;
-    private int relY;
     private EditBox name;
     private Checkbox ignoreAir;
     private Checkbox nbtToSnbt;
@@ -46,17 +41,14 @@ public class ScreenStructureSaver extends Screen {
     private Checkbox saveToConfig;
 
     public ScreenStructureSaver(ItemStack stack, Component title) {
-        super(title);
-        this.xSize = 174;
-        this.ySize = 142;
+        super(174, 142, title);
         this.stack = stack;
     }
 
     @Override
     protected void init() {
-        this.relX = (this.width - this.xSize) / 2;
-        this.relY = (this.height - this.ySize) / 2;
-        this.name = new EditBox(this.font, this.relX + 11, this.relY + 25, 125, 17, Component.translatable("skyblockbuilder.screen.widget.structure_name"));
+        super.init();
+        this.name = new EditBox(this.font, this.x(11), this.y(25), 125, 17, Component.translatable("skyblockbuilder.screen.widget.structure_name"));
         this.name.setMaxLength(Short.MAX_VALUE);
         this.name.setFocused(true);
         this.name.setValue(this.name.getValue());
@@ -64,27 +56,27 @@ public class ScreenStructureSaver extends Screen {
                     SkyblockBuilder.getNetwork().saveStructure(this.stack, this.name.getValue().isEmpty() ? "template" : this.name.getValue(), this.saveToConfig.selected(), this.ignoreAir.selected(), this.nbtToSnbt.selected(), this.netherValidation.selected());
                     this.onClose();
                 })
-                .pos(this.relX + 10, this.relY + 55)
+                .pos(this.x(10), this.y(55))
                 .size(60, 20)
                 .build());
         this.addRenderableWidget(Button.builder(Component.translatable("skyblockbuilder.screen.button.delete"), button -> {
                     SkyblockBuilder.getNetwork().deleteTags(this.stack);
                     this.onClose();
                 })
-                .pos(this.relX + 77, this.relY + 55)
+                .pos(this.x(77), this.y(55))
                 .size(60, 20)
                 .build());
         this.addRenderableWidget(Button.builder(Component.empty(), button -> {
                     ClientUtility.openPath(SkyPaths.MOD_EXPORTS);
                 })
-                .pos(this.relX + 144, this.relY + 23)
+                .pos(this.x(144), this.y(23))
                 .size(20, 20)
                 .tooltip(Tooltip.create(Component.translatable("skyblockbuilder.screen.button.open_folder.tooltip")))
                 .build());
-        this.saveToConfig = this.addRenderableWidget(new SizeableCheckbox(this.relX + 10, this.relY + 80, 10, false));
-        this.ignoreAir = this.addRenderableWidget(new SizeableCheckbox(this.relX + 10, this.relY + 95, 10, false));
-        this.nbtToSnbt = this.addRenderableWidget(new SizeableCheckbox(this.relX + 10, this.relY + 110, 10, false));
-        this.netherValidation = this.addRenderableWidget(new SizeableCheckbox(this.relX + 10, this.relY + 125, 10, false));
+        this.saveToConfig = this.addRenderableWidget(new SizeableCheckbox(this.x(10), this.y(80), 10, false));
+        this.ignoreAir = this.addRenderableWidget(new SizeableCheckbox(this.x(10), this.y(95), 10, false));
+        this.nbtToSnbt = this.addRenderableWidget(new SizeableCheckbox(this.x(10), this.y(110), 10, false));
+        this.netherValidation = this.addRenderableWidget(new SizeableCheckbox(this.x(10), this.y(125), 10, false));
     }
 
     @Override
@@ -93,14 +85,13 @@ public class ScreenStructureSaver extends Screen {
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderHelper.renderGuiBackground(guiGraphics, this.relX, this.relY, this.xSize, this.ySize);
-//        guiGraphics.blit(SCREEN_LOCATION, this.relX, this.relY, 0, 0, this.xSize, this.ySize);
+        RenderHelper.renderGuiBackground(guiGraphics, this.x(0), this.y(0), this.getXSize(), this.getYSize());
 
         this.name.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawString(this.font, this.title, this.relX + 10, this.relY + 8, Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, this.title, this.x(10), this.y(8), Color.DARK_GRAY.getRGB(), false);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.blit(SCREEN_LOCATION, this.relX + 146, this.relY + 25, 0, 0, 16, 16, 16, 16);
+        guiGraphics.blit(SCREEN_LOCATION, this.x(146), this.y(25), 0, 0, 16, 16, 16, 16);
 
         guiGraphics.pose().pushPose();
         float scale = 0.9f;

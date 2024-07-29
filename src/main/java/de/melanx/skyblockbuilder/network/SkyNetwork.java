@@ -35,6 +35,7 @@ public class SkyNetwork extends NetworkX {
     protected void registerPackets() {
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new SaveStructureMessage.Serializer(), () -> SaveStructureMessage.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new DeleteTagsMessage.Serializer(), () -> DeleteTagsMessage.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new CreateSkyblockDump.Serializer(), () -> CreateSkyblockDump.Handler::new);
 
         this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new SkyblockDataUpdateMessage.Serializer(), () -> SkyblockDataUpdateMessage.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new ProfilesUpdateMessage.Serializer(), () -> ProfilesUpdateMessage.Handler::new);
@@ -57,6 +58,10 @@ public class SkyNetwork extends NetworkX {
 
     public void deleteTags(ItemStack stack) {
         this.channel.sendToServer(new DeleteTagsMessage(stack));
+    }
+
+    public void createSkyblockDump(boolean includeConfigs, boolean includeTemplates, boolean includeLevelDat, boolean includeLog, boolean includeCrashReport, boolean includeSkyblockBuilderWorldData) {
+        this.channel.sendToServer(new CreateSkyblockDump(includeConfigs, includeTemplates, includeLevelDat, includeLog, includeCrashReport, includeSkyblockBuilderWorldData));
     }
 
     @Deprecated(forRemoval = true)
