@@ -1,3 +1,5 @@
+name: Check for dump file
+
 on:
   issues:
     types:
@@ -11,7 +13,7 @@ jobs:
         id: check_link
         run: |
           issue_body=$(jq -r '.issue.body' < $GITHUB_EVENT_PATH)
-          if echo "$issue_body" | grep -q 'https://github\.com/[^/]+/files/[0-9]+/[0-9]{8}-[0-9]{4,6}\.zip'; then
+          if echo "$issue_body" | grep -Pzo '(?m)https://github\.com/user-attachments/files/\d+/\d{8}-\d{6}\.zip'; then
             echo "Dump file found."
             echo "found=true" >> $GITHUB_ENV
           else
