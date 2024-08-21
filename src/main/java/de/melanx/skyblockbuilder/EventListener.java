@@ -282,7 +282,7 @@ public class EventListener {
             }
 
             if (PermissionsConfig.forceSkyblockCheck) {
-                SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled, no support for failures");
+                SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled");
             }
         }
     }

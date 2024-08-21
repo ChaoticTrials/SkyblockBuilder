@@ -74,7 +74,7 @@ public final class SkyblockBuilder extends ModXRegistration {
         SkyPaths.generateDefaultFiles(null);
 
         if (PermissionsConfig.forceSkyblockCheck) {
-            SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled, no support for failures");
+            SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled");
         }
     }
 
