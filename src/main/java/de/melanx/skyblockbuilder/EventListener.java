@@ -159,10 +159,10 @@ public class EventListener {
             data.addPlayerToTeam(spawn, player);
             try {
                 //noinspection OptionalGetWithoutIsPresent
-                WorldUtil.Directions direction = !spawn.getDefaultPossibleSpawns().isEmpty() ?
-                        spawn.getDefaultPossibleSpawns().stream().findFirst().get().direction() :
-                        spawn.getPossibleSpawns().stream().findFirst().get().direction();
-                ((ServerLevel) level).setDefaultSpawnPos(spawn.getIsland().getCenter(), direction.getYRot());
+                TemplatesConfig.Spawn spawnPos = !spawn.getDefaultPossibleSpawns().isEmpty() ?
+                        spawn.getDefaultPossibleSpawns().stream().findFirst().get() :
+                        spawn.getPossibleSpawns().stream().findFirst().get();
+                ((ServerLevel) level).setDefaultSpawnPos(spawnPos.pos(), spawnPos.direction().getYRot());
             } catch (NoSuchElementException e) {
                 throw new IllegalStateException("No possible spawn point set for spawn", e);
             }
