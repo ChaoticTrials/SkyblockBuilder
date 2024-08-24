@@ -124,8 +124,9 @@ public class RandomUtility {
         MinecraftServer server = level.getServer();
 
         net.minecraft.server.players.GameProfileCache profileCache = server.getProfileCache();
-        Set<GameProfile> profiles = Sets.newHashSet();
-        Set<UUID> handledIds = Sets.newHashSet(Util.NIL_UUID);
+        Set<GameProfile> profiles = Sets.newConcurrentHashSet();
+        Set<UUID> handledIds = Sets.newConcurrentHashSet();
+        handledIds.add(Util.NIL_UUID);
 
         // load the cache and look for all profiles
         //noinspection DataFlowIssue
@@ -135,13 +136,21 @@ public class RandomUtility {
             handledIds.add(profile.getId());
         });
 
+        int cachedProfilesAmount = profiles.size() - 1;
+        int usedCachedProfilesAmount = 0;
+        int uncachedProfilesAmount = 0;
+        int totalProfilesAmount = 0;
+
         // check if all the members were in the cache and add these tags if needed
         for (Team team : SkyblockSavedData.get(level).getTeams()) {
             for (UUID id : team.getPlayers()) {
+                totalProfilesAmount++;
                 if (handledIds.contains(id)) {
+                    usedCachedProfilesAmount++;
                     continue;
                 }
 
+                uncachedProfilesAmount++;
                 Optional<GameProfile> gameProfile = profileCache.get(id);
                 if (gameProfile.isPresent()) {
                     profiles.add(gameProfile.get());
@@ -158,6 +167,8 @@ public class RandomUtility {
                 }
             }
         }
+
+        SkyblockBuilder.getLogger().info("Cached profiles: {} ({} unused), uncached profiles: {}, total profiles: {}", cachedProfilesAmount, cachedProfilesAmount - usedCachedProfilesAmount, uncachedProfilesAmount, totalProfilesAmount);
 
         return profiles;
     }
