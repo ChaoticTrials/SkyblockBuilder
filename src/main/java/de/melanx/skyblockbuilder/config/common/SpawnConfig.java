@@ -4,6 +4,7 @@ import de.melanx.skyblockbuilder.SpawnProtectionEvents;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
@@ -17,7 +18,20 @@ import java.util.List;
 public class SpawnConfig {
 
     @Config("The entities which you can interact with within the spawn protection")
-    public static ResourceList interactionEntitiesInSpawnProtection = ResourceList.ALLOW_LIST;
+    public static ResourceList interactionEntitiesInSpawnProtection = new ResourceList(true, builder -> {
+        builder.simple(new ResourceLocation("corpse", "corpse"));
+    });
+
+    @Config("The blocks which you can interact with within the spawn protection")
+    public static ResourceList interactionBlocksInSpawnProtection = new ResourceList(true, builder -> {
+        builder.simple(new ResourceLocation("gravestone", "gravestone"));
+        builder.simple(new ResourceLocation("tombstone", "grave_simple"));
+    });
+
+    @Config("The items which you can interact with within the spawn protection")
+    public static ResourceList interactionItemsInSpawnProtection = new ResourceList(true, builder -> {
+        builder.simple(new ResourceLocation("tombstone", "grave_key"));
+    });
 
     @Config("The radius of chunks where to apply spawn protection. In this area, only op players can avoid this.")
     public static int spawnProtectionRadius = 0;

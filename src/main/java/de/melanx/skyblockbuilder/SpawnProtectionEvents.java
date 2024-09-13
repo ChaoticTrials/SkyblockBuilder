@@ -3,12 +3,15 @@ package de.melanx.skyblockbuilder;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
@@ -41,6 +44,12 @@ public class SpawnProtectionEvents {
 
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent event) {
+        Item mainHandItem = event.getEntity().getMainHandItem().getItem();
+        ResourceLocation itemKey = ForgeRegistries.ITEMS.getKey(mainHandItem);
+        if (SpawnConfig.interactionItemsInSpawnProtection.test(itemKey)) {
+            return;
+        }
+
         if (SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !event.getEntity().hasPermissions(2)) {
             if (event instanceof PlayerInteractEvent.EntityInteract entityInteract &&
                     (SpawnConfig.interactionEntitiesInSpawnProtection.test(ForgeRegistries.ENTITY_TYPES.getKey(entityInteract.getTarget().getType()))
@@ -49,7 +58,11 @@ public class SpawnProtectionEvents {
             }
 
             if (event.isCancelable() && !SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
-                event.setCanceled(true);
+                Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
+                ResourceLocation blockRegistryKey = ForgeRegistries.BLOCKS.getKey(block);
+                boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
+
+                event.setCanceled(!allowBlockInteraction);
             }
         }
     }
@@ -87,7 +100,11 @@ public class SpawnProtectionEvents {
         }
 
         if (SpawnProtectionEvents.isOnSpawn(event.getPlayer()) && !event.getPlayer().hasPermissions(2)) {
-            event.setCanceled(true);
+            Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
+            ResourceLocation blockRegistryKey = ForgeRegistries.BLOCKS.getKey(block);
+            boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
+
+            event.setCanceled(!allowBlockInteraction);
         }
     }
 
@@ -99,7 +116,11 @@ public class SpawnProtectionEvents {
 
         if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             if (!(event.getEntity() instanceof Player) || !event.getEntity().hasPermissions(2)) {
-                event.setCanceled(true);
+                Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
+                ResourceLocation blockRegistryKey = ForgeRegistries.BLOCKS.getKey(block);
+                boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
+
+                event.setCanceled(!allowBlockInteraction);
             }
         }
     }
