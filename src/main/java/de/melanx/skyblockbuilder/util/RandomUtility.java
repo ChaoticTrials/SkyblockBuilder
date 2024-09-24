@@ -155,7 +155,7 @@ public class RandomUtility {
                 if (gameProfile.isPresent()) {
                     profiles.add(gameProfile.get());
                 } else {
-                    GameProfile profile = server.getSessionService().fillProfileProperties(new GameProfile(id, null), true);
+                    GameProfile profile = server.getSessionService().fillProfileProperties(new GameProfile(id, null), level.getServer().enforceSecureProfile());
 
                     if (profile.getName() != null) {
                         profileCache.add(profile);
