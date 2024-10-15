@@ -35,6 +35,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.fml.ModList;
 import org.moddingx.libx.annotation.meta.RemoveIn;
 
@@ -150,12 +151,26 @@ public class RandomUtility {
                     continue;
                 }
 
+                if (UsernameCache.containsUUID(id)) {
+                    String lastKnownUsername = UsernameCache.getLastKnownUsername(id);
+                    profiles.add(new GameProfile(id, lastKnownUsername));
+                    continue;
+                }
+
                 uncachedProfilesAmount++;
                 Optional<GameProfile> gameProfile = profileCache.get(id);
                 if (gameProfile.isPresent()) {
                     profiles.add(gameProfile.get());
                 } else {
-                    GameProfile profile = server.getSessionService().fillProfileProperties(new GameProfile(id, null), level.getServer().enforceSecureProfile());
+                    GameProfile profile;
+                    GameProfile unnamedProfile = new GameProfile(id, null);
+                    boolean enforceProfileSecurity = CustomizationConfig.forceUnsecureProfileNames || level.getServer().enforceSecureProfile();
+                    try {
+                        profile = server.getSessionService().fillProfileProperties(unnamedProfile, enforceProfileSecurity);
+                    } catch (IllegalArgumentException e) {
+                        SkyblockBuilder.getLogger().error("Problems filling profile properties for id {} with requiring secure {}", id, enforceProfileSecurity);
+                        profile = unnamedProfile;
+                    }
 
                     if (profile.getName() != null) {
                         profileCache.add(profile);

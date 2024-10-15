@@ -14,4 +14,7 @@ public class CustomizationConfig {
             "The island and all its blocks remain at this position!",
             "This position will not be used for any new team, only the remaining team will be deleted."})
     public static boolean deleteTeamsAutomatically = false;
+
+    @Config("You may enable this when you encounter problems with game profiles")
+    public static boolean forceUnsecureProfileNames = false;
 }
