@@ -3,7 +3,9 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
+import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.Util;
@@ -18,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nonnull;
@@ -67,11 +70,25 @@ public class RandomUtility {
                     continue;
                 }
 
+                if (UsernameCache.containsUUID(id)) {
+                    String lastKnownUsername = UsernameCache.getLastKnownUsername(id);
+                    profiles.add(new GameProfile(id, lastKnownUsername));
+                    continue;
+                }
+
                 Optional<GameProfile> gameProfile = profileCache.get(id);
                 if (gameProfile.isPresent()) {
                     profiles.add(gameProfile.get());
                 } else {
-                    GameProfile profile = server.getSessionService().fillProfileProperties(new GameProfile(id, null), true);
+                    GameProfile profile;
+                    GameProfile unnamedProfile = new GameProfile(id, null);
+                    boolean enforceProfileSecurity = ConfigHandler.Utility.forceUnsecureProfileNames || level.getServer().enforceSecureProfile();
+                    try {
+                        profile = server.getSessionService().fillProfileProperties(unnamedProfile, enforceProfileSecurity);
+                    } catch (IllegalArgumentException e) {
+                        SkyblockBuilder.getLogger().error("Problems filling profile properties for id {} with requiring secure {}", id, enforceProfileSecurity);
+                        profile = unnamedProfile;
+                    }
 
                     if (profile.getName() != null) {
                         profileCache.add(profile);

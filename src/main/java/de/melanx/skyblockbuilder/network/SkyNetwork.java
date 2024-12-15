@@ -4,8 +4,6 @@ import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.util.RandomUtility;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -17,6 +15,7 @@ import org.moddingx.libx.annotation.meta.RemoveIn;
 import org.moddingx.libx.network.NetworkX;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,7 +27,7 @@ public class SkyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("10");
+        return Protocol.of("11");
     }
 
     @Override
@@ -82,7 +81,7 @@ public class SkyNetwork extends NetworkX {
             return;
         }
 
-        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new ProfilesUpdateMessage(this.getProfilesTag((ServerLevel) player.getCommandSenderWorld())));
+        this.sendProfilesInBatches(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), RandomUtility.getGameProfiles((ServerLevel) player.getCommandSenderWorld()));
     }
 
     public void updateProfiles(Level level) {
@@ -90,7 +89,8 @@ public class SkyNetwork extends NetworkX {
             return;
         }
 
-        this.channel.send(PacketDistributor.ALL.noArg(), new ProfilesUpdateMessage(this.getProfilesTag((ServerLevel) level)));
+        Set<GameProfile> gameProfiles = RandomUtility.getGameProfiles((ServerLevel) level);
+        this.sendProfilesInBatches(PacketDistributor.ALL.noArg(), gameProfiles);
     }
 
     public void updateTemplateNames(Player player, List<String> names) {
@@ -105,22 +105,26 @@ public class SkyNetwork extends NetworkX {
         this.channel.send(PacketDistributor.ALL.noArg(), new UpdateTemplateNamesMessage(names));
     }
 
-    private CompoundTag getProfilesTag(ServerLevel level) {
-        Set<GameProfile> profileCache = RandomUtility.getGameProfiles(level);
-        CompoundTag profiles = new CompoundTag();
-        ListTag tags = new ListTag();
+    private void sendProfilesInBatches(PacketDistributor.PacketTarget target, Set<GameProfile> allGameProfiles) {
+        final int batchSize = 1000;
+        Set<GameProfile> currentBatch = new HashSet<>(batchSize);
 
-        // load the cache and look for all profiles
-        profileCache.forEach(profile -> {
-            if (profile.getId() != null && profile.getName() != null) {
-                CompoundTag tag = new CompoundTag();
-                tag.putUUID("Id", profile.getId());
-                tag.putString("Name", profile.getName());
-                tags.add(tag);
+        for (GameProfile profile : allGameProfiles) {
+            currentBatch.add(profile);
+
+            if (currentBatch.size() == batchSize) {
+                this.sendProfileBatch(target, currentBatch);
+                currentBatch.clear();
             }
-        });
+        }
 
-        profiles.put("Profiles", tags);
-        return profiles;
+        // send any remaining profiles in the last batch
+        if (!currentBatch.isEmpty()) {
+            this.sendProfileBatch(target, currentBatch);
+        }
+    }
+
+    private void sendProfileBatch(PacketDistributor.PacketTarget target, Set<GameProfile> profiles) {
+        this.channel.send(target, new ProfilesUpdateMessage(profiles));
     }
 }

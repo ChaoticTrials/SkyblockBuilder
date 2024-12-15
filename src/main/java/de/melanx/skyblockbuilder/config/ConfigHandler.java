@@ -185,6 +185,9 @@ public class ConfigHandler {
         @Config("Should players be able to create their own team? [default: false]")
         public static boolean createOwnTeam = false;
 
+        @Config("You may enable this when you encounter problems with game profiles")
+        public static boolean forceUnsecureProfileNames = false;
+
         public static class Teleports {
 
             @Config("Should players be able to teleport to spawn? [default: true]")

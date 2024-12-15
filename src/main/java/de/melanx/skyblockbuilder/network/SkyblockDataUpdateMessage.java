@@ -68,7 +68,7 @@ public record SkyblockDataUpdateMessage(SkyblockSavedData data, UUID player) {
         @Override
         public SkyblockDataUpdateMessage decode(FriendlyByteBuf buffer) {
             SkyblockSavedData data = new SkyblockSavedData();
-            data.load(Objects.requireNonNull(buffer.readNbt()));
+            data.load(Objects.requireNonNull(buffer.readAnySizeNbt()));
             return new SkyblockDataUpdateMessage(data, buffer.readUUID());
         }
     }

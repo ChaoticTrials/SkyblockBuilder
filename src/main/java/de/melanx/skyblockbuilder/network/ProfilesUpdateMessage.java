@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.network;
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import org.moddingx.libx.network.PacketHandler;
@@ -14,7 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public record ProfilesUpdateMessage(CompoundTag profiles) {
+public record ProfilesUpdateMessage(Set<GameProfile> profiles) {
 
     public static class Handler implements PacketHandler<ProfilesUpdateMessage> {
 
@@ -25,17 +24,7 @@ public record ProfilesUpdateMessage(CompoundTag profiles) {
 
         @Override
         public boolean handle(ProfilesUpdateMessage msg, Supplier<NetworkEvent.Context> ctx) {
-            Set<GameProfile> profiles = new HashSet<>();
-            for (Tag tag : msg.profiles.getList("Profiles", Tag.TAG_COMPOUND)) {
-                CompoundTag nbt = (CompoundTag) tag;
-
-                UUID id = nbt.getUUID("Id");
-                String name = nbt.getString("Name");
-
-                profiles.add(new GameProfile(id, name));
-            }
-
-            GameProfileCache.addProfiles(profiles);
+            GameProfileCache.addProfiles(msg.profiles);
             return true;
         }
     }
@@ -49,12 +38,32 @@ public record ProfilesUpdateMessage(CompoundTag profiles) {
 
         @Override
         public void encode(ProfilesUpdateMessage msg, FriendlyByteBuf buffer) {
-            buffer.writeNbt(msg.profiles);
+            int size = msg.profiles.size();
+            buffer.writeVarInt(size);
+            msg.profiles.forEach(profile -> {
+                CompoundTag tag = new CompoundTag();
+                tag.putUUID("Id", profile.getId());
+                tag.putString("Name", profile.getName());
+                buffer.writeNbt(tag);
+            });
         }
 
         @Override
         public ProfilesUpdateMessage decode(FriendlyByteBuf buffer) {
-            return new ProfilesUpdateMessage(buffer.readNbt());
+            int size = buffer.readVarInt();
+            Set<GameProfile> profiles = new HashSet<>();
+            for (int i = 0; i < size; i++) {
+                CompoundTag tag = buffer.readNbt();
+                if (tag == null) {
+                    continue;
+                }
+
+                UUID id = tag.getUUID("Id");
+                String name = tag.getString("Name");
+                profiles.add(new GameProfile(id, name));
+            }
+
+            return new ProfilesUpdateMessage(profiles);
         }
     }
 }
