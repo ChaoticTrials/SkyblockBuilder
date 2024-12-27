@@ -9,4 +9,4 @@ A minecraft mod which lets you generate custom skyblock islands by using config.
 
 ## Wiki
 A very descriptive wiki page for each Minecraft version with examples can be
-found [here](https://wiki.chaotictrials.de/skyblock-builder).
+found [here](https://wiki.chaotictrials.de/swl/skyblock-builder).

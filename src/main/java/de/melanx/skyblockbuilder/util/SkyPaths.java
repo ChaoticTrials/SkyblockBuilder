@@ -111,7 +111,7 @@ public class SkyPaths {
 
         BufferedWriter w = Files.newBufferedWriter(ITEMS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
         w.write("// See here for more information:\n");
-        w.write("// https://wiki.chaotictrials.de/skyblock-builder/1.20.x/config/inventory/#starting-inventory\n");
+        w.write("// https://wiki.chaotictrials.de/docs/1.20.x/wiki/mods/skyblock-builder/packdev/config/inventory#starting-inventory\n");
         w.write("// If this page isn't available, go to the project page (where you downloaded the file), and click on the wiki\n");
         w.write(SkyblockBuilder.PRETTY_GSON.toJson(object));
         w.close();
