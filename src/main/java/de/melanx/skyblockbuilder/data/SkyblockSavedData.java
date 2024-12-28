@@ -36,6 +36,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 
 /*
@@ -45,7 +48,7 @@ import java.util.*;
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public class SkyblockSavedData extends SavedData {
 
-    private static final String NAME = "skyblock_builder";
+    private static final String NAME = "skyblockbuilder/main";
     private static SkyblockSavedData clientInstance;
     public static final UUID SPAWN_ID = Util.NIL_UUID;
 
@@ -539,6 +542,19 @@ public class SkyblockSavedData extends SavedData {
 
     public void setDirtySilently() {
         super.setDirty();
+    }
+
+    @Override
+    public void save(@Nonnull File file) {
+        if (this.isDirty()) {
+            try {
+                Files.createDirectories(file.toPath().getParent());
+            } catch (IOException e) {
+                SkyblockBuilder.getLogger().error("Could not create directory: {}", file.getAbsolutePath(), e);
+            }
+        }
+
+        super.save(file);
     }
 
     @Nullable
