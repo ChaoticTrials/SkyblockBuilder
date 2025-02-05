@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -13,18 +14,23 @@ import javax.annotation.Nullable;
 
 public class SizeableCheckbox extends Checkbox {
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/checkbox.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/checkbox.png");
 
     public SizeableCheckbox(int x, int y, int size, boolean selected) {
-        this(x, y, size, selected, (Tooltip) null);
+        this(x, y, size, selected, (checkbox, value) -> {
+        });
     }
 
-    public SizeableCheckbox(int x, int y, int size, boolean selected, Component component) {
-        this(x, y, size, selected, Tooltip.create(component));
+    public SizeableCheckbox(int x, int y, int size, boolean selected, Checkbox.OnValueChange onValueChange) {
+        this(x, y, size, selected, (Tooltip) null, onValueChange);
     }
 
-    public SizeableCheckbox(int x, int y, int size, boolean selected, @Nullable Tooltip tooltip) {
-        super(x, y, size, size, Component.empty(), selected, false);
+    public SizeableCheckbox(int x, int y, int size, boolean selected, Component component, Checkbox.OnValueChange onValueChange) {
+        this(x, y, size, selected, Tooltip.create(component), onValueChange);
+    }
+
+    public SizeableCheckbox(int x, int y, int size, boolean selected, @Nullable Tooltip tooltip, Checkbox.OnValueChange onValueChange) {
+        super(x, y, size, Component.empty(), Minecraft.getInstance().font, selected, onValueChange);
         this.setTooltip(tooltip);
     }
 

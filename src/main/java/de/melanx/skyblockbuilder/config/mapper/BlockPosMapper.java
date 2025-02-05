@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import org.jetbrains.annotations.NotNull;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
 import org.moddingx.libx.config.gui.WidgetProperties;
@@ -16,7 +17,6 @@ import org.moddingx.libx.impl.config.gui.EditorHelper;
 import org.moddingx.libx.impl.config.mappers.SimpleValueMappers;
 import org.moddingx.libx.screen.Panel;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
 
@@ -128,11 +128,10 @@ public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
             }
 
             @Override
-            public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            protected void renderWidgetContent(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
                 guiGraphics.drawString(this.font, "X", this.getX(), this.getY() + 6, Color.GRAY.getRGB());
                 guiGraphics.drawString(this.font, "Y", this.getX() + 63, this.getY() + 6, Color.GRAY.getRGB());
                 guiGraphics.drawString(this.font, "Z", this.getX() + 128, this.getY() + 6, Color.GRAY.getRGB());
-                super.render(guiGraphics, mouseX, mouseY, partialTick);
             }
         }
     }

@@ -13,12 +13,13 @@ import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
@@ -70,16 +71,17 @@ public class InventoryCommand {
     private static JsonArray vanillaInventory(ServerPlayer player) {
         JsonArray items = new JsonArray();
         Inventory inventory = player.getInventory();
+        RegistryAccess registryAccess = player.registryAccess();
 
         for (ItemStack stack : inventory.items) {
             if (!stack.isEmpty()) {
-                items.add(StartingInventory.serializeItem(stack));
+                items.add(StartingInventory.serializeItem(stack, registryAccess));
             }
         }
 
         for (ItemStack stack : inventory.offhand) {
             if (!stack.isEmpty()) {
-                items.add(StartingInventory.serializeItem(stack, EquipmentSlot.OFFHAND));
+                items.add(StartingInventory.serializeItem(stack, EquipmentSlot.OFFHAND, registryAccess));
             }
         }
 
@@ -93,7 +95,7 @@ public class InventoryCommand {
                     case 3 -> EquipmentSlot.HEAD;
                     default -> EquipmentSlot.MAINHAND;
                 };
-                items.add(StartingInventory.serializeItem(stack, equipmentSlot));
+                items.add(StartingInventory.serializeItem(stack, equipmentSlot, registryAccess));
             }
         }
 
@@ -102,7 +104,7 @@ public class InventoryCommand {
 
     private static JsonArray curiosInventory(ServerPlayer player) {
         JsonArray items = new JsonArray();
-        CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
+        CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
             Map<String, ICurioStacksHandler> curios = handler.getCurios();
             for (Map.Entry<String, ICurioStacksHandler> entry : curios.entrySet()) {
                 String identifier = entry.getKey();
@@ -113,7 +115,7 @@ public class InventoryCommand {
                         continue;
                     }
 
-                    items.add(CuriosCompat.serializeItem(stack, identifier));
+                    items.add(CuriosCompat.serializeItem(stack, identifier, player.registryAccess()));
                 }
             }
         });

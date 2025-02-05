@@ -1,20 +1,26 @@
 package de.melanx.skyblockbuilder.template;
 
-import com.google.gson.*;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.ModLootItemFunctions;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapDecorationType;
+import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
@@ -24,18 +30,38 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SpreadMapFunction extends LootItemConditionalFunction {
 
-    public static final MapDecoration.Type DEFAULT_DECORATION = MapDecoration.Type.RED_X;
+    public static final Holder<MapDecorationType> DEFAULT_DECORATION = MapDecorationTypes.RED_X;
+    public static final MapCodec<SpreadMapFunction> CODEC = RecordCodecBuilder.mapCodec(
+            instance -> LootItemConditionalFunction.commonFields(instance)
+                    .and(
+                            instance.group(
+                                    Codec.either(
+                                            Codec.STRING.listOf(),
+                                            Codec.STRING
+                                    ).xmap(
+                                            either -> either.map(Function.identity(), List::of),
+                                            list -> list.size() == 1 ? Either.right(list.getFirst()) : Either.left(list)
+                                    ).fieldOf("spreads").forGetter(function -> function.spreadNames),
+                                    MapDecorationType.CODEC.optionalFieldOf("decoration", DEFAULT_DECORATION).forGetter(function -> function.mapDecoration),
+                                    Codec.BYTE.optionalFieldOf("zoom", (byte) 2).forGetter(function -> function.zoom)
+                            )
+                    )
+                    .apply(instance, SpreadMapFunction::new)
+    );
     private final List<String> spreadNames;
-    private final MapDecoration.Type mapDecoration;
+    private final Holder<MapDecorationType> mapDecoration;
     private final byte zoom;
 
-    public SpreadMapFunction(LootItemCondition[] predicates, List<String> spreadNames, MapDecoration.Type mapDecoration, byte zoom) {
-        super(predicates);
+    public SpreadMapFunction(List<LootItemCondition> conditions, List<String> spreadNames, Holder<MapDecorationType> mapDecoration, byte zoom) {
+        super(conditions);
         this.spreadNames = spreadNames;
         this.mapDecoration = mapDecoration;
         this.zoom = zoom;
@@ -109,73 +135,16 @@ public class SpreadMapFunction extends LootItemConditionalFunction {
     private static ItemStack createFixedMap(Level level, int levelX, int levelZ, byte scale, boolean trackingPosition, boolean unlimitedTracking) {
         ItemStack map = Items.FILLED_MAP.getDefaultInstance();
         MapItemSavedData data = new MapItemSavedData(levelX, levelZ, scale, trackingPosition, unlimitedTracking, false, level.dimension());
-        int freeMapId = level.getFreeMapId();
-        level.setMapData("map_" + freeMapId, data);
-        map.getOrCreateTag().putInt("map", freeMapId);
+        MapId freeMapId = level.getFreeMapId();
+        level.setMapData(freeMapId, data);
+        map.set(DataComponents.MAP_ID, freeMapId);
 
         return map;
     }
 
     @Nonnull
     @Override
-    public LootItemFunctionType getType() {
+    public LootItemFunctionType<SpreadMapFunction> getType() {
         return ModLootItemFunctions.spreadMap;
-    }
-
-    public static class Serializer extends LootItemConditionalFunction.Serializer<SpreadMapFunction> {
-
-        @Override
-        public void serialize(@Nonnull JsonObject json, @Nonnull SpreadMapFunction function, @Nonnull JsonSerializationContext context) {
-            super.serialize(json, function, context);
-
-            if (function.spreadNames.size() > 1) {
-                json.addProperty("spreads", function.spreadNames.get(0));
-            } else {
-                JsonArray spreadNames = new JsonArray();
-                for (String name : function.spreadNames) {
-                    spreadNames.add(new JsonPrimitive(name));
-                }
-                json.add("spreads", spreadNames);
-            }
-
-            if (function.mapDecoration != SpreadMapFunction.DEFAULT_DECORATION) {
-                json.add("decoration", context.serialize(function.mapDecoration.toString().toLowerCase(Locale.ROOT)));
-            }
-
-            if (function.zoom != 2) {
-                json.addProperty("zoom", function.zoom);
-            }
-        }
-
-        @Nonnull
-        @Override
-        public SpreadMapFunction deserialize(@Nonnull JsonObject json, @Nonnull JsonDeserializationContext context, @Nonnull LootItemCondition[] conditions) {
-            String decoration = json.has("decoration") ? GsonHelper.getAsString(json, "decoration") : "red_x";
-            byte zoom = json.has("zoom") ? GsonHelper.getAsByte(json, "zoom") : (byte) 2;
-            MapDecoration.Type mapDecorationType = SpreadMapFunction.DEFAULT_DECORATION;
-
-            try {
-                mapDecorationType = MapDecoration.Type.valueOf(decoration.toUpperCase(Locale.ROOT));
-            } catch (IllegalArgumentException e) {
-                SkyblockBuilder.getLogger().error("Error while parsing loot table decoration entry. Found {}. Defaulting to {}", decoration, mapDecorationType);
-            }
-
-            List<String> spreads = new ArrayList<>();
-            if (json.has("spreads")) {
-                JsonElement element = json.get("spreads");
-                if (element.isJsonArray()) {
-                    JsonArray spreadsArray = element.getAsJsonArray();
-                    for (JsonElement entry : spreadsArray) {
-                        spreads.add(entry.getAsString());
-                    }
-                } else {
-                    spreads.add(element.getAsString());
-                }
-            } else {
-                SkyblockBuilder.getLogger().error("Spread destination is empty");
-            }
-
-            return new SpreadMapFunction(conditions, spreads, mapDecorationType, zoom);
-        }
     }
 }

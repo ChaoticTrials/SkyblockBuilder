@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.yggdrasil.ProfileResult;
+import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.ModBlocks;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
@@ -16,8 +18,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -35,9 +39,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraftforge.common.UsernameCache;
-import net.minecraftforge.fml.ModList;
-import org.moddingx.libx.annotation.meta.RemoveIn;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.common.UsernameCache;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Files;
@@ -46,25 +49,26 @@ import java.util.*;
 
 public class RandomUtility {
 
-    public static JsonObject serializeItem(ItemStack stack) {
-        JsonObject json = new JsonObject();
-        CompoundTag tag = stack.serializeNBT();
-        json.addProperty("item", tag.getString("id"));
+    public static JsonObject serializeItem(ItemStack stack, HolderLookup.Provider provider) {
+        Tag tag = stack.save(provider);
 
-        int count = tag.getInt("Count");
-        if (count > 1) {
-            json.addProperty("count", count);
-        }
-
-        if (tag.contains("tag")) {
-            //noinspection ConstantConditions
-            json.addProperty("nbt", tag.get("tag").toString());
-        }
-
-        if (tag.contains("ForgeCaps")) {
-            //noinspection ConstantConditions
-            json.addProperty("ForgeCaps", tag.get("ForgeCaps").toString());
-        }
+        JsonObject json = NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, tag).getAsJsonObject();
+//        json.addProperty("item", tag.getString("id"));
+//
+//        int count = tag.getInt("Count");
+//        if (count > 1) {
+//            json.addProperty("count", count);
+//        }
+//
+//        if (tag.contains("tag")) {
+//            //noinspection ConstantConditions
+//            json.addProperty("nbt", tag.get("tag").toString());
+//        }
+//
+//        if (tag.contains("ForgeCaps")) {
+//            //noinspection ConstantConditions
+//            json.addProperty("ForgeCaps", tag.get("ForgeCaps").toString());
+//        }
 
         return json;
     }
@@ -151,8 +155,8 @@ public class RandomUtility {
                     continue;
                 }
 
-                if (UsernameCache.containsUUID(id)) {
-                    String lastKnownUsername = UsernameCache.getLastKnownUsername(id);
+                String lastKnownUsername = UsernameCache.getLastKnownUsername(id);
+                if (lastKnownUsername != null) {
                     profiles.add(new GameProfile(id, lastKnownUsername));
                     continue;
                 }
@@ -163,10 +167,11 @@ public class RandomUtility {
                     profiles.add(gameProfile.get());
                 } else {
                     GameProfile profile;
-                    GameProfile unnamedProfile = new GameProfile(id, null);
+                    GameProfile unnamedProfile = new GameProfile(id, "Unknown");
                     boolean enforceProfileSecurity = CustomizationConfig.forceUnsecureProfileNames || level.getServer().enforceSecureProfile();
                     try {
-                        profile = server.getSessionService().fillProfileProperties(unnamedProfile, enforceProfileSecurity);
+                        ProfileResult profileResult = server.getSessionService().fetchProfile(id, enforceProfileSecurity);
+                        profile = profileResult != null ? profileResult.profile() : unnamedProfile;
                     } catch (IllegalArgumentException e) {
                         SkyblockBuilder.getLogger().error("Problems filling profile properties for id {} with requiring secure {}", id, enforceProfileSecurity);
                         profile = unnamedProfile;
@@ -220,7 +225,7 @@ public class RandomUtility {
                     BlockEntity blockEntity = level.getBlockEntity(actPos);
                     StructureTemplate.StructureBlockInfo blockInfo;
                     if (blockEntity != null) {
-                        blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, blockEntity.saveWithId());
+                        blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, blockEntity.saveWithId(level.registryAccess()));
                     } else {
                         blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, null);
                     }
@@ -244,12 +249,6 @@ public class RandomUtility {
 
     public static String normalize(String s) {
         return s.toLowerCase(Locale.ROOT).replaceAll("\\W+", "_");
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.21")
-    public static Path getFilePath(Path parentFolder, String name) {
-        return getFilePath(parentFolder, name, "nbt");
     }
 
     public static Path getFilePath(Path parentFolder, String name, String extension) {

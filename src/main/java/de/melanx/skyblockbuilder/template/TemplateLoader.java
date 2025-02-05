@@ -4,6 +4,7 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyPaths;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -13,7 +14,7 @@ import java.util.*;
 
 public class TemplateLoader {
 
-    public static final StructurePlaceSettings STRUCTURE_PLACE_SETTINGS = new StructurePlaceSettings().setKnownShape(true).setKeepLiquids(false);
+    public static final StructurePlaceSettings STRUCTURE_PLACE_SETTINGS = new StructurePlaceSettings().setKnownShape(true).setLiquidSettings(LiquidSettings.IGNORE_WATERLOGGING);
     private static final List<String> TEMPLATE_NAMES = new ArrayList<>();
     private static final Map<String, ConfiguredTemplate> TEMPLATE_MAP = new HashMap<>();
     private static ConfiguredTemplate TEMPLATE;
@@ -60,7 +61,7 @@ public class TemplateLoader {
             }
 
             if (TEMPLATE == null) {
-                TEMPLATE = TEMPLATE_MAP.get(TEMPLATE_NAMES.get(0).toLowerCase(Locale.ROOT));
+                TEMPLATE = TEMPLATE_MAP.get(TEMPLATE_NAMES.getFirst().toLowerCase(Locale.ROOT));
             } else {
                 TEMPLATE = TemplateLoader.getConfiguredTemplate(TEMPLATE.getName());
             }

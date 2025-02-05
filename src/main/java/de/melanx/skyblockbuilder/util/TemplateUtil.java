@@ -8,6 +8,7 @@ import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import org.apache.commons.io.IOUtils;
@@ -109,7 +110,7 @@ public class TemplateUtil {
         if (snbt) {
             return NbtUtils.snbtToStructure(IOUtils.toString(Files.newBufferedReader(path)));
         } else {
-            return NbtIo.readCompressed(path.toFile());
+            return NbtIo.readCompressed(path, NbtAccounter.unlimitedHeap());
         }
     }
 }

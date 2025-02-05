@@ -12,6 +12,6 @@ public class MineMentionCompat {
     }
 
     public static void register() {
-        SpecialMentions.registerMention(new ResourceLocation(SkyblockBuilder.getInstance().modid, "sky_team"), "sky_team", TeamMention.INSTANCE);
+        SpecialMentions.registerMention(ResourceLocation.fromNamespaceAndPath(SkyblockBuilder.getInstance().modid, "sky_team"), "sky_team", TeamMention.INSTANCE);
     }
 }

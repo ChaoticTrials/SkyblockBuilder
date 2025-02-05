@@ -1,17 +1,15 @@
 package de.melanx.skyblockbuilder.events;
 
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * SkyblockCreateTeamEvent is fired whenever a command creates a new team.<br>
  * <br>
- * This event is {@link net.minecraftforge.eventbus.api.Cancelable}.<br>
- * <br>
- * This event does not have a result. {@link net.minecraftforge.eventbus.api.Event.HasResult}<br>
- * <br>
- * This event is fired on the {@link net.minecraftforge.common.MinecraftForge#EVENT_BUS}
+ * This event is fired on the {@link NeoForge#EVENT_BUS}
  */
-public class SkyblockCreateTeamEvent extends Event {
+public class SkyblockCreateTeamEvent extends Event implements ICancellableEvent {
 
     private final String name;
 
@@ -27,10 +25,5 @@ public class SkyblockCreateTeamEvent extends Event {
      */
     public String getName() {
         return this.name;
-    }
-
-    @Override
-    public boolean isCancelable() {
-        return true;
     }
 }

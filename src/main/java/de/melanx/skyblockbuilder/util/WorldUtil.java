@@ -14,6 +14,7 @@ import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGe
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -24,8 +25,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -204,19 +205,19 @@ public class WorldUtil {
         String blockName = info[info.length - 1];
 
         Block block;
+        ResourceLocation blockId = ResourceLocation.withDefaultNamespace(blockName);
         try {
-            block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockName));
+            block = BuiltInRegistries.BLOCK.get(blockId);
         } catch (Exception exception) {
             SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", exception.getMessage());
             return null;
         }
 
-        if (block == null) {
+        if (block == Blocks.AIR && !BuiltInRegistries.BLOCK.getKey(Blocks.AIR).equals(blockId)) {
             SkyblockBuilder.getLogger().error("Error while parsing surface settings string => Unknown block, {}", blockName);
-            return null;
-        } else {
-            return new FlatLayerInfo(height, block);
         }
+
+        return new FlatLayerInfo(height, block);
     }
 
     public static int calculateHeightFromLayers(List<FlatLayerInfo> layerInfos) {

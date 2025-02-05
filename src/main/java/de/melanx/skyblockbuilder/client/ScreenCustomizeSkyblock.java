@@ -82,7 +82,7 @@ public class ScreenCustomizeSkyblock extends Screen {
 
     @Override
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderDirtBackground(guiGraphics);
+        this.renderMenuBackground(guiGraphics);
         this.list.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
         guiGraphics.drawCenteredString(this.font, Component.translatable("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
@@ -96,7 +96,7 @@ public class ScreenCustomizeSkyblock extends Screen {
         private transient final Map<String, TemplateRenderer> structureCache = new HashMap<>();
 
         public TemplateList() {
-            super(Objects.requireNonNull(ScreenCustomizeSkyblock.this.minecraft), ScreenCustomizeSkyblock.this.width, ScreenCustomizeSkyblock.this.height, 40, ScreenCustomizeSkyblock.this.height - 37, 40);
+            super(Objects.requireNonNull(ScreenCustomizeSkyblock.this.minecraft), ScreenCustomizeSkyblock.this.width, ScreenCustomizeSkyblock.this.height, 40, ScreenCustomizeSkyblock.this.height - 37);
             ScreenCustomizeSkyblock.this.templateMap.stream().sorted(Comparator.comparing(ConfiguredTemplate::getName)).forEach(entry -> {
                 this.addEntry(new TemplateEntry(entry));
             });
@@ -119,9 +119,7 @@ public class ScreenCustomizeSkyblock extends Screen {
         }
 
         @Override
-        public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-            super.render(guiGraphics, mouseX, mouseY, partialTick);
-
+        public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             if (this.getSelected() != null) {
                 RenderSystem.enableBlend();
                 int size = (this.width - 220) / 2 - 40;
@@ -143,12 +141,12 @@ public class ScreenCustomizeSkyblock extends Screen {
         }
 
         @Override
-        protected void renderList(@Nonnull GuiGraphics guiGraphics, int x, int y, float partialTick) {
+        protected void renderListItems(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             // delayed to #renderEntries to call it later
         }
 
         protected void renderEntries(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-            super.renderList(guiGraphics, mouseX, mouseY, partialTick);
+            super.renderListItems(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         private class TemplateEntry extends ObjectSelectionList.Entry<TemplateEntry> {

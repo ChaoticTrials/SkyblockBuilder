@@ -3,18 +3,23 @@ package de.melanx.skyblockbuilder.item;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.melanx.skyblockbuilder.ModDataComponentTypes;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.client.ClientUtil;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
-import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -30,9 +35,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.moddingx.libx.annotation.meta.RemoveIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.moddingx.libx.config.ConfigManager;
 
 import javax.annotation.Nonnull;
@@ -63,17 +67,27 @@ public class ItemStructureSaver extends Item {
 
         if (!context.getLevel().isClientSide && player != null && player.isShiftKeyDown()) {
             ItemStack stack = context.getItemInHand();
-            CompoundTag tag = stack.getOrCreateTag();
+            Positions positions = stack.get(ModDataComponentTypes.positions);
 
-            if (!tag.contains("Position1")) {
-                tag.put("Position1", NbtUtils.writeBlockPos(pos));
-                tag.remove("PreviousPositions");
+            if (positions == null) {
+                return InteractionResult.PASS;
+            }
+
+
+            if (positions.getPos1() == null) {
+                positions.pos1 = pos;
                 player.displayClientMessage(Component.translatable("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
+
+                Positions previousPositions = stack.get(ModDataComponentTypes.previousPositions);
+                if (previousPositions != null) {
+                    stack.remove(ModDataComponentTypes.previousPositions);
+                }
+
                 return InteractionResult.SUCCESS;
             }
 
-            if (!tag.contains("Position2")) {
-                tag.put("Position2", NbtUtils.writeBlockPos(pos));
+            if (positions.getPos2() == null) {
+                positions.pos2 = pos;
                 player.displayClientMessage(Component.translatable("skyblockbuilder.structure_saver.pos", 2, pos.getX(), pos.getY(), pos.getZ()), false);
                 return InteractionResult.SUCCESS;
             }
@@ -83,31 +97,31 @@ public class ItemStructureSaver extends Item {
     }
 
     @Override
-    public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
-        CompoundTag tag = stack.getOrCreateTag();
-        if (tag.contains("PreviousPositions") && entity.isShiftKeyDown()) {
+    public boolean onEntitySwing(@Nonnull ItemStack stack, @Nonnull LivingEntity entity, @Nonnull InteractionHand hand) {
+        Positions previousPositions = stack.get(ModDataComponentTypes.previousPositions);
+        if (previousPositions != null && entity.isShiftKeyDown()) {
             ItemStructureSaver.restorePositions(stack);
         }
 
-        return super.onEntitySwing(stack, entity);
+        return super.onEntitySwing(stack, entity, hand);
     }
 
     @Nonnull
     @Override
     public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        CompoundTag tag = stack.getOrCreateTag();
+        Positions positions = stack.get(ModDataComponentTypes.positions);
 
-        if (tag.contains("Position1") && tag.contains("Position2")) {
+        if (positions.getPos1() != null && positions.getPos2() != null) {
 
             // prevent instant save
-            if (!tag.contains("CanSave")) {
-                tag.putBoolean("CanSave", true);
+            if (!positions.canSave) {
+                positions.canSave = true;
                 return InteractionResultHolder.pass(stack);
             }
 
             if (level.isClientSide) {
-                ClientUtility.openItemScreen(stack);
+                ClientUtil.openItemScreen(stack);
             }
 
             return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
@@ -117,65 +131,54 @@ public class ItemStructureSaver extends Item {
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nullable Level level, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
-        super.appendHoverText(stack, level, tooltip, flag);
-        CompoundTag nbt = stack.getOrCreateTag();
+    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, tooltip, tooltipFlag);
+        Positions positions = stack.get(ModDataComponentTypes.positions);
 
-        if (nbt.contains("Position1")) {
-            BlockPos pos = NbtUtils.readBlockPos(nbt.getCompound("Position1"));
-            tooltip.add(Component.translatable("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.DARK_GRAY));
+        if (positions == null) {
+            return;
         }
 
-        if (nbt.contains("Position2")) {
-            BlockPos pos = NbtUtils.readBlockPos(nbt.getCompound("Position2"));
-            tooltip.add(Component.translatable("skyblockbuilder.item.structure_saver.position.tooltip", 1, pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.DARK_GRAY));
+        if (positions.getPos1() != null) {
+            tooltip.add(Component.translatable("skyblockbuilder.item.structure_saver.position.tooltip", 1, positions.pos1.getX(), positions.pos1.getY(), positions.pos1.getZ()).withStyle(ChatFormatting.DARK_GRAY));
         }
 
-        if (nbt.contains("CanSave")) {
+        if (positions.getPos2() != null) {
+            tooltip.add(Component.translatable("skyblockbuilder.item.structure_saver.position.tooltip", 1, positions.pos2.getX(), positions.pos2.getY(), positions.pos2.getZ()).withStyle(ChatFormatting.DARK_GRAY));
+        }
+
+        if (positions.canSave) {
             tooltip.add(TOOLTIP_SAVE);
         } else {
             tooltip.add(TOOLTIP_INFO);
         }
 
-        if (nbt.contains("PreviousPositions")) {
+        Positions previousPositions = stack.get(ModDataComponentTypes.previousPositions);
+        if (previousPositions != null) {
             tooltip.add(TOOLTIP_RESTORE);
         }
     }
 
     @Nullable
     public static BoundingBox getArea(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
-        if (!nbt.contains("Position1") || !nbt.contains("Position2")) {
+        Positions positions = stack.get(ModDataComponentTypes.positions);
+
+        if (positions == null || positions.pos1 == null || positions.pos2 == null) {
             return null;
         }
 
-        BlockPos pos1 = NbtUtils.readBlockPos(nbt.getCompound("Position1"));
-        BlockPos pos2 = NbtUtils.readBlockPos(nbt.getCompound("Position2"));
-
-        int minX = Math.min(pos1.getX(), pos2.getX());
-        int minY = Math.min(pos1.getY(), pos2.getY());
-        int minZ = Math.min(pos1.getZ(), pos2.getZ());
-        int maxX = Math.max(pos1.getX(), pos2.getX());
-        int maxY = Math.max(pos1.getY(), pos2.getY());
-        int maxZ = Math.max(pos1.getZ(), pos2.getZ());
+        int minX = Math.min(positions.pos1.getX(), positions.pos2.getX());
+        int minY = Math.min(positions.pos1.getY(), positions.pos2.getY());
+        int minZ = Math.min(positions.pos1.getZ(), positions.pos2.getZ());
+        int maxX = Math.max(positions.pos1.getX(), positions.pos2.getX());
+        int maxY = Math.max(positions.pos1.getY(), positions.pos2.getY());
+        int maxZ = Math.max(positions.pos1.getZ(), positions.pos2.getZ());
 
         return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.21")
-    public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt) {
-        return saveSchematic(level, stack, saveToConfig, ignoreAir, asSnbt, false, null);
-    }
-
     public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, boolean netherValidation) {
         return saveSchematic(level, stack, saveToConfig, ignoreAir, asSnbt, netherValidation, null);
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.21")
-    public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, @Nullable String name) {
-        return saveSchematic(level, stack, saveToConfig, ignoreAir, asSnbt, false, name);
     }
 
     public static String saveSchematic(Level level, ItemStack stack, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, boolean netherValidation, @Nullable String name) {
@@ -252,7 +255,7 @@ public class ItemStructureSaver extends Item {
                 Files.writeString(configFile, SkyblockBuilder.PRETTY_GSON.toJson(config));
                 ConfigManager.reloadConfig(TemplatesConfig.class);
                 if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-                    ConfigManager.forceResync(null);
+                    ConfigManager.synchronize(level.getServer(), TemplatesConfig.class);
                 }
 
                 return configFile.getFileName().toString();
@@ -286,35 +289,76 @@ public class ItemStructureSaver extends Item {
     }
 
     public static ItemStack restorePositions(ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag();
-        if (!tag.contains("PreviousPositions")) {
+        Positions previousPositions = stack.get(ModDataComponentTypes.previousPositions);
+        if (previousPositions == null) {
             return stack;
         }
 
-        CompoundTag last = tag.getCompound("PreviousPositions");
-        tag.put("Position1", last.getCompound("Position1"));
-        tag.put("Position2", last.getCompound("Position2"));
-        tag.putBoolean("CanSave", true);
-        tag.remove("PreviousPositions");
+        Positions positions = new Positions(previousPositions.pos1, previousPositions.pos2, true);
+        stack.set(ModDataComponentTypes.positions, positions);
 
-        stack.setTag(tag);
         return stack;
     }
 
     public static ItemStack removeTags(ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag();
+        Positions positions = stack.get(ModDataComponentTypes.positions);
 
-        if (tag.contains("Position1") && tag.contains("Position2")) {
-            CompoundTag last = new CompoundTag();
-            last.put("Position1", tag.getCompound("Position1"));
-            last.put("Position2", tag.getCompound("Position2"));
-            tag.put("PreviousPositions", last);
+        if (positions != null && positions.pos1 != null && positions.pos2 != null) {
+            Positions previousPositions = new Positions(positions.pos1, positions.pos2, positions.canSave);
+            stack.set(ModDataComponentTypes.previousPositions, previousPositions);
         }
 
-        tag.remove("Position1");
-        tag.remove("Position2");
-        tag.remove("CanSave");
-        stack.setTag(tag);
+        stack.remove(ModDataComponentTypes.positions);
+
         return stack;
+    }
+
+    public static class Positions {
+
+        public static final Codec<Positions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                        BlockPos.CODEC.optionalFieldOf("Position1", null).forGetter(Positions::getPos1),
+                        BlockPos.CODEC.optionalFieldOf("Position2", null).forGetter(Positions::getPos2),
+                        Codec.BOOL.optionalFieldOf("CanSave", false).forGetter(Positions::canSave)
+                )
+                .apply(instance, Positions::new));
+        public static final StreamCodec<ByteBuf, Positions> STREAM_CODEC = StreamCodec.composite(
+                BlockPos.STREAM_CODEC,
+                Positions::getPos1,
+                BlockPos.STREAM_CODEC,
+                Positions::getPos2,
+                ByteBufCodecs.BOOL,
+                Positions::canSave,
+                Positions::new
+        );
+
+        private BlockPos pos1;
+        private BlockPos pos2;
+        private boolean canSave;
+
+        public Positions(BlockPos pos1, BlockPos pos2, boolean canSave) {
+            this.pos1 = pos1;
+            this.pos2 = pos2;
+            this.canSave = canSave;
+        }
+
+        public BlockPos getPos1() {
+            return this.pos1;
+        }
+
+        public BlockPos getPos2() {
+            return this.pos2;
+        }
+
+        public boolean canSave() {
+            return this.canSave;
+        }
+
+        public void setPos1(BlockPos pos) {
+            this.pos1 = pos;
+        }
+
+        public void setPos2(BlockPos pos) {
+            this.pos2 = pos;
+        }
     }
 }

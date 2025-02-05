@@ -50,18 +50,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.moddingx.libx.event.ConfigLoadedEvent;
 import org.moddingx.libx.render.RenderHelperLevel;
 
@@ -69,7 +67,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-@Mod.EventBusSubscriber(modid = "skyblockbuilder")
+@EventBusSubscriber(modid = "skyblockbuilder")
 public class EventListener {
 
     private static final String SPAWNED_TAG = "alreadySpawned";
@@ -105,7 +103,6 @@ public class EventListener {
                 .then(SpawnCommand.register())
                 .then(SpawnsCommand.register())
                 .then(TeamCommand.register())
-                .then(TemplatesToSnbtCommand.register())
                 .then(VisitCommand.register())
         );
 
@@ -247,8 +244,6 @@ public class EventListener {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
     public static void renderBoundingBox(RenderLevelStageEvent event) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null || !(player.getMainHandItem().getItem() instanceof ItemStructureSaver) || event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
@@ -276,7 +271,7 @@ public class EventListener {
     @SubscribeEvent
     public static void onConfigChange(ConfigLoadedEvent event) {
         if (event.getConfigClass() == TemplatesConfig.class) {
-            StartingInventory.loadStarterItems();
+            StartingInventory.INSTANCE.loadStarterItems();
             if (event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
                 TemplateLoader.updateTemplates();
             }

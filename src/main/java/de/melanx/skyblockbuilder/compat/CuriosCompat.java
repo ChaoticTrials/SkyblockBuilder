@@ -3,13 +3,16 @@ package de.melanx.skyblockbuilder.compat;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -18,6 +21,7 @@ import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class CuriosCompat {
 
@@ -29,7 +33,7 @@ public class CuriosCompat {
             return;
         }
 
-        CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
+        CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
             handler.getCurios().forEach((id, type) -> {
                 IDynamicStackHandler stacks = type.getStacks();
                 IDynamicStackHandler cosmeticStacks = type.getCosmeticStacks();
@@ -46,7 +50,7 @@ public class CuriosCompat {
     }
 
     public static void setStartInventory(Player player) {
-        CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
+        CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
             Map<String, ICurioStacksHandler> curios = handler.getCurios();
 
                 outerLoop:
@@ -74,12 +78,19 @@ public class CuriosCompat {
         });
     }
 
-    public static void loadStarterInventory(JsonArray curiosItems) {
+    public static void loadStarterInventory(JsonArray curiosItems, HolderLookup.Provider lookupProvider) {
         CuriosCompat.STARTER_ITEMS.clear();
 
         for (JsonElement element : curiosItems) {
+            Tag tag = JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, element);
+            Optional<ItemStack> itemStack = ItemStack.parse(lookupProvider, tag);
+            if (itemStack.isEmpty()) {
+                throw new IllegalStateException("I have no idea what went wrong lol"); // todo rephrase
+            }
+
             JsonObject item = element.getAsJsonObject();
-            ItemStack stack = CraftingHelper.getItemStack(item, true);
+            ItemStack stack = itemStack.get();
+
             if (!item.has("Slot")) {
                 throw new IllegalStateException("Curios inventory 'Slot' identifier missing for " + stack);
             }
@@ -95,8 +106,8 @@ public class CuriosCompat {
                 .withStyle(ChatFormatting.RED));
     }
 
-    public static JsonObject serializeItem(ItemStack stack, String identifier) {
-        JsonObject json = RandomUtility.serializeItem(stack);
+    public static JsonObject serializeItem(ItemStack stack, String identifier, HolderLookup.Provider lookupProvider) {
+        JsonObject json = RandomUtility.serializeItem(stack, lookupProvider);
         json.addProperty("Slot", identifier);
 
         return json;

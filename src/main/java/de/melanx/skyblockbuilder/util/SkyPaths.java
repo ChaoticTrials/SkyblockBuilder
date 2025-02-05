@@ -13,7 +13,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.FMLPaths;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -84,7 +84,7 @@ public class SkyPaths {
                 generateDimensionInformation(server);
             }
 
-            StartingInventory.loadStarterItems();
+            StartingInventory.INSTANCE.loadStarterItems();
         } catch (IOException e) {
             SkyblockBuilder.getLogger().error("Unable to generate default files", e);
         }

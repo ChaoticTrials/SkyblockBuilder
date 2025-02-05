@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
@@ -13,19 +14,19 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityMobGriefingEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.BonemealEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.ExplosionEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.player.BonemealEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.neoforge.event.level.block.CropGrowEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 public class SpawnProtectionEvents {
 
@@ -43,23 +44,23 @@ public class SpawnProtectionEvents {
     }
 
     @SubscribeEvent
-    public void onInteract(PlayerInteractEvent event) {
+    public void onInteract(PlayerInteractEvent.EntityInteract event) {
         Item mainHandItem = event.getEntity().getMainHandItem().getItem();
-        ResourceLocation itemKey = ForgeRegistries.ITEMS.getKey(mainHandItem);
+        ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(mainHandItem);
         if (SpawnConfig.interactionItemsInSpawnProtection.test(itemKey)) {
             return;
         }
 
         if (SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !event.getEntity().hasPermissions(2)) {
             if (event instanceof PlayerInteractEvent.EntityInteract entityInteract &&
-                    (SpawnConfig.interactionEntitiesInSpawnProtection.test(ForgeRegistries.ENTITY_TYPES.getKey(entityInteract.getTarget().getType()))
+                    (SpawnConfig.interactionEntitiesInSpawnProtection.test(BuiltInRegistries.ENTITY_TYPE.getKey(entityInteract.getTarget().getType()))
                             || SpawnProtectionEvents.ignore(Type.INTERACT_ENTITIES))) {
                 return;
             }
 
-            if (event.isCancelable() && !SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
+            if (!SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
                 Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
-                ResourceLocation blockRegistryKey = ForgeRegistries.BLOCKS.getKey(block);
+                ResourceLocation blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
                 boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
 
                 event.setCanceled(!allowBlockInteraction);
@@ -76,7 +77,7 @@ public class SpawnProtectionEvents {
         //noinspection ConstantConditions
         if (event.getEntity() != null && event.getEntity().level() != null && event.getEntity().level().dimension() != null) {
             if (SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
-                event.setResult(Event.Result.DENY);
+                event.setCanGrief(false);
             }
         }
     }
@@ -87,7 +88,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        Vec3 position = event.getExplosion().getPosition();
+        Vec3 position = event.getExplosion().center();
         if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), new BlockPos((int) position.x, (int) position.y, (int) position.z))) {
             event.setCanceled(true);
         }
@@ -101,7 +102,7 @@ public class SpawnProtectionEvents {
 
         if (SpawnProtectionEvents.isOnSpawn(event.getPlayer()) && !event.getPlayer().hasPermissions(2)) {
             Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
-            ResourceLocation blockRegistryKey = ForgeRegistries.BLOCKS.getKey(block);
+            ResourceLocation blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
             boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
 
             event.setCanceled(!allowBlockInteraction);
@@ -117,7 +118,7 @@ public class SpawnProtectionEvents {
         if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             if (!(event.getEntity() instanceof Player) || !event.getEntity().hasPermissions(2)) {
                 Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
-                ResourceLocation blockRegistryKey = ForgeRegistries.BLOCKS.getKey(block);
+                ResourceLocation blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
                 boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
 
                 event.setCanceled(!allowBlockInteraction);
@@ -137,13 +138,13 @@ public class SpawnProtectionEvents {
     }
 
     @SubscribeEvent
-    public void cropGrow(BlockEvent.CropGrowEvent.Pre event) {
+    public void cropGrow(CropGrowEvent.Pre event) {
         if (SpawnProtectionEvents.ignore(Type.CROP_GROW)) {
             return;
         }
 
         if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
-            event.setResult(Event.Result.DENY);
+            event.setResult(CropGrowEvent.Pre.Result.DO_NOT_GROW);
         }
     }
 
@@ -164,32 +165,30 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), event.getPos()) && (event.getEntity() == null || !event.getEntity().hasPermissions(2))) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), event.getPos()) && (event.getPlayer() == null || !event.getPlayer().hasPermissions(2))) {
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
-    public void mobSpawn(MobSpawnEvent.FinalizeSpawn event) {
+    public void mobSpawn(MobSpawnEvent.SpawnPlacementCheck event) {
         if (SpawnProtectionEvents.ignore(Type.MOBS_SPAWN_EGG)) {
             return;
         }
 
-        Level level;
-        if (event.getLevel() instanceof Level) level = (Level) event.getLevel();
-        else level = event.getEntity().level();
-        if (level != null && SpawnProtectionEvents.isOnSpawn(event.getEntity())) {
+        Level level = event.getLevel().getLevel();
+        if (SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             if (event.getSpawnType() != MobSpawnType.SPAWN_EGG && event.getSpawnType() != MobSpawnType.BUCKET
                     && event.getSpawnType() != MobSpawnType.MOB_SUMMONED && event.getSpawnType() != MobSpawnType.COMMAND) {
-                if (event.isCancelable()) {
-                    event.setCanceled(true);
+                if (event instanceof ICancellableEvent cancellableEvent) {
+                    cancellableEvent.setCanceled(true);
                 }
             }
         }
     }
 
     @SubscribeEvent
-    public void livingAttack(LivingAttackEvent event) {
+    public void livingAttack(LivingIncomingDamageEvent event) {
         if (SpawnProtectionEvents.ignore(Type.DAMAGE)) {
             return;
         }
@@ -200,13 +199,13 @@ public class SpawnProtectionEvents {
     }
 
     @SubscribeEvent
-    public void livingHurt(LivingHurtEvent event) {
+    public void livingHurt(LivingDamageEvent.Pre event) {
         if (SpawnProtectionEvents.ignore(Type.DAMAGE)) {
             return;
         }
 
         if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (event.getEntity() instanceof Player || !(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
-            event.setCanceled(true);
+            event.setNewDamage(0);
         }
     }
 
@@ -222,16 +221,17 @@ public class SpawnProtectionEvents {
     }
 
     @SubscribeEvent
-    public void playerTick(TickEvent.PlayerTickEvent event) {
+    public void playerTick(PlayerTickEvent.Pre event) {
         if (SpawnProtectionEvents.ignore(Type.HEALING)) {
             return;
         }
 
-        if (!event.player.level().isClientSide && !event.player.isDeadOrDying() && event.player.tickCount % 20 == 0 && SpawnProtectionEvents.isOnSpawn(event.player)) {
-            event.player.setHealth(event.player.getMaxHealth());
-            event.player.getFoodData().setFoodLevel(20);
-            event.player.setAirSupply(event.player.getMaxAirSupply());
-            event.player.setRemainingFireTicks(0);
+        Player player = event.getEntity();
+        if (!player.level().isClientSide && !player.isDeadOrDying() && player.tickCount % 20 == 0 && SpawnProtectionEvents.isOnSpawn(player)) {
+            player.setHealth(player.getMaxHealth());
+            player.getFoodData().setFoodLevel(20);
+            player.setAirSupply(player.getMaxAirSupply());
+            player.setRemainingFireTicks(0);
         }
     }
 

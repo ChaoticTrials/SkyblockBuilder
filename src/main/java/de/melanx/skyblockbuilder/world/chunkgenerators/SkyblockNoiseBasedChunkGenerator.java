@@ -1,7 +1,7 @@
 package de.melanx.skyblockbuilder.world.chunkgenerators;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.common.StructuresConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
@@ -34,14 +34,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     // [VanillaCopy] overworld chunk generator codec
-    public static final Codec<SkyblockNoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.create(
+    public static final MapCodec<SkyblockNoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
             (instance) -> instance.group(
                     BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                     NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
@@ -66,7 +65,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Nonnull
     @Override
-    protected Codec<? extends ChunkGenerator> codec() {
+    protected MapCodec<? extends ChunkGenerator> codec() {
         return SkyblockNoiseBasedChunkGenerator.CODEC;
     }
 
@@ -104,7 +103,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Nonnull
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager manager, @Nonnull ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk) {
         return CompletableFuture.completedFuture(chunk);
     }
 

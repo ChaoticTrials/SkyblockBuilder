@@ -2,22 +2,21 @@ package de.melanx.skyblockbuilder.events;
 
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nonnull;
 
 /**
  * SkyblockInvitationEvent is fired whenever an invitation is handled.<br>
  * <br>
- * All children of this event do have a result. {@link net.minecraftforge.eventbus.api.Event.HasResult}.<br>
- * <br>
- * All children of this event are fired on the {@link MinecraftForge#EVENT_BUS}.
+ * All children of this event are fired on the {@link NeoForge#EVENT_BUS}.
  */
 public abstract class SkyblockInvitationEvent extends Event {
 
     private final ServerPlayer invitedPlayer;
     private final Team team;
+    private Result result = Result.DEFAULT;
 
     /**
      * @param invitedPlayer The player who is invited
@@ -42,9 +41,29 @@ public abstract class SkyblockInvitationEvent extends Event {
         return this.team;
     }
 
-    @Override
-    public boolean hasResult() {
-        return true;
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+    public Result getResult() {
+        return this.result;
+    }
+
+    public static enum Result {
+        /**
+         * Skip default checks
+         */
+        ALLOW,
+
+        /**
+         * Proceed with the default checks
+         */
+        DEFAULT,
+
+        /**
+         * Stop process instantly
+         */
+        DENY
     }
 
     /**

@@ -24,7 +24,6 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.ticks.LevelTicks;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -189,7 +188,7 @@ public class ConfiguredTemplate {
 
         ListTag surroundingBlocks = new ListTag();
         this.surroundingBlocks.forEach(block -> {
-            StringTag tag = StringTag.valueOf(Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block), "This block doesn't exist: " + block).toString());
+            StringTag tag = StringTag.valueOf(Objects.requireNonNull(BuiltInRegistries.BLOCK.getKey(block), "This block doesn't exist: " + block).toString());
             surroundingBlocks.add(tag);
         });
         nbt.put("SurroundingBlocks", surroundingBlocks);
@@ -243,7 +242,7 @@ public class ConfiguredTemplate {
         ListTag surroundingBlocks = nbt.getList("SurroundingBlocks", Tag.TAG_STRING);
         Set<Block> blocks = new HashSet<>();
         for (Tag block : surroundingBlocks) {
-            Block value = ForgeRegistries.BLOCKS.getValue(ResourceLocation.tryParse(block.getAsString()));
+            Block value = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(block.getAsString()));
             blocks.add(value);
         }
         this.surroundingBlocks = List.copyOf(blocks);
@@ -294,7 +293,6 @@ public class ConfiguredTemplate {
             try {
                 Path file = SkyPaths.SPREADS_DIR.resolve(fileName);
                 nbt = TemplateUtil.readTemplate(file);
-                //noinspection deprecation
                 template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
             } catch (IOException | CommandSyntaxException e) {
                 SkyblockBuilder.getLogger().error("Template with file name {} is incorrect.", fileName, e);

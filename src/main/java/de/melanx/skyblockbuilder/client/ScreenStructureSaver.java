@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.ClientUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -23,7 +22,7 @@ import java.awt.Color;
 
 public class ScreenStructureSaver extends BaseScreen {
 
-    private static final ResourceLocation SCREEN_LOCATION = new ResourceLocation(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
+    private static final ResourceLocation SCREEN_LOCATION = ResourceLocation.fromNamespaceAndPath(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
     private static final Component SAVE_TO_CONFIG = Component.translatable("skyblockbuilder.item.structure_saver.save_to_config.tooltip");
     private static final Component IGNORE_AIR = Component.translatable("skyblockbuilder.item.structure_saver.ignore_air.tooltip");
     private static final Component SNBT = Component.translatable("skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip");
@@ -67,7 +66,7 @@ public class ScreenStructureSaver extends BaseScreen {
                 .size(60, 20)
                 .build());
         this.addRenderableWidget(Button.builder(Component.empty(), button -> {
-                    ClientUtility.openPath(SkyPaths.MOD_EXPORTS);
+                    ClientUtil.openPath(SkyPaths.MOD_EXPORTS);
                 })
                 .pos(this.x(144), this.y(23))
                 .size(20, 20)
@@ -81,7 +80,7 @@ public class ScreenStructureSaver extends BaseScreen {
 
     @Override
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -129,16 +128,5 @@ public class ScreenStructureSaver extends BaseScreen {
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public void tick() {
-        this.name.tick();
-        super.tick();
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
     }
 }
