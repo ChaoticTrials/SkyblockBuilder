@@ -3,24 +3,29 @@ package de.melanx.skyblockbuilder.client;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.*;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.ServerLinks;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.network.connection.ConnectionType;
 import net.neoforged.neoforge.registries.callback.RegistryCallback;
 import net.neoforged.neoforge.registries.datamaps.DataMapType;
 
@@ -56,14 +61,22 @@ public class FakeLevel extends ClientLevel {
         return instance;
     }
 
+    @SuppressWarnings("DataFlowIssue")
+    private static final CommonListenerCookie FAKE_LISTENER_COOKIE = new CommonListenerCookie(
+            Minecraft.getInstance().getGameProfile(),
+            null,
+            FakeRegistry.INSTANCE,
+            FeatureFlags.DEFAULT_FLAGS,
+            null, null, null, Map.of(), null, false, Map.of(), ServerLinks.EMPTY, ConnectionType.OTHER
+    );
+
     private static ClientPacketListener fakeClientPacketListener() {
-        //noinspection DataFlowIssue
-        return new ClientPacketListener(Minecraft.getInstance(), new Connection(PacketFlow.CLIENTBOUND), null) {
+        return new ClientPacketListener(Minecraft.getInstance(), new Connection(PacketFlow.CLIENTBOUND), FAKE_LISTENER_COOKIE) {
 
             @Nonnull
             @Override
             public RegistryAccess.Frozen registryAccess() {
-                return new FakeRegistry();
+                return FakeRegistry.INSTANCE;
             }
         };
     }
@@ -75,6 +88,8 @@ public class FakeLevel extends ClientLevel {
 
     @SuppressWarnings("NullableProblems")
     private static class FakeRegistry implements RegistryAccess.Frozen {
+
+        private static final FakeRegistry INSTANCE = new FakeRegistry();
 
         @Nonnull
         @Override
@@ -397,7 +412,7 @@ public class FakeLevel extends ClientLevel {
                 //noinspection unchecked
                 return Optional.of(constructor.newInstance(ResourceLocation.tryParse(""), ResourceLocation.tryParse("")));
             } catch (Exception e) {
-                e.printStackTrace();
+                SkyblockBuilder.getLogger().error("Error in fake level: ", e);
             }
 
             return Optional.empty();

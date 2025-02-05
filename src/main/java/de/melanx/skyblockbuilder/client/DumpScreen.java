@@ -1,12 +1,10 @@
 package de.melanx.skyblockbuilder.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.DumpUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -71,7 +69,7 @@ public class DumpScreen extends BaseScreen {
                                 this.includeSkyblockBuilderWorldData.selected()
                         );
                         //noinspection DataFlowIssue
-                        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("skyblockbuilder.screen.dump.success", FMLPaths.GAMEDIR.get().relativize(zip))
+                        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("skyblockbuilder.screen.dump.success", FMLPaths.GAMEDIR.get().relativize(zip).toString())
                                 .withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, zip.getParent().toString()))));
                         Minecraft.getInstance().player.sendSystemMessage(Component.translatable("skyblockbuilder.screen.dump.create_issue").append(" ").append(DumpUtil.getIssueUrl()));
                     }
@@ -82,13 +80,11 @@ public class DumpScreen extends BaseScreen {
     }
 
     @Override
-    public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+
         RenderHelper.renderGuiBackground(guiGraphics, this.x(0), this.y(0), this.getXSize(), this.getYSize());
         guiGraphics.drawString(this.font, this.title, this.centeredX(this.font.width(this.title)), this.y(8), Color.DARK_GRAY.getRGB(), false);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         int i = 1;
         guiGraphics.drawString(this.font, Component.translatable("skyblockbuilder.screen.dump.text.configs"), this.x(TEXT_X), this.y(TEXT_FIRST_Y), Color.DARK_GRAY.getRGB(), false);
