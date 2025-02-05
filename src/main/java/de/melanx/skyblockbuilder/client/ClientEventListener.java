@@ -15,7 +15,10 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -28,6 +31,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.lwjgl.glfw.GLFW;
 import org.moddingx.libx.render.RenderHelperLevel;
+
+import java.util.Optional;
 
 public class ClientEventListener {
 
@@ -95,8 +100,8 @@ public class ClientEventListener {
             return;
         }
 
-        ItemStructureSaver.Positions positions = stack.get(ModDataComponentTypes.positions);
-        if (positions == null || positions.getPos1() == null || positions.getPos2() == null) {
+        CompoundTag positions = stack.get(ModDataComponentTypes.positions);
+        if (positions == null || !positions.contains("Position1") || !positions.contains("Position2")) {
             return;
         }
 
@@ -114,7 +119,14 @@ public class ClientEventListener {
             return;
         }
 
-        positions.setPos1(positions.getPos1().relative(direction));
-        positions.setPos2(positions.getPos2().relative(direction));
+        Optional<BlockPos> pos1 = NbtUtils.readBlockPos(positions, "Position1");
+        Optional<BlockPos> pos2 = NbtUtils.readBlockPos(positions, "Position2");
+
+        if (pos1.isEmpty() || pos2.isEmpty()) {
+            return;
+        }
+
+        positions.put("Position1", NbtUtils.writeBlockPos(pos1.get().relative(direction)));
+        positions.put("Position2", NbtUtils.writeBlockPos(pos2.get().relative(direction)));
     }
 }

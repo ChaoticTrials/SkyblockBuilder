@@ -25,7 +25,7 @@ public class DeleteTagsHandler extends PacketHandler<DeleteTagsHandler.Message> 
             return;
         }
 
-        ItemStack stack = ItemStructureSaver.removeTags(msg.stack);
+        ItemStack stack = ItemStructureSaver.removeComponents(msg.stack);
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
     }
 

@@ -42,7 +42,7 @@ public class SaveStructureHandler extends PacketHandler<SaveStructureHandler.Mes
             player.displayClientMessage(Component.literal("Failed to save, look at latest.log for more information").withStyle(ChatFormatting.RED), false);
             return;
         }
-        ItemStack stack = ItemStructureSaver.removeTags(msg.stack);
+        ItemStack stack = ItemStructureSaver.removeComponents(msg.stack);
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
         Path fullPath = msg.saveToConfig ? SkyPaths.MOD_CONFIG.resolve(name) : SkyPaths.MOD_EXPORTS.resolve(name);
         Path savedPath = FMLPaths.GAMEDIR.get().relativize(fullPath);
