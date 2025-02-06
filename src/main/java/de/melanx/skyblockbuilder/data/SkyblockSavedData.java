@@ -44,7 +44,7 @@ import java.util.*;
 
 /*
  * Credits go to Botania authors
- * https://github.com/Vazkii/Botania/blob/master/src/main/java/vazkii/botania/common/world/SkyblockSavedData.java
+ * https://github.com/VazkiiMods/Botania/blob/1.16.x-forge/src/main/java/vazkii/botania/common/world/SkyblockSavedData.java
  */
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public class SkyblockSavedData extends SavedData {
@@ -136,6 +136,7 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public static SkyblockSavedData load(CompoundTag nbt) {
+        SkyblockBuilder.getLogger().info("Loading Skyblock data...");
         SkyblockSavedData data = new SkyblockSavedData();
         Map<UUID, SkyMeta> metaInfo = Maps.newHashMap();
         Map<UUID, Team> skyblocks = Maps.newHashMap();
@@ -164,6 +165,7 @@ public class SkyblockSavedData extends SavedData {
         data.skyblockIds = skyblockIds;
         data.skyblockPositions = skyblockPositions;
         data.spiral = Spiral.fromArray(nbt.getIntArray("SpiralState"));
+        SkyblockBuilder.getLogger().info("Loaded Skyblock data.");
 
         return data;
     }
@@ -171,6 +173,7 @@ public class SkyblockSavedData extends SavedData {
     @Nonnull
     @Override
     public CompoundTag save(@Nonnull CompoundTag compound, @Nonnull HolderLookup.Provider registries) {
+        SkyblockBuilder.getLogger().info("Saving Skyblock data...");
         ListTag islands = new ListTag();
         for (Team team : this.skyblocks.values()) {
             islands.add(team.serializeNBT());
@@ -189,6 +192,8 @@ public class SkyblockSavedData extends SavedData {
         compound.putIntArray("SpiralState", this.spiral.toIntArray());
         compound.put("Islands", islands);
         compound.put("MetaInformation", metaInfo);
+        SkyblockBuilder.getLogger().info("Saved Skyblock data.");
+
         return compound;
     }
 
