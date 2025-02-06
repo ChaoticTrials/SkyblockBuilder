@@ -1,11 +1,11 @@
 package de.melanx.skyblockbuilder.template;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.registration.ModBlockTags;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;

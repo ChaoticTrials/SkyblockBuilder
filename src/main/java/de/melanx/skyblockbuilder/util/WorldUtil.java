@@ -3,12 +3,12 @@ package de.melanx.skyblockbuilder.util;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
 import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.registration.ModBlockTags;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.commands.CommandSourceStack;
@@ -163,7 +163,7 @@ public class WorldUtil {
 
     // [Vanilla copy] Get flat world info on servers
     public static List<FlatLayerInfo> layersInfoFromString(String settings) {
-        if (settings == null) {
+        if (settings == null || settings.isBlank()) {
             return Lists.newArrayList();
         }
 
@@ -205,7 +205,7 @@ public class WorldUtil {
         String blockName = info[info.length - 1];
 
         Block block;
-        ResourceLocation blockId = ResourceLocation.withDefaultNamespace(blockName);
+        ResourceLocation blockId = ResourceLocation.tryParse(blockName);
         try {
             block = BuiltInRegistries.BLOCK.get(blockId);
         } catch (Exception exception) {

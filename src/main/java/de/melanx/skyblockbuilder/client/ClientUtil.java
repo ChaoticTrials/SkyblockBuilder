@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.client;
 
+import de.melanx.skyblockbuilder.client.screens.StructureSaverScreen;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -22,6 +23,6 @@ public class ClientUtil {
     }
 
     public static void openItemScreen(ItemStack stack) {
-        Minecraft.getInstance().setScreen(new ScreenStructureSaver(stack, Component.translatable("screen.skyblockbuilder.structure_saver")));
+        Minecraft.getInstance().setScreen(new StructureSaverScreen(stack, Component.translatable("screen.skyblockbuilder.structure_saver")));
     }
 }

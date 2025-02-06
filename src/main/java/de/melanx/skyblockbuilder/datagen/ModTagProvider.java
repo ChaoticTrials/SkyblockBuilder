@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.datagen;
 
-import de.melanx.skyblockbuilder.ModBlockTags;
+import de.melanx.skyblockbuilder.registration.ModBlockTags;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;

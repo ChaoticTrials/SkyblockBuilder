@@ -1,8 +1,10 @@
-package de.melanx.skyblockbuilder.client;
+package de.melanx.skyblockbuilder.client.screens;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.client.ClientUtil;
+import de.melanx.skyblockbuilder.client.SizeableCheckbox;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -20,7 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
 
-public class ScreenStructureSaver extends BaseScreen {
+public class StructureSaverScreen extends BaseScreen {
 
     private static final ResourceLocation SCREEN_LOCATION = ResourceLocation.fromNamespaceAndPath(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
     private static final Component SAVE_TO_CONFIG = Component.translatable("skyblockbuilder.item.structure_saver.save_to_config.tooltip");
@@ -39,7 +41,7 @@ public class ScreenStructureSaver extends BaseScreen {
     private Checkbox netherValidation;
     private Checkbox saveToConfig;
 
-    public ScreenStructureSaver(ItemStack stack, Component title) {
+    public StructureSaverScreen(ItemStack stack, Component title) {
         super(174, 142, title);
         this.stack = stack;
     }

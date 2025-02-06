@@ -1,5 +1,6 @@
-package de.melanx.skyblockbuilder;
+package de.melanx.skyblockbuilder.registration;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.blocks.SpawnBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;

@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder;
+package de.melanx.skyblockbuilder.registration;
 
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.nbt.CompoundTag;

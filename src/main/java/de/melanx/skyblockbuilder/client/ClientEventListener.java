@@ -3,12 +3,13 @@ package de.melanx.skyblockbuilder.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import de.melanx.skyblockbuilder.ModBlocks;
-import de.melanx.skyblockbuilder.ModDataComponentTypes;
-import de.melanx.skyblockbuilder.ModItems;
-import de.melanx.skyblockbuilder.Registration;
+import de.melanx.skyblockbuilder.client.screens.CustomizeSkyblockScreen;
 import de.melanx.skyblockbuilder.commands.OpenDumpScreen;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
+import de.melanx.skyblockbuilder.registration.ModBlocks;
+import de.melanx.skyblockbuilder.registration.ModDataComponentTypes;
+import de.melanx.skyblockbuilder.registration.ModItems;
+import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -44,7 +45,7 @@ public class ClientEventListener {
 
     @SubscribeEvent
     public void onRegisterPresetEditors(RegisterPresetEditorsEvent event) {
-        event.register(Registration.skyblockKey, ScreenCustomizeSkyblock::new);
+        event.register(SkyblockPreset.KEY, CustomizeSkyblockScreen::new);
     }
 
     @SubscribeEvent

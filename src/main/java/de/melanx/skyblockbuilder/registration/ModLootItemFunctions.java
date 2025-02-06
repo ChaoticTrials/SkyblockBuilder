@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder;
+package de.melanx.skyblockbuilder.registration;
 
 import de.melanx.skyblockbuilder.template.SpreadMapFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;

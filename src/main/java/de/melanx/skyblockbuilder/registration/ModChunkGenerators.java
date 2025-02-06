@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder;
+package de.melanx.skyblockbuilder.registration;
 
 import com.mojang.serialization.MapCodec;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;

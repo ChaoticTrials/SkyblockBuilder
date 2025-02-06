@@ -1,5 +1,6 @@
-package de.melanx.skyblockbuilder;
+package de.melanx.skyblockbuilder.registration;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;

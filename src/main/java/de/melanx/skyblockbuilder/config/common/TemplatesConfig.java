@@ -41,7 +41,7 @@ public class TemplatesConfig {
     @Config({"The default offset from 0, 0 to generate the islands",
             "Can be used to generate them in the middle of .mca files",
             "This applies on top of the \"offset\" defined in each template"})
-    public static int defaultOffset = WorldConfig.offset;
+    public static int defaultOffset = 0;
 
     @Config({"The template which will be used for spawn only",
             "Example: ",

@@ -42,15 +42,9 @@ public class WorldConfig {
     @Config("Sea level in world [default: 63]")
     public static int seaHeight = 63;
 
-    @Config({"Distance between islands in overworld [default: 8192]", "nether the distance is 1/8"})
+    @Config({"Distance between islands in overworld [default: 8192]"})
     @IntRange(min = 64, max = 29999900)
     public static int islandDistance = 8192;
-
-    @Config({"UNUSED, USE templates.json5 'defaultOffset' INSTEAD",
-            "",
-            "The offset from 0, 0 to generate the islands",
-            "Can be used to generate them in the middle of .mca files"})
-    public static int offset = 0;
 
     @Config("Prevent scheduled ticks after generating the island")
     public static boolean preventScheduledTicks = true;
