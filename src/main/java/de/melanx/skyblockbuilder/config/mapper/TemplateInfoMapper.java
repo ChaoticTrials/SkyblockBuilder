@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
@@ -33,7 +34,7 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
     public TemplateInfo fromJson(JsonObject json) {
         String name = json.get("name").getAsString();
         String file = json.get("file").getAsString();
-        String spawns = json.get("spawns").getAsString();
+        SpawnsProvider spawns = SpawnsProvider.fromJson(json.get("spawns"));
 
         String desc = "";
         if (json.has("desc")) {
@@ -76,7 +77,7 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
         }
 
         json.addProperty("file", templateInfo.file());
-        json.addProperty("spawns", templateInfo.spawns());
+        json.add("spawns", templateInfo.spawns().toJson());
 
         if (templateInfo.offset().x() != TemplatesConfig.defaultOffset || templateInfo.offset().z() != TemplatesConfig.defaultOffset) {
             JsonArray offsetArray = new JsonArray();

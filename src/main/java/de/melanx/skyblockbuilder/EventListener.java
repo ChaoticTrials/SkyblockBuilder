@@ -12,7 +12,6 @@ import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.GenerateCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
-import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -46,7 +45,6 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.moddingx.libx.event.ConfigLoadedEvent;
 
 import java.util.NoSuchElementException;
@@ -233,13 +231,6 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onConfigChange(ConfigLoadedEvent event) {
-        MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
-        if (currentServer != null) {
-            StartingInventory.loadStarterItems(currentServer.registryAccess());
-        } else {
-            System.out.println("Server is null. Skipping config loading. LoadReason: " + event.getReason());
-        }
-
         if (event.getConfigClass() == TemplatesConfig.class && event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
             TemplateLoader.updateTemplates();
         }

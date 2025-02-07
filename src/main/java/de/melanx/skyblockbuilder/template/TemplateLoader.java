@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.template;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -29,7 +30,9 @@ public class TemplateLoader {
             Set<String> takenNames = new HashSet<>();
 
             for (TemplateInfo info : TemplatesConfig.templates) {
-                if (!TemplatesConfig.spawns.containsKey(info.spawns())) {
+                if (info.spawns() instanceof SpawnsProvider.Reference(
+                        String name
+                ) && !TemplatesConfig.spawns.containsKey(name)) {
                     throw new IllegalArgumentException("Spawn configuration \"" + info.spawns() + "\" is not defined: " + info.name());
                 }
 

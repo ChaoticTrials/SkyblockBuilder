@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
+import de.melanx.skyblockbuilder.config.values.TemplateSpawns;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.registration.ModBlockTags;
 import de.melanx.skyblockbuilder.util.SkyPaths;
@@ -48,24 +49,19 @@ public class ConfiguredTemplate {
         try {
             Path file = SkyPaths.TEMPLATES_DIR.resolve(info.file());
             nbt = TemplateUtil.readTemplate(file);
-            //noinspection deprecation
             template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
         } catch (IOException | CommandSyntaxException e) {
             SkyblockBuilder.getLogger().error("Template with name {} is incorrect.", info.file(), e);
         }
 
         this.template = template;
-        this.defaultSpawns.addAll(ConfiguredTemplate.collectSpawns(TemplatesConfig.spawns.get(info.spawns())));
+        this.defaultSpawns.addAll(ConfiguredTemplate.collectSpawns(info.spawns().spawns()));
         this.name = info.name();
         this.desc = info.desc();
         this.offset = info.offset();
         this.surroundingMargin = info.surroundingMargin();
         List<Block> blockPalette = TemplatesConfig.surroundingBlocks.get(info.surroundingBlocks());
-        if (blockPalette != null) {
-            this.surroundingBlocks = List.copyOf(blockPalette);
-        } else {
-            this.surroundingBlocks = List.of();
-        }
+        this.surroundingBlocks = blockPalette != null ? List.copyOf(blockPalette) : List.of();
         List<TemplateInfo.SpreadInfo> spreadInfos = TemplatesConfig.spreads.get(info.spreads());
         List<SpreadConfig> spreadConfigs = new ArrayList<>();
         if (spreadInfos != null) {
@@ -78,14 +74,14 @@ public class ConfiguredTemplate {
 
     private ConfiguredTemplate() {}
 
-    private static Set<TemplatesConfig.Spawn> collectSpawns(Map<String, Set<BlockPos>> spawnMap) {
-        Set<TemplatesConfig.Spawn> spawns = new HashSet<>();
-        for (Map.Entry<String, Set<BlockPos>> entry : spawnMap.entrySet()) {
-            WorldUtil.Directions direction = WorldUtil.Directions.valueOf(entry.getKey().toUpperCase(Locale.ROOT));
-            entry.getValue().forEach(pos -> spawns.add(new TemplatesConfig.Spawn(pos, direction)));
-        }
+    private static Set<TemplatesConfig.Spawn> collectSpawns(TemplateSpawns spawns) {
+        Set<TemplatesConfig.Spawn> combinedSpawns = new HashSet<>();
+        spawns.south().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.Directions.SOUTH)));
+        spawns.west().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.Directions.WEST)));
+        spawns.north().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.Directions.NORTH)));
+        spawns.east().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.Directions.EAST)));
 
-        return spawns;
+        return combinedSpawns;
     }
 
     public void placeInWorld(ServerLevel serverLevel, Team team, StructurePlaceSettings settings, RandomSource random, int flags) {
