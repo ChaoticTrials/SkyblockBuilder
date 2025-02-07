@@ -46,6 +46,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.moddingx.libx.event.ConfigLoadedEvent;
 
 import java.util.NoSuchElementException;
@@ -188,6 +189,7 @@ public class EventListener {
     public static void onServerStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
         SkyPaths.generateDefaultFiles(server);
+
         if (WorldUtil.isSkyblock(server.overworld())) {
             SkyblockBuilder.getLogger().info("Successfully loaded Skyblock!");
             TemplateLoader.updateTemplates();
@@ -231,12 +233,18 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onConfigChange(ConfigLoadedEvent event) {
-        if (event.getConfigClass() == TemplatesConfig.class) {
-            StartingInventory.INSTANCE.loadStarterItems();
-            if (event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
-                TemplateLoader.updateTemplates();
-            }
+        MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
+        if (currentServer != null) {
+            StartingInventory.loadStarterItems(currentServer.registryAccess());
+        } else {
+            System.out.println("Server is null. Skipping config loading. LoadReason: " + event.getReason());
+        }
 
+        if (event.getConfigClass() == TemplatesConfig.class && event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
+            TemplateLoader.updateTemplates();
+        }
+
+        if (event.getConfigClass() == PermissionsConfig.class) {
             if (PermissionsConfig.forceSkyblockCheck) {
                 SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled");
             }

@@ -5,11 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -82,20 +79,19 @@ public class CuriosCompat {
         CuriosCompat.STARTER_ITEMS.clear();
 
         for (JsonElement element : curiosItems) {
-            Tag tag = JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, element);
-            Optional<ItemStack> itemStack = ItemStack.parse(lookupProvider, tag);
-            if (itemStack.isEmpty()) {
-                throw new IllegalStateException("I have no idea what went wrong lol"); // todo rephrase
+            JsonObject mainObject = element.getAsJsonObject();
+            Optional<com.mojang.datafixers.util.Pair<ItemStack, JsonElement>> optional = ItemStack.OPTIONAL_CODEC.decode(JsonOps.INSTANCE, mainObject.get("Item"))
+                    .resultOrPartial(SkyblockBuilder.getLogger()::error);
+            if (optional.isEmpty()) {
+                throw new IllegalStateException("Unable to read starting item: " + element);
             }
 
-            JsonObject item = element.getAsJsonObject();
-            ItemStack stack = itemStack.get();
-
-            if (!item.has("Slot")) {
+            ItemStack stack = optional.get().getFirst();
+            if (!mainObject.has("Slot")) {
                 throw new IllegalStateException("Curios inventory 'Slot' identifier missing for " + stack);
             }
 
-            String identifier = item.get("Slot").getAsString();
+            String identifier = mainObject.get("Slot").getAsString();
             CuriosCompat.STARTER_ITEMS.add(Pair.of(identifier, stack));
         }
     }
@@ -104,12 +100,5 @@ public class CuriosCompat {
         player.sendSystemMessage(Component.literal("Something went wrong, look at the log for more information. " +
                         "If you're not the pack author, report it to them.")
                 .withStyle(ChatFormatting.RED));
-    }
-
-    public static JsonObject serializeItem(ItemStack stack, String identifier, HolderLookup.Provider lookupProvider) {
-        JsonObject json = RandomUtility.serializeItem(stack, lookupProvider);
-        json.addProperty("Slot", identifier);
-
-        return json;
     }
 }
