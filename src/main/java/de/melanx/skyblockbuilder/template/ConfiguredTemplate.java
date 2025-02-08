@@ -5,6 +5,7 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.config.values.TemplateSpawns;
+import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.registration.ModBlockTags;
 import de.melanx.skyblockbuilder.util.SkyPaths;
@@ -55,17 +56,17 @@ public class ConfiguredTemplate {
         }
 
         this.template = template;
-        this.defaultSpawns.addAll(ConfiguredTemplate.collectSpawns(info.spawns().spawns()));
+        this.defaultSpawns.addAll(ConfiguredTemplate.collectSpawns(info.spawns().templateSpawns()));
         this.name = info.name();
         this.desc = info.desc();
         this.offset = info.offset();
         this.surroundingMargin = info.surroundingMargin();
         List<Block> blockPalette = TemplatesConfig.surroundingBlocks.get(info.surroundingBlocks());
         this.surroundingBlocks = blockPalette != null ? List.copyOf(blockPalette) : List.of();
-        List<TemplateInfo.SpreadInfo> spreadInfos = TemplatesConfig.spreads.get(info.spreads());
+        SpreadsProvider spreads = info.spreads();
         List<SpreadConfig> spreadConfigs = new ArrayList<>();
-        if (spreadInfos != null) {
-            for (TemplateInfo.SpreadInfo spreadInfo : spreadInfos) {
+        if (spreads != null) {
+            for (TemplateInfo.SpreadInfo spreadInfo : spreads.templateSpreads().spreads()) {
                 spreadConfigs.add(new SpreadConfig(spreadInfo));
             }
         }

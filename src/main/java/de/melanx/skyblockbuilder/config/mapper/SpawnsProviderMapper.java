@@ -26,8 +26,8 @@ public class SpawnsProviderMapper implements ValueMapper<SpawnsProvider, JsonEle
     }
 
     @Override
-    public JsonElement toJson(SpawnsProvider value) {
-        return value.toJson();
+    public JsonElement toJson(SpawnsProvider provider) {
+        return provider.toJson();
     }
 
     @Override

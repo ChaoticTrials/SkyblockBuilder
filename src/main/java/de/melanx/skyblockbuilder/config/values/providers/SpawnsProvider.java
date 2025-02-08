@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 
 public interface SpawnsProvider {
 
-    TemplateSpawns spawns();
+    TemplateSpawns templateSpawns();
 
     JsonElement toJson();
 
@@ -28,7 +28,7 @@ public interface SpawnsProvider {
     record Reference(String name) implements SpawnsProvider {
 
         @Override
-        public TemplateSpawns spawns() {
+        public TemplateSpawns templateSpawns() {
             if (!TemplatesConfig.spawns.containsKey(this.name)) {
                 throw new IllegalArgumentException("Unknown spawns: " + this.name);
             }
@@ -42,11 +42,11 @@ public interface SpawnsProvider {
         }
     }
 
-    record Direct(@Nonnull TemplateSpawns spawns) implements SpawnsProvider {
+    record Direct(@Nonnull TemplateSpawns templateSpawns) implements SpawnsProvider {
 
         @Override
         public JsonElement toJson() {
-            return TemplateSpawns.toJson(this.spawns);
+            return TemplateSpawns.toJson(this.templateSpawns);
         }
     }
 }

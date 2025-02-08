@@ -2,18 +2,19 @@ package de.melanx.skyblockbuilder.template;
 
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
+import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public record TemplateInfo(String name, String desc, String file, SpawnsProvider spawns, Offset offset,
-                           String surroundingBlocks, String spreads, int surroundingMargin) {
+                           String surroundingBlocks, SpreadsProvider spreads, int surroundingMargin) {
 
     public TemplateInfo(String name, String file, SpawnsProvider spawns) {
-        this(name, "", file, spawns, new Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset), "default", "default", 0);
+        this(name, "", file, spawns, new Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset), "default", new SpreadsProvider.Reference("default"), 0);
     }
 
     public TemplateInfo(String name, String file, SpawnsProvider spawns, Offset offset) {
-        this(name, "", file, spawns, offset, "default", "default", 0);
+        this(name, "", file, spawns, offset, "default", new SpreadsProvider.Reference("default"), 0);
     }
 
     public record SpreadInfo(String file, BlockPos minOffset, BlockPos maxOffset, Origin origin) {

@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.config.common;
 
 import de.melanx.skyblockbuilder.config.values.TemplateSpawns;
+import de.melanx.skyblockbuilder.config.values.TemplateSpreads;
 import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -38,7 +39,7 @@ public class TemplatesConfig {
             "    \"maxOffset\": [ 4, 10, 3 ],",
             "    \"origin\": \"center\"",
             "}"})
-    public static Map<String, List<TemplateInfo.SpreadInfo>> spreads = Map.of("default", List.of());
+    public static Map<String, TemplateSpreads> spreads = Map.of("default", TemplateSpreads.EMPTY);
 
     @Config({"The default offset from 0, 0 to generate the islands",
             "Can be used to generate them in the middle of .mca files",

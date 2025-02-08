@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
+import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
@@ -59,10 +60,7 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             surroundingMargin = json.get("surroundingMargin").getAsInt();
         }
 
-        String spreads = "";
-        if (json.has("spreads")) {
-            spreads = json.get("spreads").getAsString();
-        }
+        SpreadsProvider spreads = SpreadsProvider.fromJson(json.get("spreads"));
 
         return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, spreads, surroundingMargin);
     }
@@ -95,8 +93,8 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             json.addProperty("surroundingMargin", templateInfo.surroundingMargin());
         }
 
-        if (!templateInfo.spreads().isEmpty()) {
-            json.addProperty("spreads", templateInfo.spreads());
+        if (templateInfo.spreads() != null) {
+            json.add("spreads", templateInfo.spreads().toJson());
         }
 
         return json;

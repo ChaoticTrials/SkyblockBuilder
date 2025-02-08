@@ -4,6 +4,7 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
+import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -40,7 +41,9 @@ public class TemplateLoader {
                     throw new IllegalArgumentException("Surrounding blocks configuration \"" + info.surroundingBlocks() + "\" is not defined: " + info.name());
                 }
 
-                if (!TemplatesConfig.spreads.containsKey(info.spreads()) && !info.spreads().isEmpty()) {
+                if (info.spreads() instanceof SpreadsProvider.Reference(
+                        String name
+                ) && !TemplatesConfig.spreads.containsKey(name)) {
                     throw new IllegalArgumentException("Spreads configuration \"" + info.spreads() + "\" is not defined: " + info.name());
                 }
 

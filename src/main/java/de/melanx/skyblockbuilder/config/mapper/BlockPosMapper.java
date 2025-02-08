@@ -23,6 +23,7 @@ import java.awt.Color;
 @RegisterMapper
 public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
 
+    // todo move to another class since it's used in too many locations
     public static BlockPos fromJsonArray(JsonArray json) {
         if (json.size() != 3) throw new IllegalStateException("Invalid BlockPos: " + json);
         return new BlockPos(json.get(0).getAsInt(), json.get(1).getAsInt(), json.get(2).getAsInt());
