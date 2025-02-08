@@ -133,7 +133,7 @@ public class Team {
         this.updateLastChanged();
     }
 
-    public void addPossibleSpawn(BlockPos pos, WorldUtil.Directions direction) {
+    public void addPossibleSpawn(BlockPos pos, WorldUtil.SpawnDirection direction) {
         this.addPossibleSpawn(new TemplatesConfig.Spawn(pos, direction));
     }
 
@@ -387,7 +387,7 @@ public class Team {
 
         ListTag spawns = new ListTag();
         for (TemplatesConfig.Spawn spawn : this.possibleSpawns) {
-            CompoundTag posTag = WorldUtil.getPosTag(spawn.pos());
+            CompoundTag posTag = WorldUtil.blockPosToTag(spawn.pos());
             posTag.putString("Direction", spawn.direction().name());
 
             spawns.add(posTag);
@@ -395,7 +395,7 @@ public class Team {
 
         ListTag defaultSpawns = new ListTag();
         for (TemplatesConfig.Spawn spawn : this.defaultPossibleSpawns) {
-            CompoundTag posTag = WorldUtil.getPosTag(spawn.pos());
+            CompoundTag posTag = WorldUtil.blockPosToTag(spawn.pos());
             posTag.putString("Direction", spawn.direction().name());
 
             defaultSpawns.add(posTag);
@@ -415,8 +415,8 @@ public class Team {
             for (PlacedSpread placedSpread : entry.getValue()) {
                 CompoundTag tag = new CompoundTag();
                 tag.putString("Name", placedSpread.name());
-                tag.put("Pos", WorldUtil.getPosTag(placedSpread.pos()));
-                tag.put("Size", WorldUtil.getPosTag(placedSpread.size()));
+                tag.put("Pos", WorldUtil.blockPosToTag(placedSpread.pos()));
+                tag.put("Size", WorldUtil.blockPosToTag(placedSpread.size()));
                 namedSpreads.add(tag);
             }
             placedSpreads.put(entry.getKey(), namedSpreads);
@@ -449,8 +449,8 @@ public class Team {
         this.possibleSpawns.clear();
         for (Tag tag : spawns) {
             CompoundTag posTag = (CompoundTag) tag;
-            BlockPos pos = WorldUtil.getPosFromTag(posTag);
-            WorldUtil.Directions direction = WorldUtil.Directions.valueOf(posTag.getString("Direction"));
+            BlockPos pos = WorldUtil.blockPosFromTag(posTag);
+            WorldUtil.SpawnDirection direction = WorldUtil.SpawnDirection.valueOf(posTag.getString("Direction"));
             this.possibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
         }
 
@@ -458,8 +458,8 @@ public class Team {
         this.defaultPossibleSpawns.clear();
         for (Tag tag : defaultSpawns) {
             CompoundTag posTag = (CompoundTag) tag;
-            BlockPos pos = WorldUtil.getPosFromTag(posTag);
-            WorldUtil.Directions direction = WorldUtil.Directions.valueOf(posTag.getString("Direction"));
+            BlockPos pos = WorldUtil.blockPosFromTag(posTag);
+            WorldUtil.SpawnDirection direction = WorldUtil.SpawnDirection.valueOf(posTag.getString("Direction"));
             this.defaultPossibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
         }
 
@@ -477,8 +477,8 @@ public class Team {
             for (Tag tag : list) {
                 CompoundTag ctag = ((CompoundTag) tag);
                 String name = ctag.getString("Name");
-                BlockPos pos = WorldUtil.getPosFromTag(ctag.getCompound("Pos"));
-                BlockPos size = WorldUtil.getPosFromTag(ctag.getCompound("Size"));
+                BlockPos pos = WorldUtil.blockPosFromTag(ctag.getCompound("Pos"));
+                BlockPos size = WorldUtil.blockPosFromTag(ctag.getCompound("Size"));
 
                 PlacedSpread placedSpread = new PlacedSpread(name, pos, size);
                 namedSpreads.add(placedSpread);

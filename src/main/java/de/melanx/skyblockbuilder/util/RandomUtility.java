@@ -213,7 +213,7 @@ public class RandomUtility {
                 BlockState state = level.getBlockState(actPos);
                 if (toIgnore.isEmpty() || !toIgnore.contains(state.getBlock())) {
                     if (state.is(ModBlocks.spawnBlock)) {
-                        WorldUtil.Directions direction = WorldUtil.Directions.fromDirection(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
+                        WorldUtil.SpawnDirection direction = WorldUtil.SpawnDirection.fromDirection(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
                         spawns.add(new TemplatesConfig.Spawn(relPos, direction));
                         // prevent spawn block being replaced by solid block in a cave
                         if (toIgnore.contains(Blocks.AIR)) {

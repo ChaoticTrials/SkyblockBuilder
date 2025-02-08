@@ -32,5 +32,14 @@ public record TemplateInfo(String name, String desc, String file, SpawnsProvider
         }
     }
 
-    public record Offset(int x, int y, int z) {}
+    public record Offset(int x, int y, int z) {
+
+        public static Offset fromBlockPos(BlockPos pos) {
+            return new Offset(pos.getX(), pos.getY(), pos.getZ());
+        }
+
+        public BlockPos asBlockPos() {
+            return new BlockPos(this.x, this.y, this.z);
+        }
+    }
 }

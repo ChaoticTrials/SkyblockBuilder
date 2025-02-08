@@ -4,7 +4,6 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.util.BiomeSourceConverter;
-import de.melanx.skyblockbuilder.util.WorldPresetUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.SkyBiomeSource;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
@@ -82,11 +81,11 @@ public class SkyblockPreset extends WorldPreset {
                         configuredOverworldChunkGenerator(noises, noiseGeneratorSettings, biomes)),
                 LevelStem.NETHER, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.NETHER),
                         DimensionsConfig.Nether.Default ?
-                                WorldPresetUtil.defaultNetherGenerator(noises, noiseGeneratorSettings)
+                                SkyblockPreset.defaultNetherGenerator(noises, noiseGeneratorSettings)
                                 : netherChunkGenerator(noises, noiseGeneratorSettings, biomes)),
                 LevelStem.END, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.END),
                         DimensionsConfig.End.Default ?
-                                WorldPresetUtil.defaultEndGenerator(noiseGeneratorSettings, biomes)
+                                SkyblockPreset.defaultEndGenerator(noiseGeneratorSettings, biomes)
                                 : endChunkGenerator(noiseGeneratorSettings, biomes))
         );
     }
@@ -161,5 +160,23 @@ public class SkyblockPreset extends WorldPreset {
         });
 
         return new SkyBiomeSource(centerBiomes, biomeSource);
+    }
+
+    private static ChunkGenerator defaultNetherGenerator(
+            HolderGetter<MultiNoiseBiomeSourceParameterList> noises,
+            HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings
+    ) {
+        MultiNoiseBiomeSource biomeSource = MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER));
+        Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.NETHER);
+        return new NoiseBasedChunkGenerator(biomeSource, settings);
+    }
+
+    private static ChunkGenerator defaultEndGenerator(
+            HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings,
+            HolderGetter<Biome> biomes
+    ) {
+        Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.END);
+        TheEndBiomeSource biomeSource = TheEndBiomeSource.create(biomes);
+        return new NoiseBasedChunkGenerator(biomeSource, settings);
     }
 }

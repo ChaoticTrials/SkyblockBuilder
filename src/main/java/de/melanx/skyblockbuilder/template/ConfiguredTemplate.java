@@ -77,10 +77,10 @@ public class ConfiguredTemplate {
 
     private static Set<TemplatesConfig.Spawn> collectSpawns(TemplateSpawns spawns) {
         Set<TemplatesConfig.Spawn> combinedSpawns = new HashSet<>();
-        spawns.south().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.Directions.SOUTH)));
-        spawns.west().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.Directions.WEST)));
-        spawns.north().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.Directions.NORTH)));
-        spawns.east().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.Directions.EAST)));
+        spawns.south().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.SpawnDirection.SOUTH)));
+        spawns.west().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.SpawnDirection.WEST)));
+        spawns.north().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.SpawnDirection.NORTH)));
+        spawns.east().forEach(pos -> combinedSpawns.add(new TemplatesConfig.Spawn(pos, WorldUtil.SpawnDirection.EAST)));
 
         return combinedSpawns;
     }
@@ -165,10 +165,7 @@ public class ConfiguredTemplate {
         ListTag spawns = new ListTag();
         for (TemplatesConfig.Spawn spawn : this.defaultSpawns) {
             BlockPos pos = spawn.pos();
-            CompoundTag posTag = new CompoundTag(); // todo use BlockPosMapper#toJsonArray
-            posTag.putInt("posX", pos.getX());
-            posTag.putInt("posY", pos.getY());
-            posTag.putInt("posZ", pos.getZ());
+            CompoundTag posTag = WorldUtil.blockPosToTag(pos);
             posTag.putString("Direction", spawn.direction().name());
 
             spawns.add(posTag);
@@ -178,9 +175,8 @@ public class ConfiguredTemplate {
         nbt.put("Spawns", spawns);
         nbt.putString("Name", this.name);
         nbt.putString("Desc", this.desc);
-        nbt.putInt("OffsetX", this.offset.x());
-        nbt.putInt("OffsetY", this.offset.y());
-        nbt.putInt("OffsetZ", this.offset.z());
+
+        nbt.put("Offset", WorldUtil.blockPosToTag(this.offset.asBlockPos()));
         nbt.putInt("SurroundingMargin", this.surroundingMargin);
 
         ListTag surroundingBlocks = new ListTag();
@@ -227,14 +223,14 @@ public class ConfiguredTemplate {
         this.defaultSpawns.clear();
         for (Tag tag : spawns) {
             CompoundTag posTag = (CompoundTag) tag;
-            BlockPos pos = new BlockPos(posTag.getInt("posX"), posTag.getInt("posY"), posTag.getInt("posZ"));
-            WorldUtil.Directions direction = WorldUtil.Directions.valueOf(posTag.getString("Direction"));
+            BlockPos pos = WorldUtil.blockPosFromTag(posTag);
+            WorldUtil.SpawnDirection direction = WorldUtil.SpawnDirection.valueOf(posTag.getString("Direction"));
             this.defaultSpawns.add(new TemplatesConfig.Spawn(pos, direction));
         }
 
         this.name = nbt.getString("Name");
         this.desc = nbt.getString("Desc");
-        this.offset = new TemplateInfo.Offset(nbt.getInt("OffsetX"), nbt.getInt("OffsetY"), nbt.getInt("OffsetZ"));
+        this.offset = TemplateInfo.Offset.fromBlockPos(WorldUtil.blockPosFromTag(nbt.getCompound("Offset")));
         this.surroundingMargin = nbt.getInt("SurroundingMargin");
 
         ListTag surroundingBlocks = nbt.getList("SurroundingBlocks", Tag.TAG_STRING);
@@ -255,10 +251,10 @@ public class ConfiguredTemplate {
             TemplateInfo.SpreadInfo.Origin origin = TemplateInfo.SpreadInfo.Origin.valueOf(((CompoundTag) spread).getString("Origin"));
 
             CompoundTag minPos = ((CompoundTag) spread).getCompound("minOffset");
-            BlockPos minOffset = new BlockPos(minPos.getInt("posX"), minPos.getInt("posY"), minPos.getInt("posZ"));
+            BlockPos minOffset = WorldUtil.blockPosFromTag(minPos);
 
             CompoundTag maxPos = ((CompoundTag) spread).getCompound("maxOffset");
-            BlockPos maxOffset = new BlockPos(maxPos.getInt("posX"), maxPos.getInt("posY"), maxPos.getInt("posZ"));
+            BlockPos maxOffset = WorldUtil.blockPosFromTag(maxPos);
 
             spreadConfigs.add(new SpreadConfig(file, minOffset, maxOffset, origin));
         }

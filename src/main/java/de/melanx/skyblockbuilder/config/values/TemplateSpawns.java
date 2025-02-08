@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.config.values;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import de.melanx.skyblockbuilder.config.mapper.BlockPosMapper;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 
 import java.util.HashMap;
@@ -16,7 +16,7 @@ public record TemplateSpawns(Set<BlockPos> south, Set<BlockPos> west, Set<BlockP
         Map<String, Set<BlockPos>> spawns = new HashMap<>();
         json.entrySet().forEach(entry -> {
             entry.getValue().getAsJsonArray().forEach(array -> {
-                BlockPos pos = BlockPosMapper.fromJsonArray(array.getAsJsonArray());
+                BlockPos pos = WorldUtil.blockPosFromJsonArray(array.getAsJsonArray());
                 spawns.computeIfAbsent(entry.getKey(), k -> new HashSet<>()).add(pos);
             });
         });
@@ -29,25 +29,25 @@ public record TemplateSpawns(Set<BlockPos> south, Set<BlockPos> west, Set<BlockP
 
         JsonArray southPositions = new JsonArray();
         for (BlockPos blockPos : spawns.south()) {
-            JsonArray jsonArray = BlockPosMapper.toJsonArray(blockPos);
+            JsonArray jsonArray = WorldUtil.blockPosToJsonArray(blockPos);
             southPositions.add(jsonArray);
         }
 
         JsonArray westPositions = new JsonArray();
         for (BlockPos blockPos : spawns.west()) {
-            JsonArray jsonArray = BlockPosMapper.toJsonArray(blockPos);
+            JsonArray jsonArray = WorldUtil.blockPosToJsonArray(blockPos);
             westPositions.add(jsonArray);
         }
 
         JsonArray northPositions = new JsonArray();
         for (BlockPos blockPos : spawns.north()) {
-            JsonArray jsonArray = BlockPosMapper.toJsonArray(blockPos);
+            JsonArray jsonArray = WorldUtil.blockPosToJsonArray(blockPos);
             northPositions.add(jsonArray);
         }
 
         JsonArray eastPositions = new JsonArray();
         for (BlockPos blockPos : spawns.east()) {
-            JsonArray jsonArray = BlockPosMapper.toJsonArray(blockPos);
+            JsonArray jsonArray = WorldUtil.blockPosToJsonArray(blockPos);
             eastPositions.add(jsonArray);
         }
 

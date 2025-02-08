@@ -32,7 +32,7 @@ public class SkyblockHooks {
     public static Pair<SkyblockManageTeamEvent.Result, TemplatesConfig.Spawn> onAddSpawn(ServerPlayer player, Team team, BlockPos pos, Direction direction) {
         SkyblockManageTeamEvent.AddSpawn event = new SkyblockManageTeamEvent.AddSpawn(player, team, pos, direction);
         NeoForge.EVENT_BUS.post(event);
-        return Pair.of(event.getResult(), new TemplatesConfig.Spawn(event.getPos(), WorldUtil.Directions.fromDirection(event.getDirection())));
+        return Pair.of(event.getResult(), new TemplatesConfig.Spawn(event.getPos(), WorldUtil.SpawnDirection.fromDirection(event.getDirection())));
     }
 
     public static SkyblockManageTeamEvent.Result onRemoveSpawn(ServerPlayer player, Team team, BlockPos pos) {

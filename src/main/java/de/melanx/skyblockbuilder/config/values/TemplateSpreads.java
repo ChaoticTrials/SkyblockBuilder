@@ -3,8 +3,8 @@ package de.melanx.skyblockbuilder.config.values;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.melanx.skyblockbuilder.config.mapper.BlockPosMapper;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 
 import java.util.ArrayList;
@@ -28,12 +28,12 @@ public record TemplateSpreads(List<TemplateInfo.SpreadInfo> spreads) {
                     : TemplateInfo.SpreadInfo.Origin.CENTER;
             JsonElement offsetElement = json.get("offset");
             if (offsetElement.isJsonArray()) {
-                BlockPos blockPos = BlockPosMapper.fromJsonArray(offsetElement.getAsJsonArray());
+                BlockPos blockPos = WorldUtil.blockPosFromJsonArray(offsetElement.getAsJsonArray());
                 spreads.add(new TemplateInfo.SpreadInfo(file, blockPos, blockPos, origin));
             } else {
                 JsonObject offsetObject = offsetElement.getAsJsonObject();
-                BlockPos minOffset = BlockPosMapper.fromJsonArray(offsetObject.getAsJsonArray("min"));
-                BlockPos maxOffset = BlockPosMapper.fromJsonArray(offsetObject.getAsJsonArray("max"));
+                BlockPos minOffset = WorldUtil.blockPosFromJsonArray(offsetObject.getAsJsonArray("min"));
+                BlockPos maxOffset = WorldUtil.blockPosFromJsonArray(offsetObject.getAsJsonArray("max"));
                 spreads.add(new TemplateInfo.SpreadInfo(file, minOffset, maxOffset, origin));
             }
         });
@@ -50,11 +50,11 @@ public record TemplateSpreads(List<TemplateInfo.SpreadInfo> spreads) {
             json.addProperty("origin", spread.origin().toString().toLowerCase());
 
             if (spread.minOffset().equals(spread.maxOffset())) {
-                json.add("offset", BlockPosMapper.toJsonArray(spread.minOffset()));
+                json.add("offset", WorldUtil.blockPosToJsonArray(spread.minOffset()));
             } else {
                 JsonObject offset = new JsonObject();
-                offset.add("min", BlockPosMapper.toJsonArray(spread.minOffset()));
-                offset.add("max", BlockPosMapper.toJsonArray(spread.maxOffset()));
+                offset.add("min", WorldUtil.blockPosToJsonArray(spread.minOffset()));
+                offset.add("max", WorldUtil.blockPosToJsonArray(spread.maxOffset()));
                 json.add("offset", offset);
             }
 

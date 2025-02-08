@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
@@ -115,7 +116,7 @@ public class WorldUtil {
         }
 
         SkyblockBuilder.getLogger().info("No valid spawn position found, searching...");
-        TemplatesConfig.Spawn spawn = team.getPossibleSpawns().stream().findAny().orElse(new TemplatesConfig.Spawn(team.getIsland().getCenter(), Directions.SOUTH));
+        TemplatesConfig.Spawn spawn = team.getPossibleSpawns().stream().findAny().orElse(new TemplatesConfig.Spawn(team.getIsland().getCenter(), SpawnDirection.SOUTH));
 
         return new TemplatesConfig.Spawn(PositionHelper.findPos(spawn.pos(), blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radius), spawn.direction());
     }
@@ -229,7 +230,7 @@ public class WorldUtil {
         return i;
     }
 
-    public static CompoundTag getPosTag(BlockPos pos) {
+    public static CompoundTag blockPosToTag(BlockPos pos) {
         CompoundTag posTag = new CompoundTag();
         posTag.putInt("posX", pos.getX());
         posTag.putInt("posY", pos.getY());
@@ -238,7 +239,7 @@ public class WorldUtil {
         return posTag;
     }
 
-    public static BlockPos getPosFromTag(CompoundTag posTag) {
+    public static BlockPos blockPosFromTag(CompoundTag posTag) {
         return new BlockPos(
                 posTag.getInt("posX"),
                 posTag.getInt("posY"),
@@ -246,7 +247,24 @@ public class WorldUtil {
         );
     }
 
-    public enum Directions {
+    public static BlockPos blockPosFromJsonArray(JsonArray json) {
+        if (json.size() != 3) throw new IllegalStateException("Invalid BlockPos: " + json);
+        return new BlockPos(
+                json.get(0).getAsInt(),
+                json.get(1).getAsInt(),
+                json.get(2).getAsInt()
+        );
+    }
+
+    public static JsonArray blockPosToJsonArray(BlockPos pos) {
+        JsonArray array = new JsonArray();
+        array.add(pos.getX());
+        array.add(pos.getY());
+        array.add(pos.getZ());
+        return array;
+    }
+
+    public enum SpawnDirection {
         NORTH(180),
         EAST(270),
         SOUTH(0),
@@ -254,11 +272,11 @@ public class WorldUtil {
 
         private final int yRot;
 
-        Directions(int yaw) {
+        SpawnDirection(int yaw) {
             this.yRot = yaw;
         }
 
-        public static Directions fromDirection(Direction direction) {
+        public static SpawnDirection fromDirection(Direction direction) {
             return switch (direction) {
                 case NORTH -> NORTH;
                 case EAST -> EAST;

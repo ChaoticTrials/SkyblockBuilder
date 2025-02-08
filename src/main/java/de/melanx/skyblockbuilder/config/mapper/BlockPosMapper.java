@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.config.mapper;
 
 import com.google.gson.JsonArray;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,28 +24,14 @@ import java.awt.Color;
 @RegisterMapper
 public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
 
-    // todo move to another class since it's used in too many locations
-    public static BlockPos fromJsonArray(JsonArray json) {
-        if (json.size() != 3) throw new IllegalStateException("Invalid BlockPos: " + json);
-        return new BlockPos(json.get(0).getAsInt(), json.get(1).getAsInt(), json.get(2).getAsInt());
-    }
-
-    public static JsonArray toJsonArray(BlockPos value) {
-        JsonArray array = new JsonArray();
-        array.add(value.getX());
-        array.add(value.getY());
-        array.add(value.getZ());
-        return array;
-    }
-
     @Override
     public BlockPos fromJson(JsonArray json) {
-        return BlockPosMapper.fromJsonArray(json);
+        return WorldUtil.blockPosFromJsonArray(json);
     }
 
     @Override
     public JsonArray toJson(BlockPos value) {
-        return BlockPosMapper.toJsonArray(value);
+        return WorldUtil.blockPosToJsonArray(value);
     }
 
     @Override
