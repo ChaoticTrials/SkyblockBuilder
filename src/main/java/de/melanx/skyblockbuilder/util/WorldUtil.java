@@ -1,19 +1,21 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
 import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.registration.ModBlockTags;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -24,8 +26,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -114,7 +116,7 @@ public class WorldUtil {
         }
 
         SkyblockBuilder.getLogger().info("No valid spawn position found, searching...");
-        TemplatesConfig.Spawn spawn = team.getPossibleSpawns().stream().findAny().orElse(new TemplatesConfig.Spawn(team.getIsland().getCenter(), Directions.SOUTH));
+        TemplatesConfig.Spawn spawn = team.getPossibleSpawns().stream().findAny().orElse(new TemplatesConfig.Spawn(team.getIsland().getCenter(), SpawnDirection.SOUTH));
 
         return new TemplatesConfig.Spawn(PositionHelper.findPos(spawn.pos(), blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radius), spawn.direction());
     }
@@ -162,7 +164,7 @@ public class WorldUtil {
 
     // [Vanilla copy] Get flat world info on servers
     public static List<FlatLayerInfo> layersInfoFromString(String settings) {
-        if (settings == null) {
+        if (settings == null || settings.isBlank()) {
             return Lists.newArrayList();
         }
 
@@ -204,19 +206,19 @@ public class WorldUtil {
         String blockName = info[info.length - 1];
 
         Block block;
+        ResourceLocation blockId = ResourceLocation.tryParse(blockName);
         try {
-            block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockName));
+            block = BuiltInRegistries.BLOCK.get(blockId);
         } catch (Exception exception) {
             SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", exception.getMessage());
             return null;
         }
 
-        if (block == null) {
+        if (block == Blocks.AIR && !BuiltInRegistries.BLOCK.getKey(Blocks.AIR).equals(blockId)) {
             SkyblockBuilder.getLogger().error("Error while parsing surface settings string => Unknown block, {}", blockName);
-            return null;
-        } else {
-            return new FlatLayerInfo(height, block);
         }
+
+        return new FlatLayerInfo(height, block);
     }
 
     public static int calculateHeightFromLayers(List<FlatLayerInfo> layerInfos) {
@@ -228,7 +230,7 @@ public class WorldUtil {
         return i;
     }
 
-    public static CompoundTag getPosTag(BlockPos pos) {
+    public static CompoundTag blockPosToTag(BlockPos pos) {
         CompoundTag posTag = new CompoundTag();
         posTag.putInt("posX", pos.getX());
         posTag.putInt("posY", pos.getY());
@@ -237,7 +239,7 @@ public class WorldUtil {
         return posTag;
     }
 
-    public static BlockPos getPosFromTag(CompoundTag posTag) {
+    public static BlockPos blockPosFromTag(CompoundTag posTag) {
         return new BlockPos(
                 posTag.getInt("posX"),
                 posTag.getInt("posY"),
@@ -245,7 +247,24 @@ public class WorldUtil {
         );
     }
 
-    public enum Directions {
+    public static BlockPos blockPosFromJsonArray(JsonArray json) {
+        if (json.size() != 3) throw new IllegalStateException("Invalid BlockPos: " + json);
+        return new BlockPos(
+                json.get(0).getAsInt(),
+                json.get(1).getAsInt(),
+                json.get(2).getAsInt()
+        );
+    }
+
+    public static JsonArray blockPosToJsonArray(BlockPos pos) {
+        JsonArray array = new JsonArray();
+        array.add(pos.getX());
+        array.add(pos.getY());
+        array.add(pos.getZ());
+        return array;
+    }
+
+    public enum SpawnDirection {
         NORTH(180),
         EAST(270),
         SOUTH(0),
@@ -253,11 +272,11 @@ public class WorldUtil {
 
         private final int yRot;
 
-        Directions(int yaw) {
+        SpawnDirection(int yaw) {
             this.yRot = yaw;
         }
 
-        public static Directions fromDirection(Direction direction) {
+        public static SpawnDirection fromDirection(Direction direction) {
             return switch (direction) {
                 case NORTH -> NORTH;
                 case EAST -> EAST;

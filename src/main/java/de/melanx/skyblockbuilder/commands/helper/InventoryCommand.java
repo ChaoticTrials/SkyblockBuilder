@@ -1,24 +1,26 @@
 package de.melanx.skyblockbuilder.commands.helper;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
-import de.melanx.skyblockbuilder.config.StartingInventory;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
@@ -28,7 +30,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 public class InventoryCommand {
 
@@ -68,24 +72,22 @@ public class InventoryCommand {
     }
 
     private static JsonArray vanillaInventory(ServerPlayer player) {
+        RegistryOps<JsonElement> registryOps = player.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+
         JsonArray items = new JsonArray();
         Inventory inventory = player.getInventory();
 
-        for (ItemStack stack : inventory.items) {
-            if (!stack.isEmpty()) {
-                items.add(StartingInventory.serializeItem(stack));
-            }
+        for (ItemStack item : player.getInventory().items) {
+            InventoryCommand.addItemWithSlot(items, item, registryOps);
         }
 
-        for (ItemStack stack : inventory.offhand) {
-            if (!stack.isEmpty()) {
-                items.add(StartingInventory.serializeItem(stack, EquipmentSlot.OFFHAND));
-            }
+        for (ItemStack item : player.getInventory().offhand) {
+            InventoryCommand.addItemWithSlot(items, item, EquipmentSlot.OFFHAND, registryOps);
         }
 
         for (int slot : Inventory.ALL_ARMOR_SLOTS) {
-            ItemStack stack = inventory.armor.get(slot);
-            if (!stack.isEmpty()) {
+            ItemStack item = inventory.armor.get(slot);
+            if (!item.isEmpty()) {
                 EquipmentSlot equipmentSlot = switch (slot) {
                     case 0 -> EquipmentSlot.FEET;
                     case 1 -> EquipmentSlot.LEGS;
@@ -93,7 +95,8 @@ public class InventoryCommand {
                     case 3 -> EquipmentSlot.HEAD;
                     default -> EquipmentSlot.MAINHAND;
                 };
-                items.add(StartingInventory.serializeItem(stack, equipmentSlot));
+
+                InventoryCommand.addItemWithSlot(items, item, equipmentSlot, registryOps);
             }
         }
 
@@ -101,23 +104,49 @@ public class InventoryCommand {
     }
 
     private static JsonArray curiosInventory(ServerPlayer player) {
+        RegistryOps<JsonElement> registryOps = player.registryAccess().createSerializationContext(JsonOps.INSTANCE);
         JsonArray items = new JsonArray();
-        CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
+
+        CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
             Map<String, ICurioStacksHandler> curios = handler.getCurios();
             for (Map.Entry<String, ICurioStacksHandler> entry : curios.entrySet()) {
                 String identifier = entry.getKey();
                 IDynamicStackHandler stacks = entry.getValue().getStacks();
                 for (int i = 0; i < stacks.getSlots(); i++) {
                     ItemStack stack = stacks.getStackInSlot(i);
-                    if (stack.isEmpty()) {
-                        continue;
-                    }
 
-                    items.add(CuriosCompat.serializeItem(stack, identifier));
+                    InventoryCommand.addItemWithSlot(items, stack, identifier, registryOps);
                 }
             }
         });
 
         return items;
+    }
+
+    private static void addItemWithSlot(JsonArray items, ItemStack item, RegistryOps<JsonElement> registryOps) {
+        InventoryCommand.addItemWithSlot(items, item, EquipmentSlot.MAINHAND, registryOps);
+    }
+
+    private static void addItemWithSlot(JsonArray items, ItemStack item, EquipmentSlot slot, RegistryOps<JsonElement> registryOps) {
+        InventoryCommand.addItemWithSlot(items, item, slot.toString().toLowerCase(Locale.ROOT), registryOps);
+    }
+
+    private static void addItemWithSlot(JsonArray items, ItemStack item, String slot, RegistryOps<JsonElement> registryOps) {
+        if (item.isEmpty()) {
+            return;
+        }
+
+        Optional<JsonElement> optional = ItemStack.OPTIONAL_CODEC
+                .encodeStart(registryOps, item)
+                .resultOrPartial(SkyblockBuilder.getLogger()::error);
+        if (optional.isEmpty()) {
+            return;
+        }
+
+        JsonObject mainObject = new JsonObject();
+        mainObject.addProperty("Slot", slot);
+        mainObject.add("Item", optional.get());
+
+        items.add(mainObject);
     }
 }

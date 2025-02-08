@@ -86,51 +86,35 @@ public class SkyMeta {
         }
     }
 
-    // todo 1.21 make enum for common method, and specific methods which set the enum by itself
-    public long getLastHomeTeleport() {
-        return this.lastHomeTeleport;
+    public long getLastTeleport(TeleportType type) {
+        return switch (type) {
+            case SPAWN -> this.lastSpawnTeleport;
+            case HOME -> this.lastHomeTeleport;
+            case VISIT -> this.lastVisitTeleport;
+        };
     }
 
-    // todo 1.21 make enum for common method, and specific methods which set the enum by itself
-    public void setLastHomeTeleport(long gameTime) {
-        this.lastHomeTeleport = gameTime;
+    public void setLastTeleport(TeleportType type, long gameTime) {
+        switch (type) {
+            case SPAWN -> this.lastSpawnTeleport = gameTime;
+            case HOME -> this.lastHomeTeleport = gameTime;
+            case VISIT -> this.lastVisitTeleport = gameTime;
+        }
+
         if (this.data != null) {
             this.data.setDirtySilently();
         }
     }
 
-    public boolean canTeleportHome(long gameTime) {
-        return (this.lastHomeTeleport == 0 ? PermissionsConfig.Teleports.homeCooldown : gameTime) - this.getLastHomeTeleport() >= PermissionsConfig.Teleports.homeCooldown;
-    }
+    public boolean canTeleport(TeleportType type, long gameTime) {
+        long lastTeleport = this.getLastTeleport(type);
+        int cooldown = switch (type) {
+            case SPAWN -> PermissionsConfig.Teleports.spawnCooldown;
+            case HOME -> PermissionsConfig.Teleports.homeCooldown;
+            case VISIT -> PermissionsConfig.Teleports.visitCooldown;
+        };
 
-    public long getLastSpawnTeleport() {
-        return this.lastSpawnTeleport;
-    }
-
-    public void setLastSpawnTeleport(long gameTime) {
-        this.lastSpawnTeleport = gameTime;
-        if (this.data != null) {
-            this.data.setDirtySilently();
-        }
-    }
-
-    public boolean canTeleportSpawn(long gameTime) {
-        return (this.lastSpawnTeleport == 0 ? PermissionsConfig.Teleports.spawnCooldown : gameTime) - this.getLastSpawnTeleport() >= PermissionsConfig.Teleports.spawnCooldown;
-    }
-
-    public long getLastVisitTeleport() {
-        return this.lastVisitTeleport;
-    }
-
-    public void setLastVisitTeleport(long gameTime) {
-        this.lastVisitTeleport = gameTime;
-        if (this.data != null) {
-            this.data.setDirtySilently();
-        }
-    }
-
-    public boolean canVisit(long gameTime) {
-        return (this.lastVisitTeleport == 0 ? PermissionsConfig.Teleports.visitCooldown : gameTime) - this.getLastVisitTeleport() >= PermissionsConfig.Teleports.visitCooldown;
+        return (lastTeleport == 0 ? cooldown : gameTime) - lastTeleport >= cooldown;
     }
 
     public SkyMeta load(@Nonnull CompoundTag nbt) {
@@ -176,5 +160,11 @@ public class SkyMeta {
         nbt.putLong("LastSpawnTeleport", this.lastSpawnTeleport);
         nbt.putLong("LastVisitTeleport", this.lastVisitTeleport);
         return nbt;
+    }
+
+    public enum TeleportType {
+        SPAWN,
+        HOME,
+        VISIT
     }
 }

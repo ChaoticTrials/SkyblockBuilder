@@ -2,8 +2,7 @@ package de.melanx.skyblockbuilder.config;
 
 public class SpawnSettings {
 
-    public record Range(int bottom, int top) {
-    }
+    public record Range(int bottom, int top) {}
 
     public enum Type {
         SET,

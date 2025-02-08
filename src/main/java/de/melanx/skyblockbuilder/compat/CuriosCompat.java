@@ -3,13 +3,13 @@ package de.melanx.skyblockbuilder.compat;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -18,6 +18,7 @@ import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class CuriosCompat {
 
@@ -29,7 +30,7 @@ public class CuriosCompat {
             return;
         }
 
-        CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
+        CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
             handler.getCurios().forEach((id, type) -> {
                 IDynamicStackHandler stacks = type.getStacks();
                 IDynamicStackHandler cosmeticStacks = type.getCosmeticStacks();
@@ -46,7 +47,7 @@ public class CuriosCompat {
     }
 
     public static void setStartInventory(Player player) {
-        CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
+        CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
             Map<String, ICurioStacksHandler> curios = handler.getCurios();
 
                 outerLoop:
@@ -74,17 +75,23 @@ public class CuriosCompat {
         });
     }
 
-    public static void loadStarterInventory(JsonArray curiosItems) {
+    public static void loadStarterInventory(JsonArray curiosItems, HolderLookup.Provider lookupProvider) {
         CuriosCompat.STARTER_ITEMS.clear();
 
         for (JsonElement element : curiosItems) {
-            JsonObject item = element.getAsJsonObject();
-            ItemStack stack = CraftingHelper.getItemStack(item, true);
-            if (!item.has("Slot")) {
+            JsonObject mainObject = element.getAsJsonObject();
+            Optional<com.mojang.datafixers.util.Pair<ItemStack, JsonElement>> optional = ItemStack.OPTIONAL_CODEC.decode(JsonOps.INSTANCE, mainObject.get("Item"))
+                    .resultOrPartial(SkyblockBuilder.getLogger()::error);
+            if (optional.isEmpty()) {
+                throw new IllegalStateException("Unable to read starting item: " + element);
+            }
+
+            ItemStack stack = optional.get().getFirst();
+            if (!mainObject.has("Slot")) {
                 throw new IllegalStateException("Curios inventory 'Slot' identifier missing for " + stack);
             }
 
-            String identifier = item.get("Slot").getAsString();
+            String identifier = mainObject.get("Slot").getAsString();
             CuriosCompat.STARTER_ITEMS.add(Pair.of(identifier, stack));
         }
     }
@@ -93,12 +100,5 @@ public class CuriosCompat {
         player.sendSystemMessage(Component.literal("Something went wrong, look at the log for more information. " +
                         "If you're not the pack author, report it to them.")
                 .withStyle(ChatFormatting.RED));
-    }
-
-    public static JsonObject serializeItem(ItemStack stack, String identifier) {
-        JsonObject json = RandomUtility.serializeItem(stack);
-        json.addProperty("Slot", identifier);
-
-        return json;
     }
 }

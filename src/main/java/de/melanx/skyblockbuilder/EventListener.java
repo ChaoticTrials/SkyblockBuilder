@@ -1,8 +1,6 @@
 package de.melanx.skyblockbuilder;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.melanx.skyblockbuilder.api.SkyblockBuilderAPI;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.commands.*;
@@ -14,25 +12,15 @@ import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.GenerateCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
-import de.melanx.skyblockbuilder.config.StartingInventory;
-import de.melanx.skyblockbuilder.config.common.CustomizationConfig;
-import de.melanx.skyblockbuilder.config.common.InventoryConfig;
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
-import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
-import de.melanx.skyblockbuilder.item.ItemStructureSaver;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -45,31 +33,25 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.moddingx.libx.event.ConfigLoadedEvent;
-import org.moddingx.libx.render.RenderHelperLevel;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-@Mod.EventBusSubscriber(modid = "skyblockbuilder")
+@EventBusSubscriber(modid = "skyblockbuilder")
 public class EventListener {
 
     private static final String SPAWNED_TAG = "alreadySpawned";
@@ -105,7 +87,6 @@ public class EventListener {
                 .then(SpawnCommand.register())
                 .then(SpawnsCommand.register())
                 .then(TeamCommand.register())
-                .then(TemplatesToSnbtCommand.register())
                 .then(VisitCommand.register())
         );
 
@@ -206,6 +187,7 @@ public class EventListener {
     public static void onServerStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
         SkyPaths.generateDefaultFiles(server);
+
         if (WorldUtil.isSkyblock(server.overworld())) {
             SkyblockBuilder.getLogger().info("Successfully loaded Skyblock!");
             TemplateLoader.updateTemplates();
@@ -247,42 +229,33 @@ public class EventListener {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public static void renderBoundingBox(RenderLevelStageEvent event) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null || !(player.getMainHandItem().getItem() instanceof ItemStructureSaver) || event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
-            return;
-        }
-
-        ItemStack stack = player.getMainHandItem();
-        BoundingBox area = ItemStructureSaver.getArea(stack);
-        if (area == null) {
-            return;
-        }
-
-        PoseStack poseStack = event.getPoseStack();
-        poseStack.pushPose();
-        RenderHelperLevel.loadCameraPosition(event.getCamera(), poseStack, area.minX(), area.minY(), area.minZ());
-
-        MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
-        VertexConsumer buffer = source.getBuffer(RenderType.LINES);
-
-        LevelRenderer.renderLineBox(poseStack, buffer, 0, 0, 0, area.maxX() - area.minX() + 1, area.maxY() - area.minY() + 1, area.maxZ() - area.minZ() + 1, 0.9F, 0.9F, 0.9F, 1.0F);
-        source.endBatch(RenderType.LINES);
-        poseStack.popPose();
-    }
-
     @SubscribeEvent
     public static void onConfigChange(ConfigLoadedEvent event) {
-        if (event.getConfigClass() == TemplatesConfig.class) {
-            StartingInventory.loadStarterItems();
-            if (event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
-                TemplateLoader.updateTemplates();
-            }
+        if (event.getConfigClass() == TemplatesConfig.class && event.getReason() != ConfigLoadedEvent.LoadReason.SHADOW) {
+            TemplateLoader.updateTemplates();
+        }
 
+        if (event.getConfigClass() == PermissionsConfig.class) {
             if (PermissionsConfig.forceSkyblockCheck) {
                 SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled");
+            }
+        }
+
+        if (event.getConfigClass() == WorldConfig.class || event.getConfigClass() == DimensionsConfig.class || event.getConfigClass() == SpawnConfig.class) {
+            int overworldCenterBiomesRadius = DimensionsConfig.Overworld.centeredBiomes.stream()
+                    .mapToInt(DimensionsConfig.UnregisteredCenterBiome::radius)
+                    .sum();
+
+            int netherCenterBiomesRadius = DimensionsConfig.Nether.centeredBiomes.stream()
+                    .mapToInt(DimensionsConfig.UnregisteredCenterBiome::radius)
+                    .sum();
+
+            if (SpawnConfig.dimension == Level.OVERWORLD && overworldCenterBiomesRadius > WorldConfig.islandDistance) {
+                SkyblockBuilder.getLogger().warn("The overworld center biomes radius is higher than the island distance. This will result in unwanted behaviour.");
+            }
+
+            if (SpawnConfig.dimension == Level.NETHER && netherCenterBiomesRadius > WorldConfig.islandDistance) {
+                SkyblockBuilder.getLogger().warn("The nether center biomes radius is higher than the island distance. This will result in unwanted behaviour.");
             }
         }
     }

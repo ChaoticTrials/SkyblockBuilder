@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.config.mapper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -58,16 +57,6 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
     }
 
     @Override
-    public ResourceKey<Level> fromNetwork(FriendlyByteBuf buffer) {
-        return ResourceKeyMapper.getResourceKey(buffer.readResourceLocation());
-    }
-
-    @Override
-    public void toNetwork(ResourceKey<Level> value, FriendlyByteBuf buffer) {
-        buffer.writeResourceLocation(value.location());
-    }
-
-    @Override
     public ConfigEditor<ResourceKey<Level>> createEditor(ValidatorInfo<?> validator) {
         return ConfigEditor.input(INPUT, validator);
     }
@@ -90,7 +79,7 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
     }
 
     private static ResourceKey<Level> getResourceKey(String str) {
-        return ResourceKeyMapper.getResourceKey(new ResourceLocation(str));
+        return ResourceKeyMapper.getResourceKey(ResourceLocation.tryParse(str));
     }
 
     private static ResourceKey<Level> getResourceKey(ResourceLocation location) {

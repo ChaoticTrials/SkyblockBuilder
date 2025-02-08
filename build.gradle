@@ -1,113 +1,104 @@
-import org.w3c.dom.Document
-import org.w3c.dom.NodeList
-
-import javax.xml.parsers.DocumentBuilderFactory
-
-buildscript {
-    apply from: 'https://moddingx.github.io/ModUtils/v5/buildscript.gradle', to: buildscript
+plugins {
+    id 'org.moddingx.modgradle.meta' version '5.0.2'
 }
-
-apply from: 'https://moddingx.github.io/ModUtils/v5/mod.gradle'
-apply plugin: 'org.moddingx.modgradle.coremods'
-apply plugin: 'org.moddingx.modgradle.cursedep'
-apply plugin: 'maven-publish'
-mod['version'] = getVersion(mod.minecraft + "-" + mod.base_version, new URL(mod.remote_maven + "/" + group.replace('.', '/') + "/" + name + "/maven-metadata.xml"))
-project.version = mod.version
 
 repositories {
     maven {
-        name = "JEI"
-        url = "https://maven.blamejared.com/"
+        url = "https://modmaven.dev/"
     }
     maven {
-        name = "MelanX Maven"
-        url = mod.remote_maven
-    }
-    maven {
-        name = "Curios"
-        url = "https://maven.theillusivec4.top/"
+        name = "MelanX"
+        url = "https://maven.melanx.de/"
     }
     maven {
         name = "Team Resourceful"
         url = "https://maven.teamresourceful.com/repository/maven-public/"
     }
-}
-
-dependencies {
-    annotationProcessor "org.moddingx:LibX:1.20.1-5.0.5"
-
-    implementation fg.deobf("org.moddingx:LibX:1.20.1-5.0.5")
-    implementation fg.deobf("top.theillusivec4.curios:curios-forge:5.2.0-beta.3+1.20.1")
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:MineMention:1.20.1-3.0.0")
-    implementation fg.deobf("com.teamresourceful.resourcefullib:resourcefullib-forge-1.20.1:2.1.24")
-    implementation fg.deobf("earth.terrarium.heracles:Heracles-forge-1.20.1:1.1.12")
-//    implementation fg.deobf("earth.terrarium.cadmus:cadmus-forge-1.20.1:1.0.8")
-    implementation curse.mod(845832, 5263334) // Cadmus 1.20.1-1.0.8
-    implementation fg.deobf("earth.terrarium.hermes:hermes-forge-1.20:1.6.0")
-
-    runtimeOnly fg.deobf("mezz.jei:jei-1.20.1-forge:15.0.0.12")
-    runtimeOnly fg.deobf("de.melanx:DefaultWorldType:1.20.1-4.0.4")
-
-//    runtimeOnly curse.mod(556904, 4016840) // Cosmopolis Mod 1.19.X-12.0
-
-    coremods 'org.moddingx:CoreModTypes:5.0.2-2'
-}
-
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = project.group
-            artifactId = project.name
-            version = project.version
-            artifact(jar) {
-                builtBy project.provider { project.tasks.named('reobfJar') }
-            }
-            if (mod.sources) {
-                artifact(sourceJar)
-            }
-            pom {
-                licenses {
-                    license {
-                        name = mod.license
-                        url = mod.license_url.toString()
-                    }
-                }
+    exclusiveContent {
+        forRepository {
+            maven {
+                url "https://cursemaven.com"
             }
         }
+        filter {
+            includeGroup "curse.maven"
+        }
     }
-    repositories {
+}
+
+var releaseType = 'beta'
+var baseVersion = '21.1'
+var libxVersion = '1.21.1-6.0.1'
+var jeiVersion = '19.21.0.247'
+var curiosVersion = '9.2.2+1.21.1'
+var minementionVersion = '1.20.1-3.0.0'
+var resourcefullibVersion = '3.0.11'
+
+mod.configure {
+    modid 'skyblockbuilder'
+    group 'de.melanx'
+    versioning {
+        base baseVersion
+        maven 'https://maven.melanx.de/release'
+    }
+
+    neoforge "${baseVersion}.115"
+
+    license 'The Apache License, Version 2.0'
+    github 'ChaoticTrials/SkyblockBuilder'
+
+    artifacts {
+        sources {
+            publishToRepositories()
+        }
+    }
+
+    changelog {
+        def lines = defaultChangelog.toString().split('\n')
+        def filteredChangelog = lines.findAll { !it.startsWith('- [meta]') }.join('\n')
+
+        return filteredChangelog
+    }
+
+
+    publishing {
         maven {
-            url mod.remote_maven
+            name 'melanx'
+            url 'https://maven.melanx.de/release'
             credentials(PasswordCredentials)
         }
     }
-}
-publish.dependsOn('reobfJar')
 
-
-private static String getVersion(String baseVersion, URL url) {
-    try {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-
-        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(connection.getInputStream());
-        NodeList versionNodes = doc.getElementsByTagName("version");
-
-        String latestVersion = null;
-        for (int i = 0; i < versionNodes.getLength(); i++) {
-            String version = versionNodes.item(i).getTextContent();
-            if (version.startsWith(baseVersion)) {
-                latestVersion = version;
-            }
+    upload {
+        all {
+            type releaseType
+            require 'libx'
+            optional 'minemention'
+            optional 'curios'
+            optional 'heracles'
+            optional 'cadmus'
         }
-
-        if (latestVersion == null) {
-            return baseVersion + ".0";
+        curseforge {
+            projectId 446691
         }
-
-        return baseVersion + "." + (Integer.parseInt(latestVersion.substring(latestVersion.lastIndexOf('.') + 1)) + 1);
-    } catch (Exception e) {
-        throw new RuntimeException(e);
+        modrinth {
+            projectId 'por2AZc5'
+        }
     }
+}
+
+dependencies {
+    annotationProcessor "org.moddingx:LibX:${libxVersion}"
+
+    implementation "org.moddingx:LibX:${libxVersion}"
+    implementation "top.theillusivec4.curios:curios-neoforge:${curiosVersion}"
+//    implementation "com.teamresourceful.resourcefullib:resourcefullib-neoforge-1.${baseVersion}:${resourcefullibVersion}"
+//    implementation "earth.terrarium.heracles:Heracles-neoforge-1.${baseVersion}:1.1.12"
+//    implementation "earth.terrarium.cadmus:cadmus-neoforge-1.${baseVersion}:1.0.8"
+//    implementation "earth.terrarium.hermes:hermes-neoforge-1.${baseVersion}:1.6.0"
+
+    compileOnly "io.github.noeppi_noeppi.mods:MineMention:${minementionVersion}"
+
+    runtimeOnly "mezz.jei:jei-1.${baseVersion}-neoforge:${jeiVersion}"
+    runtimeOnly "de.melanx:DefaultWorldType:1.21-5.0.0"
 }

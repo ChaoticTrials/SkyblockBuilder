@@ -1,9 +1,10 @@
-package de.melanx.skyblockbuilder.client;
+package de.melanx.skyblockbuilder.client.screens;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.util.ClientUtility;
+import de.melanx.skyblockbuilder.client.ClientUtil;
+import de.melanx.skyblockbuilder.client.SizeableCheckbox;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -21,9 +22,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
 
-public class ScreenStructureSaver extends BaseScreen {
+public class StructureSaverScreen extends BaseScreen {
 
-    private static final ResourceLocation SCREEN_LOCATION = new ResourceLocation(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
+    private static final ResourceLocation SCREEN_LOCATION = ResourceLocation.fromNamespaceAndPath(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
     private static final Component SAVE_TO_CONFIG = Component.translatable("skyblockbuilder.item.structure_saver.save_to_config.tooltip");
     private static final Component IGNORE_AIR = Component.translatable("skyblockbuilder.item.structure_saver.ignore_air.tooltip");
     private static final Component SNBT = Component.translatable("skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip");
@@ -40,7 +41,7 @@ public class ScreenStructureSaver extends BaseScreen {
     private Checkbox netherValidation;
     private Checkbox saveToConfig;
 
-    public ScreenStructureSaver(ItemStack stack, Component title) {
+    public StructureSaverScreen(ItemStack stack, Component title) {
         super(174, 142, title);
         this.stack = stack;
     }
@@ -67,7 +68,7 @@ public class ScreenStructureSaver extends BaseScreen {
                 .size(60, 20)
                 .build());
         this.addRenderableWidget(Button.builder(Component.empty(), button -> {
-                    ClientUtility.openPath(SkyPaths.MOD_EXPORTS);
+                    ClientUtil.openPath(SkyPaths.MOD_EXPORTS);
                 })
                 .pos(this.x(144), this.y(23))
                 .size(20, 20)
@@ -81,7 +82,14 @@ public class ScreenStructureSaver extends BaseScreen {
 
     @Override
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+
+        guiGraphics.blit(SCREEN_LOCATION, this.x(146), this.y(25), 0, 0, 16, 16, 16, 16);
+    }
+
+    @Override
+    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -89,9 +97,6 @@ public class ScreenStructureSaver extends BaseScreen {
 
         this.name.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawString(this.font, this.title, this.x(10), this.y(8), Color.DARK_GRAY.getRGB(), false);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-
-        guiGraphics.blit(SCREEN_LOCATION, this.x(146), this.y(25), 0, 0, 16, 16, 16, 16);
 
         guiGraphics.pose().pushPose();
         float scale = 0.9f;
@@ -129,16 +134,5 @@ public class ScreenStructureSaver extends BaseScreen {
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public void tick() {
-        this.name.tick();
-        super.tick();
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
     }
 }

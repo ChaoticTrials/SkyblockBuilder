@@ -19,18 +19,18 @@ public class SpawnConfig {
 
     @Config("The entities which you can interact with within the spawn protection")
     public static ResourceList interactionEntitiesInSpawnProtection = new ResourceList(true, builder -> {
-        builder.simple(new ResourceLocation("corpse", "corpse"));
+        builder.simple(ResourceLocation.fromNamespaceAndPath("corpse", "corpse"));
     });
 
     @Config("The blocks which you can interact with within the spawn protection")
     public static ResourceList interactionBlocksInSpawnProtection = new ResourceList(true, builder -> {
-        builder.simple(new ResourceLocation("gravestone", "gravestone"));
-        builder.simple(new ResourceLocation("tombstone", "grave_simple"));
+        builder.simple(ResourceLocation.fromNamespaceAndPath("gravestone", "gravestone"));
+        builder.simple(ResourceLocation.fromNamespaceAndPath("tombstone", "grave_simple"));
     });
 
     @Config("The items which you can interact with within the spawn protection")
     public static ResourceList interactionItemsInSpawnProtection = new ResourceList(true, builder -> {
-        builder.simple(new ResourceLocation("tombstone", "grave_key"));
+        builder.simple(ResourceLocation.fromNamespaceAndPath("tombstone", "grave_key"));
     });
 
     @Config("The radius of chunks where to apply spawn protection. In this area, only op players can avoid this.")
