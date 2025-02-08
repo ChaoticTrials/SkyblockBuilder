@@ -7,6 +7,8 @@ import de.melanx.skyblockbuilder.config.values.TemplateSpreads;
 
 public interface SpreadsProvider {
 
+    SpreadsProvider EMPTY = new Direct(TemplateSpreads.EMPTY);
+
     TemplateSpreads templateSpreads();
 
     JsonElement toJson();

@@ -2,11 +2,11 @@ package de.melanx.skyblockbuilder.config.common;
 
 import de.melanx.skyblockbuilder.config.values.TemplateSpawns;
 import de.melanx.skyblockbuilder.config.values.TemplateSpreads;
+import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
 import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Block;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
 
@@ -27,7 +27,7 @@ public class TemplatesConfig {
     );
 
     @Config("A list of blocks which can be used to surround islands/caves.")
-    public static Map<String, List<Block>> surroundingBlocks = Map.of("default", List.of());
+    public static Map<String, TemplateSurroundingBlocks> surroundingBlocks = Map.of("default", TemplateSurroundingBlocks.EMPTY);
 
     @Config({"A list of file names for templates which should spread around an island",
             "Instead of \"minOffset\" and \"maxOffset\" with same values, you could also just use \"offset\".",

@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
+import de.melanx.skyblockbuilder.config.values.providers.SurroundingBlocksProvider;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
@@ -50,19 +51,17 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             offset = new TemplateInfo.Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset);
         }
 
-        String surroundingBlocks = "";
+        SurroundingBlocksProvider surroundingBlocks = SurroundingBlocksProvider.EMPTY;
         if (json.has("surroundingBlocks")) {
-            surroundingBlocks = json.get("surroundingBlocks").getAsString();
+            surroundingBlocks = SurroundingBlocksProvider.fromJson(json.get("surroundingBlocks"));
         }
 
-        int surroundingMargin = 0;
-        if (json.has("surroundingMargin")) {
-            surroundingMargin = json.get("surroundingMargin").getAsInt();
+        SpreadsProvider spreads = SpreadsProvider.EMPTY;
+        if (json.has("spreads")) {
+            spreads = SpreadsProvider.fromJson(json.get("spreads"));
         }
 
-        SpreadsProvider spreads = SpreadsProvider.fromJson(json.get("spreads"));
-
-        return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, spreads, surroundingMargin);
+        return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, spreads);
     }
 
     @Override
@@ -85,12 +84,8 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             json.add("offset", offsetArray);
         }
 
-        if (!templateInfo.surroundingBlocks().isEmpty()) {
-            json.addProperty("surroundingBlocks", templateInfo.surroundingBlocks());
-        }
-
-        if (templateInfo.surroundingMargin() > 0) {
-            json.addProperty("surroundingMargin", templateInfo.surroundingMargin());
+        if (templateInfo.surroundingBlocks() != null) {
+            json.add("surroundingBlocks", templateInfo.surroundingBlocks().toJson());
         }
 
         if (templateInfo.spreads() != null) {

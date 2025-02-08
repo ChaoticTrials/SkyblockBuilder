@@ -5,6 +5,7 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.config.values.TemplateSpawns;
+import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
 import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.registration.ModBlockTags;
@@ -15,12 +16,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -41,7 +42,7 @@ public class ConfiguredTemplate {
     private String desc;
     private TemplateInfo.Offset offset;
     private int surroundingMargin;
-    private List<Block> surroundingBlocks;
+    private WeightedRandomList<TemplateSurroundingBlocks.WeightedBlock> surroundingBlocks;
     private List<SpreadConfig> spreads;
 
     public ConfiguredTemplate(TemplateInfo info) {
@@ -60,9 +61,8 @@ public class ConfiguredTemplate {
         this.name = info.name();
         this.desc = info.desc();
         this.offset = info.offset();
-        this.surroundingMargin = info.surroundingMargin();
-        List<Block> blockPalette = TemplatesConfig.surroundingBlocks.get(info.surroundingBlocks());
-        this.surroundingBlocks = blockPalette != null ? List.copyOf(blockPalette) : List.of();
+        this.surroundingMargin = info.surroundingBlocks().templateSurroundingBlocks().margin();
+        this.surroundingBlocks = WeightedRandomList.create(info.surroundingBlocks().templateSurroundingBlocks().blocks());
         SpreadsProvider spreads = info.spreads();
         List<SpreadConfig> spreadConfigs = new ArrayList<>();
         if (spreads != null) {
@@ -154,7 +154,7 @@ public class ConfiguredTemplate {
         return this.surroundingMargin;
     }
 
-    public List<Block> getSurroundingBlocks() {
+    public WeightedRandomList<TemplateSurroundingBlocks.WeightedBlock> getSurroundingBlocks() {
         return this.surroundingBlocks;
     }
 
@@ -165,7 +165,7 @@ public class ConfiguredTemplate {
         ListTag spawns = new ListTag();
         for (TemplatesConfig.Spawn spawn : this.defaultSpawns) {
             BlockPos pos = spawn.pos();
-            CompoundTag posTag = new CompoundTag();
+            CompoundTag posTag = new CompoundTag(); // todo use BlockPosMapper#toJsonArray
             posTag.putInt("posX", pos.getX());
             posTag.putInt("posY", pos.getY());
             posTag.putInt("posZ", pos.getZ());
@@ -184,9 +184,11 @@ public class ConfiguredTemplate {
         nbt.putInt("SurroundingMargin", this.surroundingMargin);
 
         ListTag surroundingBlocks = new ListTag();
-        this.surroundingBlocks.forEach(block -> {
-            StringTag tag = StringTag.valueOf(Objects.requireNonNull(BuiltInRegistries.BLOCK.getKey(block), "This block doesn't exist: " + block).toString());
-            surroundingBlocks.add(tag);
+        this.surroundingBlocks.unwrap().forEach(weightedBlock -> {
+            CompoundTag blockAndWeight = new CompoundTag();
+            blockAndWeight.putString("block", Objects.requireNonNull(BuiltInRegistries.BLOCK.getKey(weightedBlock.block()), "This block doesn't exist: " + weightedBlock.block()).toString());
+            blockAndWeight.putInt("weight", Math.max(weightedBlock.weight(), 1));
+            surroundingBlocks.add(blockAndWeight);
         });
         nbt.put("SurroundingBlocks", surroundingBlocks);
 
@@ -218,7 +220,6 @@ public class ConfiguredTemplate {
     public void read(CompoundTag nbt) {
         if (nbt == null) return;
         StructureTemplate template = new StructureTemplate();
-        //noinspection deprecation
         template.load(BuiltInRegistries.BLOCK.asLookup(), nbt.getCompound("Template"));
         this.template = template;
 
@@ -237,12 +238,15 @@ public class ConfiguredTemplate {
         this.surroundingMargin = nbt.getInt("SurroundingMargin");
 
         ListTag surroundingBlocks = nbt.getList("SurroundingBlocks", Tag.TAG_STRING);
-        Set<Block> blocks = new HashSet<>();
-        for (Tag block : surroundingBlocks) {
-            Block value = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(block.getAsString()));
-            blocks.add(value);
+        List<TemplateSurroundingBlocks.WeightedBlock> blocks = new ArrayList<>();
+        for (Tag tag : surroundingBlocks) {
+            CompoundTag blockAndWeight = (CompoundTag) tag;
+            //noinspection DataFlowIssue
+            Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(blockAndWeight.get("block").getAsString()));
+            int weight = blockAndWeight.getInt("weight");
+            blocks.add(new TemplateSurroundingBlocks.WeightedBlock(block, weight));
         }
-        this.surroundingBlocks = List.copyOf(blocks);
+        this.surroundingBlocks = WeightedRandomList.create(blocks);
 
         ListTag spreads = nbt.getList("Spreads", Tag.TAG_COMPOUND);
         List<SpreadConfig> spreadConfigs = new ArrayList<>();

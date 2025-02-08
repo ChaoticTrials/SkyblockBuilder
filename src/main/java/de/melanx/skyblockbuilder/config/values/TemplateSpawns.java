@@ -67,4 +67,8 @@ public record TemplateSpawns(Set<BlockPos> south, Set<BlockPos> west, Set<BlockP
                 map.getOrDefault("east", Set.of())
         );
     }
+
+    public boolean allEmpty() {
+        return this.south().isEmpty() && this.west().isEmpty() && this.north().isEmpty() && this.east().isEmpty();
+    }
 }

@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
@@ -530,8 +531,8 @@ public class SkyblockSavedData extends SavedData {
         RandomSource random = RandomSource.create();
         BlockPos.betweenClosedStream(outside).forEach(blockPos -> {
             if (!box.isInside(blockPos)) {
-                Block block = configuredTemplate.getSurroundingBlocks().get(random.nextInt(configuredTemplate.getSurroundingBlocks().size()));
-                level.setBlock(blockPos, block.defaultBlockState(), Block.UPDATE_CLIENTS);
+                Optional<TemplateSurroundingBlocks.WeightedBlock> optional = configuredTemplate.getSurroundingBlocks().getRandom(random);
+                optional.ifPresent(weightedBlock -> level.setBlock(blockPos, weightedBlock.block().defaultBlockState(), Block.UPDATE_CLIENTS));
             }
         });
     }

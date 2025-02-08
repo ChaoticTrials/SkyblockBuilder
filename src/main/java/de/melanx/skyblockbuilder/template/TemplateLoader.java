@@ -5,6 +5,7 @@ import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
+import de.melanx.skyblockbuilder.config.values.providers.SurroundingBlocksProvider;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -31,19 +32,19 @@ public class TemplateLoader {
             Set<String> takenNames = new HashSet<>();
 
             for (TemplateInfo info : TemplatesConfig.templates) {
-                if (info.spawns() instanceof SpawnsProvider.Reference(
-                        String name
-                ) && !TemplatesConfig.spawns.containsKey(name)) {
-                    throw new IllegalArgumentException("Spawn configuration \"" + info.spawns() + "\" is not defined: " + info.name());
+                if (info.spawns() instanceof SpawnsProvider.Reference(String name) && !TemplatesConfig.spawns.containsKey(name)) {
+                    throw new IllegalArgumentException("Spawns configuration \"" + info.spawns() + "\" is not defined: " + info.name());
                 }
 
-                if (!TemplatesConfig.surroundingBlocks.containsKey(info.surroundingBlocks()) && !info.surroundingBlocks().isEmpty()) {
+                if (info.spawns().templateSpawns().allEmpty()) {
+                    throw new IllegalArgumentException("Spawns configuration \"" + info.spawns() + "\" is empty: " + info.name());
+                }
+
+                if (info.surroundingBlocks() instanceof SurroundingBlocksProvider.Reference(String name) && !TemplatesConfig.surroundingBlocks.containsKey(name)) {
                     throw new IllegalArgumentException("Surrounding blocks configuration \"" + info.surroundingBlocks() + "\" is not defined: " + info.name());
                 }
 
-                if (info.spreads() instanceof SpreadsProvider.Reference(
-                        String name
-                ) && !TemplatesConfig.spreads.containsKey(name)) {
+                if (info.spreads() instanceof SpreadsProvider.Reference(String name) && !TemplatesConfig.spreads.containsKey(name)) {
                     throw new IllegalArgumentException("Spreads configuration \"" + info.spreads() + "\" is not defined: " + info.name());
                 }
 
