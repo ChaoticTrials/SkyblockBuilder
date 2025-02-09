@@ -42,6 +42,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /*
  * Credits go to Botania authors
@@ -55,10 +57,10 @@ public class SkyblockSavedData extends SavedData {
     public static final UUID SPAWN_ID = Util.NIL_UUID;
 
     private ServerLevel level;
-    private Map<UUID, SkyMeta> metaInfo = Maps.newHashMap();
-    private Map<UUID, Team> skyblocks = Maps.newHashMap();
-    private BiMap<String, UUID> skyblockIds = HashBiMap.create();
-    private BiMap<UUID, IslandPos> skyblockPositions = HashBiMap.create();
+    private ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
+    private ConcurrentMap<UUID, Team> skyblocks = new ConcurrentHashMap<>();
+    private BiMap<String, UUID> skyblockIds = Maps.synchronizedBiMap(HashBiMap.create());
+    private BiMap<UUID, IslandPos> skyblockPositions = Maps.synchronizedBiMap(HashBiMap.create());
     private Spiral spiral = new Spiral();
 
     public static SavedData.Factory<SkyblockSavedData> factory() {
@@ -138,10 +140,10 @@ public class SkyblockSavedData extends SavedData {
 
     public static SkyblockSavedData load(CompoundTag nbt) {
         SkyblockSavedData data = new SkyblockSavedData();
-        Map<UUID, SkyMeta> metaInfo = Maps.newHashMap();
-        Map<UUID, Team> skyblocks = Maps.newHashMap();
-        BiMap<String, UUID> skyblockIds = HashBiMap.create();
-        BiMap<UUID, IslandPos> skyblockPositions = HashBiMap.create();
+        ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
+        ConcurrentMap<UUID, Team> skyblocks = new ConcurrentHashMap<>();
+        BiMap<String, UUID> skyblockIds = Maps.synchronizedBiMap(HashBiMap.create());
+        BiMap<UUID, IslandPos> skyblockPositions = Maps.synchronizedBiMap(HashBiMap.create());
         for (Tag inbt : nbt.getList("Islands", Tag.TAG_COMPOUND)) {
             CompoundTag tag = (CompoundTag) inbt;
 

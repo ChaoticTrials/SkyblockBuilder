@@ -23,15 +23,18 @@ import net.neoforged.fml.ModList;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class Team {
 
     private final SkyblockSavedData data;
-    private final Set<UUID> players;
-    private final Set<UUID> joinRequests;
-    private final Set<TemplatesConfig.Spawn> possibleSpawns;
-    private final Set<TemplatesConfig.Spawn> defaultPossibleSpawns;
-    private final Map<String, Set<PlacedSpread>> placedSpreads;
+    private final Set<UUID> players = new CopyOnWriteArraySet<>();
+    private final Set<UUID> joinRequests = new CopyOnWriteArraySet<>();
+    private final Set<TemplatesConfig.Spawn> possibleSpawns = new CopyOnWriteArraySet<>();
+    private final Set<TemplatesConfig.Spawn> defaultPossibleSpawns = new CopyOnWriteArraySet<>();
+    private final Map<String, Set<PlacedSpread>> placedSpreads = new ConcurrentHashMap<>();
+
     private UUID teamId;
     private IslandPos island;
     private String name;
@@ -51,11 +54,6 @@ public class Team {
     public Team(SkyblockSavedData data, IslandPos island, UUID teamId) {
         this.data = data;
         this.island = island;
-        this.players = new HashSet<>();
-        this.possibleSpawns = new HashSet<>();
-        this.defaultPossibleSpawns = new HashSet<>();
-        this.placedSpreads = new HashMap<>();
-        this.joinRequests = new HashSet<>();
         this.teamId = teamId;
         this.allowVisits = false;
         this.createdAt = System.currentTimeMillis();
