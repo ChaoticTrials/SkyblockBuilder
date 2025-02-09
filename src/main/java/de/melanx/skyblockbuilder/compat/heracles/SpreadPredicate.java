@@ -24,7 +24,7 @@ public class SpreadPredicate {
                             Collections::singletonList
                     ),
                     spreads -> spreads.size() == 1 ?
-                            Either.right(spreads.get(0)) :
+                            Either.right(spreads.getFirst()) :
                             Either.left(spreads)
             ).fieldOf("spreads").forGetter(ins -> ins.spreads)
     ).apply(instance, SpreadPredicate::create));

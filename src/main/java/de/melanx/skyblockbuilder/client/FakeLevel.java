@@ -3,24 +3,31 @@ package de.melanx.skyblockbuilder.client;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.*;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.ServerLinks;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.network.connection.ConnectionType;
+import net.neoforged.neoforge.registries.callback.RegistryCallback;
+import net.neoforged.neoforge.registries.datamaps.DataMapType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -54,14 +61,21 @@ public class FakeLevel extends ClientLevel {
         return instance;
     }
 
+    private static final CommonListenerCookie FAKE_LISTENER_COOKIE = new CommonListenerCookie(
+            Minecraft.getInstance().getGameProfile(),
+            Minecraft.getInstance().getTelemetryManager().createWorldSessionManager(false, null, null),
+            FakeRegistry.INSTANCE,
+            FeatureFlags.DEFAULT_FLAGS,
+            null, null, null, Map.of(), null, false, Map.of(), ServerLinks.EMPTY, ConnectionType.OTHER
+    );
+
     private static ClientPacketListener fakeClientPacketListener() {
-        //noinspection DataFlowIssue
-        return new ClientPacketListener(Minecraft.getInstance(), null, new Connection(PacketFlow.CLIENTBOUND), null, null, null) {
+        return new ClientPacketListener(Minecraft.getInstance(), new Connection(PacketFlow.CLIENTBOUND), FAKE_LISTENER_COOKIE) {
 
             @Nonnull
             @Override
-            public RegistryAccess registryAccess() {
-                return new FakeRegistry();
+            public RegistryAccess.Frozen registryAccess() {
+                return FakeRegistry.INSTANCE;
             }
         };
     }
@@ -72,7 +86,9 @@ public class FakeLevel extends ClientLevel {
     }
 
     @SuppressWarnings("NullableProblems")
-    private static class FakeRegistry implements RegistryAccess {
+    private static class FakeRegistry implements RegistryAccess.Frozen {
+
+        private static final FakeRegistry INSTANCE = new FakeRegistry();
 
         @Nonnull
         @Override
@@ -161,13 +177,18 @@ public class FakeLevel extends ClientLevel {
         }
 
         @Override
-        public Lifecycle lifecycle(T value) {
-            return null;
+        public Optional<RegistrationInfo> registrationInfo(ResourceKey<T> key) {
+            return Optional.empty();
         }
 
         @Override
         public Lifecycle registryLifecycle() {
             return null;
+        }
+
+        @Override
+        public Optional<Holder.Reference<T>> getAny() {
+            return Optional.empty();
         }
 
         @Override
@@ -212,6 +233,11 @@ public class FakeLevel extends ClientLevel {
 
         @Override
         public Optional<Holder.Reference<T>> getHolder(int id) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<Holder.Reference<T>> getHolder(ResourceLocation location) {
             return Optional.empty();
         }
 
@@ -274,6 +300,61 @@ public class FakeLevel extends ClientLevel {
         public Iterator<T> iterator() {
             return null;
         }
+
+        @Override
+        public boolean doesSync() {
+            return false;
+        }
+
+        @Override
+        public int getMaxId() {
+            return 0;
+        }
+
+        @Override
+        public void addCallback(RegistryCallback<T> callback) {
+
+        }
+
+        @Override
+        public void addAlias(ResourceLocation from, ResourceLocation to) {
+
+        }
+
+        @Override
+        public ResourceLocation resolve(ResourceLocation name) {
+            return null;
+        }
+
+        @Override
+        public ResourceKey<T> resolve(ResourceKey<T> key) {
+            return null;
+        }
+
+        @Override
+        public int getId(ResourceKey<T> key) {
+            return 0;
+        }
+
+        @Override
+        public int getId(ResourceLocation name) {
+            return 0;
+        }
+
+        @Override
+        public boolean containsValue(T value) {
+            return false;
+        }
+
+        @Override
+        public <A> @org.jetbrains.annotations.Nullable A getData(DataMapType<T, A> type, ResourceKey<T> key) {
+            return null;
+        }
+
+        @Override
+        public <A> Map<ResourceKey<T>, A> getDataMap(DataMapType<T, A> type) {
+            return Map.of();
+        }
     }
 
     public record FakeHolder<T>(T value) implements Holder<T> {
@@ -303,6 +384,11 @@ public class FakeLevel extends ClientLevel {
             return false;
         }
 
+        @Override
+        public boolean is(@Nonnull Holder<T> holder) {
+            return false;
+        }
+
         @Nonnull
         @Override
         public Stream<TagKey<T>> tags() {
@@ -322,9 +408,10 @@ public class FakeLevel extends ClientLevel {
             Constructor<ResourceKey> constructor = ObfuscationReflectionHelper.findConstructor(ResourceKey.class, ResourceLocation.class, ResourceLocation.class);
             constructor.setAccessible(true);
             try {
-                return Optional.of(constructor.newInstance(new ResourceLocation(""), new ResourceLocation("")));
+                //noinspection unchecked
+                return Optional.of(constructor.newInstance(ResourceLocation.tryParse(""), ResourceLocation.tryParse("")));
             } catch (Exception e) {
-                e.printStackTrace();
+                SkyblockBuilder.getLogger().error("Error in fake level: ", e);
             }
 
             return Optional.empty();

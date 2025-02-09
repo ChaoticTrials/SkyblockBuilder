@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
+import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -38,9 +39,9 @@ public class VisitCommand {
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canVisit(level.getGameTime())) {
+        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.VISIT, level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.visitCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastVisitTeleport()))));
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.visitCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.VISIT)))));
             return 0;
         }
 
@@ -79,7 +80,7 @@ public class VisitCommand {
         }
 
         WorldUtil.teleportToIsland(player, team);
-        data.getOrCreateMetaInfo(player).setLastVisitTeleport(level.getGameTime());
+        data.getOrCreateMetaInfo(player).setLastTeleport(SkyMeta.TeleportType.VISIT, level.getGameTime());
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.visit_team", name).withStyle(ChatFormatting.GOLD), true);
         return 1;
     }

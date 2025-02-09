@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.moddingx.libx.render.ClientTickHandler;
@@ -43,19 +43,35 @@ public class TemplateRenderer {
 
     private final ClientLevel clientLevel = Objects.requireNonNull(FakeLevel.getInstance());
     private final StructureTemplate template;
-    private final float maxX;
-    private final float maxY;
     private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
     private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
     private final transient Set<Entity> erroredEntities = Collections.newSetFromMap(new WeakHashMap<>());
-    private int index = 0;
+    private final boolean fixedPaletteIndex;
+    private int paletteIndex;
+    private float maxX;
+    private float maxY;
 
     public TemplateRenderer(StructureTemplate template, float maxSize) {
-        this(template, maxSize, maxSize);
+        this(template, maxSize, maxSize, -1);
     }
 
-    public TemplateRenderer(StructureTemplate template, float maxX, float maxY) {
+    public TemplateRenderer(StructureTemplate template, float maxSize, int fixedPaletteIndex) {
+        this(template, maxSize, maxSize, fixedPaletteIndex);
+    }
+
+    public TemplateRenderer(StructureTemplate template, float maxX, float maxY, int fixedPaletteIndex) {
         this.template = template;
+        this.maxX = maxX;
+        this.maxY = maxY;
+        this.fixedPaletteIndex = fixedPaletteIndex != -1;
+        this.paletteIndex = this.fixedPaletteIndex ? fixedPaletteIndex : 0;
+    }
+
+    public void setSize(float size) {
+        this.setSize(size, size);
+    }
+
+    public void setSize(float maxX, float maxY) {
         this.maxX = maxX;
         this.maxY = maxY;
     }
@@ -101,9 +117,13 @@ public class TemplateRenderer {
 
         guiGraphics.pose().popPose();
         if (ClientTickHandler.ticksInGame() % 40 == 0) {
-            this.index++;
-            if (this.index >= this.template.palettes.size()) {
-                this.index = 0;
+            if (this.fixedPaletteIndex) {
+                return;
+            }
+
+            this.paletteIndex++;
+            if (this.paletteIndex >= this.template.palettes.size()) {
+                this.paletteIndex = 0;
             }
         }
     }
@@ -123,7 +143,7 @@ public class TemplateRenderer {
     }
 
     private void doWorldRenderPass(GuiGraphics guiGraphics, StructureTemplate template, MultiBufferSource.BufferSource buffers) {
-        StructureTemplate.Palette palette = template.palettes.get(this.index);
+        StructureTemplate.Palette palette = template.palettes.get(this.paletteIndex);
         for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
             BlockPos pos = blockInfo.pos();
             BlockState bs = blockInfo.state();
@@ -150,7 +170,7 @@ public class TemplateRenderer {
     }
 
     private void doTileEntityRenderPass(GuiGraphics guiGraphics, StructureTemplate template, MultiBufferSource buffers) {
-        StructureTemplate.Palette palette = template.palettes.get(this.index);
+        StructureTemplate.Palette palette = template.palettes.get(this.paletteIndex);
         for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
             BlockPos pos = blockInfo.pos();
             BlockState state = blockInfo.state();

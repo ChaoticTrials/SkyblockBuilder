@@ -1,0 +1,4 @@
+{
+  "world_preset_codec": "coremods/world_preset_codec.js",
+  "exit_portal": "coremods/exit_portal.js"
+}

@@ -35,7 +35,7 @@ public class ConvertCommand {
                     CompoundTag nbt = TemplateUtil.readTemplate(original.toPath(), false);
                     TemplateUtil.writeTemplate(converted, nbt, true);
 
-                    context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName, convertedName), true);
+                    context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName.toString(), convertedName), true);
                 } catch (IOException | CommandSyntaxException e) {
                     SkyblockBuilder.getLogger().error("Failed to convert {} to {}", original, convertedName, e);
                 }
@@ -47,7 +47,7 @@ public class ConvertCommand {
                     CompoundTag nbt = TemplateUtil.readTemplate(original.toPath(), true);
                     TemplateUtil.writeTemplate(converted, nbt, false);
 
-                    context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName, convertedName), true);
+                    context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName.toString(), convertedName), true);
                 } catch (IOException | CommandSyntaxException e) {
                     SkyblockBuilder.getLogger().error("Failed to convert {} to {}", original, convertedName, e);
                 }

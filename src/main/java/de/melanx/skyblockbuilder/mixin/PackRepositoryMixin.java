@@ -23,7 +23,7 @@ public class PackRepositoryMixin {
         SkyblockBuilder.getLogger().info("Sorting datapack list to load data correctly.");
         if (vanilla.isPresent()) {
             list.remove(vanilla.get());
-            list.add(0, vanilla.get());
+            list.addFirst(vanilla.get());
             cir.setReturnValue(List.copyOf(list));
         }
     }

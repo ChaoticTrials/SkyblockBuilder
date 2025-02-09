@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.world.chunkgenerators;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import net.minecraft.core.BlockPos;
@@ -25,14 +25,13 @@ import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator {
 
     private static final int MAIN_ISLAND_DISTANCE = 16;
 
     // [VanillaCopy] overworld chunk generator codec
-    public static final Codec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.create(
+    public static final MapCodec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
             (instance) -> instance.group(
                     BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                     NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
@@ -46,7 +45,7 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
 
     @Nonnull
     @Override
-    protected Codec<? extends ChunkGenerator> codec() {
+    protected MapCodec<? extends ChunkGenerator> codec() {
         return SkyblockEndChunkGenerator.CODEC;
     }
 
@@ -62,10 +61,10 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
 
     @Nonnull
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager manager, @Nonnull ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk) {
         ChunkPos chunkPos = chunk.getPos();
         if (DimensionsConfig.End.mainIsland && Mth.abs(chunkPos.x) <= MAIN_ISLAND_DISTANCE && Mth.abs(chunkPos.z) <= MAIN_ISLAND_DISTANCE) {
-            return this.parent.fillFromNoise(executor, blender, randomState, manager, chunk);
+            return this.parent.fillFromNoise(blender, randomState, structureManager, chunk);
         }
 
         return CompletableFuture.completedFuture(chunk);
