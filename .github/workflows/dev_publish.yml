@@ -19,7 +19,7 @@ jobs:
       - name: Build
         run: |
           chmod +x gradlew
-          ./gradlew clean build --no-configuration-cache
+          ./gradlew clean build
         env:
           IS_DEV: true
 
