@@ -21,6 +21,7 @@ public class TemplateLoader {
     private static final List<String> TEMPLATE_NAMES = new ArrayList<>();
     private static final Map<String, ConfiguredTemplate> TEMPLATE_MAP = new HashMap<>();
     private static ConfiguredTemplate TEMPLATE;
+    private static Optional<Integer> PALETTE_INDEX = Optional.empty();
     private static NetherPortalTemplate NETHER_PORTAL;
 
     public static void updateTemplates() {
@@ -70,7 +71,7 @@ public class TemplateLoader {
             if (TEMPLATE == null) {
                 TEMPLATE = TEMPLATE_MAP.get(TEMPLATE_NAMES.getFirst().toLowerCase(Locale.ROOT));
             } else {
-                TEMPLATE = TemplateLoader.getConfiguredTemplate(TEMPLATE.getName());
+                TEMPLATE = TemplateLoader.getConfiguredTemplate(TEMPLATE.getName(), false);
             }
 
             DimensionsConfig.Nether.netherPortalStructure.ifPresent(filePath -> NETHER_PORTAL = new NetherPortalTemplate(filePath));
@@ -101,7 +102,12 @@ public class TemplateLoader {
     }
 
     public static void setTemplate(ConfiguredTemplate template) {
+        TemplateLoader.setTemplate(template, Optional.empty());
+    }
+
+    public static void setTemplate(ConfiguredTemplate template, Optional<Integer> paletteIndex) {
         TEMPLATE = template;
+        PALETTE_INDEX = paletteIndex;
     }
 
     public static StructureTemplate getTemplate() {
@@ -114,7 +120,17 @@ public class TemplateLoader {
 
     @Nullable
     public static ConfiguredTemplate getConfiguredTemplate(String name) {
-        return TEMPLATE_MAP.get(name.toLowerCase(Locale.ROOT));
+        return TemplateLoader.getConfiguredTemplate(name, true);
+    }
+
+    @Nullable
+    public static ConfiguredTemplate getConfiguredTemplate(String name, boolean randomPalette) {
+        ConfiguredTemplate configuredTemplate = TEMPLATE_MAP.get(name.toLowerCase(Locale.ROOT));
+        if (!randomPalette && PALETTE_INDEX.isPresent()) {
+            configuredTemplate = configuredTemplate.onlyWithPalette(PALETTE_INDEX.get());
+        }
+
+        return configuredTemplate;
     }
 
     public static ConfiguredTemplate getConfiguredTemplate() {

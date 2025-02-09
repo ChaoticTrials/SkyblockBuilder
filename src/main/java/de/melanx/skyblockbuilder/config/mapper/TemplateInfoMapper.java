@@ -61,7 +61,12 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             spreads = SpreadsProvider.fromJson(json.get("spreads"));
         }
 
-        return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, spreads);
+        boolean allowPaletteSelection = true;
+        if (json.has("allowPaletteSelection")) {
+            allowPaletteSelection = json.get("allowPaletteSelection").getAsBoolean();
+        }
+
+        return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, spreads, allowPaletteSelection);
     }
 
     @Override
@@ -90,6 +95,10 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
 
         if (templateInfo.spreads() != null) {
             json.add("spreads", templateInfo.spreads().toJson());
+        }
+
+        if (!templateInfo.allowPaletteSelection()) {
+            json.addProperty("allowPaletteSelection", false);
         }
 
         return json;

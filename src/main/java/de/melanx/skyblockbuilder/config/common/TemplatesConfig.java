@@ -31,7 +31,7 @@ public class TemplatesConfig {
 
     @Config({"A list of file names for templates which should spread around an island",
             "Instead of \"minOffset\" and \"maxOffset\" with same values, you could also just use \"offset\".",
-            "\"origin\" defines from where the offset will be used. Possible values are \"zero\" and \"center\", where \"zero\" is default.",
+            "\"origin\" defines from where the offset will be used. Possible values are \"zero\" and \"center\", where \"center\" is default.",
             "Example: ",
             "{",
             "    \"file\": \"default.nbt\",",

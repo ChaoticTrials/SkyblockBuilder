@@ -44,6 +44,7 @@ public class ConfiguredTemplate {
     private int surroundingMargin;
     private WeightedRandomList<TemplateSurroundingBlocks.WeightedBlock> surroundingBlocks;
     private List<SpreadConfig> spreads;
+    private boolean allowPaletteSelection;
 
     public ConfiguredTemplate(TemplateInfo info) {
         StructureTemplate template = new StructureTemplate();
@@ -71,6 +72,7 @@ public class ConfiguredTemplate {
             }
         }
         this.spreads = List.copyOf(spreadConfigs);
+        this.allowPaletteSelection = info.allowPaletteSelection();
     }
 
     private ConfiguredTemplate() {}
@@ -156,6 +158,10 @@ public class ConfiguredTemplate {
 
     public WeightedRandomList<TemplateSurroundingBlocks.WeightedBlock> getSurroundingBlocks() {
         return this.surroundingBlocks;
+    }
+
+    public boolean allowPaletteSelection() {
+        return this.allowPaletteSelection;
     }
 
     @Nonnull
@@ -270,6 +276,12 @@ public class ConfiguredTemplate {
         ConfiguredTemplate info = new ConfiguredTemplate();
         info.read(nbt);
         return info;
+    }
+
+    public ConfiguredTemplate onlyWithPalette(int paletteIndex) {
+        ConfiguredTemplate template = this.copy();
+        template.getTemplate().palettes = List.of(template.getTemplate().palettes.get(paletteIndex));
+        return template;
     }
 
     public static class SpreadConfig {

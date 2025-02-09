@@ -61,10 +61,9 @@ public class FakeLevel extends ClientLevel {
         return instance;
     }
 
-    @SuppressWarnings("DataFlowIssue")
     private static final CommonListenerCookie FAKE_LISTENER_COOKIE = new CommonListenerCookie(
             Minecraft.getInstance().getGameProfile(),
-            null,
+            Minecraft.getInstance().getTelemetryManager().createWorldSessionManager(false, null, null),
             FakeRegistry.INSTANCE,
             FeatureFlags.DEFAULT_FLAGS,
             null, null, null, Map.of(), null, false, Map.of(), ServerLinks.EMPTY, ConnectionType.OTHER

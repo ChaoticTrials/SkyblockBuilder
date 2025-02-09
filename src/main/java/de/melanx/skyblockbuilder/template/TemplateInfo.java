@@ -8,14 +8,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public record TemplateInfo(String name, String desc, String file, SpawnsProvider spawns, Offset offset,
-                           SurroundingBlocksProvider surroundingBlocks, SpreadsProvider spreads) {
+                           SurroundingBlocksProvider surroundingBlocks, SpreadsProvider spreads,
+                           boolean allowPaletteSelection) {
 
     public TemplateInfo(String name, String file, SpawnsProvider spawns) {
-        this(name, "", file, spawns, new Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset), new SurroundingBlocksProvider.Reference("default"), new SpreadsProvider.Reference("default"));
+        this(name, "", file, spawns, new Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset), new SurroundingBlocksProvider.Reference("default"), new SpreadsProvider.Reference("default"), true);
     }
 
     public TemplateInfo(String name, String file, SpawnsProvider spawns, Offset offset) {
-        this(name, "", file, spawns, offset, new SurroundingBlocksProvider.Reference("default"), new SpreadsProvider.Reference("default"));
+        this(name, "", file, spawns, offset, new SurroundingBlocksProvider.Reference("default"), new SpreadsProvider.Reference("default"), true);
     }
 
     public record SpreadInfo(String file, BlockPos minOffset, BlockPos maxOffset, Origin origin) {
