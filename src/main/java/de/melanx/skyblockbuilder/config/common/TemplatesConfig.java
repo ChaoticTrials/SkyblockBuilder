@@ -19,7 +19,7 @@ import java.util.Set;
 public class TemplatesConfig {
 
     @Config("The list of templates being available. The first entry is the default template.")
-    public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", new SpawnsProvider.Reference("default"), new TemplateInfo.Offset(0, 0, 0)));
+    public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", new SpawnsProvider.Reference("default"), BlockPos.ZERO));
 
     @Config
     public static Map<String, TemplateSpawns> spawns = Map.of(

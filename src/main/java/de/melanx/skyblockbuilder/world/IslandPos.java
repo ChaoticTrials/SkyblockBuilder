@@ -3,7 +3,6 @@ package de.melanx.skyblockbuilder.world;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
-import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -21,17 +20,17 @@ public final class IslandPos {
     private BlockPos center;
 
     public IslandPos(Level level, int x, int z, ConfiguredTemplate template) {
-        this(x, Mth.clamp(WorldUtil.calcSpawnHeight(level, x, z) + template.getOffset().y(), level.getMinBuildHeight(), level.getMaxBuildHeight()), z, template.getOffset());
+        this(x, Mth.clamp(WorldUtil.calcSpawnHeight(level, x, z) + template.getOffset().getY(), level.getMinBuildHeight(), level.getMaxBuildHeight()), z, template.getOffset());
     }
 
     public IslandPos(int x, int y, int z, ConfiguredTemplate template) {
         this(x, y, z, template.getOffset());
     }
 
-    public IslandPos(int x, int y, int z, TemplateInfo.Offset offset) {
+    public IslandPos(int x, int y, int z, BlockPos offset) {
         this.x = x;
         this.z = z;
-        this.center = new BlockPos(this.x * WorldConfig.islandDistance + offset.x() + TemplatesConfig.defaultOffset, y, this.z * WorldConfig.islandDistance + offset.z() + TemplatesConfig.defaultOffset);
+        this.center = new BlockPos(this.x * WorldConfig.islandDistance + offset.getX() + TemplatesConfig.defaultOffset, y, this.z * WorldConfig.islandDistance + offset.getZ() + TemplatesConfig.defaultOffset);
     }
 
     private IslandPos(int x, int z, BlockPos center) {

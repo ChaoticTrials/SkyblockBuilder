@@ -40,7 +40,7 @@ public class ConfiguredTemplate {
     private StructureTemplate template;
     private String name;
     private String desc;
-    private TemplateInfo.Offset offset;
+    private BlockPos offset;
     private int surroundingMargin;
     private WeightedRandomList<TemplateSurroundingBlocks.WeightedBlock> surroundingBlocks;
     private List<SpreadConfig> spreads;
@@ -148,7 +148,7 @@ public class ConfiguredTemplate {
         return (this.desc.startsWith("{") && this.desc.endsWith("}")) ? Component.translatable(this.desc.substring(1, this.desc.length() - 1)) : Component.literal(this.desc);
     }
 
-    public TemplateInfo.Offset getOffset() {
+    public BlockPos getOffset() {
         return this.offset;
     }
 
@@ -182,7 +182,7 @@ public class ConfiguredTemplate {
         nbt.putString("Name", this.name);
         nbt.putString("Desc", this.desc);
 
-        nbt.put("Offset", WorldUtil.blockPosToTag(this.offset.asBlockPos()));
+        nbt.put("Offset", WorldUtil.blockPosToTag(this.offset));
         nbt.putInt("SurroundingMargin", this.surroundingMargin);
 
         ListTag surroundingBlocks = new ListTag();
@@ -236,7 +236,7 @@ public class ConfiguredTemplate {
 
         this.name = nbt.getString("Name");
         this.desc = nbt.getString("Desc");
-        this.offset = TemplateInfo.Offset.fromBlockPos(WorldUtil.blockPosFromTag(nbt.getCompound("Offset")));
+        this.offset = WorldUtil.blockPosFromTag(nbt.getCompound("Offset"));
         this.surroundingMargin = nbt.getInt("SurroundingMargin");
 
         ListTag surroundingBlocks = nbt.getList("SurroundingBlocks", Tag.TAG_STRING);
