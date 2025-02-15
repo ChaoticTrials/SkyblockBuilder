@@ -48,7 +48,7 @@ mod.configure {
         }
     }
 
-    neoforge "${baseVersion}.115"
+    neoforge project.hasProperty('neo_version') ? project.neo_version : "${baseVersion}.118"
 
     license 'The Apache License, Version 2.0'
     github 'ChaoticTrials/SkyblockBuilder'
