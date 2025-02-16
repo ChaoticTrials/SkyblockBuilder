@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
@@ -15,6 +16,7 @@ import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -31,37 +33,46 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /*
  * Credits go to Botania authors
- * https://github.com/Vazkii/Botania/blob/master/src/main/java/vazkii/botania/common/world/SkyblockSavedData.java
+ * https://github.com/VazkiiMods/Botania/blob/1.16.x-forge/src/main/java/vazkii/botania/common/world/SkyblockSavedData.java
  */
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public class SkyblockSavedData extends SavedData {
 
-    private static final String NAME = "skyblock_builder";
+    private static final String NAME = "skyblockbuilder/main";
     private static SkyblockSavedData clientInstance;
     public static final UUID SPAWN_ID = Util.NIL_UUID;
 
     private ServerLevel level;
-    private Map<UUID, SkyMeta> metaInfo = Maps.newHashMap();
-    private Map<UUID, Team> skyblocks = Maps.newHashMap();
-    private BiMap<String, UUID> skyblockIds = HashBiMap.create();
-    private BiMap<UUID, IslandPos> skyblockPositions = HashBiMap.create();
+    private ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
+    private ConcurrentMap<UUID, Team> skyblocks = new ConcurrentHashMap<>();
+    private BiMap<String, UUID> skyblockIds = Maps.synchronizedBiMap(HashBiMap.create());
+    private BiMap<UUID, IslandPos> skyblockPositions = Maps.synchronizedBiMap(HashBiMap.create());
     private Spiral spiral = new Spiral();
+
+    public static SavedData.Factory<SkyblockSavedData> factory() {
+        return new SavedData.Factory<>(SkyblockSavedData::new, (nbt, provider) -> SkyblockSavedData.load(nbt));
+    }
 
     public static SkyblockSavedData get(Level level) {
         if (!level.isClientSide) {
             MinecraftServer server = ((ServerLevel) level).getServer();
 
             DimensionDataStorage storage = server.overworld().getDataStorage();
-            SkyblockSavedData data = storage.computeIfAbsent(nbt -> new SkyblockSavedData().load(nbt), SkyblockSavedData::new, NAME);
+            SkyblockSavedData data = storage.computeIfAbsent(SkyblockSavedData.factory(), NAME);
             data.level = WorldUtil.getConfiguredLevel(server);
             data.getOrCreateMetaInfo(Util.NIL_UUID);
             return data;
@@ -127,16 +138,17 @@ public class SkyblockSavedData extends SavedData {
         return Pair.of(islandPos, team);
     }
 
-    public SkyblockSavedData load(CompoundTag nbt) {
-        Map<UUID, SkyMeta> metaInfo = Maps.newHashMap();
-        Map<UUID, Team> skyblocks = Maps.newHashMap();
-        BiMap<String, UUID> skyblockIds = HashBiMap.create();
-        BiMap<UUID, IslandPos> skyblockPositions = HashBiMap.create();
+    public static SkyblockSavedData load(CompoundTag nbt) {
+        SkyblockSavedData data = new SkyblockSavedData();
+        ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
+        ConcurrentMap<UUID, Team> skyblocks = new ConcurrentHashMap<>();
+        BiMap<String, UUID> skyblockIds = Maps.synchronizedBiMap(HashBiMap.create());
+        BiMap<UUID, IslandPos> skyblockPositions = Maps.synchronizedBiMap(HashBiMap.create());
         for (Tag inbt : nbt.getList("Islands", Tag.TAG_COMPOUND)) {
             CompoundTag tag = (CompoundTag) inbt;
 
             IslandPos island = IslandPos.fromTag(tag.getCompound("Island"));
-            Team team = Team.create(this, tag);
+            Team team = Team.create(data, tag);
 
             skyblocks.put(team.getId(), team);
             skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
@@ -147,21 +159,21 @@ public class SkyblockSavedData extends SavedData {
             CompoundTag tag = (CompoundTag) inbt;
 
             UUID player = tag.getUUID("Player");
-            SkyMeta meta = SkyMeta.get(this, tag.getCompound("Meta"));
+            SkyMeta meta = SkyMeta.get(data, tag.getCompound("Meta"));
             metaInfo.put(player, meta);
         }
-        this.metaInfo = metaInfo;
-        this.skyblocks = skyblocks;
-        this.skyblockIds = skyblockIds;
-        this.skyblockPositions = skyblockPositions;
-        this.spiral = Spiral.fromArray(nbt.getIntArray("SpiralState"));
+        data.metaInfo = metaInfo;
+        data.skyblocks = skyblocks;
+        data.skyblockIds = skyblockIds;
+        data.skyblockPositions = skyblockPositions;
+        data.spiral = Spiral.fromArray(nbt.getIntArray("SpiralState"));
 
-        return this;
+        return data;
     }
 
     @Nonnull
     @Override
-    public CompoundTag save(@Nonnull CompoundTag compound) {
+    public CompoundTag save(@Nonnull CompoundTag compound, @Nonnull HolderLookup.Provider registries) {
         ListTag islands = new ListTag();
         for (Team team : this.skyblocks.values()) {
             islands.add(team.serializeNBT());
@@ -180,6 +192,7 @@ public class SkyblockSavedData extends SavedData {
         compound.putIntArray("SpiralState", this.spiral.toIntArray());
         compound.put("Islands", islands);
         compound.put("MetaInformation", metaInfo);
+
         return compound;
     }
 
@@ -520,8 +533,8 @@ public class SkyblockSavedData extends SavedData {
         RandomSource random = RandomSource.create();
         BlockPos.betweenClosedStream(outside).forEach(blockPos -> {
             if (!box.isInside(blockPos)) {
-                Block block = configuredTemplate.getSurroundingBlocks().get(random.nextInt(configuredTemplate.getSurroundingBlocks().size()));
-                level.setBlock(blockPos, block.defaultBlockState(), Block.UPDATE_CLIENTS);
+                Optional<TemplateSurroundingBlocks.WeightedBlock> optional = configuredTemplate.getSurroundingBlocks().getRandom(random);
+                optional.ifPresent(weightedBlock -> level.setBlock(blockPos, weightedBlock.block().defaultBlockState(), Block.UPDATE_CLIENTS));
             }
         });
     }
@@ -539,6 +552,19 @@ public class SkyblockSavedData extends SavedData {
 
     public void setDirtySilently() {
         super.setDirty();
+    }
+
+    @Override
+    public void save(@Nonnull File file, @Nonnull HolderLookup.Provider registries) {
+        if (this.isDirty()) {
+            try {
+                Files.createDirectories(file.toPath().getParent());
+            } catch (IOException e) {
+                SkyblockBuilder.getLogger().error("Could not create directory: {}", file.getAbsolutePath(), e);
+            }
+        }
+
+        super.save(file, registries);
     }
 
     @Nullable

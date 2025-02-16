@@ -3,10 +3,10 @@ package de.melanx.skyblockbuilder.world;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
-import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
@@ -18,21 +18,25 @@ public final class IslandPos {
     private final int x;
     private final int z;
     private BlockPos center;
-    private final TemplateInfo.Offset offset;
 
     public IslandPos(Level level, int x, int z, ConfiguredTemplate template) {
-        this(x, Mth.clamp(WorldUtil.calcSpawnHeight(level, x, z) + template.getOffset().y(), level.getMinBuildHeight(), level.getMaxBuildHeight()), z, template.getOffset());
+        this(x, Mth.clamp(WorldUtil.calcSpawnHeight(level, x, z) + template.getOffset().getY(), level.getMinBuildHeight(), level.getMaxBuildHeight()), z, template.getOffset());
     }
 
     public IslandPos(int x, int y, int z, ConfiguredTemplate template) {
         this(x, y, z, template.getOffset());
     }
 
-    public IslandPos(int x, int y, int z, TemplateInfo.Offset offset) {
+    public IslandPos(int x, int y, int z, BlockPos offset) {
         this.x = x;
         this.z = z;
-        this.offset = offset;
-        this.center = new BlockPos(this.x * WorldConfig.islandDistance + offset.x(), y, this.z * WorldConfig.islandDistance + offset.z());
+        this.center = new BlockPos(this.x * WorldConfig.islandDistance + offset.getX() + TemplatesConfig.defaultOffset, y, this.z * WorldConfig.islandDistance + offset.getZ() + TemplatesConfig.defaultOffset);
+    }
+
+    private IslandPos(int x, int z, BlockPos center) {
+        this.x = x;
+        this.z = z;
+        this.center = center;
     }
 
     public BlockPos getCenter() {
@@ -44,16 +48,19 @@ public final class IslandPos {
     }
 
     public static IslandPos fromTag(CompoundTag tag) {
-        return new IslandPos(tag.getInt("IslandX"), tag.getInt("Height"), tag.getInt("IslandZ"), new TemplateInfo.Offset(tag.contains("OffsetX") ? tag.getInt("OffsetX") : TemplatesConfig.defaultOffset, tag.contains("OffsetY") ? tag.getInt("OffsetY") : 0, tag.contains("OffsetZ") ? tag.getInt("OffsetZ") : TemplatesConfig.defaultOffset));
+        //noinspection OptionalGetWithoutIsPresent
+        return new IslandPos(
+                tag.getInt("IslandX"),
+                tag.getInt("IslandZ"),
+                NbtUtils.readBlockPos(tag, "CenterPos").get()
+        );
     }
 
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
         tag.putInt("IslandX", this.x);
         tag.putInt("IslandZ", this.z);
-        tag.putInt("Height", this.center.getY());
-        tag.putInt("OffsetX", this.offset.x());
-        tag.putInt("OffsetZ", this.offset.z());
+        tag.put("CenterPos", NbtUtils.writeBlockPos(this.center));
         return tag;
     }
 

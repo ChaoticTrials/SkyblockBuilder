@@ -2,12 +2,11 @@ package de.melanx.skyblockbuilder.compat.heracles;
 
 import de.melanx.skyblockbuilder.events.SkyblockManageTeamEvent;
 import de.melanx.skyblockbuilder.events.SkyblockOpManageEvent;
-import earth.terrarium.heracles.common.handlers.progress.QuestProgressHandler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.UUID;
 
@@ -32,14 +31,14 @@ public class HeraclesEventHandler {
     }
 
     @SubscribeEvent
-    public void onLevelTick(TickEvent.LevelTickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END || event.getServer().getTickCount() % 20 != 0) {
+    public void onLevelTick(ServerTickEvent.Post event) {
+        if (event.getServer().getTickCount() % 20 != 0) {
             return;
         }
 
         MinecraftServer server = event.getServer();
         server.getPlayerList().getPlayers().forEach(player -> {
-            QuestProgressHandler.getProgress(server, player.getUUID()).testAndProgressTaskType(player, player, SpreadLocationTask.TYPE);
+//            QuestProgressHandler.getProgress(server, player.getUUID()).testAndProgressTaskType(player, player, SpreadLocationTask.TYPE); todo re-add heracles
         });
     }
 }

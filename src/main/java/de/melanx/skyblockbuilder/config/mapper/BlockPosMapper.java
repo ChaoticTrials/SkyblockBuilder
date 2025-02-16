@@ -1,12 +1,14 @@
 package de.melanx.skyblockbuilder.config.mapper;
 
 import com.google.gson.JsonArray;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import org.jetbrains.annotations.NotNull;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
 import org.moddingx.libx.config.gui.WidgetProperties;
@@ -16,34 +18,20 @@ import org.moddingx.libx.impl.config.gui.EditorHelper;
 import org.moddingx.libx.impl.config.mappers.SimpleValueMappers;
 import org.moddingx.libx.screen.Panel;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
 
 @RegisterMapper
 public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
 
-    public static BlockPos fromJsonArray(JsonArray json) {
-        if (json.size() != 3) throw new IllegalStateException("Invalid BlockPos: " + json);
-        return new BlockPos(json.get(0).getAsInt(), json.get(1).getAsInt(), json.get(2).getAsInt());
-    }
-
-    public static JsonArray toJsonArray(BlockPos value) {
-        JsonArray array = new JsonArray();
-        array.add(value.getX());
-        array.add(value.getY());
-        array.add(value.getZ());
-        return array;
-    }
-
     @Override
     public BlockPos fromJson(JsonArray json) {
-        return BlockPosMapper.fromJsonArray(json);
+        return WorldUtil.blockPosFromJsonArray(json);
     }
 
     @Override
     public JsonArray toJson(BlockPos value) {
-        return BlockPosMapper.toJsonArray(value);
+        return WorldUtil.blockPosToJsonArray(value);
     }
 
     @Override
@@ -128,11 +116,10 @@ public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
             }
 
             @Override
-            public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            protected void renderWidgetContent(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
                 guiGraphics.drawString(this.font, "X", this.getX(), this.getY() + 6, Color.GRAY.getRGB());
                 guiGraphics.drawString(this.font, "Y", this.getX() + 63, this.getY() + 6, Color.GRAY.getRGB());
                 guiGraphics.drawString(this.font, "Z", this.getX() + 128, this.getY() + 6, Color.GRAY.getRGB());
-                super.render(guiGraphics, mouseX, mouseY, partialTick);
             }
         }
     }

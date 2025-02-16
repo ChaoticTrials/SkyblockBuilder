@@ -9,27 +9,28 @@ body:
       options:
         - 1.19.2
         - 1.20.1
+        - 1.21.1
     validations:
       required: true
   - type: input
     id: libx-version
     attributes:
       label: LibX version
-      placeholder: eg. 1.18.2-3.2.0
+      placeholder: eg. 1.21.1-6.0.0
     validations:
       required: true
   - type: input
     id: mod-version
     attributes:
       label: Skyblock Builder version
-      placeholder: eg. 1.18.2-3.3.0
+      placeholder: eg. 21.1.0
     validations:
       required: true
   - type: input
-    id: forge-version
+    id: neoforge-version
     attributes:
-      label: Forge version
-      placeholder: eg. 40.0.2
+      label: NeoForge version
+      placeholder: eg. 21.1.0
     validations:
       required: true
   - type: input

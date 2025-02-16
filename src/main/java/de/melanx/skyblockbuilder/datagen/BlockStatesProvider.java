@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.datagen;
 
-import de.melanx.skyblockbuilder.ModBlocks;
+import de.melanx.skyblockbuilder.registration.ModBlocks;
 import org.moddingx.libx.datagen.DatagenContext;
 import org.moddingx.libx.datagen.provider.model.BlockStateProviderBase;
 

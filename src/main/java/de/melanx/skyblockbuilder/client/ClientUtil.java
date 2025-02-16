@@ -1,20 +1,17 @@
-package de.melanx.skyblockbuilder.util;
+package de.melanx.skyblockbuilder.client;
 
-import de.melanx.skyblockbuilder.client.ScreenStructureSaver;
+import de.melanx.skyblockbuilder.client.screens.StructureSaverScreen;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ClientUtility {
+public class ClientUtil {
 
-    @OnlyIn(Dist.CLIENT)
     public static void openPath(Path dir) {
         try {
             Files.createDirectories(dir);
@@ -25,8 +22,7 @@ public class ClientUtility {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void openItemScreen(ItemStack stack) {
-        Minecraft.getInstance().setScreen(new ScreenStructureSaver(stack, Component.translatable("screen.skyblockbuilder.structure_saver")));
+        Minecraft.getInstance().setScreen(new StructureSaverScreen(stack, Component.translatable("screen.skyblockbuilder.structure_saver")));
     }
 }

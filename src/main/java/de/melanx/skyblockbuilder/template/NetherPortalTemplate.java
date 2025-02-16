@@ -28,7 +28,6 @@ public class NetherPortalTemplate {
 
         this.filePath = filePath;
         try {
-            //noinspection deprecation
             this.structure.load(BuiltInRegistries.BLOCK.asLookup(), TemplateUtil.readTemplate(file.toPath()));
         } catch (IOException | CommandSyntaxException e) {
             throw new RuntimeException(e);

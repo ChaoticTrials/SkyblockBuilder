@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
+import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -36,9 +37,9 @@ public class HomeCommand {
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleportHome(level.getGameTime())) {
+        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.HOME, level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.homeCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastHomeTeleport()))));
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.homeCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.HOME)))));
             return 0;
         }
 
@@ -71,7 +72,7 @@ public class HomeCommand {
                 break;
         }
 
-        data.getOrCreateMetaInfo(player).setLastHomeTeleport(level.getGameTime());
+        data.getOrCreateMetaInfo(player).setLastTeleport(SkyMeta.TeleportType.HOME, level.getGameTime());
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.teleport_home").withStyle(ChatFormatting.GOLD), true);
         WorldUtil.teleportToIsland(player, team);
         return 1;

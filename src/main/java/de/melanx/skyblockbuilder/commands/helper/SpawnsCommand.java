@@ -21,9 +21,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.moddingx.libx.command.EnumArgument2;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import org.moddingx.libx.command.EnumArgumentIgnoreCase;
 import org.moddingx.libx.config.ConfigManager;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class SpawnsCommand {
         return Commands.literal("spawns")
                 .executes(context -> showSpawns(context.getSource(), Mode.NORMAL))
                 // use debug for setting up a new spawn points as pack author
-                .then(Commands.argument("mode", EnumArgument2.enumArgument(Mode.class)).requires(source -> source.hasPermission(2))
+                .then(Commands.argument("mode", EnumArgumentIgnoreCase.enumArgument(Mode.class)).requires(source -> source.hasPermission(2))
                         .executes(context -> showSpawns(context.getSource(), context.getArgument("mode", Mode.class))));
     }
 
@@ -98,7 +98,7 @@ public class SpawnsCommand {
                     Files.writeString(configFile, SkyblockBuilder.PRETTY_GSON.toJson(config));
                     ConfigManager.reloadConfig(TemplatesConfig.class);
                     if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-                        ConfigManager.forceResync(null);
+                        ConfigManager.synchronize(level.getServer(), TemplatesConfig.class);
                     }
 
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.export_spawns_to_config", formattedDate).withStyle(ChatFormatting.GOLD), true);

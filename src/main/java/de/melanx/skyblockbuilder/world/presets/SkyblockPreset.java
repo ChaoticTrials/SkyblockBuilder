@@ -1,15 +1,17 @@
 package de.melanx.skyblockbuilder.world.presets;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.util.BiomeSourceConverter;
-import de.melanx.skyblockbuilder.util.WorldPresetUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
+import de.melanx.skyblockbuilder.world.SkyBiomeSource;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.*;
@@ -25,11 +27,14 @@ import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import org.moddingx.libx.util.lazy.LazyValue;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class SkyblockPreset extends WorldPreset {
+
+    public static final ResourceKey<WorldPreset> KEY = ResourceKey.create(Registries.WORLD_PRESET, SkyblockBuilder.getInstance().resource("skyblock"));
 
     // Must be lazy as we can't access the full registry while deserializing.
     private final LazyValue<WorldPreset> actualPreset;
@@ -76,11 +81,11 @@ public class SkyblockPreset extends WorldPreset {
                         configuredOverworldChunkGenerator(noises, noiseGeneratorSettings, biomes)),
                 LevelStem.NETHER, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.NETHER),
                         DimensionsConfig.Nether.Default ?
-                                WorldPresetUtil.defaultNetherGenerator(noises, noiseGeneratorSettings)
+                                SkyblockPreset.defaultNetherGenerator(noises, noiseGeneratorSettings)
                                 : netherChunkGenerator(noises, noiseGeneratorSettings, biomes)),
                 LevelStem.END, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.END),
                         DimensionsConfig.End.Default ?
-                                WorldPresetUtil.defaultEndGenerator(noiseGeneratorSettings, biomes)
+                                SkyblockPreset.defaultEndGenerator(noiseGeneratorSettings, biomes)
                                 : endChunkGenerator(noiseGeneratorSettings, biomes))
         );
     }
@@ -100,8 +105,10 @@ public class SkyblockPreset extends WorldPreset {
             HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings,
             HolderLookup<Biome> biomes
     ) {
-        MultiNoiseBiomeSource biomeSource = (MultiNoiseBiomeSource) BiomeSourceConverter.customBiomeSource(Level.OVERWORLD, MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), biomes);
+        BiomeSource biomeSource = BiomeSourceConverter.customBiomeSource(Level.OVERWORLD, MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), biomes);
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
+
+        biomeSource = SkyblockPreset.convertBiomeSource((MultiNoiseBiomeSource) biomeSource, biomes, DimensionsConfig.Overworld.centeredBiomes);
 
         return new SkyblockNoiseBasedChunkGenerator(biomeSource, settings, Level.OVERWORLD, SkyblockPreset.getLayers(Level.OVERWORLD));
     }
@@ -113,6 +120,8 @@ public class SkyblockPreset extends WorldPreset {
     ) {
         BiomeSource biomeSource = BiomeSourceConverter.customBiomeSource(Level.NETHER, MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER)), biomes);
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.NETHER);
+
+        biomeSource = SkyblockPreset.convertBiomeSource((MultiNoiseBiomeSource) biomeSource, biomes, DimensionsConfig.Nether.centeredBiomes);
 
         return new SkyblockNoiseBasedChunkGenerator(biomeSource, settings, Level.NETHER, SkyblockPreset.getLayers(Level.NETHER));
     }
@@ -131,5 +140,43 @@ public class SkyblockPreset extends WorldPreset {
         return WorldConfig.surface
                 ? WorldUtil.layersInfoFromString(WorldConfig.surfaceSettings.get(levelKey.location().toString()))
                 : List.of();
+    }
+
+    private static BiomeSource convertBiomeSource(MultiNoiseBiomeSource biomeSource, HolderLookup<Biome> biomes, List<DimensionsConfig.UnregisteredCenterBiome> unregisteredCenterBiomes) {
+        if (unregisteredCenterBiomes.isEmpty()) {
+            return biomeSource;
+        }
+
+        List<SkyBiomeSource.CenterBiome> centerBiomes = new ArrayList<>();
+
+        unregisteredCenterBiomes.forEach(biomeConfig -> {
+            ResourceKey<Biome> resourceKey = ResourceKey.create(Registries.BIOME, biomeConfig.id());
+            Optional<Holder.Reference<Biome>> optionalHolder = biomes.get(resourceKey);
+            if (optionalHolder.isEmpty()) {
+                SkyblockBuilder.getLogger().error("Could not find biome {} for center biome {}. Use minecraft:plains as fallback.", resourceKey, biomeConfig.id());
+                optionalHolder = Optional.of(biomes.getOrThrow(Biomes.PLAINS));
+            }
+            centerBiomes.add(new SkyBiomeSource.CenterBiome(optionalHolder.get(), biomeConfig.radius()));
+        });
+
+        return new SkyBiomeSource(centerBiomes, biomeSource);
+    }
+
+    private static ChunkGenerator defaultNetherGenerator(
+            HolderGetter<MultiNoiseBiomeSourceParameterList> noises,
+            HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings
+    ) {
+        MultiNoiseBiomeSource biomeSource = MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER));
+        Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.NETHER);
+        return new NoiseBasedChunkGenerator(biomeSource, settings);
+    }
+
+    private static ChunkGenerator defaultEndGenerator(
+            HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings,
+            HolderGetter<Biome> biomes
+    ) {
+        Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.END);
+        TheEndBiomeSource biomeSource = TheEndBiomeSource.create(biomes);
+        return new NoiseBasedChunkGenerator(biomeSource, settings);
     }
 }

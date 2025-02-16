@@ -1,34 +1,37 @@
 package de.melanx.skyblockbuilder.config.common;
 
+import de.melanx.skyblockbuilder.config.values.TemplateSpawns;
+import de.melanx.skyblockbuilder.config.values.TemplateSpreads;
+import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
+import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Block;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @RegisterConfig("templates")
 public class TemplatesConfig {
 
     @Config("The list of templates being available. The first entry is the default template.")
-    public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", "default", new TemplateInfo.Offset(0, 0, 0)));
+    public static List<TemplateInfo> templates = List.of(new TemplateInfo("default", "default.nbt", new SpawnsProvider.Reference("default"), BlockPos.ZERO));
 
     @Config
-    public static Map<String, Map<String, Set<BlockPos>>> spawns = Map.of("default", Map.of(
-            WorldUtil.Directions.SOUTH.name().toLowerCase(Locale.ROOT), Set.of(new BlockPos(6, 3, 5)),
-            WorldUtil.Directions.WEST.name().toLowerCase(Locale.ROOT), Set.of(),
-            WorldUtil.Directions.NORTH.name().toLowerCase(Locale.ROOT), Set.of(),
-            WorldUtil.Directions.EAST.name().toLowerCase(Locale.ROOT), Set.of()
-    ));
+    public static Map<String, TemplateSpawns> spawns = Map.of(
+            "default", new TemplateSpawns(Set.of(new BlockPos(6, 3, 5)), Set.of(), Set.of(), Set.of())
+    );
 
     @Config("A list of blocks which can be used to surround islands/caves.")
-    public static Map<String, List<Block>> surroundingBlocks = Map.of("default", List.of());
+    public static Map<String, TemplateSurroundingBlocks> surroundingBlocks = Map.of("default", TemplateSurroundingBlocks.EMPTY);
 
     @Config({"A list of file names for templates which should spread around an island",
             "Instead of \"minOffset\" and \"maxOffset\" with same values, you could also just use \"offset\".",
-            "\"origin\" defines from where the offset will be used. Possible values are \"zero\" and \"center\", where \"zero\" is default.",
+            "\"origin\" defines from where the offset will be used. Possible values are \"zero\" and \"center\", where \"center\" is default.",
             "Example: ",
             "{",
             "    \"file\": \"default.nbt\",",
@@ -36,12 +39,12 @@ public class TemplatesConfig {
             "    \"maxOffset\": [ 4, 10, 3 ],",
             "    \"origin\": \"center\"",
             "}"})
-    public static Map<String, List<TemplateInfo.SpreadInfo>> spreads = Map.of("default", List.of());
+    public static Map<String, TemplateSpreads> spreads = Map.of("default", TemplateSpreads.EMPTY);
 
     @Config({"The default offset from 0, 0 to generate the islands",
             "Can be used to generate them in the middle of .mca files",
             "This applies on top of the \"offset\" defined in each template"})
-    public static int defaultOffset = WorldConfig.offset;
+    public static int defaultOffset = 0;
 
     @Config({"The template which will be used for spawn only",
             "Example: ",
@@ -56,5 +59,5 @@ public class TemplatesConfig {
             "}"})
     public static Optional<TemplateInfo> spawn = Optional.empty();
 
-    public record Spawn(BlockPos pos, WorldUtil.Directions direction) {}
+    public record Spawn(BlockPos pos, WorldUtil.SpawnDirection direction) {}
 }

@@ -1,17 +1,22 @@
 package de.melanx.skyblockbuilder.data;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class TemplateData extends SavedData {
 
-    private static final String NAME = "skyblock_template";
+    private static final String NAME = "skyblockbuilder/template";
 
     private final ConfiguredTemplate template;
 
@@ -20,22 +25,39 @@ public class TemplateData extends SavedData {
         this.setDirty();
     }
 
-    public static TemplateData get(ServerLevel level) {
-        DimensionDataStorage storage = level.getServer().overworld().getDataStorage();
+    public static SavedData.Factory<TemplateData> factory() {
         ConfiguredTemplate template = TemplateLoader.getConfiguredTemplate().copy();
-        return storage.computeIfAbsent(nbt -> new TemplateData(template).load(nbt), () -> new TemplateData(template), NAME);
+        return new SavedData.Factory<>(() -> new TemplateData(template), (nbt, provider) -> TemplateData.load(template, nbt));
     }
 
-    public TemplateData load(@Nonnull CompoundTag nbt) {
-        this.template.read(nbt);
+    public static TemplateData get(ServerLevel level) {
+        DimensionDataStorage storage = level.getServer().overworld().getDataStorage();
+        return storage.computeIfAbsent(TemplateData.factory(), NAME);
+    }
 
-        return this;
+    public static TemplateData load(ConfiguredTemplate template, @Nonnull CompoundTag nbt) {
+        template.read(nbt);
+
+        return new TemplateData(template);
     }
 
     @Nonnull
     @Override
-    public CompoundTag save(@Nonnull CompoundTag compound) {
-        return this.template.write(compound);
+    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+        return this.template.write(tag);
+    }
+
+    @Override
+    public void save(@Nonnull File file, @Nonnull HolderLookup.Provider registries) {
+        if (this.isDirty()) {
+            try {
+                Files.createDirectories(file.toPath().getParent());
+            } catch (IOException e) {
+                SkyblockBuilder.getLogger().error("Could not create directory: {}", file.getAbsolutePath(), e);
+            }
+        }
+
+        super.save(file, registries);
     }
 
     public void refreshTemplate() {

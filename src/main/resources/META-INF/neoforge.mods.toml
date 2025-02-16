@@ -1,0 +1,36 @@
+modLoader="javafml"
+loaderVersion = "[4,)"
+license = "${mod.license}"
+issueTrackerURL = "${mod.issue_url}"
+
+[[mods]]
+modId = "${mod.modid}"
+version = "${mod.version}"
+displayName="Skyblock Builder"
+displayURL = "${mod.source_url}"
+updateJSONURL="https://assets.melanx.de/updates/skyblock-builder.json"
+authors="MelanX"
+description='''
+Let you create a custom skyblock island via config
+'''
+
+[[dependencies.${ mod.modid }]]
+modId = "neoforge"
+mandatory = true
+versionRange = "[${mod.neoforge},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${ mod.modid }]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${mod.minecraft},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${ mod.modid }]]
+modId = "libx"
+mandatory = true
+versionRange = "[1.21.1-6.0.0,)"
+ordering = "AFTER"
+side = "BOTH"

@@ -26,7 +26,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.eventbus.api.Event;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class TeamCommand {
@@ -185,8 +184,8 @@ public class TeamCommand {
             return 0;
         }
 
-        Pair<Event.Result, Boolean> result = SkyblockHooks.onToggleVisits(player, team, enabled);
-        if (result.getLeft() == Event.Result.DENY) {
+        Pair<SkyblockManageTeamEvent.Result, Boolean> result = SkyblockHooks.onToggleVisits(player, team, enabled);
+        if (result.getLeft() == SkyblockManageTeamEvent.Result.DENY) {
             source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.toggle_request", Component.translatable("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))).withStyle(ChatFormatting.RED), false);
             return 0;
         } else {
@@ -222,8 +221,8 @@ public class TeamCommand {
             return 0;
         }
 
-        Pair<Event.Result, Boolean> result = SkyblockHooks.onToggleRequests(player, team, enabled);
-        if (result.getLeft() == Event.Result.DENY) {
+        Pair<SkyblockManageTeamEvent.Result, Boolean> result = SkyblockHooks.onToggleRequests(player, team, enabled);
+        if (result.getLeft() == SkyblockManageTeamEvent.Result.DENY) {
             source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.toggle_request", Component.translatable("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))).withStyle(ChatFormatting.RED), false);
             return 0;
         } else {
@@ -257,7 +256,7 @@ public class TeamCommand {
             team = data.getSpawn();
         }
 
-        Pair<Event.Result, TemplatesConfig.Spawn> result = SkyblockHooks.onAddSpawn(player, team, pos, player.getDirection());
+        Pair<SkyblockManageTeamEvent.Result, TemplatesConfig.Spawn> result = SkyblockHooks.onAddSpawn(player, team, pos, player.getDirection());
         switch (result.getLeft()) {
             case DENY:
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.create_spawn").withStyle(ChatFormatting.RED), false);
@@ -365,7 +364,7 @@ public class TeamCommand {
             }
         }
 
-        Event.Result result = SkyblockHooks.onResetSpawns(player, team);
+        SkyblockManageTeamEvent.Result result = SkyblockHooks.onResetSpawns(player, team);
         switch (result) {
             case DENY:
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.reset_spawns").withStyle(ChatFormatting.GOLD), false);

@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
+import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.RandomUtility;
@@ -29,9 +30,9 @@ public class SpawnCommand {
         ServerPlayer player = source.getPlayerOrException();
         Team team = data.getSpawn();
 
-        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleportSpawn(level.getGameTime())) {
+        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.SPAWN, level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.spawnCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastSpawnTeleport()))));
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.spawnCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.SPAWN)))));
             return 0;
         }
 
@@ -51,7 +52,7 @@ public class SpawnCommand {
             return 0;
         }
 
-        data.getOrCreateMetaInfo(player).setLastSpawnTeleport(level.getGameTime());
+        data.getOrCreateMetaInfo(player).setLastTeleport(SkyMeta.TeleportType.SPAWN, level.getGameTime());
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.teleport_to_spawn"), false);
         WorldUtil.teleportToIsland(player, team);
         return 1;
