@@ -21,8 +21,8 @@ public class SkyBiomeSource extends MultiNoiseBiomeSource {
     private final MultiNoiseBiomeSource parent;
 
     public static final MapCodec<SkyBiomeSource> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                    Codec.list(CenterBiome.CODEC.codec()).fieldOf("center_biome").forGetter(lol -> lol.centerBiomes),
-                    MultiNoiseBiomeSource.CODEC.fieldOf("parent").forGetter(lol -> lol.parent)
+                    Codec.list(CenterBiome.CODEC.codec()).fieldOf("center_biome").forGetter(biomeSource -> biomeSource.centerBiomes),
+                    MultiNoiseBiomeSource.CODEC.fieldOf("parent").forGetter(biomeSource -> biomeSource.parent)
             )
             .apply(instance, SkyBiomeSource::new));
 

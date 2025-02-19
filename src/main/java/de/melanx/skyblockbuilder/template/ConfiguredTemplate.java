@@ -1,14 +1,20 @@
 package de.melanx.skyblockbuilder.template;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.config.values.TemplateSpawns;
+import de.melanx.skyblockbuilder.config.values.TemplateSpreads;
 import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
-import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.registration.ModBlockTags;
+import de.melanx.skyblockbuilder.spreads.GroupWeightedSpreadEntry;
+import de.melanx.skyblockbuilder.spreads.SingleSpreadEntry;
+import de.melanx.skyblockbuilder.spreads.SpreadInfo;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -16,6 +22,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -43,7 +50,7 @@ public class ConfiguredTemplate {
     private BlockPos offset;
     private int surroundingMargin;
     private WeightedRandomList<TemplateSurroundingBlocks.WeightedBlock> surroundingBlocks;
-    private List<SpreadConfig> spreads;
+    private TemplateSpreads templateSpreads;
     private boolean allowPaletteSelection;
 
     public ConfiguredTemplate(TemplateInfo info) {
@@ -64,15 +71,34 @@ public class ConfiguredTemplate {
         this.offset = info.offset();
         this.surroundingMargin = info.surroundingBlocks().templateSurroundingBlocks().margin();
         this.surroundingBlocks = WeightedRandomList.create(info.surroundingBlocks().templateSurroundingBlocks().blocks());
-        SpreadsProvider spreads = info.spreads();
-        List<SpreadConfig> spreadConfigs = new ArrayList<>();
-        if (spreads != null) {
-            for (TemplateInfo.SpreadInfo spreadInfo : spreads.templateSpreads().spreads()) {
-                spreadConfigs.add(new SpreadConfig(spreadInfo));
-            }
-        }
-        this.spreads = List.copyOf(spreadConfigs);
+        this.templateSpreads = info.spreads().templateSpreads();
         this.allowPaletteSelection = info.allowPaletteSelection();
+    }
+
+    private void generateSpreads(LevelTicks<Block> blockTicks, ServerLevel serverLevel, @Nullable Team team, BlockPos pos, StructurePlaceSettings settings, RandomSource random, int flags) {
+        for (Either<SingleSpreadEntry, GroupWeightedSpreadEntry> either : this.templateSpreads.spreads()) {
+            either.ifLeft(entry -> {
+                this.placeSingleSpread(entry, blockTicks, serverLevel, team, pos, settings, random, flags);
+            }).ifRight(weightedSpread -> {
+                for (SingleSpreadEntry entry : weightedSpread.chooseEntries(random)) {
+                    this.placeSingleSpread(entry, blockTicks, serverLevel, team, pos, settings, random, flags);
+                }
+            });
+        }
+    }
+
+    private void placeSingleSpread(SingleSpreadEntry entry, LevelTicks<Block> blockTicks, ServerLevel serverLevel, Team team, BlockPos pos, StructurePlaceSettings settings, RandomSource random, int flags) {
+        SpreadConfig spreadConfig = new SpreadConfig(entry.file(), entry.minOffset(), entry.maxOffset(), entry.origin());
+        BlockPos offset = spreadConfig.getRandomOffset(random);
+        if (spreadConfig.getOrigin() != SpreadInfo.Origin.ZERO) {
+            offset = offset.offset(SpreadInfo.Origin.originOffset(spreadConfig.getOrigin(), this.template));
+        }
+        BlockPos offsetPos = pos.offset(offset);
+        spreadConfig.getTemplate().placeInWorld(serverLevel, offsetPos, offsetPos, settings, random, flags);
+        ConfiguredTemplate.clearBlockTicks(serverLevel, blockTicks, offsetPos, spreadConfig.getTemplate());
+        if (team != null) {
+            team.addSpread(spreadConfig.getFileNameWithoutExtension(), offsetPos, new BlockPos(spreadConfig.template.getSize()));
+        }
     }
 
     private ConfiguredTemplate() {}
@@ -97,18 +123,7 @@ public class ConfiguredTemplate {
 
     public void placeInWorld(ServerLevel serverLevel, @Nullable Team team, BlockPos pos, StructurePlaceSettings settings, RandomSource random, int flags) {
         LevelTicks<Block> blockTicks = serverLevel.getBlockTicks();
-        for (SpreadConfig spread : this.spreads) {
-            BlockPos offset = spread.getRandomOffset(random);
-            if (spread.getOrigin() != TemplateInfo.SpreadInfo.Origin.ZERO) {
-                offset = offset.offset(TemplateInfo.SpreadInfo.Origin.originOffset(spread.getOrigin(), this.template));
-            }
-            BlockPos offsetPos = pos.offset(offset);
-            spread.getTemplate().placeInWorld(serverLevel, offsetPos, offsetPos, settings, random, flags);
-            ConfiguredTemplate.clearBlockTicks(serverLevel, blockTicks, offsetPos, spread.getTemplate());
-            if (team != null) {
-                team.addSpread(spread.getFileNameWithoutExtension(), offsetPos, new BlockPos(spread.template.getSize()));
-            }
-        }
+        this.generateSpreads(blockTicks, serverLevel, team, pos, settings, random, flags);
 
         this.template.placeInWorld(serverLevel, pos, pos, settings, random, flags);
         ConfiguredTemplate.clearBlockTicks(serverLevel, blockTicks, pos, this.template);
@@ -194,27 +209,29 @@ public class ConfiguredTemplate {
         });
         nbt.put("SurroundingBlocks", surroundingBlocks);
 
-        ListTag spreads = new ListTag();
-        this.spreads.forEach(spread -> {
-            CompoundTag minPos = new CompoundTag();
-            minPos.putInt("posX", spread.minOffset.getX());
-            minPos.putInt("posY", spread.minOffset.getY());
-            minPos.putInt("posZ", spread.minOffset.getZ());
-
-            CompoundTag maxPos = new CompoundTag();
-            maxPos.putInt("posX", spread.maxOffset.getX());
-            maxPos.putInt("posY", spread.maxOffset.getY());
-            maxPos.putInt("posZ", spread.maxOffset.getZ());
-
-            CompoundTag tag = new CompoundTag();
-            tag.putString("File", spread.fileName);
-            tag.putString("Origin", spread.origin.name());
-            tag.put("minOffset", minPos);
-            tag.put("maxOffset", maxPos);
-
-            spreads.add(tag);
-        });
-        nbt.put("Spreads", spreads);
+//        ListTag spreads = new ListTag();
+        DataResult<Tag> encode = TemplateSpreads.CODEC.encodeStart(NbtOps.INSTANCE, this.templateSpreads);
+        encode.resultOrPartial(SkyblockBuilder.getLogger()::error).ifPresent(lol -> nbt.put("Spreads", lol));
+//        this.templateSpreads.forEach(spread -> {
+//            CompoundTag minPos = new CompoundTag();
+//            minPos.putInt("posX", spread.minOffset.getX());
+//            minPos.putInt("posY", spread.minOffset.getY());
+//            minPos.putInt("posZ", spread.minOffset.getZ());
+//
+//            CompoundTag maxPos = new CompoundTag();
+//            maxPos.putInt("posX", spread.maxOffset.getX());
+//            maxPos.putInt("posY", spread.maxOffset.getY());
+//            maxPos.putInt("posZ", spread.maxOffset.getZ());
+//
+//            CompoundTag tag = new CompoundTag();
+//            tag.putString("File", spread.fileName);
+//            tag.putString("Origin", spread.origin.name());
+//            tag.put("minOffset", minPos);
+//            tag.put("maxOffset", maxPos);
+//
+//            spreads.add(tag);
+//        });
+//        nbt.put("Spreads", spreads);
 
         return nbt;
     }
@@ -250,21 +267,21 @@ public class ConfiguredTemplate {
         }
         this.surroundingBlocks = WeightedRandomList.create(blocks);
 
-        ListTag spreads = nbt.getList("Spreads", Tag.TAG_COMPOUND);
-        List<SpreadConfig> spreadConfigs = new ArrayList<>();
-        for (Tag spread : spreads) {
-            String file = ((CompoundTag) spread).getString("File");
-            TemplateInfo.SpreadInfo.Origin origin = TemplateInfo.SpreadInfo.Origin.valueOf(((CompoundTag) spread).getString("Origin"));
-
-            CompoundTag minPos = ((CompoundTag) spread).getCompound("minOffset");
-            BlockPos minOffset = WorldUtil.blockPosFromTag(minPos);
-
-            CompoundTag maxPos = ((CompoundTag) spread).getCompound("maxOffset");
-            BlockPos maxOffset = WorldUtil.blockPosFromTag(maxPos);
-
-            spreadConfigs.add(new SpreadConfig(file, minOffset, maxOffset, origin));
-        }
-        this.spreads = List.copyOf(spreadConfigs);
+//        ListTag spreads = nbt.getList("Spreads", Tag.TAG_COMPOUND);
+//        List<SpreadConfig> spreadConfigs = new ArrayList<>();
+//        for (Tag spread : spreads) {
+//            String file = ((CompoundTag) spread).getString("File");
+//            SpreadInfo.Origin origin = SpreadInfo.Origin.valueOf(((CompoundTag) spread).getString("Origin"));
+//
+//            CompoundTag minPos = ((CompoundTag) spread).getCompound("minOffset");
+//            BlockPos minOffset = WorldUtil.blockPosFromTag(minPos);
+//
+//            CompoundTag maxPos = ((CompoundTag) spread).getCompound("maxOffset");
+//            BlockPos maxOffset = WorldUtil.blockPosFromTag(maxPos);
+//
+//            spreadConfigs.add(new SpreadConfig(file, minOffset, maxOffset, origin));
+//        }
+        this.templateSpreads = TemplateSpreads.CODEC.decode(NbtOps.INSTANCE, nbt.get("Spreads")).resultOrPartial().orElseGet(() -> Pair.of(TemplateSpreads.EMPTY, new CompoundTag())).getFirst();
     }
 
     public ConfiguredTemplate copy() {
@@ -290,13 +307,13 @@ public class ConfiguredTemplate {
         private final BlockPos minOffset;
         private final BlockPos maxOffset;
         private final StructureTemplate template;
-        private final TemplateInfo.SpreadInfo.Origin origin;
+        private final SpreadInfo.Origin origin;
 
-        public SpreadConfig(TemplateInfo.SpreadInfo info) {
+        public SpreadConfig(SpreadInfo info) {
             this(info.file(), info.minOffset(), info.maxOffset(), info.origin());
         }
 
-        public SpreadConfig(String fileName, BlockPos minOffset, BlockPos maxOffset, TemplateInfo.SpreadInfo.Origin origin) {
+        public SpreadConfig(String fileName, BlockPos minOffset, BlockPos maxOffset, SpreadInfo.Origin origin) {
             StructureTemplate template = new StructureTemplate();
             CompoundTag nbt;
             try {
@@ -345,14 +362,14 @@ public class ConfiguredTemplate {
                     getRandomBetween(random, this.minOffset.getZ(), this.maxOffset.getZ())
             );
 
-            if (this.getOrigin() != TemplateInfo.SpreadInfo.Origin.ZERO) {
-                offset = offset.subtract(TemplateInfo.SpreadInfo.Origin.originOffset(this.origin, this.template));
+            if (this.getOrigin() != SpreadInfo.Origin.ZERO) {
+                offset = offset.subtract(SpreadInfo.Origin.originOffset(this.origin, this.template));
             }
 
             return offset;
         }
 
-        public TemplateInfo.SpreadInfo.Origin getOrigin() {
+        public SpreadInfo.Origin getOrigin() {
             return this.origin;
         }
 

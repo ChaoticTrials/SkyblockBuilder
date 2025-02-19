@@ -1,18 +1,12 @@
 package de.melanx.skyblockbuilder.config.mapper;
 
 import com.google.gson.JsonArray;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
+import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.config.values.TemplateSpreads;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
 import org.moddingx.libx.config.mapper.ValueMapper;
 import org.moddingx.libx.config.validator.ValidatorInfo;
-import org.moddingx.libx.impl.config.ModMappers;
-import org.moddingx.libx.impl.config.mappers.special.RecordValueMapper;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 @RegisterMapper
 public class TemplateSpreadsMapper implements ValueMapper<TemplateSpreads, JsonArray> {
@@ -29,30 +23,16 @@ public class TemplateSpreadsMapper implements ValueMapper<TemplateSpreads, JsonA
 
     @Override
     public TemplateSpreads fromJson(JsonArray json) {
-        return TemplateSpreads.fromJson(json);
+        return TemplateSpreads.CODEC.decode(JsonOps.INSTANCE, json).getOrThrow().getFirst();
     }
 
     @Override
     public JsonArray toJson(TemplateSpreads value) {
-        return TemplateSpreads.toJson(value);
+        return TemplateSpreads.CODEC.encodeStart(JsonOps.INSTANCE, value).getOrThrow().getAsJsonArray();
     }
 
     @Override
     public ConfigEditor<TemplateSpreads> createEditor(ValidatorInfo<?> validator) {
-        try {
-            Method method = ModMappers.class.getDeclaredMethod("getMapper", Type.class);
-            method.setAccessible(true);
-
-            ModMappers modMappers = ModMappers.get(SkyblockBuilder.getInstance().modid);
-            return new RecordValueMapper<>(SkyblockBuilder.getInstance().modid, TemplateSpreads.class, type -> {
-                try {
-                    return (ValueMapper<?, ?>) method.invoke(modMappers, type);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
-            }).createEditor(validator);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return ConfigEditor.unsupported(TemplateSpreads.EMPTY);
     }
 }

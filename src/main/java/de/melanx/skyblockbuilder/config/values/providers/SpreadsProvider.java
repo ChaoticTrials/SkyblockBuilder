@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.config.values.providers;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.values.TemplateSpreads;
 
@@ -19,7 +20,7 @@ public interface SpreadsProvider {
         }
 
         if (json.isJsonObject()) {
-            return new Direct(TemplateSpreads.fromJson(json.getAsJsonArray()));
+            return new Direct(TemplateSpreads.CODEC.decode(JsonOps.INSTANCE, json).getOrThrow().getFirst());
         }
 
         throw new IllegalArgumentException("Unknown spawns: " + json);
@@ -46,7 +47,7 @@ public interface SpreadsProvider {
 
         @Override
         public JsonElement toJson() {
-            return TemplateSpreads.toJson(this.templateSpreads);
+            return TemplateSpreads.CODEC.encodeStart(JsonOps.INSTANCE, this.templateSpreads).getOrThrow();
         }
     }
 }
