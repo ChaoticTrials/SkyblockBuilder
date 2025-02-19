@@ -52,6 +52,13 @@ import java.util.concurrent.ConcurrentMap;
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public class SkyblockSavedData extends SavedData {
 
+    public static final String ISLANDS = "islands";
+    public static final String ISLAND = "island";
+    public static final String META_INFO = "meta_information";
+    public static final String PLAYER = "player";
+    public static final String META = "meta";
+    public static final String SPIRAL_STATE = "spiral_state";
+
     private static final String NAME = "skyblockbuilder/main";
     private static SkyblockSavedData clientInstance;
     public static final UUID SPAWN_ID = Util.NIL_UUID;
@@ -144,10 +151,10 @@ public class SkyblockSavedData extends SavedData {
         ConcurrentMap<UUID, Team> skyblocks = new ConcurrentHashMap<>();
         BiMap<String, UUID> skyblockIds = Maps.synchronizedBiMap(HashBiMap.create());
         BiMap<UUID, IslandPos> skyblockPositions = Maps.synchronizedBiMap(HashBiMap.create());
-        for (Tag inbt : nbt.getList("Islands", Tag.TAG_COMPOUND)) {
+        for (Tag inbt : nbt.getList(ISLANDS, Tag.TAG_COMPOUND)) {
             CompoundTag tag = (CompoundTag) inbt;
 
-            IslandPos island = IslandPos.fromTag(tag.getCompound("Island"));
+            IslandPos island = IslandPos.fromTag(tag.getCompound(ISLAND));
             Team team = Team.create(data, tag);
 
             skyblocks.put(team.getId(), team);
@@ -155,18 +162,18 @@ public class SkyblockSavedData extends SavedData {
             skyblockPositions.put(team.getId(), island);
         }
 
-        for (Tag inbt : nbt.getList("MetaInformation", Tag.TAG_COMPOUND)) {
+        for (Tag inbt : nbt.getList(META_INFO, Tag.TAG_COMPOUND)) {
             CompoundTag tag = (CompoundTag) inbt;
 
-            UUID player = tag.getUUID("Player");
-            SkyMeta meta = SkyMeta.get(data, tag.getCompound("Meta"));
+            UUID player = tag.getUUID(PLAYER);
+            SkyMeta meta = SkyMeta.get(data, tag.getCompound(META));
             metaInfo.put(player, meta);
         }
         data.metaInfo = metaInfo;
         data.skyblocks = skyblocks;
         data.skyblockIds = skyblockIds;
         data.skyblockPositions = skyblockPositions;
-        data.spiral = Spiral.fromArray(nbt.getIntArray("SpiralState"));
+        data.spiral = Spiral.fromArray(nbt.getIntArray(SPIRAL_STATE));
 
         return data;
     }
@@ -183,15 +190,15 @@ public class SkyblockSavedData extends SavedData {
         for (Map.Entry<UUID, SkyMeta> entry : this.metaInfo.entrySet()) {
             SkyMeta meta = entry.getValue();
             CompoundTag entryTag = new CompoundTag();
-            entryTag.putUUID("Player", entry.getKey());
-            entryTag.put("Meta", meta.save());
+            entryTag.putUUID(PLAYER, entry.getKey());
+            entryTag.put(META, meta.save());
 
             metaInfo.add(entryTag);
         }
 
-        compound.putIntArray("SpiralState", this.spiral.toIntArray());
-        compound.put("Islands", islands);
-        compound.put("MetaInformation", metaInfo);
+        compound.putIntArray(SPIRAL_STATE, this.spiral.toIntArray());
+        compound.put(ISLANDS, islands);
+        compound.put(META_INFO, metaInfo);
 
         return compound;
     }

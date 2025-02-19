@@ -15,6 +15,14 @@ import java.util.UUID;
 
 public class SkyMeta {
 
+    private static final String OWNER_ID = "owner_id";
+    private static final String TEAM_ID = "team_id";
+    private static final String PREVIOUS_TEAM_IDS = "previous_team_ids";
+    private static final String INVITATIONS = "invitations";
+    private static final String LAST_HOME_TELEPORT = "last_home_teleport";
+    private static final String LAST_SPAWN_TELEPORT = "last_spawn_teleport";
+    private static final String LAST_VISIT_TELEPORT = "last_visit_teleport";
+
     private final Set<UUID> previousTeamIds = Sets.newHashSet();
     private final List<UUID> invites = Lists.newArrayList();
     private final SkyblockSavedData data;
@@ -118,22 +126,22 @@ public class SkyMeta {
     }
 
     public SkyMeta load(@Nonnull CompoundTag nbt) {
-        this.owner = nbt.getUUID("OwnerId");
-        this.teamId = nbt.getUUID("TeamId");
+        this.owner = nbt.getUUID(OWNER_ID);
+        this.teamId = nbt.getUUID(TEAM_ID);
 
         this.previousTeamIds.clear();
-        for (Tag tag : nbt.getList("PreviousTeamIds", Tag.TAG_INT_ARRAY)) {
+        for (Tag tag : nbt.getList(PREVIOUS_TEAM_IDS, Tag.TAG_INT_ARRAY)) {
             this.previousTeamIds.add(NbtUtils.loadUUID(tag));
         }
 
         this.invites.clear();
-        for (Tag tag : nbt.getList("Invitations", Tag.TAG_INT_ARRAY)) {
+        for (Tag tag : nbt.getList(INVITATIONS, Tag.TAG_INT_ARRAY)) {
             this.invites.add(NbtUtils.loadUUID(tag));
         }
 
-        this.lastHomeTeleport = nbt.getLong("LastHomeTeleport");
-        this.lastSpawnTeleport = nbt.getLong("LastSpawnTeleport");
-        this.lastVisitTeleport = nbt.getLong("LastVisitTeleport");
+        this.lastHomeTeleport = nbt.getLong(LAST_HOME_TELEPORT);
+        this.lastSpawnTeleport = nbt.getLong(LAST_SPAWN_TELEPORT);
+        this.lastVisitTeleport = nbt.getLong(LAST_VISIT_TELEPORT);
 
         return this;
     }
@@ -141,8 +149,8 @@ public class SkyMeta {
     @Nonnull
     public CompoundTag save() {
         CompoundTag nbt = new CompoundTag();
-        nbt.putUUID("OwnerId", this.owner);
-        nbt.putUUID("TeamId", this.teamId);
+        nbt.putUUID(OWNER_ID, this.owner);
+        nbt.putUUID(TEAM_ID, this.teamId);
 
         ListTag prevTeamIds = new ListTag();
         for (UUID id : this.previousTeamIds) {
@@ -154,11 +162,11 @@ public class SkyMeta {
             invitationTeams.add(NbtUtils.createUUID(id));
         }
 
-        nbt.put("PreviousTeamIds", prevTeamIds);
-        nbt.put("Invitations", invitationTeams);
-        nbt.putLong("LastHomeTeleport", this.lastHomeTeleport);
-        nbt.putLong("LastSpawnTeleport", this.lastSpawnTeleport);
-        nbt.putLong("LastVisitTeleport", this.lastVisitTeleport);
+        nbt.put(PREVIOUS_TEAM_IDS, prevTeamIds);
+        nbt.put(INVITATIONS, invitationTeams);
+        nbt.putLong(LAST_HOME_TELEPORT, this.lastHomeTeleport);
+        nbt.putLong(LAST_SPAWN_TELEPORT, this.lastSpawnTeleport);
+        nbt.putLong(LAST_VISIT_TELEPORT, this.lastVisitTeleport);
         return nbt;
     }
 

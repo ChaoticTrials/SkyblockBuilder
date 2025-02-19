@@ -15,6 +15,10 @@ import net.minecraft.world.level.Level;
  */
 public final class IslandPos {
 
+    public static final String ISLAND_X = "island_x";
+    public static final String ISLAND_Z = "island_z";
+    public static final String CENTER_POS = "center_pos";
+
     private final int x;
     private final int z;
     private BlockPos center;
@@ -50,17 +54,17 @@ public final class IslandPos {
     public static IslandPos fromTag(CompoundTag tag) {
         //noinspection OptionalGetWithoutIsPresent
         return new IslandPos(
-                tag.getInt("IslandX"),
-                tag.getInt("IslandZ"),
-                NbtUtils.readBlockPos(tag, "CenterPos").get()
+                tag.getInt(ISLAND_X),
+                tag.getInt(ISLAND_Z),
+                NbtUtils.readBlockPos(tag, CENTER_POS).get()
         );
     }
 
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
-        tag.putInt("IslandX", this.x);
-        tag.putInt("IslandZ", this.z);
-        tag.put("CenterPos", NbtUtils.writeBlockPos(this.center));
+        tag.putInt(ISLAND_X, this.x);
+        tag.putInt(ISLAND_Z, this.z);
+        tag.put(CENTER_POS, NbtUtils.writeBlockPos(this.center));
         return tag;
     }
 
