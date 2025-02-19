@@ -1,6 +1,5 @@
 package de.melanx.skyblockbuilder.util;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -15,7 +14,6 @@ import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGe
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -25,13 +23,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -160,74 +153,6 @@ public class WorldUtil {
         }
 
         return Math.max(level.getMinBuildHeight() + 1, height);
-    }
-
-    // [Vanilla copy] Get flat world info on servers
-    public static List<FlatLayerInfo> layersInfoFromString(String settings) {
-        if (settings == null || settings.isBlank()) {
-            return Lists.newArrayList();
-        }
-
-        List<FlatLayerInfo> list = Lists.newArrayList();
-        String[] astring = settings.split(",");
-        int i = 0;
-
-        for (String s : astring) {
-            FlatLayerInfo flatlayerinfo = getLayerInfo(s, i);
-            if (flatlayerinfo == null) {
-                return Collections.emptyList();
-            }
-
-            list.add(flatlayerinfo);
-            i += flatlayerinfo.getHeight();
-        }
-
-        return list;
-    }
-
-    // [Vanilla copy]
-    @Nullable
-    private static FlatLayerInfo getLayerInfo(String setting, int currentLayers) {
-        String[] info = setting.split("\\*", 2);
-        int i;
-        if (info.length == 2) {
-            try {
-                i = Math.max(Integer.parseInt(info[0]), 0);
-            } catch (NumberFormatException numberformatexception) {
-                SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", numberformatexception.getMessage());
-                return null;
-            }
-        } else {
-            i = 1;
-        }
-
-        int maxLayers = Math.min(currentLayers + i, 384);
-        int height = maxLayers - currentLayers;
-        String blockName = info[info.length - 1];
-
-        Block block;
-        ResourceLocation blockId = ResourceLocation.tryParse(blockName);
-        try {
-            block = BuiltInRegistries.BLOCK.get(blockId);
-        } catch (Exception exception) {
-            SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", exception.getMessage());
-            return null;
-        }
-
-        if (block == Blocks.AIR && !BuiltInRegistries.BLOCK.getKey(Blocks.AIR).equals(blockId)) {
-            SkyblockBuilder.getLogger().error("Error while parsing surface settings string => Unknown block, {}", blockName);
-        }
-
-        return new FlatLayerInfo(height, block);
-    }
-
-    public static int calculateHeightFromLayers(List<FlatLayerInfo> layerInfos) {
-        int i = 0;
-        for (FlatLayerInfo info : layerInfos) {
-            i += info.getHeight();
-        }
-
-        return i;
     }
 
     public static CompoundTag blockPosToTag(BlockPos pos) {

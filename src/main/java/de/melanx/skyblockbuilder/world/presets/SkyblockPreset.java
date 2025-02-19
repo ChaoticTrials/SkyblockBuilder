@@ -4,10 +4,10 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.util.BiomeSourceConverter;
-import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.SkyBiomeSource;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
+import de.melanx.skyblockbuilder.world.flat.FlatLayers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
@@ -22,7 +22,6 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldDimensions;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import org.moddingx.libx.util.lazy.LazyValue;
 
@@ -136,10 +135,10 @@ public class SkyblockPreset extends WorldPreset {
         return new SkyblockEndChunkGenerator(biomeSource, settings, Level.END, SkyblockPreset.getLayers(Level.END));
     }
 
-    public static List<FlatLayerInfo> getLayers(ResourceKey<Level> levelKey) {
+    public static FlatLayers getLayers(ResourceKey<Level> levelKey) {
         return WorldConfig.surface
-                ? WorldUtil.layersInfoFromString(WorldConfig.surfaceSettings.get(levelKey.location().toString()))
-                : List.of();
+                ? WorldConfig.surfaceSettings.get(levelKey.location().toString())
+                : FlatLayers.EMPTY;
     }
 
     private static BiomeSource convertBiomeSource(MultiNoiseBiomeSource biomeSource, HolderLookup<Biome> biomes, List<DimensionsConfig.UnregisteredCenterBiome> unregisteredCenterBiomes) {

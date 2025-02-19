@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.world.chunkgenerators;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
+import de.melanx.skyblockbuilder.world.flat.FlatLayers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
@@ -20,10 +21,8 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator {
@@ -36,11 +35,11 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
                     BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                     NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
                     Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
-                    FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(generator -> generator.layerInfos)
+                    FlatLayers.CODEC.optionalFieldOf("layers", FlatLayers.EMPTY).forGetter(generator -> generator.flatLayers)
             ).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
 
-    public SkyblockEndChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
-        super(biomeSource, generatorSettings, dimension, layerInfos);
+    public SkyblockEndChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, FlatLayers flatLayers) {
+        super(biomeSource, generatorSettings, dimension, flatLayers);
     }
 
     @Nonnull

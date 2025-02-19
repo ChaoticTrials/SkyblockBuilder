@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.config.common;
 
 import com.google.common.collect.Maps;
+import de.melanx.skyblockbuilder.world.flat.FlatLayers;
 import net.minecraft.Util;
 import net.minecraft.world.level.Level;
 import org.moddingx.libx.annotation.config.RegisterConfig;
@@ -26,10 +27,10 @@ public class WorldConfig {
     public static boolean surface = false;
 
     @Config({"The block settings for generating the different dimensions surfaces.", "Same format as flat world generation settings (blocks only)"})
-    public static Map<String, String> surfaceSettings = Util.make(Maps.newHashMap(), map -> {
-        map.put(Level.OVERWORLD.location().toString(), "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block");
-        map.put(Level.NETHER.location().toString(), "");
-        map.put(Level.END.location().toString(), "");
+    public static Map<String, FlatLayers> surfaceSettings = Util.make(Maps.newHashMap(), map -> {
+        map.put(Level.OVERWORLD.location().toString(), FlatLayers.of("minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block"));
+        map.put(Level.NETHER.location().toString(), FlatLayers.EMPTY);
+        map.put(Level.END.location().toString(), FlatLayers.EMPTY);
     });
 
     @Config

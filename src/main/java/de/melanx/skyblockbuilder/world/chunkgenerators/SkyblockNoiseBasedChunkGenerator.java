@@ -5,7 +5,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.common.StructuresConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
-import de.melanx.skyblockbuilder.util.WorldUtil;
+import de.melanx.skyblockbuilder.world.flat.FlatLayerConfig;
+import de.melanx.skyblockbuilder.world.flat.FlatLayers;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
@@ -26,7 +27,6 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
@@ -45,22 +45,22 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                     BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                     NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
                     Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
-                    FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(generator -> generator.layerInfos)
+                    FlatLayers.CODEC.optionalFieldOf("layers", FlatLayers.EMPTY).forGetter(generator -> generator.flatLayers)
             ).apply(instance, instance.stable(SkyblockNoiseBasedChunkGenerator::new)));
 
     public final Holder<NoiseGeneratorSettings> generatorSettings;
     public final ResourceKey<Level> dimension;
     protected final NoiseBasedChunkGenerator parent;
-    protected final List<FlatLayerInfo> layerInfos;
+    protected final FlatLayers flatLayers;
     private final int layerHeight;
 
-    public SkyblockNoiseBasedChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
+    public SkyblockNoiseBasedChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, FlatLayers flatLayers) {
         super(biomeSource, generatorSettings);
         this.generatorSettings = generatorSettings;
         this.parent = new NoiseBasedChunkGenerator(biomeSource, generatorSettings);
         this.dimension = dimension;
-        this.layerInfos = layerInfos;
-        this.layerHeight = WorldUtil.calculateHeightFromLayers(this.layerInfos);
+        this.flatLayers = flatLayers;
+        this.layerHeight = this.flatLayers.totalHeight();
     }
 
     @Nonnull
@@ -76,7 +76,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Override
     public void buildSurface(@Nonnull WorldGenRegion level, @Nonnull StructureManager structureManager, @Nonnull RandomState randomState, @Nonnull ChunkAccess chunk) {
-        if (!this.layerInfos.isEmpty()) {
+        if (!this.flatLayers.isEmpty()) {
             ChunkPos cp = chunk.getPos();
             int xs = cp.getMinBlockX();
             int zs = cp.getMinBlockZ();
@@ -84,11 +84,23 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
             int ze = cp.getMaxBlockZ();
             int y = level.getMinBuildHeight();
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-            for (FlatLayerInfo info : this.layerInfos) {
+            for (FlatLayerConfig info : this.flatLayers.layers()) {
                 BlockState state = info.getBlockState();
+
                 for (int i = 0; i < info.getHeight(); i++) {
                     for (int x = xs; x <= xe; x++) {
                         for (int z = zs; z <= ze; z++) {
+                            if (info.hasExtra()) {
+                                if (!info.checkChance(level.getRandom())) {
+                                    state = info.getBlockState();
+                                } else {
+                                    Optional<FlatLayerConfig.WeightedBlockEntry> maybeBlock = info.getExtraBlocks().getRandom(level.getRandom());
+                                    if (maybeBlock.isPresent()) {
+                                        state = maybeBlock.get().block().defaultBlockState();
+                                    }
+                                }
+                            }
+
                             pos.setX(x);
                             pos.setY(y);
                             pos.setZ(z);
@@ -132,7 +144,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Override
     public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState random, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving step) {
-        if (this.layerInfos.isEmpty()) {
+        if (this.flatLayers.isEmpty()) {
             return;
         }
 
@@ -290,7 +302,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         return this.dimension;
     }
 
-    public List<FlatLayerInfo> getLayerInfos() {
-        return this.layerInfos;
+    public FlatLayers getFlatLayers() {
+        return this.flatLayers;
     }
 }
