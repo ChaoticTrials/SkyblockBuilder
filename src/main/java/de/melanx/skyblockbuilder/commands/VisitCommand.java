@@ -9,14 +9,15 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.CommandUtil;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 
 public class VisitCommand {
 
@@ -28,17 +29,15 @@ public class VisitCommand {
     }
 
     private static int visit(CommandSourceStack source, String name) throws CommandSyntaxException {
-        WorldUtil.checkSkyblock(source);
-        ServerLevel level = source.getLevel();
-        SkyblockSavedData data = SkyblockSavedData.get(level);
-
-        ServerPlayer player = source.getPlayerOrException();
-        Team team = data.getTeam(name);
-
-        if (team == null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+        CommandUtil.ValidationResult validationResult = CommandUtil.validateTeamExistence(source, name);
+        if (validationResult == null) {
             return 0;
         }
+
+        ServerPlayer player = validationResult.player();
+        Level level = player.level();
+        SkyblockSavedData data = validationResult.data();
+        Team team = validationResult.team();
 
         if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.VISIT, level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
@@ -46,33 +45,33 @@ public class VisitCommand {
             return 0;
         }
 
-        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
+        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(level.dimension().location())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
             return 0;
         }
 
-        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && player.level() != data.getLevel()) {
+        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && level != data.getLevel()) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
             return 0;
         }
 
         switch (SkyblockHooks.onVisit(player, team)) {
             case DENY:
-                source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
+                source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.visit_team"));
                 return 0;
             case DEFAULT:
                 if (team.hasPlayer(player)) {
-                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.visit_own_team").withStyle(ChatFormatting.RED), false);
+                    source.sendFailure(Component.translatable("skyblockbuilder.command.error.visit_own_team"));
                     return 0;
                 }
                 if (!PermissionManager.INSTANCE.mayExecuteOpCommand(player)) {
                     if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_TO_VISITING_ISLAND)) {
-                        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.team_visit").withStyle(ChatFormatting.RED), false);
+                        source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.team_visit"));
                         return 0;
                     }
 
                     if (!team.allowsVisits()) {
-                        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
+                        source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.visit_team"));
                         return 0;
                     }
                 }

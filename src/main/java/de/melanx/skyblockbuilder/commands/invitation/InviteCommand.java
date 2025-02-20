@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class InviteCommand {
 
-    public static HoverEvent COPY_TEXT = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("skyblockbuilder.command.info.click_to_copy"));
+    public static final HoverEvent COPY_TEXT = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("skyblockbuilder.command.info.click_to_copy"));
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Invites the given player
@@ -35,29 +35,29 @@ public class InviteCommand {
 
         Team team = data.getTeamFromPlayer(player);
         if (team == null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
             return 0;
         }
 
         Team invitedPlayersTeam = data.getTeamFromPlayer(invitePlayer);
         if (invitedPlayersTeam != null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_has_team", invitePlayer.getName().getString()).withStyle(ChatFormatting.RED), false);
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.player_has_team", invitePlayer.getName().getString()));
             return 0;
         }
 
         if (data.hasInviteFrom(team, invitePlayer)) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_already_invited").withStyle(ChatFormatting.RED), false);
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.player_already_invited"));
             return 0;
         }
 
         SkyblockInvitationEvent.Invite event = SkyblockHooks.onInvite(invitePlayer, team, player);
         switch (event.getResult()) {
             case DENY:
-                source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.invite_player").withStyle(ChatFormatting.RED), false);
+                source.sendFailure(Component.translatable("skyblockbuilder.command.denied.invite_player"));
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_HANDLE_INVITES)) {
-                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.send_invitations").withStyle(ChatFormatting.RED), false);
+                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.send_invitations"));
                     return 0;
                 }
                 break;

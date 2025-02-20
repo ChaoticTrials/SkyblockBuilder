@@ -47,7 +47,7 @@ public abstract class SkyblockManageTeamEvent extends Event {
         return this.result;
     }
 
-    public static enum Result {
+    public enum Result {
         /**
          * Skip default checks
          */

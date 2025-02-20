@@ -11,6 +11,7 @@ import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.commands.invitation.JoinCommand;
 import de.melanx.skyblockbuilder.commands.operator.GenerateCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
+import de.melanx.skyblockbuilder.commands.team.TeamCommandBase;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
 import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
@@ -86,7 +87,7 @@ public class EventListener {
                 .then(ManageCommand.register())
                 .then(SpawnCommand.register())
                 .then(SpawnsCommand.register())
-                .then(TeamCommand.register())
+                .then(TeamCommandBase.register())
                 .then(VisitCommand.register())
         );
 

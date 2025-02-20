@@ -39,20 +39,15 @@ public class CreateCommand {
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
-        if (name == null) {
-            Random rand = new Random();
-            do {
-                name = NameGenerator.randomName(rand);
-            } while (data.teamExists(name));
-        }
+        name = CreateCommand.generateName(name, data);
 
         if (SkyblockHooks.onCreateTeam(name)) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.create_team").withStyle(ChatFormatting.RED), false);
+            source.sendFailure(Component.translatable("skyblockbuilder.command.denied.create_team"));
             return 0;
         }
 
         if (players.isEmpty() && source.getEntity() instanceof ServerPlayer && data.hasPlayerTeam((ServerPlayer) source.getEntity())) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED), false);
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_has_team"));
             return 0;
         }
 
@@ -60,7 +55,7 @@ public class CreateCommand {
 
         String finalName = name;
         if (team == null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.team_already_exist", finalName).withStyle(ChatFormatting.RED), false);
+            source.sendFailure(Component.translatable("skyblockbuilder.command.error.team_already_exist", finalName));
             return 0;
         }
 
@@ -70,7 +65,7 @@ public class CreateCommand {
         } else {
             players.forEach(player -> {
                 if (data.getTeamFromPlayer(player) != null) {
-                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()).withStyle(ChatFormatting.RED), false);
+                    source.sendFailure(Component.translatable("skyblockbuilder.command.error.player_has_team", player.getDisplayName().getString()));
                 } else {
                     data.addPlayerToTeam(team, player);
                     WorldUtil.teleportToIsland(player, team);
@@ -80,5 +75,16 @@ public class CreateCommand {
 
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.create_team", finalName).withStyle(ChatFormatting.GREEN), true);
         return 1;
+    }
+
+    private static String generateName(String name, SkyblockSavedData data) {
+        if (name == null) {
+            Random rand = new Random();
+            do {
+                name = NameGenerator.randomName(rand);
+            } while (data.teamExists(name));
+        }
+
+        return name;
     }
 }

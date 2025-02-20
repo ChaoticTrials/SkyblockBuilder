@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.CommandUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -64,16 +65,12 @@ public class ListCommand {
     }
 
     private static int listPlayers(CommandSourceStack source, String teamName) throws CommandSyntaxException {
-        WorldUtil.checkSkyblock(source);
-        ServerLevel level = source.getLevel();
-        SkyblockSavedData data = SkyblockSavedData.get(level);
-        Team team = data.getTeam(teamName);
-
-        if (team == null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+        CommandUtil.ValidationResult validationResult = CommandUtil.validateTeamExistence(source, teamName);
+        if (validationResult == null) {
             return 0;
         }
 
+        Team team = validationResult.team();
         GameProfileCache profileCache = source.getServer().getProfileCache();
         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.info.team_detailed", team.getName(), team.getPlayers().size()).withStyle(ChatFormatting.GOLD), false);
         team.getPlayers().forEach(id -> {

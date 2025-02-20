@@ -8,14 +8,15 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.CommandUtil;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 
 public class HomeCommand {
 
@@ -26,46 +27,32 @@ public class HomeCommand {
     }
 
     private static int home(CommandSourceStack source) throws CommandSyntaxException {
-        WorldUtil.checkSkyblock(source);
-        ServerLevel level = source.getLevel();
-        SkyblockSavedData data = SkyblockSavedData.get(level);
-
-        ServerPlayer player = source.getPlayerOrException();
-        Team team = data.getTeamFromPlayer(player);
-
-        if (team == null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED), false);
+        CommandUtil.ValidationResult validationResult = CommandUtil.validatePlayerTeam(source);
+        if (validationResult == null) {
             return 0;
         }
 
+        ServerPlayer player = validationResult.player();
+        Level level = player.level();
+        SkyblockSavedData data = SkyblockSavedData.get(level);
+        Team team = validationResult.team();
         if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_HOME) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.HOME, level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
                     RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.homeCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.HOME)))));
             return 0;
         }
 
-        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
-            return 0;
-        }
-
-        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && player.level() != data.getLevel()) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
-            return 0;
-        }
-
-        if (PermissionsConfig.Teleports.disallowTeleportationDuringFalling && player.fallDistance > 1) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.prevent_while_falling"));
+        if (CommandUtil.mayNotTeleport(source, data, player)) {
             return 0;
         }
 
         switch (SkyblockHooks.onHome(player, team)) {
             case DENY:
-                source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.teleport_home").withStyle(ChatFormatting.RED), false);
+                source.sendFailure(Component.translatable("skyblockbuilder.command.denied.teleport_home"));
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_HOME)) {
-                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.teleport_home").withStyle(ChatFormatting.RED), false);
+                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.teleport_home"));
                     return 0;
                 }
                 break;
