@@ -60,6 +60,7 @@ public class SpawnsCommand {
                 team = data.getSpawn();
             }
 
+            // todo remove exporting
             if (mode == Mode.EXPORT) {
                 try {
                     Files.createDirectories(SkyPaths.MOD_EXPORTS);

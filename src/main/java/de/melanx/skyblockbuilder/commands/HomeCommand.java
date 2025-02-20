@@ -7,6 +7,7 @@ import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
@@ -37,23 +38,23 @@ public class HomeCommand {
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.HOME, level.getGameTime())) {
+        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_HOME) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.HOME, level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.homeCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.HOME)))));
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.homeCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.HOME)))));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
+        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.crossDimensionTeleportation && player.level() != data.getLevel()) {
+        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && player.level() != data.getLevel()) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && PermissionsConfig.Teleports.preventWhileFalling && player.fallDistance > 1) {
+        if (PermissionsConfig.Teleports.disallowTeleportationDuringFalling && player.fallDistance > 1) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.prevent_while_falling"));
             return 0;
         }
@@ -63,7 +64,7 @@ public class HomeCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.teleport_home").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!PermissionsConfig.Teleports.home && !source.hasPermission(2)) {
+                if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_HOME)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.teleport_home").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }

@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -20,7 +21,7 @@ public class LocateCommand {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("locate")
-                .requires(source -> source.hasPermission(2))
+                .requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
                 .then(Commands.literal("spread")
                         .then(Commands.argument("team", StringArgumentType.string()).suggests(Suggestions.ALL_TEAMS)
                                 .executes(LocateCommand::locateAllSpreads)

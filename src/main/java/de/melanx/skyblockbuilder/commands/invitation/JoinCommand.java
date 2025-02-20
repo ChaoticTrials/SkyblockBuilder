@@ -4,11 +4,11 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.Suggestions;
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.events.SkyblockJoinRequestEvent;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -49,11 +49,12 @@ public class JoinCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.join_request").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!source.hasPermission(2)) {
-                    if (!PermissionsConfig.selfManage) {
+                if (!PermissionManager.INSTANCE.mayExecuteOpCommand(player)) {
+                    if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_HANDLE_INVITES)) {
                         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED), false);
                         return 0;
                     }
+
                     if (!team.allowsJoinRequests()) {
                         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.team_join_request").withStyle(ChatFormatting.RED), false);
                         return 0;

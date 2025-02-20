@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
@@ -29,7 +30,7 @@ import java.io.IOException;
 public class GenerateCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
-        return Commands.literal("generate").requires(source -> source.hasPermission(2))
+        return Commands.literal("generate").requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
                 .then(Commands.literal("template")
                         .then(Commands.argument("template", StringArgumentType.string()).suggests(Suggestions.TEMPLATES)
                                 .executes(GenerateCommand::generateTemplate)

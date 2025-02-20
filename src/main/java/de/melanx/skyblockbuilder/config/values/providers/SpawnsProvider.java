@@ -29,11 +29,11 @@ public interface SpawnsProvider {
 
         @Override
         public TemplateSpawns templateSpawns() {
-            if (!TemplatesConfig.spawns.containsKey(this.name)) {
+            if (!TemplatesConfig.spawnPointReferences.containsKey(this.name)) {
                 throw new IllegalArgumentException("Unknown spawns: " + this.name);
             }
 
-            return TemplatesConfig.spawns.get(this.name);
+            return TemplatesConfig.spawnPointReferences.get(this.name);
         }
 
         @Override

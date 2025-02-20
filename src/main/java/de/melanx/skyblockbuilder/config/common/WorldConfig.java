@@ -17,6 +17,7 @@ public class WorldConfig {
     @Config({"A list of biomes for each dimension.",
             "You can not use this for the end dimension. The end dimension will always have it's five biomes.",
             "Overworld has all oceans by default because animals cannot spawn in these biomes.",
+            "A list of biomes will be generated at \"config/skyblockbuilder/data/biomes.txt\" each time joining a world.",
             "These are resource lists. See https://moddingx.org/libx/org/moddingx/libx/util/data/ResourceList.html#use_resource_lists_in_configs"})
     public static Map<String, ResourceList> biomes = Util.make(Maps.newHashMap(), map -> {
         map.put(Level.OVERWORLD.location().toString(), new ResourceList(false, b -> b.parse("minecraft:*ocean*")));
@@ -33,7 +34,9 @@ public class WorldConfig {
         map.put(Level.END.location().toString(), FlatLayers.EMPTY);
     });
 
-    @Config
+    @Config({"A list of carvers for each dimension.",
+            "A list of carvers will be generated at \"config/skyblockbuilder/data/carvers.txt\" each time joining a world.",
+            "These are resource lists. See https://moddingx.org/libx/org/moddingx/libx/util/data/ResourceList.html#use_resource_lists_in_configs"})
     public static Map<String, ResourceList> carvers = Util.make(Maps.newHashMap(), map -> {
         map.put(Level.OVERWORLD.location().toString(), ResourceList.ALLOW_LIST);
         map.put(Level.NETHER.location().toString(), ResourceList.ALLOW_LIST);

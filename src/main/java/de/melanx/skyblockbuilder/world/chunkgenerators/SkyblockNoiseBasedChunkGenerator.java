@@ -122,10 +122,10 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     @Nullable
     @Override
     public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(@Nonnull ServerLevel level, @Nonnull HolderSet<Structure> structureHolderSet, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
-        List<Holder<Structure>> holders = structureHolderSet.stream().filter(holder -> holder.unwrapKey().isPresent() && StructuresConfig.generationStructures.test(holder.unwrapKey().get().location())).toList();
+        List<Holder<Structure>> holders = structureHolderSet.stream().filter(holder -> holder.unwrapKey().isPresent() && StructuresConfig.structuresToGenerate.test(holder.unwrapKey().get().location())).toList();
         HolderSet.Direct<Structure> modifiedStructureHolderSet = HolderSet.direct(holders);
         for (Holder<Structure> holder : modifiedStructureHolderSet) {
-            if (holder.unwrapKey().isPresent() && StructuresConfig.generationStructures.test(holder.unwrapKey().get().location())) {
+            if (holder.unwrapKey().isPresent() && StructuresConfig.structuresToGenerate.test(holder.unwrapKey().get().location())) {
                 return super.findNearestMapStructure(level, modifiedStructureHolderSet, pos, searchRadius, skipKnownStructures);
             }
         }
@@ -225,7 +225,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                 if (structureManager.shouldGenerateStructures()) {
                     for (Structure structure : map.getOrDefault(i, Collections.emptyList())) {
                         ResourceLocation location = level.registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(structure);
-                        if (!StructuresConfig.generationStructures.test(location)) {
+                        if (!StructuresConfig.structuresToGenerate.test(location)) {
                             continue;
                         }
 
@@ -271,7 +271,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                         PlacedFeature placedfeature = stepFeatureData.features().get(featureIndex);
                         // The only reason why I needed to copy the code - checking if it should be placed
                         Optional<ResourceKey<ConfiguredFeature<?, ?>>> optionalResourceKey = placedfeature.feature().unwrapKey();
-                        if (optionalResourceKey.isPresent() && !StructuresConfig.generationFeatures.test(optionalResourceKey.get().location())) {
+                        if (optionalResourceKey.isPresent() && !StructuresConfig.featuresToGenerate.test(optionalResourceKey.get().location())) {
                             continue;
                         }
 

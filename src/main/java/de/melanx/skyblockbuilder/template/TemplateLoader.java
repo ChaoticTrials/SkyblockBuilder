@@ -32,8 +32,8 @@ public class TemplateLoader {
             SkyPaths.copyTemplateFile();
             Set<String> takenNames = new HashSet<>();
 
-            for (TemplateInfo info : TemplatesConfig.templates) {
-                if (info.spawns() instanceof SpawnsProvider.Reference(String name) && !TemplatesConfig.spawns.containsKey(name)) {
+            for (TemplateInfo info : TemplatesConfig.templateList) {
+                if (info.spawns() instanceof SpawnsProvider.Reference(String name) && !TemplatesConfig.spawnPointReferences.containsKey(name)) {
                     throw new IllegalArgumentException("Spawns configuration \"" + info.spawns() + "\" is not defined: " + info.name());
                 }
 
@@ -41,11 +41,11 @@ public class TemplateLoader {
                     throw new IllegalArgumentException("Spawns configuration \"" + info.spawns() + "\" is empty: " + info.name());
                 }
 
-                if (info.surroundingBlocks() instanceof SurroundingBlocksProvider.Reference(String name) && !TemplatesConfig.surroundingBlocks.containsKey(name)) {
+                if (info.surroundingBlocks() instanceof SurroundingBlocksProvider.Reference(String name) && !TemplatesConfig.surroundingBlockReferences.containsKey(name)) {
                     throw new IllegalArgumentException("Surrounding blocks configuration \"" + info.surroundingBlocks() + "\" is not defined: " + info.name());
                 }
 
-                if (info.spreads() instanceof SpreadsProvider.Reference(String name) && !TemplatesConfig.spreads.containsKey(name)) {
+                if (info.spreads() instanceof SpreadsProvider.Reference(String name) && !TemplatesConfig.spreadReferences.containsKey(name)) {
                     throw new IllegalArgumentException("Spreads configuration \"" + info.spreads() + "\" is not defined: " + info.name());
                 }
 

@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.client.screens;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.SizeableCheckbox;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.DumpUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -101,6 +102,6 @@ public class DumpScreen extends BaseScreen {
     }
 
     private static boolean isOpPlayer() {
-        return Minecraft.getInstance().player != null && Minecraft.getInstance().player.hasPermissions(2);
+        return Minecraft.getInstance().player != null && PermissionManager.INSTANCE.mayExecuteOpCommand(Minecraft.getInstance().player);
     }
 }

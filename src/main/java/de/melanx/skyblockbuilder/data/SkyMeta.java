@@ -117,9 +117,9 @@ public class SkyMeta {
     public boolean canTeleport(TeleportType type, long gameTime) {
         long lastTeleport = this.getLastTeleport(type);
         int cooldown = switch (type) {
-            case SPAWN -> PermissionsConfig.Teleports.spawnCooldown;
-            case HOME -> PermissionsConfig.Teleports.homeCooldown;
-            case VISIT -> PermissionsConfig.Teleports.visitCooldown;
+            case SPAWN -> PermissionsConfig.Teleports.Cooldowns.spawnCooldown;
+            case HOME -> PermissionsConfig.Teleports.Cooldowns.homeCooldown;
+            case VISIT -> PermissionsConfig.Teleports.Cooldowns.visitCooldown;
         };
 
         return (lastTeleport == 0 ? cooldown : gameTime) - lastTeleport >= cooldown;

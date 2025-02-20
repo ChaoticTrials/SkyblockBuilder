@@ -132,7 +132,7 @@ public class EventListener {
             player.getPersistentData().putBoolean(SPAWNED_TAG, true);
             data.getOrCreateMetaInfo(player);
 
-            if (InventoryConfig.clearInv) {
+            if (InventoryConfig.clearInitialInventory) {
                 player.getInventory().clearContent();
             }
 
@@ -250,11 +250,11 @@ public class EventListener {
                     .mapToInt(DimensionsConfig.UnregisteredCenterBiome::radius)
                     .sum();
 
-            if (SpawnConfig.dimension == Level.OVERWORLD && overworldCenterBiomesRadius > WorldConfig.islandDistance) {
+            if (SpawnConfig.spawmDimension == Level.OVERWORLD && overworldCenterBiomesRadius > WorldConfig.islandDistance) {
                 SkyblockBuilder.getLogger().warn("The overworld center biomes radius is higher than the island distance. This will result in unwanted behaviour.");
             }
 
-            if (SpawnConfig.dimension == Level.NETHER && netherCenterBiomesRadius > WorldConfig.islandDistance) {
+            if (SpawnConfig.spawmDimension == Level.NETHER && netherCenterBiomesRadius > WorldConfig.islandDistance) {
                 SkyblockBuilder.getLogger().warn("The nether center biomes radius is higher than the island distance. This will result in unwanted behaviour.");
             }
         }

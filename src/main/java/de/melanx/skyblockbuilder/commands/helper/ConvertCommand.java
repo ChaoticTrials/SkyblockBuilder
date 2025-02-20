@@ -4,6 +4,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import net.minecraft.commands.CommandSourceStack;
@@ -20,7 +21,7 @@ public class ConvertCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Highlights all spawns for a few seconds
-        return Commands.literal("convert").requires(source -> source.hasPermission(2))
+        return Commands.literal("convert").requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
                 .executes(ConvertCommand::convert);
     }
 

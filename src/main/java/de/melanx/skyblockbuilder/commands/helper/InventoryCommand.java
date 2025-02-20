@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.ChatFormatting;
@@ -39,8 +40,8 @@ public class InventoryCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("inventory")
                 .then(Commands.literal("export")
-                        .requires(source -> source.hasPermission(2))
-                        .executes(context -> exportInventory(context.getSource())));
+                        .requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
+                        .executes(context -> InventoryCommand.exportInventory(context.getSource())));
     }
 
     private static int exportInventory(CommandSourceStack source) throws CommandSyntaxException {

@@ -29,11 +29,11 @@ public interface SurroundingBlocksProvider {
 
         @Override
         public TemplateSurroundingBlocks templateSurroundingBlocks() {
-            if (!TemplatesConfig.surroundingBlocks.containsKey(this.name)) {
+            if (!TemplatesConfig.surroundingBlockReferences.containsKey(this.name)) {
                 throw new IllegalArgumentException("Unknown surrounding blocks: " + this.name);
             }
 
-            return TemplatesConfig.surroundingBlocks.get(this.name);
+            return TemplatesConfig.surroundingBlockReferences.get(this.name);
         }
 
         @Override

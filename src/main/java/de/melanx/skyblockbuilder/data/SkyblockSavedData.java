@@ -98,7 +98,7 @@ public class SkyblockSavedData extends SavedData {
         }
 
         SkyblockBuilder.getLogger().info("Successfully generated spawn.");
-        Team team = this.createTeam("Spawn", TemplatesConfig.spawn.flatMap(templateInfo -> Optional.of(new ConfiguredTemplate(templateInfo))).orElse(TemplateData.get(this.level).getConfiguredTemplate()));
+        Team team = this.createTeam("Spawn", TemplatesConfig.mainSpawnIsland.flatMap(templateInfo -> Optional.of(new ConfiguredTemplate(templateInfo))).orElse(TemplateData.get(this.level).getConfiguredTemplate()));
         //noinspection ConstantConditions
         team.addPlayer(Util.NIL_UUID);
 
@@ -253,7 +253,7 @@ public class SkyblockSavedData extends SavedData {
         ServerLevel level = team.getLevel();
         if (level != null && !this.getOrCreateMetaInfo(player).getPreviousTeamIds().contains(team.getId())) {
             ServerPlayer onlinePlayer = level.getServer().getPlayerList().getPlayer(player);
-            if (onlinePlayer != null && (TemplatesConfig.spawn.isEmpty() || !team.isSpawn())) {
+            if (onlinePlayer != null && (TemplatesConfig.mainSpawnIsland.isEmpty() || !team.isSpawn())) {
                 RandomUtility.setStartInventory(onlinePlayer);
             }
         }

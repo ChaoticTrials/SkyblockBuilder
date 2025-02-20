@@ -4,10 +4,10 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.Suggestions;
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -47,7 +47,7 @@ public class DeclineCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.decline_invitations").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!PermissionsConfig.selfManage && !source.hasPermission(2)) {
+                if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_HANDLE_INVITES)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.decline_invitations").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }

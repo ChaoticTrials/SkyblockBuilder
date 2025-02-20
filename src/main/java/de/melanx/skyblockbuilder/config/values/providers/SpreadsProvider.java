@@ -30,11 +30,11 @@ public interface SpreadsProvider {
 
         @Override
         public TemplateSpreads templateSpreads() {
-            if (!TemplatesConfig.spreads.containsKey(this.name)) {
+            if (!TemplatesConfig.spreadReferences.containsKey(this.name)) {
                 throw new IllegalArgumentException("Unknown spreads: " + this.name);
             }
 
-            return TemplatesConfig.spreads.get(this.name);
+            return TemplatesConfig.spreadReferences.get(this.name);
         }
 
         @Override

@@ -62,7 +62,7 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk) {
         ChunkPos chunkPos = chunk.getPos();
-        if (DimensionsConfig.End.mainIsland && Mth.abs(chunkPos.x) <= MAIN_ISLAND_DISTANCE && Mth.abs(chunkPos.z) <= MAIN_ISLAND_DISTANCE) {
+        if (DimensionsConfig.End.keepMainIsland && Mth.abs(chunkPos.x) <= MAIN_ISLAND_DISTANCE && Mth.abs(chunkPos.z) <= MAIN_ISLAND_DISTANCE) {
             return this.parent.fillFromNoise(blender, randomState, structureManager, chunk);
         }
 

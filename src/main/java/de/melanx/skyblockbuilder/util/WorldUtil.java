@@ -50,7 +50,7 @@ public class WorldUtil {
         TemplatesConfig.Spawn spawn = validPosition(level, team);
         player.teleportTo(level, spawn.pos().getX() + 0.5, spawn.pos().getY() + 0.2, spawn.pos().getZ() + 0.5, spawn.direction().getYRot(), 0);
         player.setRespawnPosition(level.dimension(), spawn.pos(), spawn.direction().getYRot(), true, false);
-        if (PermissionsConfig.Teleports.noFallDamage) {
+        if (PermissionsConfig.Teleports.negateFallDamage) {
             player.fallDistance = 0;
         }
     }
@@ -61,16 +61,16 @@ public class WorldUtil {
 
         MinecraftServer server = ((ServerLevel) level).getServer();
 
-        if (!DimensionsConfig.Overworld.Default) {
+        if (DimensionsConfig.Overworld.isCustom) {
             return server.overworld().getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
         }
 
-        if (!DimensionsConfig.Nether.Default) {
+        if (DimensionsConfig.Nether.isCustom) {
             ServerLevel nether = server.getLevel(Level.NETHER);
             return nether != null && nether.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
         }
 
-        if (!DimensionsConfig.End.Default) {
+        if (DimensionsConfig.End.isCustom) {
             ServerLevel end = server.getLevel(Level.END);
             return end != null && end.getChunkSource().getGenerator() instanceof SkyblockEndChunkGenerator;
         }
@@ -85,7 +85,7 @@ public class WorldUtil {
     }
 
     public static ServerLevel getConfiguredLevel(MinecraftServer server) {
-        ResourceLocation location = SpawnConfig.dimension.location();
+        ResourceLocation location = SpawnConfig.spawmDimension.location();
         ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, location);
         ServerLevel configLevel = server.getLevel(worldKey);
 
@@ -111,7 +111,7 @@ public class WorldUtil {
         SkyblockBuilder.getLogger().info("No valid spawn position found, searching...");
         TemplatesConfig.Spawn spawn = team.getPossibleSpawns().stream().findAny().orElse(new TemplatesConfig.Spawn(team.getIsland().getCenter(), SpawnDirection.SOUTH));
 
-        return new TemplatesConfig.Spawn(PositionHelper.findPos(spawn.pos(), blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radius), spawn.direction());
+        return new TemplatesConfig.Spawn(PositionHelper.findPos(spawn.pos(), blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radiusToFindValidSpawn), spawn.direction());
     }
 
     public static boolean isValidSpawn(Level level, BlockPos pos) {
@@ -131,12 +131,12 @@ public class WorldUtil {
         int bottom = SpawnConfig.Height.range.bottom();
 
         int height;
-        switch (SpawnConfig.Height.spawnType) {
+        switch (SpawnConfig.Height.heightCalculationType) {
             case RANGE_TOP, RANGE_BOTTOM -> {
                 BlockPos.MutableBlockPos spawn = new BlockPos.MutableBlockPos(x, top, z);
                 while (!WorldUtil.isValidSpawn(level, spawn, bottom, top)) {
                     if (spawn.getY() <= level.getMinBuildHeight()) {
-                        if (SpawnConfig.Height.spawnType == SpawnSettings.Type.RANGE_TOP) {
+                        if (SpawnConfig.Height.heightCalculationType == SpawnSettings.Type.RANGE_TOP) {
                             spawn.setY(top);
                         } else {
                             spawn.setY(bottom);

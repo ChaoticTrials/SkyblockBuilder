@@ -5,6 +5,7 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.CadmusConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -16,7 +17,7 @@ public class CadmusCompat {
 
     public static LiteralArgumentBuilder<CommandSourceStack> spawnProtectionCommand() {
         return Commands.literal(MODID)
-                .requires(source -> source.hasPermission(2))
+                .requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
                 .then(Commands.literal(SkyblockBuilder.getInstance().modid)
                         .then(Commands.literal("protectSpawn")
                                 .executes(source -> {

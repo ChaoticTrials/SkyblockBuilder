@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder;
 
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -51,7 +52,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !event.getEntity().hasPermissions(2)) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getEntity()) && !PermissionManager.INSTANCE.mayBypassLimitation(event.getEntity())) {
             if (event instanceof PlayerInteractEvent.EntityInteract entityInteract &&
                     (SpawnConfig.interactionEntitiesInSpawnProtection.test(BuiltInRegistries.ENTITY_TYPE.getKey(entityInteract.getTarget().getType()))
                             || SpawnProtectionEvents.ignore(Type.INTERACT_ENTITIES))) {
@@ -100,7 +101,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (SpawnProtectionEvents.isOnSpawn(event.getPlayer()) && !event.getPlayer().hasPermissions(2)) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getPlayer()) && !PermissionManager.INSTANCE.mayBypassLimitation(event.getPlayer())) {
             Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
             ResourceLocation blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
             boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
@@ -116,7 +117,7 @@ public class SpawnProtectionEvents {
         }
 
         if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
-            if (!(event.getEntity() instanceof Player) || !event.getEntity().hasPermissions(2)) {
+            if (!(event.getEntity() instanceof Player player) || !PermissionManager.INSTANCE.mayBypassLimitation(player)) {
                 Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
                 ResourceLocation blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
                 boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
@@ -154,7 +155,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (SpawnProtectionEvents.isOnSpawn(event.getContext().getLevel(), event.getPos()) && (event.getPlayer() == null || !event.getPlayer().hasPermissions(2))) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getContext().getLevel(), event.getPos()) && (event.getPlayer() == null || !PermissionManager.INSTANCE.mayBypassLimitation(event.getPlayer()))) {
             event.setCanceled(true);
         }
     }
@@ -165,7 +166,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), event.getPos()) && (event.getPlayer() == null || !event.getPlayer().hasPermissions(2))) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getLevel(), event.getPos()) && (event.getPlayer() == null || !PermissionManager.INSTANCE.mayBypassLimitation(event.getPlayer()))) {
             event.setCanceled(true);
         }
     }
@@ -193,7 +194,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (!(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
+        if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (!(event.getSource().getEntity() instanceof Player player) || !PermissionManager.INSTANCE.mayBypassLimitation(player))) {
             event.setCanceled(true);
         }
     }
@@ -204,7 +205,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (event.getEntity() instanceof Player || !(event.getSource().getEntity() instanceof Player) || !event.getSource().getEntity().hasPermissions(2))) {
+        if (!event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) && SpawnProtectionEvents.isOnSpawn(event.getEntity()) && (event.getEntity() instanceof Player || !(event.getSource().getEntity() instanceof Player player) || !PermissionManager.INSTANCE.mayBypassLimitation(player))) {
             event.setNewDamage(0);
         }
     }
@@ -215,7 +216,7 @@ public class SpawnProtectionEvents {
             return;
         }
 
-        if (SpawnProtectionEvents.isOnSpawn(event.getTarget()) && !event.getEntity().hasPermissions(2)) {
+        if (SpawnProtectionEvents.isOnSpawn(event.getTarget()) && !PermissionManager.INSTANCE.mayBypassLimitation(event.getEntity())) {
             event.setCanceled(true);
         }
     }
@@ -245,7 +246,7 @@ public class SpawnProtectionEvents {
 
     private static boolean isOnSpawn(Level level, BlockPos blockPos) {
         ChunkPos pos = new ChunkPos(blockPos);
-        return WorldUtil.isSkyblock(level) && SpawnConfig.dimension == level.dimension()
+        return WorldUtil.isSkyblock(level) && SpawnConfig.spawmDimension == level.dimension()
                 && Math.abs(pos.x) < SpawnConfig.spawnProtectionRadius && Math.abs(pos.z) < SpawnConfig.spawnProtectionRadius
                 && !level.isOutsideBuildHeight(blockPos);
     }

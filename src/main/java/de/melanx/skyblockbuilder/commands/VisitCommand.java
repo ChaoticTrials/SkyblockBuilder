@@ -8,6 +8,7 @@ import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
@@ -39,18 +40,18 @@ public class VisitCommand {
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.VISIT, level.getGameTime())) {
+        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.VISIT, level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.visitCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.VISIT)))));
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.visitCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.VISIT)))));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
+        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.crossDimensionTeleportation && player.level() != data.getLevel()) {
+        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && player.level() != data.getLevel()) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
             return 0;
         }
@@ -64,11 +65,12 @@ public class VisitCommand {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.visit_own_team").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
-                if (!player.hasPermissions(2)) {
-                    if (!PermissionsConfig.Teleports.allowVisits) {
+                if (!PermissionManager.INSTANCE.mayExecuteOpCommand(player)) {
+                    if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_TO_VISITING_ISLAND)) {
                         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.team_visit").withStyle(ChatFormatting.RED), false);
                         return 0;
                     }
+
                     if (!team.allowsVisits()) {
                         source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
                         return 0;

@@ -3,10 +3,10 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
@@ -25,13 +25,13 @@ public class CreateCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Let a player create a team if enabled in config
-        return Commands.literal("create").requires(source -> PermissionsConfig.createOwnTeam)
-                .executes(context -> create(context.getSource(), null, Collections.emptyList()))
+        return Commands.literal("create").requires(source -> PermissionManager.INSTANCE.hasPermission(source, PermissionManager.Permission.TEAM_CREATE))
+                .executes(context -> CreateCommand.create(context.getSource(), null, Collections.emptyList()))
                 .then(Commands.argument("name", StringArgumentType.string())
-                        .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), Collections.emptyList()))
+                        .executes(context -> CreateCommand.create(context.getSource(), StringArgumentType.getString(context, "name"), Collections.emptyList()))
                         .then(Commands.argument("players", EntityArgument.players())
-                                .requires(commandSource -> commandSource.hasPermission(2))
-                                .executes(context -> create(context.getSource(), StringArgumentType.getString(context, "name"), EntityArgument.getPlayers(context, "players")))));
+                                .requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
+                                .executes(context -> CreateCommand.create(context.getSource(), StringArgumentType.getString(context, "name"), EntityArgument.getPlayers(context, "players")))));
     }
 
     private static int create(CommandSourceStack source, String name, Collection<ServerPlayer> players) throws CommandSyntaxException {

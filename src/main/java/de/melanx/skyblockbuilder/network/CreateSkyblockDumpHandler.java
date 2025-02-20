@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.network;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.DumpUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -30,7 +31,7 @@ public class CreateSkyblockDumpHandler extends PacketHandler<CreateSkyblockDumpH
             return;
         }
 
-        if (!player.hasPermissions(3)) {
+        if (!PermissionManager.INSTANCE.mayExecuteOpCommand(player)) {
             player.sendSystemMessage(Component.translatable("skyblockbuilder.screen.dump.failure").withStyle(ChatFormatting.RED));
             return;
         }

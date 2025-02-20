@@ -4,6 +4,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.commands.CommandSourceStack;
@@ -95,7 +96,7 @@ public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> VISIT_TEAMS = (context, builder) -> SharedSuggestionProvider
             .suggest(SkyblockSavedData.get(context.getSource().getPlayerOrException().level())
                     .getTeams().stream()
-                    .filter(team -> team.allowsVisits() || context.getSource().hasPermission(2))
+                    .filter(team -> team.allowsVisits() || PermissionManager.INSTANCE.mayBypassLimitation(context.getSource()))
                     .filter(team -> !team.isSpawn())
                     .map(team -> team.getName().split(" ").length == 1 ? team.getName() : "\"" + team.getName() + "\"")
                     .collect(Collectors.toSet()), builder);

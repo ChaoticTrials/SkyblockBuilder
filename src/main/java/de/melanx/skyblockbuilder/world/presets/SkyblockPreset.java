@@ -77,15 +77,15 @@ public class SkyblockPreset extends WorldPreset {
     ) {
         return Map.of(
                 LevelStem.OVERWORLD, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.OVERWORLD),
-                        configuredOverworldChunkGenerator(noises, noiseGeneratorSettings, biomes)),
+                        SkyblockPreset.configuredOverworldChunkGenerator(noises, noiseGeneratorSettings, biomes)),
                 LevelStem.NETHER, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.NETHER),
-                        DimensionsConfig.Nether.Default ?
-                                SkyblockPreset.defaultNetherGenerator(noises, noiseGeneratorSettings)
-                                : netherChunkGenerator(noises, noiseGeneratorSettings, biomes)),
+                        DimensionsConfig.Nether.isCustom
+                                ? SkyblockPreset.netherChunkGenerator(noises, noiseGeneratorSettings, biomes)
+                                : SkyblockPreset.defaultNetherGenerator(noises, noiseGeneratorSettings)),
                 LevelStem.END, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.END),
-                        DimensionsConfig.End.Default ?
-                                SkyblockPreset.defaultEndGenerator(noiseGeneratorSettings, biomes)
-                                : endChunkGenerator(noiseGeneratorSettings, biomes))
+                        DimensionsConfig.End.isCustom
+                                ? SkyblockPreset.endChunkGenerator(noiseGeneratorSettings, biomes)
+                                : SkyblockPreset.defaultEndGenerator(noiseGeneratorSettings, biomes))
         );
     }
 
@@ -94,9 +94,9 @@ public class SkyblockPreset extends WorldPreset {
             HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings,
             HolderLookup<Biome> biomes
     ) {
-        return DimensionsConfig.Overworld.Default ?
-                new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD))
-                : overworldChunkGenerator(noises, noiseGeneratorSettings, biomes);
+        return DimensionsConfig.Overworld.isCustom
+                ? SkyblockPreset.overworldChunkGenerator(noises, noiseGeneratorSettings, biomes)
+                : new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD));
     }
 
     public static ChunkGenerator overworldChunkGenerator(
@@ -155,6 +155,7 @@ public class SkyblockPreset extends WorldPreset {
                 SkyblockBuilder.getLogger().error("Could not find biome {} for center biome {}. Use minecraft:plains as fallback.", resourceKey, biomeConfig.id());
                 optionalHolder = Optional.of(biomes.getOrThrow(Biomes.PLAINS));
             }
+
             centerBiomes.add(new SkyBiomeSource.CenterBiome(optionalHolder.get(), biomeConfig.radius()));
         });
 

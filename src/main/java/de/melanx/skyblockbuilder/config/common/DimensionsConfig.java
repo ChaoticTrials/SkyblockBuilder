@@ -12,8 +12,8 @@ public class DimensionsConfig {
 
     public static class Overworld {
 
-        @Config("Should overworld generate as in default world type? [default: false]")
-        public static boolean Default = false;
+        @Config("Should overworld use custom generation? [default: true]")
+        public static boolean isCustom = true;
 
         @Config({"A list of biomes for each island in a circle shape around the island.",
                 "First entry will be first circle of that radius. Second entry will be the next ring and the radius will be added to the previous radius.",
@@ -34,8 +34,8 @@ public class DimensionsConfig {
 
     public static class Nether {
 
-        @Config("Should nether generate as in default world type? [default: false]")
-        public static boolean Default = false;
+        @Config("Should nether use custom generation? [default: true]")
+        public static boolean isCustom = true;
 
         @Config("File name in template directory of a valid template containing a nether portal")
         public static Optional<String> netherPortalStructure = Optional.empty();
@@ -59,11 +59,11 @@ public class DimensionsConfig {
 
     public static class End {
 
-        @Config("Should end generate as in default world type? [default: false]")
-        public static boolean Default = false;
+        @Config("Should end use custom generation? [default: true]")
+        public static boolean isCustom = true;
 
         @Config("Should the main island be generated as normal? [default: true]")
-        public static boolean mainIsland = true;
+        public static boolean keepMainIsland = true;
     }
 
     public record UnregisteredCenterBiome(ResourceLocation id, int radius) {}

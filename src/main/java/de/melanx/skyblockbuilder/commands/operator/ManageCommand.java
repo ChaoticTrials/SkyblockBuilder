@@ -10,6 +10,7 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.RandomUtility;
@@ -29,7 +30,7 @@ import java.util.*;
 public class ManageCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
-        return Commands.literal("manage").requires(source -> source.hasPermission(2))
+        return Commands.literal("manage").requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
                 // refreshes the island shape
                 .then(Commands.literal("islandShape")
                         .then(Commands.argument("template", StringArgumentType.string()).suggests(Suggestions.TEMPLATES)

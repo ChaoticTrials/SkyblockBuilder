@@ -6,6 +6,7 @@ import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.commands.CommandSourceStack;
@@ -18,7 +19,7 @@ public class SpawnCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Teleports the player to spawn
-        return Commands.literal("spawn").requires(source -> PermissionsConfig.Teleports.spawn || source.hasPermission(2)) // todo 1.21 check on execution
+        return Commands.literal("spawn")
                 .executes(context -> spawn(context.getSource()));
     }
 
@@ -30,24 +31,23 @@ public class SpawnCommand {
         ServerPlayer player = source.getPlayerOrException();
         Team team = data.getSpawn();
 
-        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.SPAWN, level.getGameTime())) {
+        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_TO_SPAWN) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.SPAWN, level.getGameTime())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.spawnCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.SPAWN)))));
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.spawnCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.SPAWN)))));
             return 0;
         }
 
-        // todo 1.21 simplify this "player.hasPermission"
-        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
+        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.crossDimensionTeleportation && player.level() != data.getLevel()) {
+        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && player.level() != data.getLevel()) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && PermissionsConfig.Teleports.preventWhileFalling && player.fallDistance > 1) {
+        if (PermissionsConfig.Teleports.disallowTeleportationDuringFalling && player.fallDistance > 1) {
             source.sendFailure(Component.translatable("skyblockbuilder.command.error.prevent_while_falling"));
             return 0;
         }

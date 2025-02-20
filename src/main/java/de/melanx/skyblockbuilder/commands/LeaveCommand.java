@@ -3,10 +3,10 @@ package de.melanx.skyblockbuilder.commands;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.common.InventoryConfig;
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
@@ -41,7 +41,7 @@ public class LeaveCommand {
                 source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.leave_team").withStyle(ChatFormatting.RED), false);
                 return 0;
             case DEFAULT:
-                if (!PermissionsConfig.selfManage && !source.hasPermission(2)) {
+                if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_LEAVE)) {
                     source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.manage_teams").withStyle(ChatFormatting.RED), false);
                     return 0;
                 }
