@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.network;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -46,7 +47,7 @@ public class SaveStructureHandler extends PacketHandler<SaveStructureHandler.Mes
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
         Path fullPath = msg.saveToConfig ? SkyPaths.MOD_CONFIG.resolve(name) : SkyPaths.MOD_EXPORTS.resolve(name);
         Path savedPath = FMLPaths.GAMEDIR.get().relativize(fullPath);
-        MutableComponent component = Component.translatable("skyblockbuilder.schematic.saved", savedPath.toString().replace('\\', '/'));
+        MutableComponent component = SkyComponents.SCHEMATIC_SAVED.apply(savedPath.toString().replace('\\', '/'));
         SkyblockBuilder.getLogger().info("Saved structure (and spawn points) to: {}", fullPath);
         player.displayClientMessage(component, true);
     }

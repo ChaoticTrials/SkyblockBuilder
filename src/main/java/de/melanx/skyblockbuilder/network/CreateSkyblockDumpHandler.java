@@ -3,9 +3,8 @@ package de.melanx.skyblockbuilder.network;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.DumpUtil;
-import net.minecraft.ChatFormatting;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -15,6 +14,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
 
+import javax.annotation.Nonnull;
 import java.nio.file.Path;
 
 public class CreateSkyblockDumpHandler extends PacketHandler<CreateSkyblockDumpHandler.Message> {
@@ -32,13 +32,13 @@ public class CreateSkyblockDumpHandler extends PacketHandler<CreateSkyblockDumpH
         }
 
         if (!PermissionManager.INSTANCE.mayExecuteOpCommand(player)) {
-            player.sendSystemMessage(Component.translatable("skyblockbuilder.screen.dump.failure").withStyle(ChatFormatting.RED));
+            player.sendSystemMessage(SkyComponents.SCREEN_DUMP_FAILURE);
             return;
         }
 
         Path zip = DumpUtil.createZip(msg.includeConfigs, msg.includeTemplates, msg.includeLevelDat, msg.includeLog, msg.includeCrashReport, msg.includeSkyblockBuilderWorldData);
-        player.sendSystemMessage(Component.translatable("skyblockbuilder.screen.dump.success", FMLPaths.GAMEDIR.get().relativize(zip)).append(" ").append(Component.translatable("skyblockbuilder.screen.dump.success.server")));
-        player.sendSystemMessage(Component.translatable("skyblockbuilder.screen.dump.create_issue").append(" ").append(DumpUtil.getIssueUrl()));
+        player.sendSystemMessage(SkyComponents.SCREEN_DUMP_SUCCESS.apply(String.valueOf(FMLPaths.GAMEDIR.get().relativize(zip))).append(" ").append(SkyComponents.SCREEN_DUMP_SUCCESS_SERVER));
+        player.sendSystemMessage(SkyComponents.SCREEN_DUMP_CREATE_ISSUE.append(" ").append(DumpUtil.getIssueUrl()));
     }
 
     public record Message(boolean includeConfigs, boolean includeTemplates, boolean includeLevelDat, boolean includeLog,
@@ -57,6 +57,7 @@ public class CreateSkyblockDumpHandler extends PacketHandler<CreateSkyblockDumpH
                 buffer -> new Message(buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean())
         );
 
+        @Nonnull
         @Override
         public Type<? extends CustomPacketPayload> type() {
             return CreateSkyblockDumpHandler.TYPE;

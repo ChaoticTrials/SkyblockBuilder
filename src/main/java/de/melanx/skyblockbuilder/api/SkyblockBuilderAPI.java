@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.api;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import net.minecraft.network.chat.Component;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -33,7 +33,7 @@ public class SkyblockBuilderAPI {
 
     public static void checkTeamManagement() throws CommandSyntaxException {
         if (!teamManagementDisablingMods.isEmpty()) {
-            throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.compat.disabled_management", String.join(", ", teamManagementDisablingMods))).create();
+            throw new SimpleCommandExceptionType(SkyComponents.COMPAT_DISABLED_MANAGEMENT.apply(String.join(", ", teamManagementDisablingMods))).create();
         }
     }
 

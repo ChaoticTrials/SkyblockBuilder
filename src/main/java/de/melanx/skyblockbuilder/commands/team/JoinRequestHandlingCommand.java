@@ -8,12 +8,12 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.events.SkyblockJoinRequestEvent;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,11 +43,11 @@ public class JoinRequestHandlingCommand {
         SkyblockJoinRequestEvent.AcceptRequest event = SkyblockHooks.onAcceptJoinRequest(validationResult.player(), player, validationResult.team());
         switch (event.getResult()) {
             case DENY:
-                source.sendFailure(Component.translatable("skyblockbuilder.command.denied.accept_join_request"));
+                source.sendFailure(SkyComponents.DENIED_ACCEPT_JOIN_REQUEST);
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_HANDLE_JOIN_REQUESTS)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.accept_join_request"));
+                    source.sendFailure(SkyComponents.DISABLED_ACCEPT_JOIN_REQUEST);
                     return 0;
                 }
                 break;
@@ -55,11 +55,11 @@ public class JoinRequestHandlingCommand {
                 break;
         }
 
-        validationResult.team().broadcast(Component.translatable("skyblockbuilder.event.accept_join_request", validationResult.player().getDisplayName(), player.getDisplayName()), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
+        validationResult.team().broadcast(SkyComponents.EVENT_ACCEPT_JOIN_REQUEST.apply(validationResult.player().getDisplayName(), player.getDisplayName()), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         validationResult.data().addPlayerToTeam(validationResult.team(), player);
         validationResult.team().removeJoinRequest(player);
         WorldUtil.teleportToIsland(player, validationResult.team());
-        player.displayClientMessage(Component.translatable("skyblockbuilder.command.success.join_request_accepted", validationResult.team().getName()).withStyle(ChatFormatting.GOLD), false);
+        player.displayClientMessage(SkyComponents.SUCCESS_JOIN_REQUEST_ACCEPTED.apply(validationResult.team().getName()), false);
         return 1;
     }
 
@@ -73,11 +73,11 @@ public class JoinRequestHandlingCommand {
         SkyblockJoinRequestEvent.DenyRequest event = SkyblockHooks.onDenyJoinRequest(validationResult.player(), player, team);
         switch (event.getResult()) {
             case DENY:
-                source.sendFailure(Component.translatable("skyblockbuilder.command.denied.deny_join_request"));
+                source.sendFailure(SkyComponents.DENIED_DENY_JOIN_REQUEST);
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_HANDLE_JOIN_REQUESTS)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.deny_join_request"));
+                    source.sendFailure(SkyComponents.DISABLED_DENY_JOIN_REQUEST);
                     return 0;
                 }
                 break;
@@ -85,9 +85,9 @@ public class JoinRequestHandlingCommand {
                 break;
         }
 
-        team.broadcast(Component.translatable("skyblockbuilder.event.deny_join_request", validationResult.player().getDisplayName(), player.getDisplayName()), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
+        team.broadcast(SkyComponents.EVENT_DENY_JOIN_REQUEST.apply(validationResult.player().getDisplayName(), player.getDisplayName()), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         team.removeJoinRequest(player);
-        player.displayClientMessage(Component.translatable("skyblockbuilder.command.success.deny_request_accepted", team.getName()).withStyle(ChatFormatting.GOLD), false);
+        player.displayClientMessage(SkyComponents.SUCCESS_DENY_REQUEST_ACCEPTED.apply(team.getName()), false);
 
         return 1;
     }
@@ -101,12 +101,12 @@ public class JoinRequestHandlingCommand {
         ServerPlayer commandPlayer = source.getPlayerOrException();
         Team team = data.getTeamFromPlayer(commandPlayer);
         if (team == null) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED));
+            source.sendFailure(SkyComponents.ERROR_USER_HAS_NO_TEAM);
             return null;
         }
 
         if (data.hasPlayerTeam(player)) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.player_has_team"));
+            source.sendFailure(SkyComponents.ERROR_PLAYER_HAS_TEAM.apply(player.getDisplayName().toString()));
             team.removeJoinRequest(player);
             return null;
         }

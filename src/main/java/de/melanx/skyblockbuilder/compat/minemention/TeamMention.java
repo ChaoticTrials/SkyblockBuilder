@@ -2,8 +2,8 @@ package de.melanx.skyblockbuilder.compat.minemention;
 
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import io.github.noeppi_noeppi.mods.minemention.api.SpecialMention;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -15,7 +15,7 @@ public class TeamMention implements SpecialMention {
 
     @Override
     public MutableComponent description() {
-        return Component.translatable("minemention.skyblockbuilder.team");
+        return SkyComponents.MINEMENTION_TEAM;
     }
 
     @Override

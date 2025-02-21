@@ -9,8 +9,8 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.events.SkyblockManageTeamEvent;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -38,7 +38,7 @@ public class RenameTeamCommand {
             return 0;
         }
 
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.rename_team", newName).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_RENAME_TEAM.apply(newName), true);
         return 1;
     }
 
@@ -48,13 +48,13 @@ public class RenameTeamCommand {
             ServerPlayer player = source.getPlayerOrException();
             team = data.getTeamFromPlayer(player);
             if (team == null) {
-                source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
+                source.sendFailure(SkyComponents.ERROR_USER_HAS_NO_TEAM);
                 return false;
             }
         } else {
             team = data.getTeam(oldName);
             if (team == null) {
-                source.sendFailure(Component.translatable("skyblockbuilder.command.error.team_not_exist"));
+                source.sendFailure(SkyComponents.ERROR_TEAM_NOT_EXIST);
                 return false;
             }
         }
@@ -88,17 +88,17 @@ public class RenameTeamCommand {
 
     private enum RenameResult {
         ALLOWED(null),
-        DENIED("skyblockbuilder.command.denied.rename_team"),
-        NO_PERMISSION("skyblockbuilder.command.disabled.rename_team");
+        DENIED(SkyComponents.DENIED_RENAME_TEAM),
+        NO_PERMISSION(SkyComponents.DISABLED_RENAME_TEAM);
 
-        private final Component messageKey;
+        private final Component message;
 
-        RenameResult(String messageKey) {
-            this.messageKey = Component.translatable(messageKey);
+        RenameResult(Component message) {
+            this.message = message;
         }
 
         public Component getMessage() {
-            return this.messageKey;
+            return this.message;
         }
     }
 }

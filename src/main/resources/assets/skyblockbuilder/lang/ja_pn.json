@@ -1,8 +1,8 @@
 {
   "block.skyblockbuilder.spawn_block": "スポーンブロック",
   "item.skyblockbuilder.structure_saver": "構造保存装置",
-  "screen.skyblockbuilder.structure_saver": "構造保存装置",
-  "screen.skyblockbuilder.select_template": "テンプレートを選択してください",
+  "skyblockbuilder.screen.structure_saver.title": "構造保存装置",
+  "skyblockbuilder.screen.select_template.title": "テンプレートを選択してください",
 
   "generator.skyblockbuilder.skyblock": "スカイブロック",
 
@@ -79,7 +79,6 @@
   "skyblockbuilder.command.info.invited_to_team1": " に参加することができます.",
   "skyblockbuilder.command.info.toggle_visit": "他のプレイヤーからの訪問を受ける能力が %s になりました.",
   "skyblockbuilder.command.info.toggle_request": "他のプレーヤーによる参加リクエストは現在%sです。",
-  "skyblockbuilder.command.info.click_to_copy": "クリックしてコピー",
 
   "skyblockbuilder.command.success.reset_island": "島の形状を%sに設定しました。",
   "skyblockbuilder.command.success.export_spawns": "現在のスポーンを%sに正常にエクスポートしました。",
@@ -128,13 +127,13 @@
   "skyblockbuilder.item.structure_saver.ignore_air.desc": "選択したエリア内の空気ブロックは無視され、テンプレートに保存されません",
   "skyblockbuilder.item.structure_saver.nbt_to_snbt.desc": "生成されたファイルは.snbtファイルとなり、標準エディタで編集可能です",
   "skyblockbuilder.item.structure_saver.save_to_config.desc": "テンプレート（スポーン地点を含む）は自動的にtemplates.json5構成に追加されます",
+  "skyblockbuilder.item.structure_saver.position_set.desc": "位置%sがx%s、y%s、z%sに設定されました。",
   "skyblockbuilder.screen.button.save": "保存",
   "skyblockbuilder.screen.button.delete": "削除",
   "skyblockbuilder.screen.button.open_folder.tooltip": "フォルダを開く",
   "skyblockbuilder.screen.widget.structure_name": "構造名",
   "skyblockbuilder.screen.open_folder.error": "フォルダを開けませんでした：%s",
   "skyblockbuilder.schematic.saved": "スキーマが%sに保存されました。",
-  "skyblockbuilder.structure_saver.pos": "位置%sがx%s、y%s、z%sに設定されました。",
 
   "skyblockbuilder.compat.disabled_management": "これと他のすべてのチーム管理が%sによって無効にされています。",
 

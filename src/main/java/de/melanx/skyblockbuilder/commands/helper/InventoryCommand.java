@@ -11,11 +11,10 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -49,7 +48,7 @@ public class InventoryCommand {
         try {
             Files.createDirectories(SkyPaths.MOD_EXPORTS);
         } catch (IOException e) {
-            throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_path", SkyPaths.MOD_EXPORTS.toString())).create();
+            throw new SimpleCommandExceptionType(SkyComponents.ERROR_CREATING_PATH.apply(SkyPaths.MOD_EXPORTS.toString())).create();
         }
         Path filePath = RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS, "starter_inventory", "json5");
 
@@ -65,10 +64,10 @@ public class InventoryCommand {
             w.write(SkyblockBuilder.PRETTY_GSON.toJson(json));
             w.close();
         } catch (IOException e) {
-            throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.command.error.creating_file", file.toString())).create();
+            throw new SimpleCommandExceptionType(SkyComponents.ERROR_CREATING_FILE.apply(file.toString())).create();
         }
 
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.export_inventory", filePath.toString()).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_EXPORT_INVENTORY.apply(filePath.toString()), true);
         return 1;
     }
 

@@ -6,10 +6,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.events.SkyblockManageTeamEvent;
 import de.melanx.skyblockbuilder.util.CommandUtil;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -52,12 +52,12 @@ public class ToggleTeamSettingsCommand {
 
         Pair<SkyblockManageTeamEvent.Result, Boolean> result = SkyblockHooks.onToggleVisits(validationResult.player(), validationResult.team(), enabled);
         if (result.getLeft() == SkyblockManageTeamEvent.Result.DENY) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.denied.toggle_request", Component.translatable("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))));
+            source.sendFailure(SkyComponents.DENIED_TOGGLE_VISITS.apply(enabled ? SkyComponents.ARGUMENT_ENABLE : SkyComponents.ARGUMENT_DISABLE));
             return 0;
         }
 
         validationResult.team().setAllowVisit(result.getRight());
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.info.toggle_visit", Component.translatable("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).withStyle(ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> SkyComponents.INFO_TOGGLE_VISIT.apply(enabled ? SkyComponents.ARGUMENT_ENABLED : SkyComponents.ARGUMENT_DISABLED).withStyle(ChatFormatting.GOLD), false);
         return 1;
     }
 
@@ -83,11 +83,11 @@ public class ToggleTeamSettingsCommand {
 
         Pair<SkyblockManageTeamEvent.Result, Boolean> result = SkyblockHooks.onToggleRequests(validationResult.player(), validationResult.team(), enabled);
         if (result.getLeft() == SkyblockManageTeamEvent.Result.DENY) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.denied.toggle_request", Component.translatable("skyblockbuilder.command.argument." + (enabled ? "enable" : "disable"))));
+            source.sendFailure(SkyComponents.DENIED_TOGGLE_REQUEST.apply(enabled ? SkyComponents.ARGUMENT_ENABLE : SkyComponents.ARGUMENT_DISABLE));
             return 0;
         } else {
             validationResult.team().setAllowJoinRequest(result.getRight());
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.info.toggle_request", Component.translatable("skyblockbuilder.command.argument." + (enabled ? "enabled" : "disabled"))).withStyle(ChatFormatting.GOLD), false);
+            source.sendSuccess(() -> SkyComponents.INFO_TOGGLE_REQUEST.apply(enabled ? SkyComponents.ARGUMENT_ENABLED : SkyComponents.ARGUMENT_DISABLED).withStyle(ChatFormatting.GOLD), false);
             return 1;
         }
     }

@@ -5,9 +5,7 @@ import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -17,17 +15,17 @@ public class CommandUtil {
 
     public static boolean mayNotTeleport(CommandSourceStack source, SkyblockSavedData data, ServerPlayer player) {
         if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
+            source.sendFailure(SkyComponents.ERROR_TELEPORTATION_NOT_ALLOWED_DIMENSION);
             return true;
         }
 
         if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && player.level() != data.getLevel()) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
+            source.sendFailure(SkyComponents.ERROR_TELEPORT_ACROSS_DIMENSIONS);
             return true;
         }
 
         if (PermissionsConfig.Teleports.disallowTeleportationDuringFalling && player.fallDistance > 1) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.prevent_while_falling"));
+            source.sendFailure(SkyComponents.ERROR_PREVENT_WHILE_FALLING);
             return true;
         }
 
@@ -43,7 +41,7 @@ public class CommandUtil {
 
         Team team = data.getTeamFromPlayer(player);
         if (team == null) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
+            source.sendFailure(SkyComponents.ERROR_USER_HAS_NO_TEAM);
             return null;
         }
 
@@ -60,7 +58,7 @@ public class CommandUtil {
         Team team = data.getTeam(name);
 
         if (team == null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+            source.sendFailure(SkyComponents.ERROR_TEAM_NOT_EXIST);
             return null;
         }
 

@@ -35,7 +35,7 @@ public class HeraclesCompat {
 //        }
 //
 //        QuestProgressHandler.getProgress(player.server, player.getUUID()).reset();
-//        player.sendSystemMessage(Component.translatable("heracles.skyblockbuilder.reset_quest_progress").withStyle(ChatFormatting.RED), true);
+//        player.sendSystemMessage(SkyComponents.HERACLES_RESET_QUEST_PROGRESS, true);
     }
 
     public static void resetQuestProgress(MinecraftServer server, UUID player) {

@@ -13,6 +13,7 @@ import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.events.SkyblockManageTeamEvent;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -20,7 +21,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -58,22 +58,22 @@ public class EditTeamSpawnsCommand {
 
         if (team == null) {
             if (!PermissionManager.INSTANCE.mayExecuteOpCommand(player)) {
-                source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
+                source.sendFailure(SkyComponents.ERROR_USER_HAS_NO_TEAM);
                 return 0;
             }
 
-            source.sendFailure(Component.translatable("skyblockbuilder.command.warning.edit_spawn_spawns"));
+            source.sendFailure(SkyComponents.WARNING_EDIT_SPAWN_SPAWNS);
             team = SkyblockSavedData.get(player.level()).getSpawn();
         }
 
         Pair<SkyblockManageTeamEvent.Result, TemplatesConfig.Spawn> result = SkyblockHooks.onAddSpawn(player, team, pos, player.getDirection());
         switch (result.getLeft()) {
             case DENY:
-                source.sendFailure(Component.translatable("skyblockbuilder.command.denied.create_spawn"));
+                source.sendFailure(SkyComponents.DENIED_CREATE_SPAWN);
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.EDIT_SPAWNS)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.modify_spawns"));
+                    source.sendFailure(SkyComponents.DISABLED_MODIFY_SPAWNS);
                     return 0;
                 }
 
@@ -81,7 +81,7 @@ public class EditTeamSpawnsCommand {
                 BlockPos center = team.getIsland().getCenter().mutable();
                 center.offset(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
                 if (!result.getValue().pos().closerThan(center, PermissionsConfig.Spawns.range)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.error.position_too_far_away"));
+                    source.sendFailure(SkyComponents.ERROR_POSITION_TOO_FAR_AWAY);
                     return 0;
                 }
                 break;
@@ -90,7 +90,7 @@ public class EditTeamSpawnsCommand {
         }
 
         team.addPossibleSpawn(result.getValue());
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.spawn_added", pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_SPAWN_ADDED.apply(pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.GOLD), false);
         return 1;
     }
 
@@ -101,22 +101,22 @@ public class EditTeamSpawnsCommand {
         }
 
         if (validationResult.team() == null) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
+            source.sendFailure(SkyComponents.ERROR_USER_HAS_NO_TEAM);
             return 0;
         }
 
         switch (SkyblockHooks.onRemoveSpawn(validationResult.player(), validationResult.team(), pos)) {
             case DENY:
-                MutableComponent component = Component.translatable("skyblockbuilder.command.denied.modify_spawns0");
+                MutableComponent component = SkyComponents.DENIED_MODIFY_SPAWNS0;
                 if (validationResult.team().getPossibleSpawns().size() <= 1) {
-                    component.append(" ").append(Component.translatable("skyblockbuilder.command.denied.modify_spawns1"));
+                    component.append(" ").append(SkyComponents.DENIED_MODIFY_SPAWNS1);
                 }
 
                 source.sendFailure(component);
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(validationResult.player(), PermissionManager.Permission.EDIT_SPAWNS)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.modify_spawns"));
+                    source.sendFailure(SkyComponents.DISABLED_MODIFY_SPAWNS);
                     return 0;
                 }
             case ALLOW:
@@ -124,16 +124,16 @@ public class EditTeamSpawnsCommand {
         }
 
         if (!validationResult.team().removePossibleSpawn(pos)) {
-            MutableComponent component = Component.translatable("skyblockbuilder.command.error.remove_spawn0");
+            MutableComponent component = SkyComponents.ERROR_REMOVE_SPAWN0;
             if (validationResult.team().getPossibleSpawns().size() <= 1) {
-                component.append(" ").append(Component.translatable("skyblockbuilder.command.error.remove_spawn1"));
+                component.append(" ").append(SkyComponents.ERROR_REMOVE_SPAWN1);
             }
 
             source.sendFailure(component);
             return 0;
         }
 
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.spawn_removed", pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_SPAWN_REMOVED.apply(pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.GOLD), false);
         return 1;
     }
 
@@ -144,7 +144,7 @@ public class EditTeamSpawnsCommand {
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
         if (level != source.getServer().getLevel(SpawnConfig.spawmDimension)) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.wrong_position"));
+            source.sendFailure(SkyComponents.ERROR_WRONG_POSITION);
             return null;
         }
 
@@ -165,7 +165,7 @@ public class EditTeamSpawnsCommand {
         ServerPlayer player = null;
         if (name == null) {
             if (!(source.getEntity() instanceof ServerPlayer)) {
-                source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_no_player"));
+                source.sendFailure(SkyComponents.ERROR_USER_NO_PLAYER);
                 return 0;
             }
 
@@ -173,14 +173,14 @@ public class EditTeamSpawnsCommand {
             team = data.getTeamFromPlayer(player);
 
             if (team == null) {
-                source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
+                source.sendFailure(SkyComponents.ERROR_USER_HAS_NO_TEAM);
                 return 0;
             }
         } else {
             team = data.getTeam(name);
 
             if (team == null) {
-                source.sendFailure(Component.translatable("skyblockbuilder.command.error.team_not_exist"));
+                source.sendFailure(SkyComponents.ERROR_TEAM_NOT_EXIST);
                 return 0;
             }
         }
@@ -188,11 +188,11 @@ public class EditTeamSpawnsCommand {
         SkyblockManageTeamEvent.Result result = SkyblockHooks.onResetSpawns(player, team);
         switch (result) {
             case DENY:
-                source.sendFailure(Component.translatable("skyblockbuilder.command.denied.reset_spawns"));
+                source.sendFailure(SkyComponents.DENIED_RESET_SPAWNS);
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(source, PermissionManager.Permission.EDIT_SPAWNS)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.modify_spawns"));
+                    source.sendFailure(SkyComponents.DISABLED_MODIFY_SPAWNS);
                     return 0;
                 }
                 break;
@@ -201,7 +201,7 @@ public class EditTeamSpawnsCommand {
         }
 
         team.setPossibleSpawns(team.getDefaultPossibleSpawns());
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.reset_spawns").withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_RESET_SPAWNS.withStyle(ChatFormatting.GOLD), true);
         return 1;
     }
 }

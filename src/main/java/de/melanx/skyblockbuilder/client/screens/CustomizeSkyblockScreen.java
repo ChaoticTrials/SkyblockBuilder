@@ -7,6 +7,7 @@ import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.template.TemplateRenderer;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -100,7 +101,7 @@ public class CustomizeSkyblockScreen extends Screen {
         this.renderMenuBackground(guiGraphics);
         this.list.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
-        guiGraphics.drawCenteredString(this.font, Component.translatable("screen.skyblockbuilder.select_template"), this.width / 2, 28, Color.GRAY.getRGB());
+        guiGraphics.drawCenteredString(this.font, SkyComponents.SCREEN_SELECT_PALETTE, this.width / 2, 28, Color.GRAY.getRGB());
         this.list.renderEntries(guiGraphics, mouseX, mouseY, partialTick);
     }
 
@@ -201,7 +202,7 @@ public class CustomizeSkyblockScreen extends Screen {
                     guiGraphics.blit(SELECT_PALETTE, textureX, textureY, 0, 0, 23, 13, 23, 13);
 
                     if (this.isMouseOverPaletteSelection(textureX, textureY, mouseX, mouseY)) {
-                        guiGraphics.renderTooltip(CustomizeSkyblockScreen.this.font, Component.translatable("screen.skyblockbuilder.select_palette"), mouseX, mouseY);
+                        guiGraphics.renderTooltip(CustomizeSkyblockScreen.this.font, SkyComponents.SCREEN_SELECT_PALETTE, mouseX, mouseY);
                     }
                 }
 

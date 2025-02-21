@@ -19,6 +19,7 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
@@ -108,6 +109,7 @@ public class EventListener {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        event.getEntity().sendSystemMessage(SkyComponents.dump("test"));
         SkyblockBuilder.getNetwork().updateData(event.getEntity(), null);
         Level level = event.getEntity().level();
         SkyblockBuilder.getNetwork().updateProfiles(level);

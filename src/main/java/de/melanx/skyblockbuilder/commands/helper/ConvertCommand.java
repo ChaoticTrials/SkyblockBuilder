@@ -5,12 +5,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class ConvertCommand {
                     CompoundTag nbt = TemplateUtil.readTemplate(original.toPath(), false);
                     TemplateUtil.writeTemplate(converted, nbt, true);
 
-                    context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName.toString(), convertedName), true);
+                    context.getSource().sendSuccess(() -> SkyComponents.SUCCESS_CONVERT_TEMPLATE.apply(fileName.toString(), convertedName), true);
                 } catch (IOException | CommandSyntaxException e) {
                     SkyblockBuilder.getLogger().error("Failed to convert {} to {}", original, convertedName, e);
                 }
@@ -48,7 +48,7 @@ public class ConvertCommand {
                     CompoundTag nbt = TemplateUtil.readTemplate(original.toPath(), true);
                     TemplateUtil.writeTemplate(converted, nbt, false);
 
-                    context.getSource().sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.convert_template", fileName.toString(), convertedName), true);
+                    context.getSource().sendSuccess(() -> SkyComponents.SUCCESS_CONVERT_TEMPLATE.apply(fileName.toString(), convertedName), true);
                 } catch (IOException | CommandSyntaxException e) {
                     SkyblockBuilder.getLogger().error("Failed to convert {} to {}", original, convertedName, e);
                 }

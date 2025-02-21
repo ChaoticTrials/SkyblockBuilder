@@ -8,6 +8,7 @@ import de.melanx.skyblockbuilder.client.ClientUtil;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.registration.ModDataComponentTypes;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import net.minecraft.ChatFormatting;
@@ -48,9 +49,9 @@ import java.util.Set;
 
 public class ItemStructureSaver extends Item {
 
-    private static final MutableComponent TOOLTIP_INFO = Component.translatable("skyblockbuilder.item.structure_saver.info.tooltip").withStyle(ChatFormatting.GOLD);
-    private static final MutableComponent TOOLTIP_SAVE = Component.translatable("skyblockbuilder.item.structure_saver.save.tooltip").withStyle(ChatFormatting.GOLD);
-    private static final MutableComponent TOOLTIP_RESTORE = Component.translatable("skyblockbuilder.item.structure_saver.restore.tooltip").withStyle(ChatFormatting.GOLD);
+    private static final MutableComponent TOOLTIP_INFO = SkyComponents.ITEM_STRUCTURE_SAVER_INFO_TOOLTIP.withStyle(ChatFormatting.GOLD);
+    private static final MutableComponent TOOLTIP_SAVE = SkyComponents.ITEM_STRUCTURE_SAVER_SAVE_TOOLTIP.withStyle(ChatFormatting.GOLD);
+    private static final MutableComponent TOOLTIP_RESTORE = SkyComponents.ITEM_STRUCTURE_SAVER_RESTORE_TOOLTIP.withStyle(ChatFormatting.GOLD);
 
     public ItemStructureSaver() {
         super(new Properties());
@@ -72,7 +73,7 @@ public class ItemStructureSaver extends Item {
 
             if (!positions.contains("Position1")) {
                 positions.put("Position1", NbtUtils.writeBlockPos(pos));
-                player.displayClientMessage(Component.translatable("skyblockbuilder.structure_saver.pos", 1, pos.getX(), pos.getY(), pos.getZ()), false);
+                player.displayClientMessage(SkyComponents.STRUCTURE_SAVER_POS.apply(1, pos.getX(), pos.getY(), pos.getZ()), false);
                 stack.remove(ModDataComponentTypes.previousPositions);
 
                 stack.set(ModDataComponentTypes.positions, positions);
@@ -81,7 +82,7 @@ public class ItemStructureSaver extends Item {
 
             if (!positions.contains("Position2")) {
                 positions.put("Position2", NbtUtils.writeBlockPos(pos));
-                player.displayClientMessage(Component.translatable("skyblockbuilder.structure_saver.pos", 2, pos.getX(), pos.getY(), pos.getZ()), false);
+                player.displayClientMessage(SkyComponents.STRUCTURE_SAVER_POS.apply(2, pos.getX(), pos.getY(), pos.getZ()), false);
 
                 stack.set(ModDataComponentTypes.positions, positions.copy());
                 return InteractionResult.SUCCESS;
@@ -139,12 +140,12 @@ public class ItemStructureSaver extends Item {
 
         if (positions.contains("Position1")) {
             Optional<BlockPos> pos = NbtUtils.readBlockPos(positions, "Position1");
-            pos.ifPresent(blockPos -> tooltip.add(Component.translatable("skyblockbuilder.item.structure_saver.position.tooltip", 1, blockPos.getX(), blockPos.getY(), blockPos.getZ()).withStyle(ChatFormatting.DARK_GRAY)));
+            pos.ifPresent(blockPos -> tooltip.add(SkyComponents.ITEM_STRUCTURE_SAVER_POSITION_TOOLTIP.apply(1, blockPos.getX(), blockPos.getY(), blockPos.getZ()).withStyle(ChatFormatting.DARK_GRAY)));
         }
 
         if (positions.contains("Position2")) {
             Optional<BlockPos> pos = NbtUtils.readBlockPos(positions, "Position2");
-            pos.ifPresent(blockPos -> tooltip.add(Component.translatable("skyblockbuilder.item.structure_saver.position.tooltip", 2, blockPos.getX(), blockPos.getY(), blockPos.getZ()).withStyle(ChatFormatting.DARK_GRAY)));
+            pos.ifPresent(blockPos -> tooltip.add(SkyComponents.ITEM_STRUCTURE_SAVER_POSITION_TOOLTIP.apply(2, blockPos.getX(), blockPos.getY(), blockPos.getZ()).withStyle(ChatFormatting.DARK_GRAY)));
         }
 
         if (positions.contains("CanSave")) {

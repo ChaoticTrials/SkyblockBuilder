@@ -10,11 +10,11 @@ import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.CommandUtil;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
@@ -37,8 +37,9 @@ public class HomeCommand {
         SkyblockSavedData data = SkyblockSavedData.get(level);
         Team team = validationResult.team();
         if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_HOME) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.HOME, level.getGameTime())) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.homeCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.HOME)))));
+            source.sendFailure(SkyComponents.ERROR_COOLDOWN.apply(
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.homeCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.HOME)))
+            ));
             return 0;
         }
 
@@ -48,11 +49,11 @@ public class HomeCommand {
 
         switch (SkyblockHooks.onHome(player, team)) {
             case DENY:
-                source.sendFailure(Component.translatable("skyblockbuilder.command.denied.teleport_home"));
+                source.sendFailure(SkyComponents.DENIED_TELEPORT_HOME);
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_HOME)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.teleport_home"));
+                    source.sendFailure(SkyComponents.DISABLED_TELEPORT_HOME);
                     return 0;
                 }
                 break;
@@ -61,7 +62,7 @@ public class HomeCommand {
         }
 
         data.getOrCreateMetaInfo(player).setLastTeleport(SkyMeta.TeleportType.HOME, level.getGameTime());
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.teleport_home").withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_TELEPORT_HOME.withStyle(ChatFormatting.GOLD), true);
         WorldUtil.teleportToIsland(player, team);
         return 1;
     }

@@ -1,9 +1,9 @@
 {
   "block.skyblockbuilder.spawn_block": "Spawn Block",
   "item.skyblockbuilder.structure_saver": "Structure Saver",
-  "screen.skyblockbuilder.structure_saver": "Structure Saver",
-  "screen.skyblockbuilder.select_template": "Please select a template",
-  "screen.skyblockbuilder.select_palette": "Select Palette",
+  "skyblockbuilder.screen.structure_saver.title": "Structure Saver",
+  "skyblockbuilder.screen.select_template.title": "Please select a template",
+  "skyblockbuilder.screen.select_palette.title": "Select Palette",
 
   "generator.skyblockbuilder.skyblock": "Skyblock",
 
@@ -13,7 +13,7 @@
   "skyblockbuilder.command.argument.disable": "disable",
   "skyblockbuilder.command.argument.disabled": "disabled",
 
-  "skyblockbuilder.command.generated": "Generated %s at %s",
+  "skyblockbuilder.command.generated.success": "Generated %s at %s",
   "skyblockbuilder.command.generated.fail": "This template doesn't exist.",
 
   "skyblockbuilder.error.no_skyblock": "This command can only be used in a skyblock world.",
@@ -86,7 +86,6 @@
   "skyblockbuilder.command.info.invited_to_team1": " to join the team.",
   "skyblockbuilder.command.info.toggle_visit": "Visits by other players are now %s.",
   "skyblockbuilder.command.info.toggle_request": "Join requests by other players are now %s.",
-  "skyblockbuilder.command.info.click_to_copy": "Click to copy",
   "skyblockbuilder.command.info.show_team_spawns": "The spawns for team %s:",
 
   "skyblockbuilder.command.success.reset_island": "Successfully set island shape to %s",
@@ -140,13 +139,13 @@
   "skyblockbuilder.item.structure_saver.nbt_to_snbt.desc": "The generated file will be a .snbt file, that means editable in a standard editor",
   "skyblockbuilder.item.structure_saver.save_to_config.desc": "The template (and including spawns) will automatically added to the templates.json5 config",
   "skyblockbuilder.item.structure_saver.nether_validation.desc": "Checks whether a nether portal block is included",
+  "skyblockbuilder.item.structure_saver.position_set.desc": "Position %s set at x %s, y %s, z %s",
   "skyblockbuilder.screen.button.save": "Save",
   "skyblockbuilder.screen.button.delete": "Delete",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Open Folder",
   "skyblockbuilder.screen.widget.structure_name": "Structure Name",
   "skyblockbuilder.screen.open_folder.error": "Could not open folder: %s",
   "skyblockbuilder.schematic.saved": "Schematic saved in %s",
-  "skyblockbuilder.structure_saver.pos": "Position %s set at x %s, y %s, z %s",
 
   "skyblockbuilder.compat.disabled_management": "This and all other team management is disabled by %s.",
 

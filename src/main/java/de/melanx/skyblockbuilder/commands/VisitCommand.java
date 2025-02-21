@@ -11,11 +11,10 @@ import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.CommandUtil;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
@@ -40,38 +39,39 @@ public class VisitCommand {
         Team team = validationResult.team();
 
         if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.VISIT, level.getGameTime())) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.visitCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.VISIT)))));
+            source.sendFailure(SkyComponents.ERROR_COOLDOWN.apply(
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.visitCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.VISIT)))
+            ));
             return 0;
         }
 
         if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(level.dimension().location())) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
+            source.sendFailure(SkyComponents.ERROR_TELEPORTATION_NOT_ALLOWED_DIMENSION);
             return 0;
         }
 
         if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && level != data.getLevel()) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
+            source.sendFailure(SkyComponents.ERROR_TELEPORT_ACROSS_DIMENSIONS);
             return 0;
         }
 
         switch (SkyblockHooks.onVisit(player, team)) {
             case DENY:
-                source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.visit_team"));
+                source.sendFailure(SkyComponents.DISABLED_VISIT_TEAM);
                 return 0;
             case DEFAULT:
                 if (team.hasPlayer(player)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.error.visit_own_team"));
+                    source.sendFailure(SkyComponents.ERROR_VISIT_OWN_TEAM);
                     return 0;
                 }
                 if (!PermissionManager.INSTANCE.mayExecuteOpCommand(player)) {
                     if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_TO_VISITING_ISLAND)) {
-                        source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.team_visit"));
+                        source.sendFailure(SkyComponents.DISABLED_TEAM_VISIT);
                         return 0;
                     }
 
                     if (!team.allowsVisits()) {
-                        source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.visit_team"));
+                        source.sendFailure(SkyComponents.DISABLED_VISIT_TEAM);
                         return 0;
                     }
                 }
@@ -82,7 +82,7 @@ public class VisitCommand {
 
         WorldUtil.teleportToIsland(player, team);
         data.getOrCreateMetaInfo(player).setLastTeleport(SkyMeta.TeleportType.VISIT, level.getGameTime());
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.visit_team", name).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_VISIT_TEAM.apply(name), true);
         return 1;
     }
 }

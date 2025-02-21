@@ -9,10 +9,9 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.CommandUtil;
-import net.minecraft.ChatFormatting;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public class AcceptCommand {
@@ -35,22 +34,22 @@ public class AcceptCommand {
         Team team = validationResult.team();
 
         if (data.hasPlayerTeam(player)) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.player_has_team"));
+            source.sendFailure(SkyComponents.ERROR_PLAYER_HAS_TEAM.apply(player.getDisplayName().getString()));
             return 0;
         }
 
         if (!data.hasInvites(player)) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.no_invitations"));
+            source.sendFailure(SkyComponents.ERROR_NO_INVITATIONS);
             return 0;
         }
 
         switch (SkyblockHooks.onAccept(player, team)) {
             case DENY:
-                source.sendFailure(Component.translatable("skyblockbuilder.command.denied.accept_invitations"));
+                source.sendFailure(SkyComponents.DENIED_ACCEPT_INVITATIONS);
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_HANDLE_INVITES)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.accept_invitations"));
+                    source.sendFailure(SkyComponents.DISABLED_ACCEPT_INVITATIONS);
                     return 0;
                 }
                 break;
@@ -59,11 +58,11 @@ public class AcceptCommand {
         }
 
         if (!data.acceptInvite(team, player)) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.accept_invitations"));
+            source.sendFailure(SkyComponents.ERROR_ACCEPT_INVITATIONS);
             return 0;
         }
 
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.joined_team", team.getName()).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_JOINED_TEAM.apply(team.getName()), true);
         return 1;
     }
 

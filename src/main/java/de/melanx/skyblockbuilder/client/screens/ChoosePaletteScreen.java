@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.client.screens;
 
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateRenderer;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -26,7 +27,7 @@ public class ChoosePaletteScreen extends Screen {
     private int rows = 1;
 
     protected ChoosePaletteScreen(CustomizeSkyblockScreen parent, ConfiguredTemplate template) {
-        super(Component.translatable("screen.skyblockbuilder.select_palette"));
+        super(SkyComponents.SCREEN_SELECT_PALETTE);
         this.template = template;
         this.applyIndex = i -> parent.getTemplateList().getSelected().setPaletteIndex(i);
         this.resetIndex = () -> parent.getTemplateList().getSelected().resetPaletteIndex();

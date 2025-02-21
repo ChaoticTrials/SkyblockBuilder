@@ -6,9 +6,9 @@ import de.melanx.skyblockbuilder.config.common.CadmusConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 
 public class CadmusCompat {
@@ -24,7 +24,7 @@ public class CadmusCompat {
                                     ServerLevel level = source.getSource().getLevel();
                                     SkyblockSavedData data = SkyblockSavedData.get(level);
                                     CadmusCompat.protectSpawn(level, data.getSpawn(), true);
-                                    source.getSource().sendSuccess(() -> Component.translatable("cadmus.skyblockbuilder.claim_spawn"), true);
+                                    source.getSource().sendSuccess(() -> SkyComponents.CADMUS_CLAIM_SPAWN, true);
                                     return 1;
                                 })));
     }

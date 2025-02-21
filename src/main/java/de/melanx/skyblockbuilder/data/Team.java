@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.data;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.ChatFormatting;
@@ -339,12 +340,12 @@ public class Team {
 
     public void sendJoinRequest(Player requestingPlayer) {
         this.addJoinRequest(requestingPlayer.getGameProfile().getId());
-        MutableComponent component = Component.translatable("skyblockbuilder.event.join_request0", requestingPlayer.getDisplayName());
+        MutableComponent component = SkyComponents.EVENT_JOIN_REQUEST0.apply(requestingPlayer.getDisplayName());
         component.append(Component.literal("/skyblock team accept " + requestingPlayer.getDisplayName().getString()).setStyle(Style.EMPTY
                 .withHoverEvent(InviteCommand.COPY_TEXT)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock team accept " + requestingPlayer.getDisplayName().getString()))
                 .applyFormats(ChatFormatting.UNDERLINE, ChatFormatting.GOLD)));
-        component.append(Component.translatable("skyblockbuilder.event.join_request1"));
+        component.append(SkyComponents.EVENT_JOIN_REQUEST1);
         this.broadcast(component, Style.EMPTY.applyFormat(ChatFormatting.GOLD));
     }
 

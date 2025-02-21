@@ -8,6 +8,7 @@ import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.CommandUtil;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -39,7 +40,7 @@ public class ListCommand {
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
         List<Team> teams = data.getTeams().stream().sorted(Comparator.comparing(Team::getName)).filter(team -> !team.getName().equalsIgnoreCase("spawn")).toList();
-        MutableComponent info = Component.translatable("skyblockbuilder.command.info.teams",
+        MutableComponent info = SkyComponents.INFO_TEAMS.apply(
                 teams.size(),
                 teams.stream().filter(Team::isEmpty).count());
         info.withStyle(ChatFormatting.GOLD);
@@ -50,7 +51,7 @@ public class ListCommand {
                 MutableComponent list = (Component.literal("- " + team.getName()));
                 if (team.isEmpty()) {
                     list.append(" (");
-                    list.append(Component.translatable("skyblockbuilder.command.argument.empty"));
+                    list.append(SkyComponents.ARGUMENT_EMPTY);
                     list.append(")");
                     list.withStyle(ChatFormatting.RED);
                 } else {
@@ -72,7 +73,7 @@ public class ListCommand {
 
         Team team = validationResult.team();
         GameProfileCache profileCache = source.getServer().getProfileCache();
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.info.team_detailed", team.getName(), team.getPlayers().size()).withStyle(ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> SkyComponents.INFO_TEAM_DETAILED.apply(team.getName(), team.getPlayers().size()).withStyle(ChatFormatting.GOLD), false);
         team.getPlayers().forEach(id -> {
             Optional<GameProfile> profile = profileCache.get(id);
             if (profile.isPresent()) {

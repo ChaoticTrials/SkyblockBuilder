@@ -43,9 +43,9 @@
 //        int baseX = x + iconSize + 16;
 //        int baseY = y + 8 + font.lineHeight;
 //        if (this.team == null || this.team.getPlacedSpreads().isEmpty()) {
-//            graphics.drawString(font, Component.translatable("setting.skyblockbuilder.spread_location.no_valid_spreads"), baseX, baseY, QuestScreenTheme.getTaskDescription(), false);
+//            graphics.drawString(font, SkyComponents.SETTING_SPREAD_LOCATION_NO_VALID_SPREADS, baseX, baseY, QuestScreenTheme.getTaskDescription(), false);
 //        } else if (this.task.predicate() == SpreadPredicate.ALWAYS_TRUE) {
-//            graphics.drawString(font, Component.translatable("setting.skyblockbuilder.spread_location.no_spreads_defined"), baseX, baseY, QuestScreenTheme.getTaskDescription(), false);
+//            graphics.drawString(font, SkyComponents.SETTING_SPREAD_LOCATION_NO_SPREADS_DEFINED, baseX, baseY, QuestScreenTheme.getTaskDescription(), false);
 //        } else {
 //            List<String> spreads = this.task.predicate().getSpreads();
 //            Map<String, Set<Team.PlacedSpread>> teamSpreads = this.team.getPlacedSpreads();
@@ -53,13 +53,13 @@
 //
 //            if (!validSpreads.isEmpty()) {
 //                int i = 2;
-//                graphics.drawString(font, Component.translatable("setting.skyblockbuilder.spread_location.visit_spreads"), baseX, baseY, QuestScreenTheme.getTaskDescription(), false);
+//                graphics.drawString(font, SkyComponents.SETTING_SPREAD_LOCATION_VISIT_SPREADS, baseX, baseY, QuestScreenTheme.getTaskDescription(), false);
 //
 //                for (String spread : spreads) {
 //                    graphics.drawString(font, Component.literal("  - " + spread), baseX, y + 8 + ((font.lineHeight + 1) * i++), QuestScreenTheme.getTaskDescription(), false);
 //                }
 //            } else {
-//                graphics.drawString(font, Component.translatable("setting.skyblockbuilder.spread_location.no_valid_spreads"), baseX, baseY, QuestScreenTheme.getTaskDescription(), false);
+//                graphics.drawString(font, SkyComponents.SETTING_SPREAD_LOCATION_NO_VALID_SPREADS, baseX, baseY, QuestScreenTheme.getTaskDescription(), false);
 //            }
 //        }
 //

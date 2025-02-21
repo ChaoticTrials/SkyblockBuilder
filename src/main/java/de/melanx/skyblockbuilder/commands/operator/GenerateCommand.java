@@ -11,6 +11,7 @@ import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import net.minecraft.commands.CommandSourceStack;
@@ -61,7 +62,7 @@ public class GenerateCommand {
 
 
         if (configuredTemplate == null) {
-            context.getSource().sendFailure(Component.translatable("skyblockbuilder.command.generated.fail"));
+            context.getSource().sendFailure(SkyComponents.COMMAND_GENERATED_FAIL);
             return 0;
         }
         if (spreads) {
@@ -93,7 +94,6 @@ public class GenerateCommand {
         }
 
         StructureTemplate template = new StructureTemplate();
-        //noinspection deprecation
         template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
 
         ServerLevel level = context.getSource().getLevel();
@@ -105,6 +105,6 @@ public class GenerateCommand {
 
     private static void showLocationResult(CommandSourceStack source, String structureName, BlockPos generatedAt) {
         Component coords = RandomUtility.getFormattedPos(generatedAt);
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.generated", structureName, coords), true);
+        source.sendSuccess(() -> SkyComponents.COMMAND_GENERATED_SUCCESS.apply(structureName, coords), true);
     }
 }

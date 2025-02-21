@@ -4,11 +4,11 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.SizeableCheckbox;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.DumpUtil;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.fml.loading.FMLPaths;
@@ -36,7 +36,7 @@ public class DumpScreen extends BaseScreen {
     public SizeableCheckbox generateOnServer;
 
     public DumpScreen() {
-        super(174, DumpScreen.isOpPlayer() ? 172 : 172 - ROW_OFFSET, Component.translatable("skyblockbuilder.screen.dump.title"));
+        super(174, DumpScreen.isOpPlayer() ? 172 : 172 - ROW_OFFSET, SkyComponents.SCREEN_DUMP_TITLE);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class DumpScreen extends BaseScreen {
         this.includeSkyblockBuilderWorldData = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), 10, true));
         this.generateOnServer = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i), 10, false));
         this.generateOnServer.visible = this.isOpPlayer;
-        this.addRenderableWidget(Button.builder(Component.translatable("skyblockbuilder.screen.dump.button.create"), button -> {
+        this.addRenderableWidget(Button.builder(SkyComponents.SCREEN_DUMP_BUTTON_CREATE, button -> {
                     if (this.generateOnServer.selected()) {
                         SkyblockBuilder.getNetwork().createSkyblockDump(
                                 this.includeConfigs.selected(),
@@ -71,9 +71,9 @@ public class DumpScreen extends BaseScreen {
                                 this.includeSkyblockBuilderWorldData.selected()
                         );
                         //noinspection DataFlowIssue
-                        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("skyblockbuilder.screen.dump.success", FMLPaths.GAMEDIR.get().relativize(zip).toString())
+                        Minecraft.getInstance().player.sendSystemMessage(SkyComponents.SCREEN_DUMP_SUCCESS.apply(FMLPaths.GAMEDIR.get().relativize(zip).toString())
                                 .withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, zip.getParent().toString()))));
-                        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("skyblockbuilder.screen.dump.create_issue").append(" ").append(DumpUtil.getIssueUrl()));
+                        Minecraft.getInstance().player.sendSystemMessage(SkyComponents.SCREEN_DUMP_CREATE_ISSUE.append(" ").append(DumpUtil.getIssueUrl()));
                     }
                     this.onClose();
                 })
@@ -89,15 +89,15 @@ public class DumpScreen extends BaseScreen {
         guiGraphics.drawString(this.font, this.title, this.centeredX(this.font.width(this.title)), this.y(8), Color.DARK_GRAY.getRGB(), false);
 
         int i = 1;
-        guiGraphics.drawString(this.font, Component.translatable("skyblockbuilder.screen.dump.text.configs"), this.x(TEXT_X), this.y(TEXT_FIRST_Y), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, Component.translatable("skyblockbuilder.screen.dump.text.templates"), this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, Component.translatable("skyblockbuilder.screen.dump.text.level_dat"), this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, Component.translatable("skyblockbuilder.screen.dump.text.latest_log"), this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, Component.translatable("skyblockbuilder.screen.dump.text.crash_report"), this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, Component.translatable("skyblockbuilder.screen.dump.text.data_file"), this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_CONFIGS, this.x(TEXT_X), this.y(TEXT_FIRST_Y), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_TEMPLATES, this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_LEVEL_DAT, this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_LATEST_LOG, this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_CRASH_REPORT, this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_DATA_FILE, this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
 
         if (this.isOpPlayer) {
-            guiGraphics.drawString(this.font, Component.translatable("skyblockbuilder.screen.dump.text.create_on_server"), this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i), Color.DARK_GRAY.getRGB(), false);
+            guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_CREATE_ON_SERVER, this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i), Color.DARK_GRAY.getRGB(), false);
         }
     }
 

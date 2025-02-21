@@ -16,7 +16,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -80,7 +79,7 @@ public class WorldUtil {
 
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {
         if (!isSkyblock(source.getServer().overworld())) {
-            throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.error.no_skyblock")).create();
+            throw new SimpleCommandExceptionType(SkyComponents.NO_SKYBLOCK).create();
         }
     }
 

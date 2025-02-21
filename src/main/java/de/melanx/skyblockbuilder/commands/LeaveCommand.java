@@ -8,11 +8,10 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -31,18 +30,18 @@ public class LeaveCommand {
         ServerPlayer player = source.getPlayerOrException();
 
         if (!data.hasPlayerTeam(player)) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
+            source.sendFailure(SkyComponents.ERROR_USER_HAS_NO_TEAM);
             return 0;
         }
 
         Team team = data.getTeamFromPlayer(player);
         switch (SkyblockHooks.onLeave(player, team)) {
             case DENY:
-                source.sendFailure(Component.translatable("skyblockbuilder.command.denied.leave_team"));
+                source.sendFailure(SkyComponents.DENIED_LEAVE_TEAM);
                 return 0;
             case DEFAULT:
                 if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_LEAVE)) {
-                    source.sendFailure(Component.translatable("skyblockbuilder.command.disabled.manage_teams"));
+                    source.sendFailure(SkyComponents.DISABLED_MANAGE_TEAMS);
                     return 0;
                 }
                 break;
@@ -54,7 +53,7 @@ public class LeaveCommand {
             RandomUtility.dropInventories(player);
         }
         data.removePlayerFromTeam(player);
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.left_team").withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_LEFT_TEAM, true);
         RandomUtility.deleteTeamIfEmpty(data, team);
         WorldUtil.teleportToIsland(player, data.getSpawn());
         return 1;

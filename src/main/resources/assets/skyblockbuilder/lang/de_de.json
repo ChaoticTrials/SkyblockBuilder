@@ -1,9 +1,9 @@
 {
   "block.skyblockbuilder.spawn_block": "Spawnblock",
   "item.skyblockbuilder.structure_saver": "Struktur-Sicherer",
-  "screen.skyblockbuilder.structure_saver": "Struktur-Sicherer",
-  "screen.skyblockbuilder.select_template": "Bitte wähle eine Vorlage",
-  "screen.skyblockbuilder.select_palette": "Palette auswählen",
+  "skyblockbuilder.screen.structure_saver.title": "Struktur-Sicherer",
+  "skyblockbuilder.screen.select_template.title": "Bitte wähle eine Vorlage",
+  "skyblockbuilder.screen.select_palette.title": "Palette auswählen",
 
   "generator.skyblockbuilder.skyblock": "Skyblock",
 
@@ -13,7 +13,7 @@
   "skyblockbuilder.command.argument.disable": "deaktivieren",
   "skyblockbuilder.command.argument.disabled": "deaktiviert",
 
-  "skyblockbuilder.command.generated": "%s an %s generiert",
+  "skyblockbuilder.command.generated.success": "%s an %s generiert",
   "skyblockbuilder.command.generated.fail": "Diese Vorlage existiert nicht.",
 
   "skyblockbuilder.error.no_skyblock": "Dieser Befehl kann nur in SkyBlock Welten verwendet werden.",
@@ -86,7 +86,6 @@
   "skyblockbuilder.command.info.invited_to_team1": " ein, um dem Team beizutreten.",
   "skyblockbuilder.command.info.toggle_visit": "Besuche anderer Spieler sind nun %s.",
   "skyblockbuilder.command.info.toggle_request": "Beitrittsanfragen anderer Spieler sind nun %s.",
-  "skyblockbuilder.command.info.click_to_copy": "Klicke zum Kopieren",
   "skyblockbuilder.command.info.show_team_spawns": "Die Spawnpunkte für %s:",
 
   "skyblockbuilder.command.success.reset_island": "Insel-Vorlage erfolgreich gesetzt zu %s",
@@ -140,13 +139,13 @@
   "skyblockbuilder.item.structure_saver.nbt_to_snbt.desc": "Die generierte Datei wird eine .snbt-Datei sein, was bedeutet, dass sie in einem Standard-Editor bearbeitet werden kann",
   "skyblockbuilder.item.structure_saver.save_to_config.desc": "Die Vorlage (einschließlich der Spawnpunkte) wird automatisch zur templates.json5-Konfiguration hinzugefügt",
   "skyblockbuilder.item.structure_saver.nether_validation.desc": "Überprüft, ob ein Netherportal Block vorhanden ist",
+  "skyblockbuilder.item.structure_saver.position_set.desc": "Position %s gesetzt an x %s, y %s, z %s",
   "skyblockbuilder.screen.button.save": "Sichern",
   "skyblockbuilder.screen.button.delete": "Löschen",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Öffne Ordner",
   "skyblockbuilder.screen.widget.structure_name": "Strukturname",
   "skyblockbuilder.screen.open_folder.error": "Ordner konnte nicht geöffnet werden: %s",
   "skyblockbuilder.schematic.saved": "Schema gespeichert in %s",
-  "skyblockbuilder.structure_saver.pos": "Position %s gesetzt an x %s, y %s, z %s",
 
   "skyblockbuilder.compat.disabled_management": "Diese und andere Teamverwaltungsfunktionen sind aktuell durch %s deaktiviert.",
 

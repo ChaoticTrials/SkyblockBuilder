@@ -1,8 +1,8 @@
 {
   "block.skyblockbuilder.spawn_block": "Bloque de Aparición",
   "item.skyblockbuilder.structure_saver": "Guarda Estructuras",
-  "screen.skyblockbuilder.structure_saver": "Guarda Estructuras",
-  "screen.skyblockbuilder.select_template": "Selecciona una plantilla",
+  "skyblockbuilder.screen.structure_saver.title": "Guarda Estructuras",
+  "skyblockbuilder.screen.select_template.title": "Selecciona una plantilla",
 
   "generator.skyblockbuilder.skyblock": "Skyblock",
 
@@ -79,7 +79,6 @@
   "skyblockbuilder.command.info.invited_to_team1": " para unirte al equipo.",
   "skyblockbuilder.command.info.toggle_visit": "Las visitas de otros jugadores ahora están %s.",
   "skyblockbuilder.command.info.toggle_request": "Solicitudes de admisión por parte de otros jugadores estan ahora %s.",
-  "skyblockbuilder.command.info.click_to_copy": "Clica aquí para copiar",
 
   "skyblockbuilder.command.success.reset_island": "Forma de la isla establecida a %s con éxito",
   "skyblockbuilder.command.success.export_spawns": "Puntos de reaparación exportados a %s con éxito",
@@ -128,13 +127,13 @@
   "skyblockbuilder.item.structure_saver.ignore_air.desc": "Cada bloque de aire en el área seleccionada se ignorará y no se guardará en la plantilla",
   "skyblockbuilder.item.structure_saver.nbt_to_snbt.desc": "El archivo generado será un archivo .snbt, lo que significa que se puede editar en un editor estándar",
   "skyblockbuilder.item.structure_saver.save_to_config.desc": "La plantilla (incluidos los puntos de generación) se agregará automáticamente a la configuración templates.json5",
+  "skyblockbuilder.item.structure_saver.position_set.desc": "Posición %s establecida en x %s, y %s, z %s",
   "skyblockbuilder.screen.button.save": "Guardar",
   "skyblockbuilder.screen.button.delete": "Eliminar",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Abrir Carpeta",
   "skyblockbuilder.screen.widget.structure_name": "Nombre de la Estructura",
   "skyblockbuilder.screen.open_folder.error": "No se pudo abrir la carpeta: %s",
   "skyblockbuilder.schematic.saved": "Diagrama guardado en %s",
-  "skyblockbuilder.structure_saver.pos": "Posición %s establecida en x %s, y %s, z %s",
 
   "skyblockbuilder.compat.disabled_management": "Esto y todo otra administración del equipo fue desactivada por %s.",
 

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.ClientUtil;
 import de.melanx.skyblockbuilder.client.SizeableCheckbox;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -25,14 +26,14 @@ import java.awt.Color;
 public class StructureSaverScreen extends BaseScreen {
 
     private static final ResourceLocation SCREEN_LOCATION = ResourceLocation.fromNamespaceAndPath(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
-    private static final Component SAVE_TO_CONFIG = Component.translatable("skyblockbuilder.item.structure_saver.save_to_config.tooltip");
-    private static final Component IGNORE_AIR = Component.translatable("skyblockbuilder.item.structure_saver.ignore_air.tooltip");
-    private static final Component SNBT = Component.translatable("skyblockbuilder.item.structure_saver.nbt_to_snbt.tooltip");
-    private static final Component NETHER_VALIDATION = Component.translatable("skyblockbuilder.item.structure_saver.nether_validation.tooltip");
-    private static final Component SAVE_TO_CONFIG_DESC = Component.translatable("skyblockbuilder.item.structure_saver.save_to_config.desc");
-    private static final Component IGNORE_AIR_DESC = Component.translatable("skyblockbuilder.item.structure_saver.ignore_air.desc");
-    private static final Component SNBT_DESC = Component.translatable("skyblockbuilder.item.structure_saver.nbt_to_snbt.desc");
-    private static final Component NETHER_VALIDATION_DESC = Component.translatable("skyblockbuilder.item.structure_saver.nether_validation.desc");
+    private static final Component SAVE_TO_CONFIG = SkyComponents.ITEM_STRUCTURE_SAVER_SAVE_TO_CONFIG_TOOLTIP;
+    private static final Component IGNORE_AIR = SkyComponents.ITEM_STRUCTURE_SAVER_IGNORE_AIR_TOOLTIP;
+    private static final Component SNBT = SkyComponents.ITEM_STRUCTURE_SAVER_NBT_TO_SNBT_TOOLTIP;
+    private static final Component NETHER_VALIDATION = SkyComponents.ITEM_STRUCTURE_SAVER_NETHER_VALIDATION_TOOLTIP;
+    private static final Component SAVE_TO_CONFIG_DESC = SkyComponents.ITEM_STRUCTURE_SAVER_SAVE_TO_CONFIG_DESC;
+    private static final Component IGNORE_AIR_DESC = SkyComponents.ITEM_STRUCTURE_SAVER_IGNORE_AIR_DESC;
+    private static final Component SNBT_DESC = SkyComponents.ITEM_STRUCTURE_SAVER_NBT_TO_SNBT_DESC;
+    private static final Component NETHER_VALIDATION_DESC = SkyComponents.ITEM_STRUCTURE_SAVER_NETHER_VALIDATION_DESC;
 
     private final ItemStack stack;
     private EditBox name;
@@ -41,26 +42,26 @@ public class StructureSaverScreen extends BaseScreen {
     private Checkbox netherValidation;
     private Checkbox saveToConfig;
 
-    public StructureSaverScreen(ItemStack stack, Component title) {
-        super(174, 142, title);
+    public StructureSaverScreen(ItemStack stack) {
+        super(174, 142, SkyComponents.SCREEN_STRUCTURE_SAVER);
         this.stack = stack;
     }
 
     @Override
     protected void init() {
         super.init();
-        this.name = new EditBox(this.font, this.x(11), this.y(25), 125, 17, Component.translatable("skyblockbuilder.screen.widget.structure_name"));
+        this.name = new EditBox(this.font, this.x(11), this.y(25), 125, 17, SkyComponents.SCREEN_WIDGET_STRUCTURE_NAME);
         this.name.setMaxLength(Short.MAX_VALUE);
         this.name.setFocused(true);
         this.name.setValue(this.name.getValue());
-        this.addRenderableWidget(Button.builder(Component.translatable("skyblockbuilder.screen.button.save"), button -> {
+        this.addRenderableWidget(Button.builder(SkyComponents.SCREEN_BUTTON_SAVE, button -> {
                     SkyblockBuilder.getNetwork().saveStructure(this.stack, this.name.getValue().isEmpty() ? "template" : this.name.getValue(), this.saveToConfig.selected(), this.ignoreAir.selected(), this.nbtToSnbt.selected(), this.netherValidation.selected());
                     this.onClose();
                 })
                 .pos(this.x(10), this.y(55))
                 .size(60, 20)
                 .build());
-        this.addRenderableWidget(Button.builder(Component.translatable("skyblockbuilder.screen.button.delete"), button -> {
+        this.addRenderableWidget(Button.builder(SkyComponents.SCREEN_BUTTON_DELETE, button -> {
                     SkyblockBuilder.getNetwork().deleteTags(this.stack);
                     this.onClose();
                 })
@@ -72,7 +73,7 @@ public class StructureSaverScreen extends BaseScreen {
                 })
                 .pos(this.x(144), this.y(23))
                 .size(20, 20)
-                .tooltip(Tooltip.create(Component.translatable("skyblockbuilder.screen.button.open_folder.tooltip")))
+                .tooltip(Tooltip.create(SkyComponents.SCREEN_BUTTON_OPEN_FOLDER_TOOLTIP))
                 .build());
         this.saveToConfig = this.addRenderableWidget(new SizeableCheckbox(this.x(10), this.y(80), 10, false));
         this.ignoreAir = this.addRenderableWidget(new SizeableCheckbox(this.x(10), this.y(95), 10, false));
