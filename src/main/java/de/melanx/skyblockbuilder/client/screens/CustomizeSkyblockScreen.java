@@ -82,6 +82,8 @@ public class CustomizeSkyblockScreen extends Screen {
                     .orElse(null));
             if (this.list.getSelected() != null) {
                 paletteIndex.ifPresent(this.list.getSelected()::setPaletteIndex);
+            } else {
+                this.list.setConfiguredStructureRenderer(new TemplateRenderer(this.template.getTemplate(), (float) (this.width - this.list.getRowWidth()) / 2, 0));
             }
         }
     }
@@ -108,6 +110,7 @@ public class CustomizeSkyblockScreen extends Screen {
     class TemplateList extends ObjectSelectionList<TemplateList.TemplateEntry> {
 
         private transient final Map<String, TemplateRenderer> structureCache = new HashMap<>();
+        private TemplateRenderer configuredStructureRenderer = null;
 
         public TemplateList() {
             super(Objects.requireNonNull(CustomizeSkyblockScreen.this.minecraft), CustomizeSkyblockScreen.this.width, CustomizeSkyblockScreen.this.height, 37, 40);
@@ -136,19 +139,26 @@ public class CustomizeSkyblockScreen extends Screen {
 
         @Override
         public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-            if (this.getSelected() != null) {
+            boolean hasSelectedEntry = this.getSelected() != null;
+            if (hasSelectedEntry || this.configuredStructureRenderer != null) {
                 RenderSystem.enableBlend();
                 int size = (this.width - this.getRowWidth()) / 2;
-                boolean useIcon = this.getSelected().icon != null;
+                boolean useIcon = hasSelectedEntry && this.getSelected().icon != null;
 
                 if (useIcon) {
                     //noinspection ConstantConditions
                     int iconSize = this.getSelected().icon.getPixels().getHeight();
                     guiGraphics.blit(this.getSelected().iconLocation, 20, 85, size, size, 0, 0, iconSize, iconSize, iconSize, iconSize);
                 } else {
-                    String templateName = this.getSelected().name.getString();
-                    this.structureCache.computeIfAbsent(templateName, key -> new TemplateRenderer(this.getSelected().template.getTemplate(), size))
-                            .render(guiGraphics, (int) ((this.width - this.getRowWidth()) / 2f - (size / 2f)), this.getRowTop(0) + size / 2);
+                    TemplateRenderer renderer;
+                    if (hasSelectedEntry) {
+                        String templateName = this.getSelected().name.getString();
+                        renderer = this.structureCache.computeIfAbsent(templateName, key -> new TemplateRenderer(this.getSelected().template.getTemplate(), size));
+                    } else {
+                        renderer = this.configuredStructureRenderer;
+                    }
+
+                    renderer.render(guiGraphics, (int) ((this.width - this.getRowWidth()) / 2f - (size / 2f)), this.getRowTop(0) + size / 2);
                 }
                 RenderSystem.disableBlend();
             }
@@ -161,6 +171,10 @@ public class CustomizeSkyblockScreen extends Screen {
 
         protected void renderEntries(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             super.renderListItems(guiGraphics, mouseX, mouseY, partialTick);
+        }
+
+        public void setConfiguredStructureRenderer(@Nullable TemplateRenderer templateRenderer) {
+            this.configuredStructureRenderer = templateRenderer;
         }
 
         class TemplateEntry extends ObjectSelectionList.Entry<TemplateEntry> {
