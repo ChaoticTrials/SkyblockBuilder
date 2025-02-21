@@ -16,16 +16,20 @@ public record SingleSpreadEntry(String file, BlockPos minOffset, BlockPos maxOff
     public static final Codec<SingleSpreadEntry> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     Codec.STRING.fieldOf("file").forGetter(SingleSpreadEntry::file),
-                    Codec.either(BlockPos.CODEC, MinMax.CODEC).fieldOf("offset").xmap(
+                    Codec.either(BlockPos.CODEC, MinMax.CODEC).optionalFieldOf("offset", Either.left(BlockPos.ZERO)).xmap(
                             either -> either.map(
                                     blockPos -> new MinMax(blockPos, blockPos),
                                     minMax -> minMax
                             ), minMax -> minMax.min.equals(minMax.max) ? Either.left(minMax.min) : Either.right(minMax)
-                    ).fieldOf("offset").forGetter(SingleSpreadEntry::offset),
+                    ).forGetter(SingleSpreadEntry::offset),
                     Origin.CODEC.optionalFieldOf("origin", Origin.CENTER).forGetter(SingleSpreadEntry::origin)
             ).apply(instance, SingleSpreadEntry::new));
 
     public static final SingleSpreadEntry DEFAULT = new SingleSpreadEntry("default.nbt", BlockPos.ZERO, BlockPos.ZERO, SpreadInfo.Origin.ZERO);
+
+    public SingleSpreadEntry copyWithOffset(BlockPos offset) {
+        return new SingleSpreadEntry(this.file, offset, offset, this.origin);
+    }
 
     private MinMax offset() {
         return new MinMax(this.minOffset, this.maxOffset);

@@ -34,7 +34,7 @@ public class TemplatesConfig {
     public static List<TemplateInfo> templateList = List.of(new TemplateInfo("default", "default.nbt", new SpawnsProvider.Reference("default"), BlockPos.ZERO));
 
     @Config({"A list of possible spawn points.",
-            "You may also directly use these in the template config, or use a reference created here.",})
+            "You may also directly use these in the template config, or use a reference created here."})
     public static Map<String, TemplateSpawns> spawnPointReferences = Map.of(
             "default", new TemplateSpawns(Set.of(new BlockPos(6, 3, 5)), Set.of(), Set.of(), Set.of())
     );
@@ -54,7 +54,7 @@ public class TemplatesConfig {
             "        \"min\": [ -6, 3, 5 ],",
             "        \"max\": [ 4, 10, 3 ]",
             "    },",
-            "    \"origin\": \"center\"",
+            "    \"origin\": \"CENTER\"",
             "}"})
     public static Map<String, TemplateSpreads> spreadReferences = Map.of("default", TemplateSpreads.EMPTY);
 

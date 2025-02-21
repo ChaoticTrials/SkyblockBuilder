@@ -81,7 +81,7 @@ public class LocateCommand {
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
         Team team = data.getTeam(teamName);
-        if (team == null || team.isSpawn()) {
+        if (team == null) {
             context.getSource().sendFailure(SkyComponents.ERROR_TEAM_NOT_EXIST);
         }
 
