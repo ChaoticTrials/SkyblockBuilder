@@ -10,6 +10,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import org.apache.commons.io.IOUtils;
 
 import javax.annotation.Nonnull;
@@ -21,6 +23,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.Set;
 
 public class TemplateUtil {
+
+    public static final StructurePlaceSettings STRUCTURE_PLACE_SETTINGS = new StructurePlaceSettings().setKnownShape(true).setLiquidSettings(LiquidSettings.IGNORE_WATERLOGGING);
 
     public static JsonObject possibleSpawnsAsJson(@Nonnull Team team) {
         return TemplateUtil.spawnsAsJson(team.getIsland(), team.getPossibleSpawns());

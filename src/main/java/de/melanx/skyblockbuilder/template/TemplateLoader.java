@@ -7,8 +7,6 @@ import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
 import de.melanx.skyblockbuilder.config.values.providers.SurroundingBlocksProvider;
 import de.melanx.skyblockbuilder.util.SkyPaths;
-import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nullable;
@@ -17,7 +15,6 @@ import java.util.*;
 
 public class TemplateLoader {
 
-    public static final StructurePlaceSettings STRUCTURE_PLACE_SETTINGS = new StructurePlaceSettings().setKnownShape(true).setLiquidSettings(LiquidSettings.IGNORE_WATERLOGGING);
     private static final List<String> TEMPLATE_NAMES = new ArrayList<>();
     private static final Map<String, ConfiguredTemplate> TEMPLATE_MAP = new HashMap<>();
     private static ConfiguredTemplate TEMPLATE;

@@ -1,14 +1,10 @@
 {
   "required": true,
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "refmap": "skyblockbuilder.refmap.json",
   "package": "de.melanx.skyblockbuilder.mixin",
   "minVersion": "0.8",
-  "client": [
-    "LivingEntityRendererMixin"
-  ],
-  "server": [],
-  "mixins": [
-    "PackRepositoryMixin"
-  ]
+  "client": [ "LivingEntityRendererMixin" ],
+  "server": [ ],
+  "mixins": [ "NetherPortalBlockMixin", "PackRepositoryMixin" ]
 }

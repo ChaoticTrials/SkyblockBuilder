@@ -8,11 +8,7 @@ import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
-import de.melanx.skyblockbuilder.template.TemplateLoader;
-import de.melanx.skyblockbuilder.util.RandomUtility;
-import de.melanx.skyblockbuilder.util.SkyComponents;
-import de.melanx.skyblockbuilder.util.Spiral;
-import de.melanx.skyblockbuilder.util.WorldUtil;
+import de.melanx.skyblockbuilder.util.*;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -286,7 +282,7 @@ public class SkyblockSavedData extends SavedData {
         team.setPossibleSpawns(possibleSpawns);
 
         BlockPos center = team.getIsland().getCenter();
-        template.placeInWorld(this.level, team, TemplateLoader.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
+        template.placeInWorld(this.level, team, TemplateUtil.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
         SkyblockSavedData.surround(this.level, center, template);
 
         this.skyblocks.put(team.getId(), team);

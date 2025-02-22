@@ -50,7 +50,7 @@ public class NetherPortalTemplate {
             throw new RuntimeException("There is no nether portal in this template");
         }
 
-        return netherPortals.stream().sorted(Comparator.comparing(blockInfo -> blockInfo.pos().getY())).toList().get(0).pos();
+        return netherPortals.stream().sorted(Comparator.comparing(blockInfo -> blockInfo.pos().getY())).toList().getFirst().pos();
     }
 
     public String getFilePath() {
