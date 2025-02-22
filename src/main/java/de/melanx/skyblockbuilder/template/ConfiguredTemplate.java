@@ -209,29 +209,8 @@ public class ConfiguredTemplate {
         });
         nbt.put("SurroundingBlocks", surroundingBlocks);
 
-//        ListTag spreads = new ListTag();
         DataResult<Tag> encode = TemplateSpreads.CODEC.encodeStart(NbtOps.INSTANCE, this.templateSpreads);
-        encode.resultOrPartial(SkyblockBuilder.getLogger()::error).ifPresent(lol -> nbt.put("Spreads", lol));
-//        this.templateSpreads.forEach(spread -> {
-//            CompoundTag minPos = new CompoundTag();
-//            minPos.putInt("posX", spread.minOffset.getX());
-//            minPos.putInt("posY", spread.minOffset.getY());
-//            minPos.putInt("posZ", spread.minOffset.getZ());
-//
-//            CompoundTag maxPos = new CompoundTag();
-//            maxPos.putInt("posX", spread.maxOffset.getX());
-//            maxPos.putInt("posY", spread.maxOffset.getY());
-//            maxPos.putInt("posZ", spread.maxOffset.getZ());
-//
-//            CompoundTag tag = new CompoundTag();
-//            tag.putString("File", spread.fileName);
-//            tag.putString("Origin", spread.origin.name());
-//            tag.put("minOffset", minPos);
-//            tag.put("maxOffset", maxPos);
-//
-//            spreads.add(tag);
-//        });
-//        nbt.put("Spreads", spreads);
+        encode.resultOrPartial(SkyblockBuilder.getLogger()::error).ifPresent(tag -> nbt.put("Spreads", tag));
 
         return nbt;
     }
@@ -266,21 +245,6 @@ public class ConfiguredTemplate {
             blocks.add(new TemplateSurroundingBlocks.WeightedBlock(block, weight));
         }
         this.surroundingBlocks = WeightedRandomList.create(blocks);
-
-//        ListTag spreads = nbt.getList("Spreads", Tag.TAG_COMPOUND);
-//        List<SpreadConfig> spreadConfigs = new ArrayList<>();
-//        for (Tag spread : spreads) {
-//            String file = ((CompoundTag) spread).getString("File");
-//            SpreadInfo.Origin origin = SpreadInfo.Origin.valueOf(((CompoundTag) spread).getString("Origin"));
-//
-//            CompoundTag minPos = ((CompoundTag) spread).getCompound("minOffset");
-//            BlockPos minOffset = WorldUtil.blockPosFromTag(minPos);
-//
-//            CompoundTag maxPos = ((CompoundTag) spread).getCompound("maxOffset");
-//            BlockPos maxOffset = WorldUtil.blockPosFromTag(maxPos);
-//
-//            spreadConfigs.add(new SpreadConfig(file, minOffset, maxOffset, origin));
-//        }
         this.templateSpreads = TemplateSpreads.CODEC.decode(NbtOps.INSTANCE, nbt.get("Spreads")).resultOrPartial().orElseGet(() -> Pair.of(TemplateSpreads.EMPTY, new CompoundTag())).getFirst();
     }
 

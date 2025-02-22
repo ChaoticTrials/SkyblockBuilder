@@ -1,8 +1,7 @@
-# This workflow was generated with the help of OpenAI's GPT.
-
 name: Check Localization Files
 on:
   pull_request_target:
+    types: [ opened, synchronize, reopened ]
     paths:
       - 'src/main/resources/assets/**/lang/*.json'
 
