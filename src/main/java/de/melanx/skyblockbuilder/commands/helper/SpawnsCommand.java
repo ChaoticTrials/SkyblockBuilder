@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -15,7 +16,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import org.moddingx.libx.command.EnumArgumentIgnoreCase;
 
 import java.util.Set;
 
@@ -24,28 +24,30 @@ public class SpawnsCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Highlights all spawns for a few seconds
         return Commands.literal("spawns")
-                .executes(context -> SpawnsCommand.showSpawns(context.getSource(), Mode.NORMAL))
-                // use debug for setting up a new spawn points as pack author
-                .then(Commands.argument("mode", EnumArgumentIgnoreCase.enumArgument(Mode.class)).requires(source -> source.hasPermission(2))
-                        .executes(context -> SpawnsCommand.showSpawns(context.getSource(), context.getArgument("mode", Mode.class))));
+                .executes(context -> SpawnsCommand.showSpawns(context.getSource()));
     }
 
     @SuppressWarnings("SameReturnValue")
-    private static int showSpawns(CommandSourceStack source, Mode mode) throws CommandSyntaxException {
+    private static int showSpawns(CommandSourceStack source) throws CommandSyntaxException {
         WorldUtil.checkSkyblock(source);
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
-        Team team = data.getSpawn();
+        Team team = null;
         if (source.getEntity() instanceof ServerPlayer player) {
             team = data.getTeamFromPlayer(player);
-            if (team == null) {
-                team = data.getSpawn();
-            }
         }
 
-        boolean showDefaultSpawns = team.isSpawn() && mode == Mode.NORMAL;
-        Set<TemplatesConfig.Spawn> spawns = showDefaultSpawns ? team.getDefaultPossibleSpawns() : team.getPossibleSpawns();
+        if (team == null) {
+            team = data.getSpawn();
+        }
+
+        if (team.isSpawn() && !PermissionManager.INSTANCE.mayExecuteOpCommand(source)) {
+            source.sendFailure(SkyComponents.ERROR_USER_HAS_NO_TEAM);
+            return 0;
+        }
+
+        Set<TemplatesConfig.Spawn> spawns = team.getPossibleSpawns();
         if (!spawns.isEmpty()) {
             source.sendSystemMessage(SkyComponents.INFO_SHOW_TEAM_SPAWNS.apply(team.getName()));
         }
@@ -61,10 +63,5 @@ public class SpawnsCommand {
         }
 
         return 1;
-    }
-
-    public enum Mode {
-        NORMAL,
-        DEBUG
     }
 }
