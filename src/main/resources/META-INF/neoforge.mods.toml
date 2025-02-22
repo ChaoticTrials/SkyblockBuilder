@@ -16,21 +16,24 @@ Let you create a custom skyblock island via config
 
 [[dependencies.${ mod.modid }]]
 modId = "neoforge"
-mandatory = true
+type = "required"
 versionRange = "[${mod.neoforge},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${ mod.modid }]]
 modId = "minecraft"
-mandatory = true
+type = "required"
 versionRange = "[${mod.minecraft},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${ mod.modid }]]
 modId = "libx"
-mandatory = true
+type = "required"
 versionRange = "[1.21.1-6.0.0,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[mixins]]
+config = "${mod.modid}.mixins.json"
