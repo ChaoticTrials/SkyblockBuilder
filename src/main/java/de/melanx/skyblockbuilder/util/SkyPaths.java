@@ -38,18 +38,21 @@ public class SkyPaths {
     public static final Path CONVERT_OUTPUT = SKYBLOCK_UTILS.resolve("convert_output");
     public static final Path DUMPS = SKYBLOCK_UTILS.resolve("dumps");
     public static final Path TEMPLATES_DIR = MOD_CONFIG.resolve("templates");
+    public static final Path ISLANDS_DIR = TEMPLATES_DIR.resolve("islands");
     public static final Path SPREADS_DIR = TEMPLATES_DIR.resolve("spreads");
+    public static final Path PORTALS_DIR = TEMPLATES_DIR.resolve("portals");
     public static final Path ICONS_DIR = TEMPLATES_DIR.resolve("icons");
     public static final Path DATA_DIR = MOD_CONFIG.resolve("data");
 
     // files
     public static final Path ITEMS_FILE = MOD_CONFIG.resolve("starter_inventory.json5");
-    public static final Path SCHEMATIC_FILE = TEMPLATES_DIR.resolve("default.nbt");
+    public static final Path SCHEMATIC_FILE = ISLANDS_DIR.resolve("default.nbt");
     private static final Path FEATURES_FILE = DATA_DIR.resolve("features.txt");
     private static final Path STRUCTURES_FILE = DATA_DIR.resolve("structures.txt");
     private static final Path BIOMES_FILE = DATA_DIR.resolve("biomes.txt");
     private static final Path CARVERS_FILE = DATA_DIR.resolve("carvers.txt");
     private static final Path DIMENSIONS_FILE = DATA_DIR.resolve("dimensions.txt");
+    private static final Path PORTALS_INFORMATION_FILE = PORTALS_DIR.resolve("information.txt");
 
     public static final Predicate<File> NBT_OR_SNBT = file -> file.isFile() && (file.getName().endsWith(".nbt") || file.getName().endsWith(".snbt"));
 
@@ -62,7 +65,9 @@ public class SkyPaths {
             Files.createDirectories(CONVERT_OUTPUT);
             Files.createDirectories(DUMPS);
             Files.createDirectories(TEMPLATES_DIR);
+            Files.createDirectories(ISLANDS_DIR);
             Files.createDirectories(SPREADS_DIR);
+            Files.createDirectories(PORTALS_DIR);
             Files.createDirectories(ICONS_DIR);
             Files.createDirectories(DATA_DIR);
         } catch (IOException e) {
@@ -75,6 +80,7 @@ public class SkyPaths {
             createDirectories();
 
             copyTemplateFile();
+            writePortalsInformation();
             generateStarterItemsFile();
             if (server != null) {
                 generateFeatureInformation(server);
@@ -84,7 +90,6 @@ public class SkyPaths {
                 generateDimensionInformation(server);
                 StartingInventory.loadStarterItems(server.registryAccess());
             }
-
         } catch (IOException e) {
             SkyblockBuilder.getLogger().error("Unable to generate default files", e);
         }
@@ -92,12 +97,24 @@ public class SkyPaths {
 
     public static void copyTemplateFile() throws IOException {
         //noinspection ConstantConditions
-        if (Arrays.stream(TEMPLATES_DIR.toFile().listFiles()).anyMatch(NBT_OR_SNBT)) {
+        if (Arrays.stream(ISLANDS_DIR.toFile().listFiles()).anyMatch(NBT_OR_SNBT)) {
             return;
         }
 
         //noinspection ConstantConditions
         Files.copy(SkyblockBuilder.class.getResourceAsStream("/skyblockbuilder-template.nbt"), SCHEMATIC_FILE);
+    }
+
+    public static void writePortalsInformation() throws IOException {
+        String fileContent = "This directory is only for providing custom portals. At the moment, you only may set a custom portal when entering the nether.\n" +
+                "To do so, call your file \"to_nether.nbt\" or \"to_nether.snbt\".\n" +
+                "It needs to contain at least one nether portal block. If that is destroyed, the structure would re-generate when re-entering the nether.";
+
+        if (Files.exists(PORTALS_INFORMATION_FILE) && Files.readString(PORTALS_INFORMATION_FILE).equals(fileContent)) {
+            return;
+        }
+
+        Files.writeString(PORTALS_INFORMATION_FILE, fileContent);
     }
 
     private static void generateStarterItemsFile() throws IOException {
@@ -111,7 +128,7 @@ public class SkyPaths {
 
         BufferedWriter w = Files.newBufferedWriter(ITEMS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
         w.write("// See here for more information:\n");
-        w.write("// https://wiki.chaotictrials.de/docs/1.20.x/wiki/mods/skyblock-builder/packdev/config/inventory#starting-inventory\n"); // todo correct link
+        w.write("// https://wiki.chaotictrials.de/swl/skyblock-builder\n"); // todo correct link
         w.write("// If this page isn't available, go to the project page (where you downloaded the file), and click on the wiki\n");
         w.write(SkyblockBuilder.PRETTY_GSON.toJson(object));
         w.close();

@@ -1,7 +1,6 @@
 package de.melanx.skyblockbuilder.template;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,18 +14,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class NetherPortalTemplate {
-    // todo config for custom portal overworld -> nether || nether -> overworld
-    private final String filePath;
     private final StructureTemplate structure = new StructureTemplate();
     private final BlockPos portalOffset;
 
-    public NetherPortalTemplate(String filePath) {
-        File file = SkyPaths.TEMPLATES_DIR.resolve(filePath).toFile();
-        if (!SkyPaths.NBT_OR_SNBT.test(file)) {
-            throw new IllegalStateException("The file " + filePath + " is not a valid nbt or snbt file");
-        }
-
-        this.filePath = filePath;
+    public NetherPortalTemplate(File file) {
+        // todo config for custom portal overworld -> nether || nether -> overworld
         try {
             this.structure.load(BuiltInRegistries.BLOCK.asLookup(), TemplateUtil.readTemplate(file.toPath()));
         } catch (IOException | CommandSyntaxException e) {
@@ -51,10 +43,6 @@ public class NetherPortalTemplate {
         }
 
         return netherPortals.stream().sorted(Comparator.comparing(blockInfo -> blockInfo.pos().getY())).toList().getFirst().pos();
-    }
-
-    public String getFilePath() {
-        return this.filePath;
     }
 
     public StructureTemplate getStructure() {

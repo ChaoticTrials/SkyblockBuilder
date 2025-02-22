@@ -232,7 +232,7 @@ public class ItemStructureSaver extends Item {
                 config.add("spawnPointReferences", spawns);
 
                 // add template
-                Path templatePath = RandomUtility.getFilePath(SkyPaths.TEMPLATES_DIR, name, asSnbt ? "snbt" : "nbt");
+                Path templatePath = RandomUtility.getFilePath(SkyPaths.ISLANDS_DIR, name, asSnbt ? "snbt" : "nbt");
                 if (ItemStructureSaver.trySaveTemplate(asSnbt, template, templatePath)) {
                     return null;
                 }

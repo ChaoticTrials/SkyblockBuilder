@@ -57,7 +57,7 @@ public class ConfiguredTemplate {
         StructureTemplate template = new StructureTemplate();
         CompoundTag nbt;
         try {
-            Path file = SkyPaths.TEMPLATES_DIR.resolve(info.file());
+            Path file = SkyPaths.ISLANDS_DIR.resolve(info.file());
             nbt = TemplateUtil.readTemplate(file);
             template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
         } catch (IOException | CommandSyntaxException e) {

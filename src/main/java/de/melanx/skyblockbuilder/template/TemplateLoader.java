@@ -1,7 +1,6 @@
 package de.melanx.skyblockbuilder.template;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
@@ -10,6 +9,7 @@ import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -46,7 +46,7 @@ public class TemplateLoader {
                     throw new IllegalArgumentException("Spreads configuration \"" + info.spreads() + "\" is not defined: " + info.name());
                 }
 
-                if (!SkyPaths.TEMPLATES_DIR.resolve(info.file()).toFile().exists()) {
+                if (!SkyPaths.ISLANDS_DIR.resolve(info.file()).toFile().exists()) {
                     throw new IllegalArgumentException("Template file \"" + info.file() + "\" does not exist: " + info.name());
                 }
 
@@ -71,7 +71,9 @@ public class TemplateLoader {
                 TEMPLATE = TemplateLoader.getConfiguredTemplate(TEMPLATE.getName(), false);
             }
 
-            DimensionsConfig.Nether.netherPortalStructure.ifPresent(filePath -> NETHER_PORTAL = new NetherPortalTemplate(filePath));
+            //noinspection DataFlowIssue
+            Optional<File> netherPortalFile = Arrays.stream(SkyPaths.PORTALS_DIR.toFile().listFiles()).filter(SkyPaths.NBT_OR_SNBT).filter(file -> file.getName().startsWith("to_nether")).findFirst();
+            netherPortalFile.ifPresent(file -> NETHER_PORTAL = new NetherPortalTemplate(file));
         } catch (IOException e) {
             throw new RuntimeException("Cannot load templates.", e);
         }

@@ -88,7 +88,7 @@ public class DumpUtil {
 
             JsonArray filesArray = new JsonArray();
             if (includeConfigs) {
-                DumpUtil.addDirToZip(filesArray, SkyPaths.MOD_CONFIG, zipStream, Paths.get("config"));
+                DumpUtil.addDirToZip(filesArray, SkyPaths.MOD_CONFIG, zipStream, Paths.get("config"), false);
 
                 Map<ResourceLocation, String> diffs = DumpUtil.configDiffs();
                 for (Map.Entry<ResourceLocation, String> entry : diffs.entrySet()) {
@@ -101,7 +101,7 @@ public class DumpUtil {
             }
 
             if (includeTemplates) {
-                DumpUtil.addDirToZip(filesArray, SkyPaths.TEMPLATES_DIR, zipStream);
+                DumpUtil.addDirToZip(filesArray, SkyPaths.TEMPLATES_DIR, zipStream, true);
             }
 
             if (server != null) {
@@ -150,16 +150,18 @@ public class DumpUtil {
         return file;
     }
 
-    private static void addDirToZip(JsonArray fileCollector, Path dirPath, ZipOutputStream zipStream) throws IOException {
-        DumpUtil.addDirToZip(fileCollector, dirPath, zipStream, dirPath.getFileName());
+    private static void addDirToZip(JsonArray fileCollector, Path dirPath, ZipOutputStream zipStream, boolean recursive) throws IOException {
+        DumpUtil.addDirToZip(fileCollector, dirPath, zipStream, dirPath.getFileName(), recursive);
     }
 
-    private static void addDirToZip(JsonArray fileCollector, Path dirPath, ZipOutputStream zipStream, Path parentFolder) throws IOException {
+    private static void addDirToZip(JsonArray fileCollector, Path dirPath, ZipOutputStream zipStream, Path parentFolder, boolean recursive) throws IOException {
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dirPath)) {
             for (Path path : directoryStream) {
                 if (!Files.isDirectory(path)) {
                     Path zipEntryName = parentFolder.resolve(path.getFileName());
                     DumpUtil.addFileToZip(fileCollector, zipStream, path, zipEntryName);
+                } else if (recursive) {
+                    DumpUtil.addDirToZip(fileCollector, path, zipStream, parentFolder.resolve(path.getFileName()), recursive);
                 }
             }
         }
