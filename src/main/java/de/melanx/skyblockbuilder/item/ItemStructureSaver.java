@@ -219,26 +219,21 @@ public class ItemStructureSaver extends Item {
             try {
                 JsonObject config = SkyblockBuilder.PRETTY_GSON.fromJson(Files.readString(configFile), JsonObject.class);
                 // add spawns
-                if (!config.has("spawns")) {
-                    config.add("spawns", new JsonObject());
+                if (!config.has("spawnPointReferences")) {
+                    config.add("spawnPointReferences", new JsonObject());
                 }
 
-                JsonObject spawns = config.getAsJsonObject("spawns");
+                JsonObject spawns = config.getAsJsonObject("spawnPointReferences");
                 Calendar calendar = Calendar.getInstance();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
                 String formattedDate = dateFormat.format(calendar.getTime());
                 String spawnsName = "exported_at_" + formattedDate;
                 spawns.add(spawnsName, json);
-                config.add("spawns", spawns);
+                config.add("spawnPointReferences", spawns);
 
                 // add template
                 Path templatePath = RandomUtility.getFilePath(SkyPaths.TEMPLATES_DIR, name, asSnbt ? "snbt" : "nbt");
-                CompoundTag tag = template.save(new CompoundTag());
-                try {
-                    TemplateUtil.writeTemplate(templatePath, tag, asSnbt);
-                    SkyblockBuilder.getLogger().info("Saved template at {}", templatePath.toAbsolutePath());
-                } catch (IllegalStateException e) {
-                    e.printStackTrace();
+                if (ItemStructureSaver.trySaveTemplate(asSnbt, template, templatePath)) {
                     return null;
                 }
 
@@ -249,15 +244,15 @@ public class ItemStructureSaver extends Item {
                 JsonObject templateObject = new JsonObject();
                 templateObject.addProperty("name", templateName);
                 templateObject.addProperty("file", fileName);
-                templateObject.addProperty("spawns", spawnsName);
+                templateObject.add("spawns", json);
 
-                if (!config.has("templates")) {
-                    config.add("templates", new JsonObject());
+                if (!config.has("templateList")) {
+                    config.add("templateList", new JsonArray());
                 }
 
-                JsonArray templates = config.getAsJsonArray("templates");
-                templates.add(templateObject);
-                config.add("templates", templates);
+                JsonArray templateList = config.getAsJsonArray("templateList");
+                templateList.add(templateObject);
+                config.add("templateList", templateList);
 
                 // write and reload config
                 Files.writeString(configFile, SkyblockBuilder.PRETTY_GSON.toJson(config));
@@ -279,35 +274,41 @@ public class ItemStructureSaver extends Item {
                 Files.writeString(spawns, SkyblockBuilder.PRETTY_GSON.toJson(json));
                 SkyblockBuilder.getLogger().info("Saved spawns at {}", spawns.toAbsolutePath());
             } catch (IOException e) {
-                e.printStackTrace();
+                SkyblockBuilder.getLogger().error("Failed saving {}", spawns, e);
                 return null;
             }
         }
         Path path = RandomUtility.getFilePath(SkyPaths.MOD_EXPORTS, name, asSnbt ? "snbt" : "nbt");
-        CompoundTag tag = template.save(new CompoundTag());
-        try {
-            TemplateUtil.writeTemplate(path, tag, asSnbt);
-            SkyblockBuilder.getLogger().info("Saved template at {}", path.toAbsolutePath());
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
+        if (ItemStructureSaver.trySaveTemplate(asSnbt, template, path)) {
             return null;
         }
 
         return path.getFileName().toString();
     }
 
-    public static ItemStack restorePositions(ItemStack stack) {
+    private static boolean trySaveTemplate(boolean asSnbt, StructureTemplate template, Path path) {
+        CompoundTag tag = template.save(new CompoundTag());
+        try {
+            TemplateUtil.writeTemplate(path, tag, asSnbt);
+            SkyblockBuilder.getLogger().info("Saved template at {}", path.toAbsolutePath());
+        } catch (IllegalStateException e) {
+            SkyblockBuilder.getLogger().error("Failed saving template", e);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static void restorePositions(ItemStack stack) {
         CompoundTag previousPositions = stack.get(ModDataComponentTypes.previousPositions);
         if (previousPositions == null) {
-            return stack;
+            return;
         }
 
         CompoundTag positions = previousPositions.copy();
         positions.putBoolean("CanSave", true);
         stack.set(ModDataComponentTypes.positions, positions);
         stack.remove(ModDataComponentTypes.previousPositions);
-
-        return stack;
     }
 
     public static ItemStack removeComponents(ItemStack stack) {
