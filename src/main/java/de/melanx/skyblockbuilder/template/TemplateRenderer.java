@@ -8,6 +8,7 @@ import de.melanx.skyblockbuilder.client.FakeLevel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -110,6 +111,7 @@ public class TemplateRenderer {
 
     private void renderElements(GuiGraphics guiGraphics, StructureTemplate template) {
         guiGraphics.pose().pushPose();
+        ItemBlockRenderTypes.setFancy(Minecraft.useFancyGraphics());
         RenderSystem.setShaderColor(1, 1, 1, 1);
         guiGraphics.pose().translate(0, 0, -1);
 
