@@ -1,11 +1,12 @@
 package de.melanx.skyblockbuilder.world.chunkgenerators;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.common.StructuresConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
-import de.melanx.skyblockbuilder.util.WorldUtil;
+import de.melanx.skyblockbuilder.world.flat.FlatLayerConfig;
+import de.melanx.skyblockbuilder.world.flat.FlatLayers;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
@@ -26,7 +27,6 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
@@ -34,39 +34,38 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     // [VanillaCopy] overworld chunk generator codec
-    public static final Codec<SkyblockNoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.create(
+    public static final MapCodec<SkyblockNoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
             (instance) -> instance.group(
                     BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                     NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
                     Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
-                    FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(generator -> generator.layerInfos)
+                    FlatLayers.CODEC.optionalFieldOf("layers", FlatLayers.EMPTY).forGetter(generator -> generator.flatLayers)
             ).apply(instance, instance.stable(SkyblockNoiseBasedChunkGenerator::new)));
 
     public final Holder<NoiseGeneratorSettings> generatorSettings;
     public final ResourceKey<Level> dimension;
     protected final NoiseBasedChunkGenerator parent;
-    protected final List<FlatLayerInfo> layerInfos;
+    protected final FlatLayers flatLayers;
     private final int layerHeight;
 
-    public SkyblockNoiseBasedChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
+    public SkyblockNoiseBasedChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, FlatLayers flatLayers) {
         super(biomeSource, generatorSettings);
         this.generatorSettings = generatorSettings;
         this.parent = new NoiseBasedChunkGenerator(biomeSource, generatorSettings);
         this.dimension = dimension;
-        this.layerInfos = layerInfos;
-        this.layerHeight = WorldUtil.calculateHeightFromLayers(this.layerInfos);
+        this.flatLayers = flatLayers;
+        this.layerHeight = this.flatLayers.totalHeight();
     }
 
     @Nonnull
     @Override
-    protected Codec<? extends ChunkGenerator> codec() {
+    protected MapCodec<? extends ChunkGenerator> codec() {
         return SkyblockNoiseBasedChunkGenerator.CODEC;
     }
 
@@ -77,7 +76,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Override
     public void buildSurface(@Nonnull WorldGenRegion level, @Nonnull StructureManager structureManager, @Nonnull RandomState randomState, @Nonnull ChunkAccess chunk) {
-        if (!this.layerInfos.isEmpty()) {
+        if (!this.flatLayers.isEmpty()) {
             ChunkPos cp = chunk.getPos();
             int xs = cp.getMinBlockX();
             int zs = cp.getMinBlockZ();
@@ -85,11 +84,23 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
             int ze = cp.getMaxBlockZ();
             int y = level.getMinBuildHeight();
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-            for (FlatLayerInfo info : this.layerInfos) {
+            for (FlatLayerConfig info : this.flatLayers.layers()) {
                 BlockState state = info.getBlockState();
+
                 for (int i = 0; i < info.getHeight(); i++) {
                     for (int x = xs; x <= xe; x++) {
                         for (int z = zs; z <= ze; z++) {
+                            if (info.hasExtra()) {
+                                if (!info.checkChance(level.getRandom())) {
+                                    state = info.getBlockState();
+                                } else {
+                                    Optional<FlatLayerConfig.WeightedBlockEntry> maybeBlock = info.getExtraBlocks().getRandom(level.getRandom());
+                                    if (maybeBlock.isPresent()) {
+                                        state = maybeBlock.get().block().defaultBlockState();
+                                    }
+                                }
+                            }
+
                             pos.setX(x);
                             pos.setY(y);
                             pos.setZ(z);
@@ -104,17 +115,17 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Nonnull
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager manager, @Nonnull ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk) {
         return CompletableFuture.completedFuture(chunk);
     }
 
     @Nullable
     @Override
     public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(@Nonnull ServerLevel level, @Nonnull HolderSet<Structure> structureHolderSet, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
-        List<Holder<Structure>> holders = structureHolderSet.stream().filter(holder -> holder.unwrapKey().isPresent() && StructuresConfig.generationStructures.test(holder.unwrapKey().get().location())).toList();
+        List<Holder<Structure>> holders = structureHolderSet.stream().filter(holder -> holder.unwrapKey().isPresent() && StructuresConfig.structuresToGenerate.test(holder.unwrapKey().get().location())).toList();
         HolderSet.Direct<Structure> modifiedStructureHolderSet = HolderSet.direct(holders);
         for (Holder<Structure> holder : modifiedStructureHolderSet) {
-            if (holder.unwrapKey().isPresent() && StructuresConfig.generationStructures.test(holder.unwrapKey().get().location())) {
+            if (holder.unwrapKey().isPresent() && StructuresConfig.structuresToGenerate.test(holder.unwrapKey().get().location())) {
                 return super.findNearestMapStructure(level, modifiedStructureHolderSet, pos, searchRadius, skipKnownStructures);
             }
         }
@@ -133,7 +144,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
     @Override
     public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState random, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving step) {
-        if (this.layerInfos.isEmpty()) {
+        if (this.flatLayers.isEmpty()) {
             return;
         }
 
@@ -214,7 +225,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                 if (structureManager.shouldGenerateStructures()) {
                     for (Structure structure : map.getOrDefault(i, Collections.emptyList())) {
                         ResourceLocation location = level.registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(structure);
-                        if (!StructuresConfig.generationStructures.test(location)) {
+                        if (!StructuresConfig.structuresToGenerate.test(location)) {
                             continue;
                         }
 
@@ -223,16 +234,15 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
                         try {
                             level.setCurrentlyGenerating(currentlyGenerating);
-                            structureManager.startsForStructure(sectionPos, structure).forEach((structureStart) -> {
-                                structureStart.placeInChunk(level, structureManager, this, worldgenRandom, getWritableArea(chunk), chunkPos);
-                            });
+                            structureManager.startsForStructure(sectionPos, structure).forEach(
+                                    structureStart -> structureStart.placeInChunk(level, structureManager, this, worldgenRandom, getWritableArea(chunk), chunkPos));
                         } catch (Exception e) {
                             CrashReport report = CrashReport.forThrowable(e, "Feature placement");
                             report.addCategory("Feature").setDetail("Description", currentlyGenerating::get);
                             throw new ReportedException(report);
                         }
 
-                        ++index;
+                        index++;
                     }
                 }
 
@@ -244,9 +254,8 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                         if (i < holderSets.size()) {
                             HolderSet<PlacedFeature> featureHolderSet = holderSets.get(i);
                             FeatureSorter.StepFeatureData stepFeatureData = stepFeatureDataList.get(i);
-                            featureHolderSet.stream().map(Holder::value).forEach((p_223174_) -> {
-                                mapping.add(stepFeatureData.indexMapping().applyAsInt(p_223174_));
-                            });
+                            featureHolderSet.stream().map(Holder::value).forEach(
+                                    placedFeature -> mapping.add(stepFeatureData.indexMapping().applyAsInt(placedFeature)));
                         }
                     }
 
@@ -260,7 +269,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                         PlacedFeature placedfeature = stepFeatureData.features().get(featureIndex);
                         // The only reason why I needed to copy the code - checking if it should be placed
                         Optional<ResourceKey<ConfiguredFeature<?, ?>>> optionalResourceKey = placedfeature.feature().unwrapKey();
-                        if (optionalResourceKey.isPresent() && !StructuresConfig.generationFeatures.test(optionalResourceKey.get().location())) {
+                        if (optionalResourceKey.isPresent() && !StructuresConfig.featuresToGenerate.test(optionalResourceKey.get().location())) {
                             continue;
                         }
 
@@ -291,7 +300,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         return this.dimension;
     }
 
-    public List<FlatLayerInfo> getLayerInfos() {
-        return this.layerInfos;
+    public FlatLayers getFlatLayers() {
+        return this.flatLayers;
     }
 }

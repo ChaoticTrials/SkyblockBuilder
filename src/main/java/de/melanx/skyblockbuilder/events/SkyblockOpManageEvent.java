@@ -3,8 +3,9 @@ package de.melanx.skyblockbuilder.events;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -13,13 +14,9 @@ import java.util.Set;
 /**
  * This fires whenever something is managed in the op manage command.<br>
  * <br>
- * All children of this event does not have a result. {@link net.minecraftforge.eventbus.api.Event.HasResult}.<br>
- * <br>
- * This event is {@link net.minecraftforge.eventbus.api.Cancelable}.<br>
- * <br>
- * All children of this event are fired on the {@link MinecraftForge#EVENT_BUS}.
+ * All children of this event are fired on the {@link NeoForge#EVENT_BUS}.
  */
-public abstract class SkyblockOpManageEvent extends Event {
+public abstract class SkyblockOpManageEvent extends Event implements ICancellableEvent {
 
     private final CommandSourceStack source;
 
@@ -33,11 +30,6 @@ public abstract class SkyblockOpManageEvent extends Event {
     @Nullable
     public CommandSourceStack getSource() {
         return this.source;
-    }
-
-    @Override
-    public boolean isCancelable() {
-        return true;
     }
 
     /**

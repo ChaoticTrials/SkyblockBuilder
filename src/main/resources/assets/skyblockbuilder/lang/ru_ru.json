@@ -1,8 +1,8 @@
 {
   "block.skyblockbuilder.spawn_block": "Блок спавна",
   "item.skyblockbuilder.structure_saver": "Менеджер структур",
-  "screen.skyblockbuilder.structure_saver": "Менеджер структур",
-  "screen.skyblockbuilder.select_template": "Пожалуйста выбери шаблон",
+  "skyblockbuilder.screen.structure_saver.title": "Менеджер структур",
+  "skyblockbuilder.screen.select_template.title": "Пожалуйста выбери шаблон",
 
   "generator.skyblockbuilder.skyblock": "Скайблок",
 
@@ -16,7 +16,6 @@
   "skyblockbuilder.command.error.cooldown": "Попробуй ещё раз через %s минут",
   "skyblockbuilder.command.error.creating_file": "Файл %s не был создан",
   "skyblockbuilder.command.error.creating_path": "Путь %s не был создан",
-  "skyblockbuilder.command.error.overwrite_config": "Не удалось перезаписать конфигурацию %s",
   "skyblockbuilder.command.error.team_not_exist": "Такой команды не существует",
   "skyblockbuilder.command.error.team_already_exist": "Команда %s уже существует! Пожалуйста введи другое имя!",
   "skyblockbuilder.command.error.user_has_team": "Ты уже в команде!",
@@ -79,11 +78,8 @@
   "skyblockbuilder.command.info.invited_to_team1": " для присоединения к команде.",
   "skyblockbuilder.command.info.toggle_visit": "Визиты от других игроков теперь %s.",
   "skyblockbuilder.command.info.toggle_request": "Запросы на присоединение от других игроков теперь %s.",
-  "skyblockbuilder.command.info.click_to_copy": "Нажми что бы скопировать",
 
   "skyblockbuilder.command.success.reset_island": "Форма острова успешно установлена: %s",
-  "skyblockbuilder.command.success.export_spawns": "Текущие спавны успешно экспортированы в %s",
-  "skyblockbuilder.command.success.export_spawns_to_config": "Успешно экспортированы текущие точки спавна в конфигурацию, используя ключ '%s'",
   "skyblockbuilder.command.success.export_inventory": "Успешно передан текущий инвентарь игроку %s",
   "skyblockbuilder.command.success.joined_team": "Присоединение к команде %s произошло успешно.",
   "skyblockbuilder.command.success.declined_invitation": "Успешно отменено прилагшение команды %s.",
@@ -128,13 +124,13 @@
   "skyblockbuilder.item.structure_saver.ignore_air.desc": "Каждый блок воздуха в выбранной области будет проигнорирован и не будет сохранен в шаблоне",
   "skyblockbuilder.item.structure_saver.nbt_to_snbt.desc": "Сгенерированный файл будет файлом .snbt, что означает возможность редактирования в стандартном редакторе",
   "skyblockbuilder.item.structure_saver.save_to_config.desc": "Шаблон (включая точки возрождения) будет автоматически добавлен в конфигурацию templates.json5",
+  "skyblockbuilder.item.structure_saver.position_set.desc": "Координаты %s установлены в x %s, y %s, z %s",
   "skyblockbuilder.screen.button.save": "Сохранить",
   "skyblockbuilder.screen.button.delete": "Удалить",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Открыть папку",
   "skyblockbuilder.screen.widget.structure_name": "Имя структуры",
   "skyblockbuilder.screen.open_folder.error": "Невозможно открыть папку: %s",
   "skyblockbuilder.schematic.saved": "Схема сохранена в папке %s",
-  "skyblockbuilder.structure_saver.pos": "Координаты %s установлены в x %s, y %s, z %s",
 
   "skyblockbuilder.compat.disabled_management": "Это и все остальные средства управления командой отключены %s.",
 

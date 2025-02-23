@@ -1,14 +1,14 @@
 package de.melanx.skyblockbuilder.util;
 
-import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import de.melanx.skyblockbuilder.ModBlockTags;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
 import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.registration.ModBlockTags;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.commands.CommandSourceStack;
@@ -16,20 +16,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
-import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -50,12 +44,12 @@ public class WorldUtil {
         }
 
         //noinspection ConstantConditions
-        ServerLevel level = getConfiguredLevel(server);
+        ServerLevel level = WorldUtil.getConfiguredLevel(server);
 
         TemplatesConfig.Spawn spawn = validPosition(level, team);
         player.teleportTo(level, spawn.pos().getX() + 0.5, spawn.pos().getY() + 0.2, spawn.pos().getZ() + 0.5, spawn.direction().getYRot(), 0);
         player.setRespawnPosition(level.dimension(), spawn.pos(), spawn.direction().getYRot(), true, false);
-        if (PermissionsConfig.Teleports.noFallDamage) {
+        if (PermissionsConfig.Teleports.negateFallDamage) {
             player.fallDistance = 0;
         }
     }
@@ -66,16 +60,16 @@ public class WorldUtil {
 
         MinecraftServer server = ((ServerLevel) level).getServer();
 
-        if (!DimensionsConfig.Overworld.Default) {
+        if (DimensionsConfig.Overworld.isCustom) {
             return server.overworld().getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
         }
 
-        if (!DimensionsConfig.Nether.Default) {
+        if (DimensionsConfig.Nether.isCustom) {
             ServerLevel nether = server.getLevel(Level.NETHER);
             return nether != null && nether.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
         }
 
-        if (!DimensionsConfig.End.Default) {
+        if (DimensionsConfig.End.isCustom) {
             ServerLevel end = server.getLevel(Level.END);
             return end != null && end.getChunkSource().getGenerator() instanceof SkyblockEndChunkGenerator;
         }
@@ -85,12 +79,12 @@ public class WorldUtil {
 
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {
         if (!isSkyblock(source.getServer().overworld())) {
-            throw new SimpleCommandExceptionType(Component.translatable("skyblockbuilder.error.no_skyblock")).create();
+            throw new SimpleCommandExceptionType(SkyComponents.NO_SKYBLOCK).create();
         }
     }
 
     public static ServerLevel getConfiguredLevel(MinecraftServer server) {
-        ResourceLocation location = SpawnConfig.dimension.location();
+        ResourceLocation location = SpawnConfig.spawmDimension.location();
         ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, location);
         ServerLevel configLevel = server.getLevel(worldKey);
 
@@ -114,9 +108,9 @@ public class WorldUtil {
         }
 
         SkyblockBuilder.getLogger().info("No valid spawn position found, searching...");
-        TemplatesConfig.Spawn spawn = team.getPossibleSpawns().stream().findAny().orElse(new TemplatesConfig.Spawn(team.getIsland().getCenter(), Directions.SOUTH));
+        TemplatesConfig.Spawn spawn = team.getPossibleSpawns().stream().findAny().orElse(new TemplatesConfig.Spawn(team.getIsland().getCenter(), SpawnDirection.SOUTH));
 
-        return new TemplatesConfig.Spawn(PositionHelper.findPos(spawn.pos(), blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radius), spawn.direction());
+        return new TemplatesConfig.Spawn(PositionHelper.findPos(spawn.pos(), blockPos -> isValidSpawn(level, blockPos), SpawnConfig.radiusToFindValidSpawn), spawn.direction());
     }
 
     public static boolean isValidSpawn(Level level, BlockPos pos) {
@@ -136,12 +130,12 @@ public class WorldUtil {
         int bottom = SpawnConfig.Height.range.bottom();
 
         int height;
-        switch (SpawnConfig.Height.spawnType) {
+        switch (SpawnConfig.Height.heightCalculationType) {
             case RANGE_TOP, RANGE_BOTTOM -> {
                 BlockPos.MutableBlockPos spawn = new BlockPos.MutableBlockPos(x, top, z);
                 while (!WorldUtil.isValidSpawn(level, spawn, bottom, top)) {
                     if (spawn.getY() <= level.getMinBuildHeight()) {
-                        if (SpawnConfig.Height.spawnType == SpawnSettings.Type.RANGE_TOP) {
+                        if (SpawnConfig.Height.heightCalculationType == SpawnSettings.Type.RANGE_TOP) {
                             spawn.setY(top);
                         } else {
                             spawn.setY(bottom);
@@ -160,75 +154,7 @@ public class WorldUtil {
         return Math.max(level.getMinBuildHeight() + 1, height);
     }
 
-    // [Vanilla copy] Get flat world info on servers
-    public static List<FlatLayerInfo> layersInfoFromString(String settings) {
-        if (settings == null) {
-            return Lists.newArrayList();
-        }
-
-        List<FlatLayerInfo> list = Lists.newArrayList();
-        String[] astring = settings.split(",");
-        int i = 0;
-
-        for (String s : astring) {
-            FlatLayerInfo flatlayerinfo = getLayerInfo(s, i);
-            if (flatlayerinfo == null) {
-                return Collections.emptyList();
-            }
-
-            list.add(flatlayerinfo);
-            i += flatlayerinfo.getHeight();
-        }
-
-        return list;
-    }
-
-    // [Vanilla copy]
-    @Nullable
-    private static FlatLayerInfo getLayerInfo(String setting, int currentLayers) {
-        String[] info = setting.split("\\*", 2);
-        int i;
-        if (info.length == 2) {
-            try {
-                i = Math.max(Integer.parseInt(info[0]), 0);
-            } catch (NumberFormatException numberformatexception) {
-                SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", numberformatexception.getMessage());
-                return null;
-            }
-        } else {
-            i = 1;
-        }
-
-        int maxLayers = Math.min(currentLayers + i, 384);
-        int height = maxLayers - currentLayers;
-        String blockName = info[info.length - 1];
-
-        Block block;
-        try {
-            block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockName));
-        } catch (Exception exception) {
-            SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", exception.getMessage());
-            return null;
-        }
-
-        if (block == null) {
-            SkyblockBuilder.getLogger().error("Error while parsing surface settings string => Unknown block, {}", blockName);
-            return null;
-        } else {
-            return new FlatLayerInfo(height, block);
-        }
-    }
-
-    public static int calculateHeightFromLayers(List<FlatLayerInfo> layerInfos) {
-        int i = 0;
-        for (FlatLayerInfo info : layerInfos) {
-            i += info.getHeight();
-        }
-
-        return i;
-    }
-
-    public static CompoundTag getPosTag(BlockPos pos) {
+    public static CompoundTag blockPosToTag(BlockPos pos) {
         CompoundTag posTag = new CompoundTag();
         posTag.putInt("posX", pos.getX());
         posTag.putInt("posY", pos.getY());
@@ -237,7 +163,7 @@ public class WorldUtil {
         return posTag;
     }
 
-    public static BlockPos getPosFromTag(CompoundTag posTag) {
+    public static BlockPos blockPosFromTag(CompoundTag posTag) {
         return new BlockPos(
                 posTag.getInt("posX"),
                 posTag.getInt("posY"),
@@ -245,7 +171,24 @@ public class WorldUtil {
         );
     }
 
-    public enum Directions {
+    public static BlockPos blockPosFromJsonArray(JsonArray json) {
+        if (json.size() != 3) throw new IllegalStateException("Invalid BlockPos: " + json);
+        return new BlockPos(
+                json.get(0).getAsInt(),
+                json.get(1).getAsInt(),
+                json.get(2).getAsInt()
+        );
+    }
+
+    public static JsonArray blockPosToJsonArray(BlockPos pos) {
+        JsonArray array = new JsonArray();
+        array.add(pos.getX());
+        array.add(pos.getY());
+        array.add(pos.getZ());
+        return array;
+    }
+
+    public enum SpawnDirection {
         NORTH(180),
         EAST(270),
         SOUTH(0),
@@ -253,11 +196,11 @@ public class WorldUtil {
 
         private final int yRot;
 
-        Directions(int yaw) {
+        SpawnDirection(int yaw) {
             this.yRot = yaw;
         }
 
-        public static Directions fromDirection(Direction direction) {
+        public static SpawnDirection fromDirection(Direction direction) {
             return switch (direction) {
                 case NORTH -> NORTH;
                 case EAST -> EAST;

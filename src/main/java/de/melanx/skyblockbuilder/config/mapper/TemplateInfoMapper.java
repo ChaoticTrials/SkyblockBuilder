@@ -4,7 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
+import de.melanx.skyblockbuilder.config.values.providers.SpreadsProvider;
+import de.melanx.skyblockbuilder.config.values.providers.SurroundingBlocksProvider;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
+import net.minecraft.core.BlockPos;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
 import org.moddingx.libx.config.mapper.ValueMapper;
@@ -33,37 +37,37 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
     public TemplateInfo fromJson(JsonObject json) {
         String name = json.get("name").getAsString();
         String file = json.get("file").getAsString();
-        String spawns = json.get("spawns").getAsString();
+        SpawnsProvider spawns = SpawnsProvider.fromJson(json.get("spawns"));
 
         String desc = "";
         if (json.has("desc")) {
             desc = json.get("desc").getAsString();
         }
 
-        TemplateInfo.Offset offset = new TemplateInfo.Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset);
+        BlockPos offset = new BlockPos(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset);
         if (json.has("offset")) {
             JsonArray offsetArray = json.get("offset").getAsJsonArray();
-            offset = new TemplateInfo.Offset(offsetArray.get(0).getAsInt() + TemplatesConfig.defaultOffset, offsetArray.get(1).getAsInt(), offsetArray.get(2).getAsInt() + TemplatesConfig.defaultOffset);
+            offset = new BlockPos(offsetArray.get(0).getAsInt() + TemplatesConfig.defaultOffset, offsetArray.get(1).getAsInt(), offsetArray.get(2).getAsInt() + TemplatesConfig.defaultOffset);
         } else if (TemplatesConfig.defaultOffset != 0) {
-            offset = new TemplateInfo.Offset(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset);
+            offset = new BlockPos(TemplatesConfig.defaultOffset, 0, TemplatesConfig.defaultOffset);
         }
 
-        String surroundingBlocks = "";
+        SurroundingBlocksProvider surroundingBlocks = SurroundingBlocksProvider.EMPTY;
         if (json.has("surroundingBlocks")) {
-            surroundingBlocks = json.get("surroundingBlocks").getAsString();
+            surroundingBlocks = SurroundingBlocksProvider.fromJson(json.get("surroundingBlocks"));
         }
 
-        int surroundingMargin = 0;
-        if (json.has("surroundingMargin")) {
-            surroundingMargin = json.get("surroundingMargin").getAsInt();
-        }
-
-        String spreads = "";
+        SpreadsProvider spreads = SpreadsProvider.EMPTY;
         if (json.has("spreads")) {
-            spreads = json.get("spreads").getAsString();
+            spreads = SpreadsProvider.fromJson(json.get("spreads"));
         }
 
-        return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, spreads, surroundingMargin);
+        boolean allowPaletteSelection = true;
+        if (json.has("allowPaletteSelection")) {
+            allowPaletteSelection = json.get("allowPaletteSelection").getAsBoolean();
+        }
+
+        return new TemplateInfo(name, desc, file, spawns, offset, surroundingBlocks, spreads, allowPaletteSelection);
     }
 
     @Override
@@ -76,26 +80,26 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
         }
 
         json.addProperty("file", templateInfo.file());
-        json.addProperty("spawns", templateInfo.spawns());
+        json.add("spawns", templateInfo.spawns().toJson());
 
-        if (templateInfo.offset().x() != TemplatesConfig.defaultOffset || templateInfo.offset().z() != TemplatesConfig.defaultOffset) {
+        if (templateInfo.offset().getX() != TemplatesConfig.defaultOffset || templateInfo.offset().getZ() != TemplatesConfig.defaultOffset) {
             JsonArray offsetArray = new JsonArray();
-            offsetArray.add(templateInfo.offset().x());
-            offsetArray.add(templateInfo.offset().y());
-            offsetArray.add(templateInfo.offset().z());
+            offsetArray.add(templateInfo.offset().getX());
+            offsetArray.add(templateInfo.offset().getY());
+            offsetArray.add(templateInfo.offset().getZ());
             json.add("offset", offsetArray);
         }
 
-        if (!templateInfo.surroundingBlocks().isEmpty()) {
-            json.addProperty("surroundingBlocks", templateInfo.surroundingBlocks());
+        if (templateInfo.surroundingBlocks() != null) {
+            json.add("surroundingBlocks", templateInfo.surroundingBlocks().toJson());
         }
 
-        if (templateInfo.surroundingMargin() > 0) {
-            json.addProperty("surroundingMargin", templateInfo.surroundingMargin());
+        if (templateInfo.spreads() != null) {
+            json.add("spreads", templateInfo.spreads().toJson());
         }
 
-        if (!templateInfo.spreads().isEmpty()) {
-            json.addProperty("spreads", templateInfo.spreads());
+        if (!templateInfo.allowPaletteSelection()) {
+            json.addProperty("allowPaletteSelection", false);
         }
 
         return json;

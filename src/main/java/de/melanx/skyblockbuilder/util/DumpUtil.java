@@ -4,19 +4,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
-import net.minecraftforge.forgespi.language.IModFileInfo;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforgespi.language.IModFileInfo;
+import net.neoforged.neoforgespi.language.IModInfo;
 import org.moddingx.libx.config.ConfigManager;
 import org.moddingx.libx.impl.config.ConfigImpl;
 import org.moddingx.libx.impl.config.ConfigKey;
@@ -41,8 +38,8 @@ import java.util.zip.ZipOutputStream;
 
 public class DumpUtil {
 
-    public static int MANIFEST_VERSION = 1;
-    public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-HHmmss");
+    public static final int MANIFEST_VERSION = 1;
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-HHmmss");
     private static final Map<String, IModInfo> MOD_INFO_MAP = ModList.get().getMods().stream().collect(Collectors.toMap(IModInfo::getModId, info -> info));
 
     public static Component getIssueUrl() {
@@ -58,7 +55,7 @@ public class DumpUtil {
         return Component.literal(url).withStyle(Style.EMPTY
                 .applyFormats(ChatFormatting.BLUE, ChatFormatting.UNDERLINE)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url + "/new?template=dump_bug_report.yml"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.link.open")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommonComponents.GUI_OPEN_IN_BROWSER))
         );
     }
 
@@ -88,7 +85,7 @@ public class DumpUtil {
 
             JsonArray filesArray = new JsonArray();
             if (includeConfigs) {
-                DumpUtil.addDirToZip(filesArray, SkyPaths.MOD_CONFIG, zipStream, Paths.get("config"));
+                DumpUtil.addDirToZip(filesArray, SkyPaths.MOD_CONFIG, zipStream, Paths.get("config"), false);
 
                 Map<ResourceLocation, String> diffs = DumpUtil.configDiffs();
                 for (Map.Entry<ResourceLocation, String> entry : diffs.entrySet()) {
@@ -101,7 +98,7 @@ public class DumpUtil {
             }
 
             if (includeTemplates) {
-                DumpUtil.addDirToZip(filesArray, SkyPaths.TEMPLATES_DIR, zipStream);
+                DumpUtil.addDirToZip(filesArray, SkyPaths.TEMPLATES_DIR, zipStream, true);
             }
 
             if (server != null) {
@@ -150,16 +147,18 @@ public class DumpUtil {
         return file;
     }
 
-    private static void addDirToZip(JsonArray fileCollector, Path dirPath, ZipOutputStream zipStream) throws IOException {
-        DumpUtil.addDirToZip(fileCollector, dirPath, zipStream, dirPath.getFileName());
+    private static void addDirToZip(JsonArray fileCollector, Path dirPath, ZipOutputStream zipStream, boolean recursive) throws IOException {
+        DumpUtil.addDirToZip(fileCollector, dirPath, zipStream, dirPath.getFileName(), recursive);
     }
 
-    private static void addDirToZip(JsonArray fileCollector, Path dirPath, ZipOutputStream zipStream, Path parentFolder) throws IOException {
+    private static void addDirToZip(JsonArray fileCollector, Path dirPath, ZipOutputStream zipStream, Path parentFolder, boolean recursive) throws IOException {
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dirPath)) {
             for (Path path : directoryStream) {
                 if (!Files.isDirectory(path)) {
                     Path zipEntryName = parentFolder.resolve(path.getFileName());
                     DumpUtil.addFileToZip(fileCollector, zipStream, path, zipEntryName);
+                } else if (recursive) {
+                    DumpUtil.addDirToZip(fileCollector, path, zipStream, parentFolder.resolve(path.getFileName()), recursive);
                 }
             }
         }

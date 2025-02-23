@@ -1,8 +1,8 @@
 {
   "block.skyblockbuilder.spawn_block": "Bloc de spawn",
   "item.skyblockbuilder.structure_saver": "Structure sauvegarder",
-  "screen.skyblockbuilder.structure_saver": "Structure sauvegarder",
-  "screen.skyblockbuilder.select_template": "Veuillez sélectionner un modèle",
+  "skyblockbuilder.screen.structure_saver.title": "Structure sauvegarder",
+  "skyblockbuilder.screen.select_template.title": "Veuillez sélectionner un modèle",
 
   "generator.skyblockbuilder.skyblock": "Skyblock",
 
@@ -16,7 +16,6 @@
   "skyblockbuilder.command.error.cooldown": "Réessayez dans %s min.",
   "skyblockbuilder.command.error.creating_file": "Échec de la création du fichier %s",
   "skyblockbuilder.command.error.creating_path": "Échec de la création du chemin %s",
-  "skyblockbuilder.command.error.overwrite_config": "Impossible de remplacer la configuration %s",
   "skyblockbuilder.command.error.team_not_exist": "Cette équipe n'existe pas !",
   "skyblockbuilder.command.error.team_already_exist": "L'équipe %s existe déjà ! Veuillez choisir un autre nom !",
   "skyblockbuilder.command.error.user_has_team": "Vous êtes déjà dans une équipe !",
@@ -79,11 +78,8 @@
   "skyblockbuilder.command.info.invited_to_team1": " pour rejoindre l'équipe.",
   "skyblockbuilder.command.info.toggle_visit": "Les visites par d'autres joueurs sont maintenant %s.",
   "skyblockbuilder.command.info.toggle_request": "Les demandes d'adhésion par les autres joueurs sont maintenant %s.",
-  "skyblockbuilder.command.info.click_to_copy": "Cliquez pour copier",
 
   "skyblockbuilder.command.success.reset_island": "Définition réussit de la forme de l'île de %s.",
-  "skyblockbuilder.command.success.export_spawns": "Exportation réussie des points d'apparitions actuels vers %s.",
-  "skyblockbuilder.command.success.export_spawns_to_config": "Exportation réussie des points d'apparition actuels vers la configuration, en utilisant la clé '%s'",
   "skyblockbuilder.command.success.export_inventory": "Inventaire exporté à %s avec succès",
   "skyblockbuilder.command.success.joined_team": "Adhésion à l'équipe %s réussit.",
   "skyblockbuilder.command.success.declined_invitation": "Suppression de l'invitation de l'équipe %s réussit.",
@@ -128,13 +124,13 @@
   "skyblockbuilder.item.structure_saver.ignore_air.desc": "Chaque bloc d'air dans la zone sélectionnée sera ignoré et ne sera pas enregistré dans le modèle",
   "skyblockbuilder.item.structure_saver.nbt_to_snbt.desc": "Le fichier généré sera un fichier .snbt, ce qui signifie qu'il est modifiable dans un éditeur standard",
   "skyblockbuilder.item.structure_saver.save_to_config.desc": "Le modèle (et les points d'apparition inclus) sera automatiquement ajouté à la configuration templates.json5",
+  "skyblockbuilder.item.structure_saver.position_set.desc": "Position %s définie à x %s,y %s,z %s",
   "skyblockbuilder.screen.button.save": "sauvegarder",
   "skyblockbuilder.screen.button.delete": "Supprimer",
   "skyblockbuilder.screen.button.open_folder.tooltip": "Dossier ouvert",
   "skyblockbuilder.screen.widget.structure_name": "Nom de la structure",
   "skyblockbuilder.screen.open_folder.error": "Impossible d'ouvrir le dossier : %s",
   "skyblockbuilder.schematic.saved": "Schéma enregistré dans %s",
-  "skyblockbuilder.structure_saver.pos": "Position %s définie à x %s,y %s,z %s",
 
   "skyblockbuilder.compat.disabled_management": "Cette gestion d'équipe et toutes les autres sont désactivées par %s.",
 

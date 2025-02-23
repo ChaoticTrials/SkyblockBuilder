@@ -1,8 +1,8 @@
 {
   "block.skyblockbuilder.spawn_block": "生成方块",
   "item.skyblockbuilder.structure_saver": "结构保存器",
-  "screen.skyblockbuilder.structure_saver": "结构保存器",
-  "screen.skyblockbuilder.select_template": "请选择一个模板",
+  "skyblockbuilder.screen.structure_saver.title": "结构保存器",
+  "skyblockbuilder.screen.select_template.title": "请选择一个模板",
 
   "generator.skyblockbuilder.skyblock": "空岛",
 
@@ -16,7 +16,6 @@
   "skyblockbuilder.command.error.cooldown": "%s分钟后再试。",
   "skyblockbuilder.command.error.creating_file": "无法创建文件 %s",
   "skyblockbuilder.command.error.creating_path": "无法创建路径 %s",
-  "skyblockbuilder.command.error.overwrite_config": "无法覆盖配置文件 %s",
   "skyblockbuilder.command.error.team_not_exist": "该队伍不存在！",
   "skyblockbuilder.command.error.team_already_exist": "队伍 %s 已经存在！请选择其他名称！",
   "skyblockbuilder.command.error.user_has_team": "你已经在一个队伍中了！",
@@ -79,11 +78,8 @@
   "skyblockbuilder.command.info.invited_to_team1": " 加入队伍。",
   "skyblockbuilder.command.info.toggle_visit": "其他玩家的访问现在处于 %s 状态。",
   "skyblockbuilder.command.info.toggle_request": "其他玩家的加入请求现在处于 %s 状态。",
-  "skyblockbuilder.command.info.click_to_copy": "点击复制",
 
   "skyblockbuilder.command.success.reset_island": "成功将岛屿形状设置为 %s",
-  "skyblockbuilder.command.success.export_spawns": "成功将当前出生点导出到 %s",
-  "skyblockbuilder.command.success.export_spawns_to_config": "成功将当前生成点导出到配置文件，使用密钥 '%s'",
   "skyblockbuilder.command.success.export_inventory": "成功将当前库存导出到 %s",
   "skyblockbuilder.command.success.joined_team": "成功加入队伍 %s。",
   "skyblockbuilder.command.success.declined_invitation": "成功销毁了队伍 %s 的邀请。",
@@ -128,13 +124,13 @@
   "skyblockbuilder.item.structure_saver.ignore_air.desc": "选择区域内的每个空气方块都将被忽略，不会保存到模板中",
   "skyblockbuilder.item.structure_saver.nbt_to_snbt.desc": "生成的文件将是.snbt文件，可以在标准编辑器中进行编辑",
   "skyblockbuilder.item.structure_saver.save_to_config.desc": "模板（包括生成点）将自动添加到 templates.json5 配置中",
+  "skyblockbuilder.item.structure_saver.position_set.desc": "位置 %s 设置在 x %s，y %s，z %s 处",
   "skyblockbuilder.screen.button.save": "保存",
   "skyblockbuilder.screen.button.delete": "删除",
   "skyblockbuilder.screen.button.open_folder.tooltip": "打开文件夹",
   "skyblockbuilder.screen.widget.structure_name": "结构名称",
   "skyblockbuilder.screen.open_folder.error": "无法打开文件夹：%s",
   "skyblockbuilder.schematic.saved": "原理图保存在 %s 中",
-  "skyblockbuilder.structure_saver.pos": "位置 %s 设置在 x %s，y %s，z %s 处",
 
   "skyblockbuilder.compat.disabled_management": "%s 禁用了此项和所有其他团队管理功能。",
 

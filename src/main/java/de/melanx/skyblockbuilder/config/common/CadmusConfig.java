@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
 
-@RegisterConfig(value = CadmusCompat.MODID, requiresMod = CadmusCompat.MODID)
+@RegisterConfig(value = "compatability/" + CadmusCompat.MODID, requiresMod = CadmusCompat.MODID)
 public class CadmusConfig {
 
     @Config({"The chunks of the spawn will be claimed automatically as admin claims.",

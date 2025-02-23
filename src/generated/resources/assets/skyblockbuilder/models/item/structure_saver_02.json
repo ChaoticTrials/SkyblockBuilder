@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "skyblockbuilder:item/structure_saver_02"
+  }
+}

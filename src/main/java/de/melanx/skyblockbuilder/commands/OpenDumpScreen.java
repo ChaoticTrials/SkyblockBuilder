@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import de.melanx.skyblockbuilder.client.DumpScreen;
+import de.melanx.skyblockbuilder.client.screens.DumpScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

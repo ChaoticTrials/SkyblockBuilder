@@ -11,8 +11,8 @@ public class StructuresConfig {
     @Config({"All the structures that should be generated.",
             "A list with all possible structures can be found in config/skyblockbuilder/data/structures.txt",
             "WARNING: This only works for vanilla dimensions (Overworld, Nether, End)"})
-    public static ResourceList generationStructures = new ResourceList(true, b -> {
-        b.simple(new ResourceLocation("minecraft", "fortress"));
+    public static ResourceList structuresToGenerate = new ResourceList(true, b -> {
+        b.simple(ResourceLocation.withDefaultNamespace("fortress"));
     });
 
     @Config({"All the features that should be generated.",
@@ -20,8 +20,8 @@ public class StructuresConfig {
             "INFO: The two default values are required for the obsidian towers in end. If this is missing, they will be first generated when respawning the dragon.",
             "WARNING: Some features like trees need special surface!",
             "WARNING: This only works for vanilla dimensions (Overworld, Nether, End)"})
-    public static ResourceList generationFeatures = new ResourceList(true, b -> {
-        b.simple(new ResourceLocation("minecraft", "end_spike"));
-        b.simple(new ResourceLocation("minecraft", "end_gateway_return"));
+    public static ResourceList featuresToGenerate = new ResourceList(true, b -> {
+        b.simple(ResourceLocation.withDefaultNamespace("end_spike"));
+        b.simple(ResourceLocation.withDefaultNamespace("end_gateway_return"));
     });
 }

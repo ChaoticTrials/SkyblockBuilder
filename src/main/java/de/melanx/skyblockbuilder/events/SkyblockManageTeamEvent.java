@@ -4,8 +4,8 @@ import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,14 +13,13 @@ import javax.annotation.Nullable;
 /**
  * This fires whenever something is managed in the team.<br>
  * <br>
- * All children of this event does have a result. {@link net.minecraftforge.eventbus.api.Event.HasResult}.<br>
- * <br>
- * All children of this event are fired on the {@link MinecraftForge#EVENT_BUS}.
+ * All children of this event are fired on the {@link NeoForge#EVENT_BUS}.
  */
 public abstract class SkyblockManageTeamEvent extends Event {
 
     private final ServerPlayer player;
     private final Team team;
+    private Result result = Result.DEFAULT;
 
     /**
      * @param player Player who manages the team
@@ -40,9 +39,29 @@ public abstract class SkyblockManageTeamEvent extends Event {
         return this.team;
     }
 
-    @Override
-    public boolean hasResult() {
-        return true;
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+    public Result getResult() {
+        return this.result;
+    }
+
+    public enum Result {
+        /**
+         * Skip default checks
+         */
+        ALLOW,
+
+        /**
+         * Proceed with the default checks
+         */
+        DEFAULT,
+
+        /**
+         * Stop process instantly
+         */
+        DENY
     }
 
     /**
@@ -55,16 +74,6 @@ public abstract class SkyblockManageTeamEvent extends Event {
         public ToggleVisits(@Nonnull ServerPlayer player, Team team, boolean allowVisits) {
             super(player, team);
             this.allowVisits = allowVisits;
-        }
-
-        /**
-         * @return The player who changes the visit ability
-         */
-        @Nonnull
-        @Override
-        public ServerPlayer getPlayer() {
-            //noinspection ConstantConditions
-            return super.getPlayer();
         }
 
         /**
@@ -124,16 +133,6 @@ public abstract class SkyblockManageTeamEvent extends Event {
         }
 
         /**
-         * @return Player who adds the spawn point
-         */
-        @Nonnull
-        @Override
-        public ServerPlayer getPlayer() {
-            //noinspection ConstantConditions
-            return super.getPlayer();
-        }
-
-        /**
          * @return New spawn position
          */
         public BlockPos getPos() {
@@ -176,16 +175,6 @@ public abstract class SkyblockManageTeamEvent extends Event {
         public RemoveSpawn(@Nonnull ServerPlayer player, Team team, BlockPos pos) {
             super(player, team);
             this.pos = pos;
-        }
-
-        /**
-         * @return Player who removes the spawn point
-         */
-        @Nonnull
-        @Override
-        public ServerPlayer getPlayer() {
-            //noinspection ConstantConditions
-            return super.getPlayer();
         }
 
         /**
@@ -242,16 +231,6 @@ public abstract class SkyblockManageTeamEvent extends Event {
 
         public Leave(@Nonnull ServerPlayer player, Team team) {
             super(player, team);
-        }
-
-        /**
-         * @return Player who leaves the team
-         */
-        @Nonnull
-        @Override
-        public ServerPlayer getPlayer() {
-            //noinspection ConstantConditions
-            return super.getPlayer();
         }
     }
 }

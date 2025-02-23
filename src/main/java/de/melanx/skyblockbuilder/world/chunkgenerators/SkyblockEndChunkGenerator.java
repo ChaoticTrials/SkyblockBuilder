@@ -1,8 +1,9 @@
 package de.melanx.skyblockbuilder.world.chunkgenerators;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
+import de.melanx.skyblockbuilder.world.flat.FlatLayers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
@@ -20,33 +21,30 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator {
 
     private static final int MAIN_ISLAND_DISTANCE = 16;
 
     // [VanillaCopy] overworld chunk generator codec
-    public static final Codec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.create(
+    public static final MapCodec<SkyblockEndChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
             (instance) -> instance.group(
                     BiomeSource.CODEC.fieldOf("biome_source").forGetter(generator -> generator.biomeSource),
                     NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.generatorSettings),
                     Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(generator -> generator.dimension),
-                    FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(generator -> generator.layerInfos)
+                    FlatLayers.CODEC.optionalFieldOf("layers", FlatLayers.EMPTY).forGetter(generator -> generator.flatLayers)
             ).apply(instance, instance.stable(SkyblockEndChunkGenerator::new)));
 
-    public SkyblockEndChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, List<FlatLayerInfo> layerInfos) {
-        super(biomeSource, generatorSettings, dimension, layerInfos);
+    public SkyblockEndChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> generatorSettings, ResourceKey<Level> dimension, FlatLayers flatLayers) {
+        super(biomeSource, generatorSettings, dimension, flatLayers);
     }
 
     @Nonnull
     @Override
-    protected Codec<? extends ChunkGenerator> codec() {
+    protected MapCodec<? extends ChunkGenerator> codec() {
         return SkyblockEndChunkGenerator.CODEC;
     }
 
@@ -62,10 +60,10 @@ public class SkyblockEndChunkGenerator extends SkyblockNoiseBasedChunkGenerator 
 
     @Nonnull
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Executor executor, @Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager manager, @Nonnull ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(@Nonnull Blender blender, @Nonnull RandomState randomState, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk) {
         ChunkPos chunkPos = chunk.getPos();
-        if (DimensionsConfig.End.mainIsland && Mth.abs(chunkPos.x) <= MAIN_ISLAND_DISTANCE && Mth.abs(chunkPos.z) <= MAIN_ISLAND_DISTANCE) {
-            return this.parent.fillFromNoise(executor, blender, randomState, manager, chunk);
+        if (DimensionsConfig.End.keepMainIsland && Mth.abs(chunkPos.x) <= MAIN_ISLAND_DISTANCE && Mth.abs(chunkPos.z) <= MAIN_ISLAND_DISTANCE) {
+            return this.parent.fillFromNoise(blender, randomState, structureManager, chunk);
         }
 
         return CompletableFuture.completedFuture(chunk);

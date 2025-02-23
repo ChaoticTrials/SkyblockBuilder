@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.config.common;
 
 import com.google.common.collect.Maps;
+import de.melanx.skyblockbuilder.world.flat.FlatLayers;
 import net.minecraft.Util;
 import net.minecraft.world.level.Level;
 import org.moddingx.libx.annotation.config.RegisterConfig;
@@ -16,6 +17,7 @@ public class WorldConfig {
     @Config({"A list of biomes for each dimension.",
             "You can not use this for the end dimension. The end dimension will always have it's five biomes.",
             "Overworld has all oceans by default because animals cannot spawn in these biomes.",
+            "A list of biomes will be generated at \"config/skyblockbuilder/data/biomes.txt\" each time joining a world.",
             "These are resource lists. See https://moddingx.org/libx/org/moddingx/libx/util/data/ResourceList.html#use_resource_lists_in_configs"})
     public static Map<String, ResourceList> biomes = Util.make(Maps.newHashMap(), map -> {
         map.put(Level.OVERWORLD.location().toString(), new ResourceList(false, b -> b.parse("minecraft:*ocean*")));
@@ -26,13 +28,15 @@ public class WorldConfig {
     public static boolean surface = false;
 
     @Config({"The block settings for generating the different dimensions surfaces.", "Same format as flat world generation settings (blocks only)"})
-    public static Map<String, String> surfaceSettings = Util.make(Maps.newHashMap(), map -> {
-        map.put(Level.OVERWORLD.location().toString(), "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block");
-        map.put(Level.NETHER.location().toString(), "");
-        map.put(Level.END.location().toString(), "");
+    public static Map<String, FlatLayers> surfaceSettings = Util.make(Maps.newHashMap(), map -> {
+        map.put(Level.OVERWORLD.location().toString(), FlatLayers.of("minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block"));
+        map.put(Level.NETHER.location().toString(), FlatLayers.EMPTY);
+        map.put(Level.END.location().toString(), FlatLayers.EMPTY);
     });
 
-    @Config
+    @Config({"A list of carvers for each dimension.",
+            "A list of carvers will be generated at \"config/skyblockbuilder/data/carvers.txt\" each time joining a world.",
+            "These are resource lists. See https://moddingx.org/libx/org/moddingx/libx/util/data/ResourceList.html#use_resource_lists_in_configs"})
     public static Map<String, ResourceList> carvers = Util.make(Maps.newHashMap(), map -> {
         map.put(Level.OVERWORLD.location().toString(), ResourceList.ALLOW_LIST);
         map.put(Level.NETHER.location().toString(), ResourceList.ALLOW_LIST);
@@ -42,15 +46,9 @@ public class WorldConfig {
     @Config("Sea level in world [default: 63]")
     public static int seaHeight = 63;
 
-    @Config({"Distance between islands in overworld [default: 8192]", "nether the distance is 1/8"})
+    @Config({"Distance between islands in overworld [default: 8192]"})
     @IntRange(min = 64, max = 29999900)
     public static int islandDistance = 8192;
-
-    @Config({"UNUSED, USE templates.json5 'defaultOffset' INSTEAD",
-            "",
-            "The offset from 0, 0 to generate the islands",
-            "Can be used to generate them in the middle of .mca files"})
-    public static int offset = 0;
 
     @Config("Prevent scheduled ticks after generating the island")
     public static boolean preventScheduledTicks = true;

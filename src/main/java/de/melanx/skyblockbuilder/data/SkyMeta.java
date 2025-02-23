@@ -15,6 +15,14 @@ import java.util.UUID;
 
 public class SkyMeta {
 
+    private static final String OWNER_ID = "owner_id";
+    private static final String TEAM_ID = "team_id";
+    private static final String PREVIOUS_TEAM_IDS = "previous_team_ids";
+    private static final String INVITATIONS = "invitations";
+    private static final String LAST_HOME_TELEPORT = "last_home_teleport";
+    private static final String LAST_SPAWN_TELEPORT = "last_spawn_teleport";
+    private static final String LAST_VISIT_TELEPORT = "last_visit_teleport";
+
     private final Set<UUID> previousTeamIds = Sets.newHashSet();
     private final List<UUID> invites = Lists.newArrayList();
     private final SkyblockSavedData data;
@@ -86,70 +94,54 @@ public class SkyMeta {
         }
     }
 
-    // todo 1.21 make enum for common method, and specific methods which set the enum by itself
-    public long getLastHomeTeleport() {
-        return this.lastHomeTeleport;
+    public long getLastTeleport(TeleportType type) {
+        return switch (type) {
+            case SPAWN -> this.lastSpawnTeleport;
+            case HOME -> this.lastHomeTeleport;
+            case VISIT -> this.lastVisitTeleport;
+        };
     }
 
-    // todo 1.21 make enum for common method, and specific methods which set the enum by itself
-    public void setLastHomeTeleport(long gameTime) {
-        this.lastHomeTeleport = gameTime;
+    public void setLastTeleport(TeleportType type, long gameTime) {
+        switch (type) {
+            case SPAWN -> this.lastSpawnTeleport = gameTime;
+            case HOME -> this.lastHomeTeleport = gameTime;
+            case VISIT -> this.lastVisitTeleport = gameTime;
+        }
+
         if (this.data != null) {
             this.data.setDirtySilently();
         }
     }
 
-    public boolean canTeleportHome(long gameTime) {
-        return (this.lastHomeTeleport == 0 ? PermissionsConfig.Teleports.homeCooldown : gameTime) - this.getLastHomeTeleport() >= PermissionsConfig.Teleports.homeCooldown;
-    }
+    public boolean canTeleport(TeleportType type, long gameTime) {
+        long lastTeleport = this.getLastTeleport(type);
+        int cooldown = switch (type) {
+            case SPAWN -> PermissionsConfig.Teleports.Cooldowns.spawnCooldown;
+            case HOME -> PermissionsConfig.Teleports.Cooldowns.homeCooldown;
+            case VISIT -> PermissionsConfig.Teleports.Cooldowns.visitCooldown;
+        };
 
-    public long getLastSpawnTeleport() {
-        return this.lastSpawnTeleport;
-    }
-
-    public void setLastSpawnTeleport(long gameTime) {
-        this.lastSpawnTeleport = gameTime;
-        if (this.data != null) {
-            this.data.setDirtySilently();
-        }
-    }
-
-    public boolean canTeleportSpawn(long gameTime) {
-        return (this.lastSpawnTeleport == 0 ? PermissionsConfig.Teleports.spawnCooldown : gameTime) - this.getLastSpawnTeleport() >= PermissionsConfig.Teleports.spawnCooldown;
-    }
-
-    public long getLastVisitTeleport() {
-        return this.lastVisitTeleport;
-    }
-
-    public void setLastVisitTeleport(long gameTime) {
-        this.lastVisitTeleport = gameTime;
-        if (this.data != null) {
-            this.data.setDirtySilently();
-        }
-    }
-
-    public boolean canVisit(long gameTime) {
-        return (this.lastVisitTeleport == 0 ? PermissionsConfig.Teleports.visitCooldown : gameTime) - this.getLastVisitTeleport() >= PermissionsConfig.Teleports.visitCooldown;
+        return (lastTeleport == 0 ? cooldown : gameTime) - lastTeleport >= cooldown;
     }
 
     public SkyMeta load(@Nonnull CompoundTag nbt) {
-        this.owner = nbt.getUUID("OwnerId");
-        this.teamId = nbt.getUUID("TeamId");
+        this.owner = nbt.getUUID(OWNER_ID);
+        this.teamId = nbt.getUUID(TEAM_ID);
 
         this.previousTeamIds.clear();
-        for (Tag tag : nbt.getList("PreviousTeamIds", Tag.TAG_INT_ARRAY)) {
+        for (Tag tag : nbt.getList(PREVIOUS_TEAM_IDS, Tag.TAG_INT_ARRAY)) {
             this.previousTeamIds.add(NbtUtils.loadUUID(tag));
         }
 
         this.invites.clear();
-        for (Tag tag : nbt.getList("Invitations", Tag.TAG_INT_ARRAY)) {
+        for (Tag tag : nbt.getList(INVITATIONS, Tag.TAG_INT_ARRAY)) {
             this.invites.add(NbtUtils.loadUUID(tag));
         }
 
-        this.lastHomeTeleport = nbt.getLong("LastHomeTeleport");
-        this.lastSpawnTeleport = nbt.getLong("LastSpawnTeleport");
-        this.lastVisitTeleport = nbt.getLong("LastVisitTeleport");
+        this.lastHomeTeleport = nbt.getLong(LAST_HOME_TELEPORT);
+        this.lastSpawnTeleport = nbt.getLong(LAST_SPAWN_TELEPORT);
+        this.lastVisitTeleport = nbt.getLong(LAST_VISIT_TELEPORT);
 
         return this;
     }
@@ -157,8 +149,8 @@ public class SkyMeta {
     @Nonnull
     public CompoundTag save() {
         CompoundTag nbt = new CompoundTag();
-        nbt.putUUID("OwnerId", this.owner);
-        nbt.putUUID("TeamId", this.teamId);
+        nbt.putUUID(OWNER_ID, this.owner);
+        nbt.putUUID(TEAM_ID, this.teamId);
 
         ListTag prevTeamIds = new ListTag();
         for (UUID id : this.previousTeamIds) {
@@ -170,11 +162,17 @@ public class SkyMeta {
             invitationTeams.add(NbtUtils.createUUID(id));
         }
 
-        nbt.put("PreviousTeamIds", prevTeamIds);
-        nbt.put("Invitations", invitationTeams);
-        nbt.putLong("LastHomeTeleport", this.lastHomeTeleport);
-        nbt.putLong("LastSpawnTeleport", this.lastSpawnTeleport);
-        nbt.putLong("LastVisitTeleport", this.lastVisitTeleport);
+        nbt.put(PREVIOUS_TEAM_IDS, prevTeamIds);
+        nbt.put(INVITATIONS, invitationTeams);
+        nbt.putLong(LAST_HOME_TELEPORT, this.lastHomeTeleport);
+        nbt.putLong(LAST_SPAWN_TELEPORT, this.lastSpawnTeleport);
+        nbt.putLong(LAST_VISIT_TELEPORT, this.lastVisitTeleport);
         return nbt;
+    }
+
+    public enum TeleportType {
+        SPAWN,
+        HOME,
+        VISIT
     }
 }

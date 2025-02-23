@@ -7,9 +7,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
 import net.minecraft.commands.CommandSourceStack;
@@ -29,7 +31,7 @@ import java.io.IOException;
 public class GenerateCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
-        return Commands.literal("generate").requires(source -> source.hasPermission(2))
+        return Commands.literal("generate").requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
                 .then(Commands.literal("template")
                         .then(Commands.argument("template", StringArgumentType.string()).suggests(Suggestions.TEMPLATES)
                                 .executes(GenerateCommand::generateTemplate)
@@ -60,13 +62,14 @@ public class GenerateCommand {
 
 
         if (configuredTemplate == null) {
-            context.getSource().sendFailure(Component.translatable("skyblockbuilder.command.generated.fail"));
+            context.getSource().sendFailure(SkyComponents.COMMAND_GENERATED_FAIL);
             return 0;
         }
+
         if (spreads) {
-            configuredTemplate.placeInWorld(level, pos, TemplateLoader.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
+            configuredTemplate.placeInWorld(level, pos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
         } else {
-            configuredTemplate.getTemplate().placeInWorld(level, pos, pos, TemplateLoader.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
+            configuredTemplate.getTemplate().placeInWorld(level, pos, pos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
         }
 
         if (border) {
@@ -92,11 +95,10 @@ public class GenerateCommand {
         }
 
         StructureTemplate template = new StructureTemplate();
-        //noinspection deprecation
         template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
 
         ServerLevel level = context.getSource().getLevel();
-        template.placeInWorld(level, pos, pos, TemplateLoader.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
+        template.placeInWorld(level, pos, pos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
         showLocationResult(context.getSource(), file, pos);
 
         return 1;
@@ -104,6 +106,6 @@ public class GenerateCommand {
 
     private static void showLocationResult(CommandSourceStack source, String structureName, BlockPos generatedAt) {
         Component coords = RandomUtility.getFormattedPos(generatedAt);
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.generated", structureName, coords), true);
+        source.sendSuccess(() -> SkyComponents.COMMAND_GENERATED_SUCCESS.apply(structureName, coords), true);
     }
 }

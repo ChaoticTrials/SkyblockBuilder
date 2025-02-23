@@ -4,17 +4,19 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
+import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.CommandUtil;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 
 public class VisitCommand {
 
@@ -26,50 +28,50 @@ public class VisitCommand {
     }
 
     private static int visit(CommandSourceStack source, String name) throws CommandSyntaxException {
-        WorldUtil.checkSkyblock(source);
-        ServerLevel level = source.getLevel();
-        SkyblockSavedData data = SkyblockSavedData.get(level);
-
-        ServerPlayer player = source.getPlayerOrException();
-        Team team = data.getTeam(name);
-
-        if (team == null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+        CommandUtil.ValidationResult validationResult = CommandUtil.validateTeamExistence(source, name);
+        if (validationResult == null) {
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !data.getOrCreateMetaInfo(player).canVisit(level.getGameTime())) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.cooldown",
-                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.visitCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastVisitTeleport()))));
+        ServerPlayer player = validationResult.player();
+        Level level = player.level();
+        SkyblockSavedData data = validationResult.data();
+        Team team = validationResult.team();
+
+        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !data.getOrCreateMetaInfo(player).canTeleport(SkyMeta.TeleportType.VISIT, level.getGameTime())) {
+            source.sendFailure(SkyComponents.ERROR_COOLDOWN.apply(
+                    RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.visitCooldown - (level.getGameTime() - data.getOrCreateMetaInfo(player).getLastTeleport(SkyMeta.TeleportType.VISIT)))
+            ));
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleportation_not_allowed_dimension"));
+        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(level.dimension().location())) {
+            source.sendFailure(SkyComponents.ERROR_TELEPORTATION_NOT_ALLOWED_DIMENSION);
             return 0;
         }
 
-        if (!player.hasPermissions(2) && !PermissionsConfig.Teleports.crossDimensionTeleportation && player.level() != data.getLevel()) {
-            source.sendFailure(Component.translatable("skyblockbuilder.command.error.teleport_across_dimensions"));
+        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && level != data.getLevel()) {
+            source.sendFailure(SkyComponents.ERROR_TELEPORT_ACROSS_DIMENSIONS);
             return 0;
         }
 
         switch (SkyblockHooks.onVisit(player, team)) {
             case DENY:
-                source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
+                source.sendFailure(SkyComponents.DISABLED_VISIT_TEAM);
                 return 0;
             case DEFAULT:
                 if (team.hasPlayer(player)) {
-                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.visit_own_team").withStyle(ChatFormatting.RED), false);
+                    source.sendFailure(SkyComponents.ERROR_VISIT_OWN_TEAM);
                     return 0;
                 }
-                if (!player.hasPermissions(2)) {
-                    if (!PermissionsConfig.Teleports.allowVisits) {
-                        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.team_visit").withStyle(ChatFormatting.RED), false);
+                if (!PermissionManager.INSTANCE.mayExecuteOpCommand(player)) {
+                    if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_TO_VISITING_ISLAND)) {
+                        source.sendFailure(SkyComponents.DISABLED_TEAM_VISIT);
                         return 0;
                     }
+
                     if (!team.allowsVisits()) {
-                        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED), false);
+                        source.sendFailure(SkyComponents.DISABLED_VISIT_TEAM);
                         return 0;
                     }
                 }
@@ -79,8 +81,8 @@ public class VisitCommand {
         }
 
         WorldUtil.teleportToIsland(player, team);
-        data.getOrCreateMetaInfo(player).setLastVisitTeleport(level.getGameTime());
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.visit_team", name).withStyle(ChatFormatting.GOLD), true);
+        data.getOrCreateMetaInfo(player).setLastTeleport(SkyMeta.TeleportType.VISIT, level.getGameTime());
+        source.sendSuccess(() -> SkyComponents.SUCCESS_VISIT_TEAM.apply(name), true);
         return 1;
     }
 }

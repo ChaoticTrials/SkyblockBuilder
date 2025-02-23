@@ -4,16 +4,14 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.Suggestions;
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
-import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.ChatFormatting;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.CommandUtil;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 public class AcceptCommand {
@@ -26,34 +24,32 @@ public class AcceptCommand {
     }
 
     private static int acceptTeam(CommandSourceStack source, String teamName) throws CommandSyntaxException {
-        WorldUtil.checkSkyblock(source);
-        ServerLevel level = source.getLevel();
-        SkyblockSavedData data = SkyblockSavedData.get(level);
-        ServerPlayer player = source.getPlayerOrException();
-        Team team = data.getTeam(teamName);
-
-        if (team == null) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED), false);
+        CommandUtil.ValidationResult validationResult = CommandUtil.validateTeamExistence(source, teamName);
+        if (validationResult == null) {
             return 0;
         }
 
+        ServerPlayer player = validationResult.player();
+        SkyblockSavedData data = SkyblockSavedData.get(player.level());
+        Team team = validationResult.team();
+
         if (data.hasPlayerTeam(player)) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.player_has_team").withStyle(ChatFormatting.RED), false);
+            source.sendFailure(SkyComponents.ERROR_PLAYER_HAS_TEAM.apply(player.getDisplayName().getString()));
             return 0;
         }
 
         if (!data.hasInvites(player)) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.no_invitations").withStyle(ChatFormatting.RED), false);
+            source.sendFailure(SkyComponents.ERROR_NO_INVITATIONS);
             return 0;
         }
 
         switch (SkyblockHooks.onAccept(player, team)) {
             case DENY:
-                source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.denied.accept_invitations").withStyle(ChatFormatting.RED), false);
+                source.sendFailure(SkyComponents.DENIED_ACCEPT_INVITATIONS);
                 return 0;
             case DEFAULT:
-                if (!PermissionsConfig.selfManage && !source.hasPermission(2)) {
-                    source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.disabled.accept_invitations").withStyle(ChatFormatting.RED), false);
+                if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_HANDLE_INVITES)) {
+                    source.sendFailure(SkyComponents.DISABLED_ACCEPT_INVITATIONS);
                     return 0;
                 }
                 break;
@@ -62,11 +58,11 @@ public class AcceptCommand {
         }
 
         if (!data.acceptInvite(team, player)) {
-            source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.error.accept_invitations").withStyle(ChatFormatting.RED), false);
+            source.sendFailure(SkyComponents.ERROR_ACCEPT_INVITATIONS);
             return 0;
         }
 
-        source.sendSuccess(() -> Component.translatable("skyblockbuilder.command.success.joined_team", team.getName()).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_JOINED_TEAM.apply(team.getName()), true);
         return 1;
     }
 

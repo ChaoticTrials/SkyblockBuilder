@@ -1,0 +1,42 @@
+name: Dev Publishing
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'update/1.21.x'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build
+        run: |
+          chmod +x gradlew
+          ./gradlew clean build
+        env:
+          IS_DEV: true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: skyblock-builder
+          path: build/libs/*.jar
+
+      - name: Send Discord Notification
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          username: Endermite
+          avatar-url: https://cdn.discordapp.com/avatars/1254781618196054108/724c24e2324939a8c8cfd17fb55f76e8.webp?size=256
+          embed-title: "Skyblock Builder"
+          embed-url: "https://github.com/ChaoticTrials/SkyblockBuilder/actions/runs/${{ github.run_id }}"
+          embed-description: "A new build has been completed on the `update/1.21.x` branch! [View build details](https://github.com/ChaoticTrials/SkyblockBuilder/actions/runs/${{ github.run_id }})"
+          embed-author-name: "Endermite"
+          embed-thumbnail-url: "https://avatars.githubusercontent.com/u/172169094"

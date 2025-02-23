@@ -48,9 +48,16 @@ public class BiomeSourceConverter {
                     return optionalResourceKey.filter(biomeResourceKey -> resourceList.test(biomeResourceKey.location())).isPresent();
                 }).collect(Collectors.toList());
                 if (parameters.isEmpty()) {
-                    newBiomes.forEach(holder -> {
-                        parameters.add(Pair.of(new Climate.ParameterPoint(Climate.Parameter.point(0), Climate.Parameter.point(0), Climate.Parameter.point(0), Climate.Parameter.point(0), Climate.Parameter.point(0), Climate.Parameter.point(0), 0L), holder));
-                    });
+                    newBiomes.forEach(holder -> parameters.add(Pair.of(
+                            new Climate.ParameterPoint(
+                                    Climate.Parameter.point(0),
+                                    Climate.Parameter.point(0),
+                                    Climate.Parameter.point(0),
+                                    Climate.Parameter.point(0),
+                                    Climate.Parameter.point(0),
+                                    Climate.Parameter.point(0),
+                                    0L
+                            ), holder)));
                 }
                 return MultiNoiseBiomeSource.createFromList(new Climate.ParameterList<>(parameters));
             }
