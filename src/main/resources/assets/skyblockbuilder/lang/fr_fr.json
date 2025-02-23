@@ -80,8 +80,6 @@
   "skyblockbuilder.command.info.toggle_request": "Les demandes d'adhésion par les autres joueurs sont maintenant %s.",
 
   "skyblockbuilder.command.success.reset_island": "Définition réussit de la forme de l'île de %s.",
-  "skyblockbuilder.command.success.export_spawns": "Exportation réussie des points d'apparitions actuels vers %s.",
-  "skyblockbuilder.command.success.export_spawns_to_config": "Exportation réussie des points d'apparition actuels vers la configuration, en utilisant la clé '%s'",
   "skyblockbuilder.command.success.export_inventory": "Inventaire exporté à %s avec succès",
   "skyblockbuilder.command.success.joined_team": "Adhésion à l'équipe %s réussit.",
   "skyblockbuilder.command.success.declined_invitation": "Suppression de l'invitation de l'équipe %s réussit.",

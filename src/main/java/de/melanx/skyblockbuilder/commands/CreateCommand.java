@@ -10,7 +10,6 @@ import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -73,7 +72,7 @@ public class CreateCommand {
             });
         }
 
-        source.sendSuccess(() -> SkyComponents.SUCCESS_CREATE_TEAM.apply(finalName).withStyle(ChatFormatting.GREEN), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_CREATE_TEAM.apply(finalName), true);
         return 1;
     }
 

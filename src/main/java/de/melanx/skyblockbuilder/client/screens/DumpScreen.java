@@ -20,12 +20,12 @@ import java.nio.file.Path;
 
 public class DumpScreen extends BaseScreen {
 
+    private static final int CHECKBOX_SIZE = 10;
     private static final int CHECKBOX_X = 10;
     private static final int CHECKBOX_FIRST_Y = 25;
     private static final int TEXT_X = CHECKBOX_X + 17;
     private static final int TEXT_FIRST_Y = CHECKBOX_FIRST_Y + 2;
     private static final int ROW_OFFSET = 15;
-    public boolean isOpPlayer = DumpScreen.isOpPlayer();
     public MinecraftServer server;
     public SizeableCheckbox includeConfigs;
     public SizeableCheckbox includeTemplates;
@@ -43,14 +43,14 @@ public class DumpScreen extends BaseScreen {
     protected void init() {
         super.init();
         int i = 1;
-        this.includeConfigs = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y), 10, true));
-        this.includeTemplates = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), 10, true));
-        this.includeLevelDat = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), 10, true));
-        this.includeLog = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), 10, true));
-        this.includeCrashReport = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), 10, true));
-        this.includeSkyblockBuilderWorldData = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), 10, true));
-        this.generateOnServer = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i), 10, false));
-        this.generateOnServer.visible = this.isOpPlayer;
+        this.includeConfigs = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y), CHECKBOX_SIZE, true));
+        this.includeTemplates = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), CHECKBOX_SIZE, true));
+        this.includeLevelDat = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), CHECKBOX_SIZE, true));
+        this.includeLog = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), CHECKBOX_SIZE, true));
+        this.includeCrashReport = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), CHECKBOX_SIZE, true));
+        this.includeSkyblockBuilderWorldData = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), CHECKBOX_SIZE, true));
+        this.generateOnServer = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i), CHECKBOX_SIZE, false));
+        this.generateOnServer.visible = DumpScreen.isOpPlayer();
         this.addRenderableWidget(Button.builder(SkyComponents.SCREEN_DUMP_BUTTON_CREATE, button -> {
                     if (this.generateOnServer.selected()) {
                         SkyblockBuilder.getNetwork().createSkyblockDump(
@@ -77,7 +77,7 @@ public class DumpScreen extends BaseScreen {
                     }
                     this.onClose();
                 })
-                .bounds(this.centeredX(Button.SMALL_WIDTH), this.y(this.isOpPlayer ? 137 : 137 - ROW_OFFSET), Button.SMALL_WIDTH, Button.DEFAULT_HEIGHT)
+                .bounds(this.centeredX(Button.SMALL_WIDTH), this.y(DumpScreen.isOpPlayer() ? 137 : 137 - ROW_OFFSET), Button.SMALL_WIDTH, Button.DEFAULT_HEIGHT)
                 .build());
     }
 
@@ -96,7 +96,7 @@ public class DumpScreen extends BaseScreen {
         guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_CRASH_REPORT, this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
         guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_DATA_FILE, this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i++), Color.DARK_GRAY.getRGB(), false);
 
-        if (this.isOpPlayer) {
+        if (DumpScreen.isOpPlayer()) {
             guiGraphics.drawString(this.font, SkyComponents.SCREEN_DUMP_TEXT_CREATE_ON_SERVER, this.x(TEXT_X), this.y(TEXT_FIRST_Y + ROW_OFFSET * i), Color.DARK_GRAY.getRGB(), false);
         }
     }

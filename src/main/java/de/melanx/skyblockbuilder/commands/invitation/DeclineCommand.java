@@ -8,7 +8,6 @@ import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.CommandUtil;
 import de.melanx.skyblockbuilder.util.SkyComponents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,7 +52,7 @@ public class DeclineCommand {
             return 0;
         }
 
-        source.sendSuccess(() -> SkyComponents.SUCCESS_DECLINED_INVITATION.apply(validationResult.team().getName()).withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_DECLINED_INVITATION.apply(validationResult.team().getName()), true);
         return 1;
     }
 }

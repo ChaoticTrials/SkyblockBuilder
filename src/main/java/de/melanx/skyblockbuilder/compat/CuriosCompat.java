@@ -30,27 +30,26 @@ public class CuriosCompat {
             return;
         }
 
-        CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
-            handler.getCurios().forEach((id, type) -> {
-                IDynamicStackHandler stacks = type.getStacks();
-                IDynamicStackHandler cosmeticStacks = type.getCosmeticStacks();
-                for (int i = 0; i < type.getSlots(); i++) {
-                    ItemStack stack = stacks.getStackInSlot(i);
-                    ItemStack stack1 = cosmeticStacks.getStackInSlot(i);
-                    stacks.setStackInSlot(i, ItemStack.EMPTY);
-                    cosmeticStacks.setStackInSlot(i, ItemStack.EMPTY);
-                    player.drop(stack, true, false);
-                    player.drop(stack1, true, false);
-                }
-            });
-        });
+        CuriosApi.getCuriosInventory(player).ifPresent(handler -> handler.getCurios().forEach(
+                (id, type) -> {
+                    IDynamicStackHandler stacks = type.getStacks();
+                    IDynamicStackHandler cosmeticStacks = type.getCosmeticStacks();
+                    for (int i = 0; i < type.getSlots(); i++) {
+                        ItemStack stack = stacks.getStackInSlot(i);
+                        ItemStack stack1 = cosmeticStacks.getStackInSlot(i);
+                        stacks.setStackInSlot(i, ItemStack.EMPTY);
+                        cosmeticStacks.setStackInSlot(i, ItemStack.EMPTY);
+                        player.drop(stack, true, false);
+                        player.drop(stack1, true, false);
+                    }
+                }));
     }
 
     public static void setStartInventory(Player player) {
         CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
             Map<String, ICurioStacksHandler> curios = handler.getCurios();
 
-                outerLoop:
+            outerLoop:
             for (Pair<String, ItemStack> entry : CuriosCompat.STARTER_ITEMS) {
                 ICurioStacksHandler stacksHandler = curios.get(entry.getKey());
                 if (stacksHandler == null) {

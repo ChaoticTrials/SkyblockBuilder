@@ -29,6 +29,8 @@ public class ChoosePaletteScreen extends Screen {
     protected ChoosePaletteScreen(CustomizeSkyblockScreen parent, ConfiguredTemplate template) {
         super(SkyComponents.SCREEN_SELECT_PALETTE);
         this.template = template;
+        assert parent.getTemplateList() != null;
+        assert parent.getTemplateList().getSelected() != null;
         this.applyIndex = i -> parent.getTemplateList().getSelected().setPaletteIndex(i);
         this.resetIndex = () -> parent.getTemplateList().getSelected().resetPaletteIndex();
     }

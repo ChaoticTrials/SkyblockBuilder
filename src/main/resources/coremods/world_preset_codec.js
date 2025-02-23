@@ -1,7 +1,7 @@
 function initializeCoreMod() {
-    var Opcodes = Java.type('org.objectweb.asm.Opcodes');
-    var InsnList = Java.type('org.objectweb.asm.tree.InsnList');
-    var MethodInsnNode = Java.type('org.objectweb.asm.tree.MethodInsnNode');
+    const Opcodes = Java.type('org.objectweb.asm.Opcodes');
+    const InsnList = Java.type('org.objectweb.asm.tree.InsnList');
+    const MethodInsnNode = Java.type('org.objectweb.asm.tree.MethodInsnNode');
 
     return {
         'modify_codec': {
@@ -22,9 +22,9 @@ function initializeCoreMod() {
                 ));
                 for (let i = 0; i < method.instructions.size(); i++) {
                     const node = method.instructions.get(i);
-                    if (node.getOpcode() == Opcodes.PUTSTATIC) {
-                        var fieldNode = node;
-                        if (fieldNode.owner == 'net/minecraft/world/level/levelgen/presets/WorldPreset' && fieldNode.name == 'DIRECT_CODEC') {
+                    if (node.getOpcode() === Opcodes.PUTSTATIC) {
+                        const fieldNode = node;
+                        if (fieldNode.owner === 'net/minecraft/world/level/levelgen/presets/WorldPreset' && fieldNode.name === 'DIRECT_CODEC') {
                             method.instructions.insertBefore(fieldNode, target);
                             return method;
                         }

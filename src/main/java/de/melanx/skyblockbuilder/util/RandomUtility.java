@@ -2,10 +2,8 @@ package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.yggdrasil.ProfileResult;
-import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
 import de.melanx.skyblockbuilder.config.StartingInventory;
@@ -18,10 +16,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -31,7 +26,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -48,30 +42,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class RandomUtility {
-
-    public static JsonObject serializeItem(ItemStack stack, HolderLookup.Provider provider) {
-        Tag tag = stack.save(provider);
-
-        JsonObject json = NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, tag).getAsJsonObject();
-//        json.addProperty("item", tag.getString("id"));
-//
-//        int count = tag.getInt("Count");
-//        if (count > 1) {
-//            json.addProperty("count", count);
-//        }
-//
-//        if (tag.contains("tag")) {
-//            //noinspection ConstantConditions
-//            json.addProperty("nbt", tag.get("tag").toString());
-//        }
-//
-//        if (tag.contains("ForgeCaps")) {
-//            //noinspection ConstantConditions
-//            json.addProperty("ForgeCaps", tag.get("ForgeCaps").toString());
-//        }
-
-        return json;
-    }
 
     public static void dropInventories(Player player) {
         if (player.isSpectator() || player.isCreative()) {

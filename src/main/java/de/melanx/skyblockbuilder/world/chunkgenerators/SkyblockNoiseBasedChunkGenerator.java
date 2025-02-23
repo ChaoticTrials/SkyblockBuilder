@@ -234,16 +234,15 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
                         try {
                             level.setCurrentlyGenerating(currentlyGenerating);
-                            structureManager.startsForStructure(sectionPos, structure).forEach((structureStart) -> {
-                                structureStart.placeInChunk(level, structureManager, this, worldgenRandom, getWritableArea(chunk), chunkPos);
-                            });
+                            structureManager.startsForStructure(sectionPos, structure).forEach(
+                                    structureStart -> structureStart.placeInChunk(level, structureManager, this, worldgenRandom, getWritableArea(chunk), chunkPos));
                         } catch (Exception e) {
                             CrashReport report = CrashReport.forThrowable(e, "Feature placement");
                             report.addCategory("Feature").setDetail("Description", currentlyGenerating::get);
                             throw new ReportedException(report);
                         }
 
-                        ++index;
+                        index++;
                     }
                 }
 
@@ -255,9 +254,8 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                         if (i < holderSets.size()) {
                             HolderSet<PlacedFeature> featureHolderSet = holderSets.get(i);
                             FeatureSorter.StepFeatureData stepFeatureData = stepFeatureDataList.get(i);
-                            featureHolderSet.stream().map(Holder::value).forEach((p_223174_) -> {
-                                mapping.add(stepFeatureData.indexMapping().applyAsInt(p_223174_));
-                            });
+                            featureHolderSet.stream().map(Holder::value).forEach(
+                                    placedFeature -> mapping.add(stepFeatureData.indexMapping().applyAsInt(placedFeature)));
                         }
                     }
 

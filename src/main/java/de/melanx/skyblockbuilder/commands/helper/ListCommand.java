@@ -73,7 +73,8 @@ public class ListCommand {
 
         Team team = validationResult.team();
         GameProfileCache profileCache = source.getServer().getProfileCache();
-        source.sendSuccess(() -> SkyComponents.INFO_TEAM_DETAILED.apply(team.getName(), team.getPlayers().size()).withStyle(ChatFormatting.GOLD), false);
+        assert profileCache != null;
+        source.sendSuccess(() -> SkyComponents.INFO_TEAM_DETAILED.apply(team.getName(), team.getPlayers().size()), false);
         team.getPlayers().forEach(id -> {
             Optional<GameProfile> profile = profileCache.get(id);
             if (profile.isPresent()) {

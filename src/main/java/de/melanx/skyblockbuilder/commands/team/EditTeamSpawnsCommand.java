@@ -133,7 +133,7 @@ public class EditTeamSpawnsCommand {
             return 0;
         }
 
-        source.sendSuccess(() -> SkyComponents.SUCCESS_SPAWN_REMOVED.apply(pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_SPAWN_REMOVED.apply(pos.getX(), pos.getY(), pos.getZ()), false);
         return 1;
     }
 
@@ -201,7 +201,7 @@ public class EditTeamSpawnsCommand {
         }
 
         team.setPossibleSpawns(team.getDefaultPossibleSpawns());
-        source.sendSuccess(() -> SkyComponents.SUCCESS_RESET_SPAWNS.withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> SkyComponents.SUCCESS_RESET_SPAWNS, true);
         return 1;
     }
 }

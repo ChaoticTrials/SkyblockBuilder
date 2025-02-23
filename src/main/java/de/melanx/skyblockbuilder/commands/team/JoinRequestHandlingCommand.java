@@ -3,11 +3,11 @@ package de.melanx.skyblockbuilder.commands.team;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.Suggestions;
-import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.events.SkyblockJoinRequestEvent;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.CommandUtil;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
@@ -15,7 +15,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Style;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 import javax.annotation.Nullable;
@@ -35,7 +34,7 @@ public class JoinRequestHandlingCommand {
     }
 
     private static int acceptRequest(CommandSourceStack source, ServerPlayer player) throws CommandSyntaxException {
-        ValidationResult validationResult = JoinRequestHandlingCommand.checkJoinRequestValidity(source, player);
+        CommandUtil.ValidationResult validationResult = JoinRequestHandlingCommand.checkJoinRequestValidity(source, player);
         if (validationResult == null) {
             return 0;
         }
@@ -64,7 +63,7 @@ public class JoinRequestHandlingCommand {
     }
 
     private static int denyRequest(CommandSourceStack source, ServerPlayer player) throws CommandSyntaxException {
-        ValidationResult validationResult = JoinRequestHandlingCommand.checkJoinRequestValidity(source, player);
+        CommandUtil.ValidationResult validationResult = JoinRequestHandlingCommand.checkJoinRequestValidity(source, player);
         if (validationResult == null) {
             return 0;
         }
@@ -93,26 +92,18 @@ public class JoinRequestHandlingCommand {
     }
 
     @Nullable
-    private static ValidationResult checkJoinRequestValidity(CommandSourceStack source, ServerPlayer player) throws CommandSyntaxException {
-        WorldUtil.checkSkyblock(source);
-        ServerLevel level = source.getLevel();
-        SkyblockSavedData data = SkyblockSavedData.get(level);
-
-        ServerPlayer commandPlayer = source.getPlayerOrException();
-        Team team = data.getTeamFromPlayer(commandPlayer);
-        if (team == null) {
-            source.sendFailure(SkyComponents.ERROR_USER_HAS_NO_TEAM);
+    private static CommandUtil.ValidationResult checkJoinRequestValidity(CommandSourceStack source, ServerPlayer player) throws CommandSyntaxException {
+        CommandUtil.ValidationResult result = CommandUtil.validatePlayerTeam(source);
+        if (result == null) {
             return null;
         }
 
-        if (data.hasPlayerTeam(player)) {
+        if (result.data().hasPlayerTeam(player)) {
             source.sendFailure(SkyComponents.ERROR_PLAYER_HAS_TEAM.apply(player.getDisplayName().toString()));
-            team.removeJoinRequest(player);
+            result.team().removeJoinRequest(player);
             return null;
         }
 
-        return new ValidationResult(data, commandPlayer, team);
+        return result;
     }
-
-    private record ValidationResult(SkyblockSavedData data, ServerPlayer player, Team team) {}
 }

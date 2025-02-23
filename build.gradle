@@ -1,5 +1,5 @@
 plugins {
-    id 'org.moddingx.modgradle.meta' version '5.0.2'
+    id 'org.moddingx.modgradle.meta' version '5.0.3'
 }
 
 repositories {
@@ -81,8 +81,8 @@ mod.configure {
             require 'libx'
             optional 'minemention'
             optional 'curios'
-            optional 'heracles'
-            optional 'cadmus'
+//            optional 'heracles'
+//            optional 'cadmus'
         }
         curseforge {
             projectId 446691

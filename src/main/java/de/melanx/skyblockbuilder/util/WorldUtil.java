@@ -44,7 +44,7 @@ public class WorldUtil {
         }
 
         //noinspection ConstantConditions
-        ServerLevel level = getConfiguredLevel(server);
+        ServerLevel level = WorldUtil.getConfiguredLevel(server);
 
         TemplatesConfig.Spawn spawn = validPosition(level, team);
         player.teleportTo(level, spawn.pos().getX() + 0.5, spawn.pos().getY() + 0.2, spawn.pos().getZ() + 0.5, spawn.direction().getYRot(), 0);

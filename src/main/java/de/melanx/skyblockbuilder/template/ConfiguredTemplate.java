@@ -77,13 +77,12 @@ public class ConfiguredTemplate {
 
     private void generateSpreads(LevelTicks<Block> blockTicks, ServerLevel serverLevel, @Nullable Team team, BlockPos pos, StructurePlaceSettings settings, RandomSource random, int flags) {
         for (Either<SingleSpreadEntry, GroupWeightedSpreadEntry> either : this.templateSpreads.spreads()) {
-            either.ifLeft(entry -> {
-                this.placeSingleSpread(entry, blockTicks, serverLevel, team, pos, settings, random, flags);
-            }).ifRight(weightedSpread -> {
-                for (SingleSpreadEntry entry : weightedSpread.chooseEntries(random)) {
-                    this.placeSingleSpread(entry, blockTicks, serverLevel, team, pos, settings, random, flags);
-                }
-            });
+            either.ifLeft(entry -> this.placeSingleSpread(entry, blockTicks, serverLevel, team, pos, settings, random, flags))
+                    .ifRight(weightedSpread -> {
+                        for (SingleSpreadEntry entry : weightedSpread.chooseEntries(random)) {
+                            this.placeSingleSpread(entry, blockTicks, serverLevel, team, pos, settings, random, flags);
+                        }
+                    });
         }
     }
 

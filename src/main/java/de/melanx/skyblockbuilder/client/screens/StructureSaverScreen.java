@@ -32,6 +32,7 @@ import org.moddingx.libx.render.RenderHelper;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -86,8 +87,7 @@ public class StructureSaverScreen extends BaseScreen {
     private void initForType(StructureSaverSettings.Type type) {
         this.addRenderableWidget(Button.builder(SkyComponents.SCREEN_BUTTON_SAVE, button -> {
                     if (!this.validator.get()) {
-                        //noinspection DataFlowIssue
-                        this.minecraft.setScreen(new ErrorScreen(type));
+                        Objects.requireNonNull(this.minecraft).setScreen(new ErrorScreen(type));
                         return;
                     }
 

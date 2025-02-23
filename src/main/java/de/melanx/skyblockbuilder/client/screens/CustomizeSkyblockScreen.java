@@ -115,9 +115,9 @@ public class CustomizeSkyblockScreen extends Screen {
         public TemplateList() {
             super(Objects.requireNonNull(CustomizeSkyblockScreen.this.minecraft), CustomizeSkyblockScreen.this.width, CustomizeSkyblockScreen.this.height, 37, 40);
             AtomicInteger index = new AtomicInteger();
-            CustomizeSkyblockScreen.this.templateMap.stream().sorted(Comparator.comparing(ConfiguredTemplate::getName)).forEach(entry -> {
-                this.addEntry(new TemplateEntry(entry, index.getAndIncrement()));
-            });
+            CustomizeSkyblockScreen.this.templateMap.stream().sorted(Comparator.comparing(ConfiguredTemplate::getName)).forEach(entry -> this.addEntry(
+                    new TemplateEntry(entry, index.getAndIncrement())
+            ));
         }
 
         @Override

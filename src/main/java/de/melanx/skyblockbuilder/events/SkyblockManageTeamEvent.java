@@ -77,16 +77,6 @@ public abstract class SkyblockManageTeamEvent extends Event {
         }
 
         /**
-         * @return The player who changes the visit ability
-         */
-        @Nonnull
-        @Override
-        public ServerPlayer getPlayer() {
-            //noinspection ConstantConditions
-            return super.getPlayer();
-        }
-
-        /**
          * @return Current visiting state
          */
         public boolean shouldAllowVisits() {
@@ -143,16 +133,6 @@ public abstract class SkyblockManageTeamEvent extends Event {
         }
 
         /**
-         * @return Player who adds the spawn point
-         */
-        @Nonnull
-        @Override
-        public ServerPlayer getPlayer() {
-            //noinspection ConstantConditions
-            return super.getPlayer();
-        }
-
-        /**
          * @return New spawn position
          */
         public BlockPos getPos() {
@@ -195,16 +175,6 @@ public abstract class SkyblockManageTeamEvent extends Event {
         public RemoveSpawn(@Nonnull ServerPlayer player, Team team, BlockPos pos) {
             super(player, team);
             this.pos = pos;
-        }
-
-        /**
-         * @return Player who removes the spawn point
-         */
-        @Nonnull
-        @Override
-        public ServerPlayer getPlayer() {
-            //noinspection ConstantConditions
-            return super.getPlayer();
         }
 
         /**
@@ -261,16 +231,6 @@ public abstract class SkyblockManageTeamEvent extends Event {
 
         public Leave(@Nonnull ServerPlayer player, Team team) {
             super(player, team);
-        }
-
-        /**
-         * @return Player who leaves the team
-         */
-        @Nonnull
-        @Override
-        public ServerPlayer getPlayer() {
-            //noinspection ConstantConditions
-            return super.getPlayer();
         }
     }
 }

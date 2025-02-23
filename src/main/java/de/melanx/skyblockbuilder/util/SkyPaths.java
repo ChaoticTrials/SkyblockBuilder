@@ -106,9 +106,10 @@ public class SkyPaths {
     }
 
     public static void writePortalsInformation() throws IOException {
-        String fileContent = "This directory is only for providing custom portals. At the moment, you only may set a custom portal when entering the nether.\n" +
-                "To do so, call your file \"to_nether.nbt\" or \"to_nether.snbt\".\n" +
-                "It needs to contain at least one nether portal block. If that is destroyed, the structure would re-generate when re-entering the nether.";
+        String fileContent = """
+                This directory is only for providing custom portals. At the moment, you only may set a custom portal when entering the nether.
+                To do so, call your file "to_nether.nbt" or "to_nether.snbt".
+                It needs to contain at least one nether portal block. If that is destroyed, the structure would re-generate when re-entering the nether.""";
 
         if (Files.exists(PORTALS_INFORMATION_FILE) && Files.readString(PORTALS_INFORMATION_FILE).equals(fileContent)) {
             return;

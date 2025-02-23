@@ -14,7 +14,7 @@ import java.util.List;
 
 public record TemplateSurroundingBlocks(int margin, List<WeightedBlock> blocks) {
 
-    public static TemplateSurroundingBlocks EMPTY = new TemplateSurroundingBlocks(0, List.of());
+    public static final TemplateSurroundingBlocks EMPTY = new TemplateSurroundingBlocks(0, List.of());
 
     public static TemplateSurroundingBlocks fromJson(JsonObject json) {
         int margin = 1;
