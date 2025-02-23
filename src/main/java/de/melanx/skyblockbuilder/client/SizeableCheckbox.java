@@ -33,6 +33,7 @@ public class SizeableCheckbox extends Checkbox {
 
     public SizeableCheckbox(int x, int y, int size, boolean selected, @Nullable Tooltip tooltip, Checkbox.OnValueChange onValueChange) {
         super(x, y, size, Component.empty(), Minecraft.getInstance().font, selected, onValueChange);
+        this.height = size;
         this.setTooltip(tooltip);
     }
 

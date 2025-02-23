@@ -144,6 +144,10 @@ public class SkyComponents {
         return SkyComponents.dump("text." + key, args);
     }
 
+    public static MutableComponent errorScreen(String key, Object... args) {
+        return SkyComponents.screen("error." + key, args);
+    }
+
     // Command Arguments
     public static final MutableComponent ARGUMENT_DISABLE = SkyComponents.argument("disable");
     public static final MutableComponent ARGUMENT_DISABLED = SkyComponents.argument("disabled");
@@ -202,7 +206,6 @@ public class SkyComponents {
     public static final MutableComponent ERROR_NO_INVITATIONS = SkyComponents.error("no_invitations");
     public static final MutableComponent ERROR_NO_PLAYER_ADDED = SkyComponents.error("no_player_added");
     public static final MutableComponent ERROR_NO_SPREADS = SkyComponents.error("no_spreads");
-    public static final MutableComponent ERROR_OVERWRITE_CONFIG = SkyComponents.error("overwrite_config");
     public static final MutableComponent ERROR_PLAYER_ALREADY_INVITED = SkyComponents.error("player_already_invited");
     public static final MutableComponent ERROR_PLAYER_HAS_NO_TEAM = SkyComponents.error("player_has_no_team");
     public static final Function<String, MutableComponent> ERROR_PLAYER_HAS_TEAM = playerName -> SkyComponents.error("player_has_team", playerName);
@@ -240,8 +243,6 @@ public class SkyComponents {
     public static final Function<String, MutableComponent> SUCCESS_DELETE_ONE_TEAM = teamName -> SkyComponents.success("delete_one_team", teamName);
     public static final Function<String, MutableComponent> SUCCESS_DENY_REQUEST_ACCEPTED = teamName -> SkyComponents.success("deny_request_accepted", teamName);
     public static final Function<String, MutableComponent> SUCCESS_EXPORT_INVENTORY = path -> SkyComponents.success("export_inventory", path);
-    public static final MutableComponent SUCCESS_EXPORT_SPAWNS = SkyComponents.success("export_spawns");
-    public static final MutableComponent SUCCESS_EXPORT_SPAWNS_TO_CONFIG = SkyComponents.success("export_spawns_to_config");
     public static final Function<String, MutableComponent> SUCCESS_JOIN_REQUEST = teamName -> SkyComponents.success("join_request", teamName);
     public static final Function<String, MutableComponent> SUCCESS_JOIN_REQUEST_ACCEPTED = teamName -> SkyComponents.success("join_request_accepted", teamName);
     public static final Function<String, MutableComponent> SUCCESS_JOINED_TEAM = teamName -> SkyComponents.success("joined_team", teamName);
@@ -280,12 +281,12 @@ public class SkyComponents {
     public static final Function4<Integer, Integer, Integer, Integer, MutableComponent> STRUCTURE_SAVER_POS = (i, posX, posY, posZ) -> SkyComponents.structureSaverDescription("position_set", i, posX, posY, posZ);
     public static final MutableComponent ITEM_STRUCTURE_SAVER_IGNORE_AIR_TOOLTIP = SkyComponents.structureSaverTooltip("ignore_air");
     public static final MutableComponent ITEM_STRUCTURE_SAVER_NBT_TO_SNBT_TOOLTIP = SkyComponents.structureSaverTooltip("nbt_to_snbt");
+    public static final MutableComponent ITEM_STRUCTURE_SAVER_KEEP_POSITIONS_TOOLTIP = SkyComponents.structureSaverTooltip("keep_positions");
     public static final MutableComponent ITEM_STRUCTURE_SAVER_SAVE_TO_CONFIG_TOOLTIP = SkyComponents.structureSaverTooltip("save_to_config");
-    public static final MutableComponent ITEM_STRUCTURE_SAVER_NETHER_VALIDATION_TOOLTIP = SkyComponents.structureSaverTooltip("nether_validation");
     public static final MutableComponent ITEM_STRUCTURE_SAVER_IGNORE_AIR_DESC = SkyComponents.structureSaverDescription("ignore_air");
     public static final MutableComponent ITEM_STRUCTURE_SAVER_NBT_TO_SNBT_DESC = SkyComponents.structureSaverDescription("nbt_to_snbt");
+    public static final MutableComponent ITEM_STRUCTURE_SAVER_KEEP_POSITIONS_DESC = SkyComponents.structureSaverDescription("keep_positions");
     public static final MutableComponent ITEM_STRUCTURE_SAVER_SAVE_TO_CONFIG_DESC = SkyComponents.structureSaverDescription("save_to_config");
-    public static final MutableComponent ITEM_STRUCTURE_SAVER_NETHER_VALIDATION_DESC = SkyComponents.structureSaverDescription("nether_validation");
 
     // Screen
     public static final MutableComponent SCREEN_BUTTON_SAVE = SkyComponents.button("save");
@@ -293,6 +294,9 @@ public class SkyComponents {
     public static final MutableComponent SCREEN_BUTTON_OPEN_FOLDER_TOOLTIP = SkyComponents.button("open_folder.tooltip");
     public static final MutableComponent SCREEN_WIDGET_STRUCTURE_NAME = SkyComponents.widget("structure_name");
     public static final Function<String, MutableComponent> SCREEN_OPEN_FOLDER_ERROR = path -> SkyComponents.screen("open_folder.error", path);
+    public static final MutableComponent SCREEN_STRUCTURE_SAVER_TAB_ISLAND = SkyComponents.structureSaverTooltip("island").withStyle(ChatFormatting.BLUE);
+    public static final MutableComponent SCREEN_STRUCTURE_SAVER_TAB_SPREAD = SkyComponents.structureSaverTooltip("spread").withStyle(ChatFormatting.GREEN);
+    public static final MutableComponent SCREEN_STRUCTURE_SAVER_TAB_NETHER = SkyComponents.structureSaverTooltip("nether").withStyle(ChatFormatting.RED);
 
     // Screen Titles
     public static final MutableComponent SCREEN_STRUCTURE_SAVER = SkyComponents.screenTitle("structure_saver");
@@ -312,6 +316,11 @@ public class SkyComponents {
     public static final MutableComponent SCREEN_DUMP_SUCCESS_SERVER = SkyComponents.dump("success.server");
     public static final MutableComponent SCREEN_DUMP_CREATE_ISSUE = SkyComponents.dump("create_issue");
     public static final MutableComponent SCREEN_DUMP_FAILURE = SkyComponents.dump("failure").withStyle(ChatFormatting.RED);
+
+    // Error Screen
+    public static final MutableComponent SCREEN_ERROR_TITLE = SkyComponents.errorScreen("title");
+    public static final MutableComponent SCREEN_ERROR_MESSAGE = SkyComponents.errorScreen("message");
+    public static final MutableComponent SCREEN_ERROR_GIVE_BUTTON = SkyComponents.errorScreen("button.give");
 
     // Miscellaneous
     public static final Function<String, MutableComponent> SCHEMATIC_SAVED = path -> Component.translatable("skyblockbuilder.schematic.saved", path);

@@ -256,7 +256,7 @@ public class RandomUtility {
         String filename;
         Path filepath;
         do {
-            filename = (name == null ? "template" : RandomUtility.normalize(name)) + ((index == 0) ? "" : "_" + index) + "." + extension;
+            filename = ((name == null || name.isBlank()) ? "template" : RandomUtility.normalize(name)) + ((index == 0) ? "" : "_" + index) + "." + extension;
             index++;
             filepath = parentFolder.resolve(filename);
         } while (Files.exists(filepath));

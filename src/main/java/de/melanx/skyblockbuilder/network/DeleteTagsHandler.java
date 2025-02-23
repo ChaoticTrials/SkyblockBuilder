@@ -11,6 +11,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
 
+import javax.annotation.Nonnull;
+
 public class DeleteTagsHandler extends PacketHandler<DeleteTagsHandler.Message> {
 
     public static final CustomPacketPayload.Type<DeleteTagsHandler.Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("delete_tags"));
@@ -31,6 +33,7 @@ public class DeleteTagsHandler extends PacketHandler<DeleteTagsHandler.Message> 
 
     public record Message(ItemStack stack) implements CustomPacketPayload {
 
+        @Nonnull
         @Override
         public Type<? extends CustomPacketPayload> type() {
             return DeleteTagsHandler.TYPE;

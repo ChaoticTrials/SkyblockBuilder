@@ -32,7 +32,7 @@ public final class SkyblockBuilder extends ModXRegistration {
 
     private static SkyblockBuilder instance;
     private final SkyNetwork network;
-    private final Logger logger;
+    private final Logger logger = LoggerFactory.getLogger(SkyblockBuilder.class);
     public static final Gson PRETTY_GSON = Util.make(() -> {
         GsonBuilder gsonbuilder = new GsonBuilder();
         gsonbuilder.disableHtmlEscaping();
@@ -44,7 +44,6 @@ public final class SkyblockBuilder extends ModXRegistration {
     public SkyblockBuilder(IEventBus bus, Dist dist) {
         instance = this;
         this.network = new SkyNetwork(this);
-        this.logger = LoggerFactory.getLogger(SkyblockBuilder.class);
 
         SkyPaths.createDirectories();
         NeoForge.EVENT_BUS.register(new SpawnProtectionEvents());

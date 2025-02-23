@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder.network;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
+import de.melanx.skyblockbuilder.item.StructureSaverSettings;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.ChatFormatting;
@@ -38,33 +39,31 @@ public class SaveStructureHandler extends PacketHandler<SaveStructureHandler.Mes
         }
 
         ServerLevel level = (ServerLevel) player.level();
-        String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.saveToConfig, msg.ignoreAir, msg.asSnbt, msg.netherValidation, msg.name);
+        String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.settings);
         if (name == null) {
             player.displayClientMessage(Component.literal("Failed to save, look at latest.log for more information").withStyle(ChatFormatting.RED), false);
             return;
         }
-        ItemStack stack = ItemStructureSaver.removeComponents(msg.stack);
-        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-        Path fullPath = msg.saveToConfig ? SkyPaths.MOD_CONFIG.resolve(name) : SkyPaths.MOD_EXPORTS.resolve(name);
+
+        if (!msg.settings.keepPositions()) {
+            ItemStack stack = ItemStructureSaver.removeComponents(msg.stack);
+            player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+        }
+
+        Path fullPath = msg.settings.saveToConfig() ? SkyPaths.MOD_CONFIG.resolve(name) : SkyPaths.MOD_EXPORTS.resolve(name);
         Path savedPath = FMLPaths.GAMEDIR.get().relativize(fullPath);
         MutableComponent component = SkyComponents.SCHEMATIC_SAVED.apply(savedPath.toString().replace('\\', '/'));
         SkyblockBuilder.getLogger().info("Saved structure (and spawn points) to: {}", fullPath);
         player.displayClientMessage(component, true);
     }
 
-    public record Message(ItemStack stack, String name, boolean saveToConfig, boolean ignoreAir, boolean asSnbt,
-                          boolean netherValidation) implements CustomPacketPayload {
+    public record Message(ItemStack stack, StructureSaverSettings settings) implements CustomPacketPayload {
 
         public static final StreamCodec<RegistryFriendlyByteBuf, SaveStructureHandler.Message> CODEC = StreamCodec.of(
                 (buffer, msg) -> {
                     ItemStack.STREAM_CODEC.encode(buffer, msg.stack);
-                    buffer.writeUtf(msg.name);
-                    buffer.writeBoolean(msg.saveToConfig);
-                    buffer.writeBoolean(msg.ignoreAir);
-                    buffer.writeBoolean(msg.asSnbt);
-                    buffer.writeBoolean(msg.netherValidation);
-                },
-                buffer -> new Message(ItemStack.STREAM_CODEC.decode(buffer), buffer.readUtf(Short.MAX_VALUE), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean())
+                    StructureSaverSettings.STREAM_CODEC.encode(buffer, msg.settings);
+                }, buffer -> new SaveStructureHandler.Message(ItemStack.STREAM_CODEC.decode(buffer), StructureSaverSettings.STREAM_CODEC.decode(buffer))
         );
 
         @Nonnull

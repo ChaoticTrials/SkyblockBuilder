@@ -1,8 +1,10 @@
 package de.melanx.skyblockbuilder.registration;
 
+import de.melanx.skyblockbuilder.item.StructureSaverSettings;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.nbt.CompoundTag;
 import org.moddingx.libx.annotation.registration.RegisterClass;
+import org.moddingx.libx.codec.MoreCodecs;
 
 import java.util.function.UnaryOperator;
 
@@ -11,6 +13,8 @@ public class ModDataComponentTypes {
 
     public static final DataComponentType<CompoundTag> positions = ModDataComponentTypes.builder(builder -> builder.persistent(CompoundTag.CODEC));
     public static final DataComponentType<CompoundTag> previousPositions = ModDataComponentTypes.builder(builder -> builder.persistent(CompoundTag.CODEC));
+    public static final DataComponentType<StructureSaverSettings.Type> structureSaverType = ModDataComponentTypes.builder(builder -> builder.persistent(MoreCodecs.enumCodec(StructureSaverSettings.Type.class)));
+    public static final DataComponentType<StructureSaverSettings> structureSaverSettings = ModDataComponentTypes.builder(builder -> builder.persistent(StructureSaverSettings.CODEC));
 
     private static <T> DataComponentType<T> builder(UnaryOperator<DataComponentType.Builder<T>> builder) {
         return builder.apply(new DataComponentType.Builder<>()).build();

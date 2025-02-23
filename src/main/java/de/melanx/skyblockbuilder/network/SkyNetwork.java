@@ -2,10 +2,12 @@ package de.melanx.skyblockbuilder.network;
 
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.item.StructureSaverSettings;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -19,8 +21,6 @@ import java.util.Set;
 
 public class SkyNetwork extends NetworkX {
 
-    private static SkyNetwork instance = null;
-
     public SkyNetwork(ModX mod) {
         super(mod);
 
@@ -28,6 +28,9 @@ public class SkyNetwork extends NetworkX {
         this.register(new SaveStructureHandler());
         this.register(new DeleteTagsHandler());
         this.register(new CreateSkyblockDumpHandler());
+        this.register(new GiveItemHandler());
+        this.register(new UpdateStructureSaverTypeHandler());
+        this.register(new UpdateStructureSaverSettingsHandler());
 
         // send to client
         this.register(new SkyblockDataUpdateHandler());
@@ -63,8 +66,20 @@ public class SkyNetwork extends NetworkX {
         PacketDistributor.sendToServer(new CreateSkyblockDumpHandler.Message(includeConfigs, includeTemplates, includeLevelDat, includeLog, includeCrashReport, includeSkyblockBuilderWorldData));
     }
 
-    public void saveStructure(ItemStack stack, String name, boolean saveToConfig, boolean ignoreAir, boolean asSnbt, boolean netherValidation) {
-        PacketDistributor.sendToServer(new SaveStructureHandler.Message(stack, name, saveToConfig, ignoreAir, asSnbt, netherValidation));
+    public void saveStructure(ItemStack stack, StructureSaverSettings settings) {
+        PacketDistributor.sendToServer(new SaveStructureHandler.Message(stack, settings));
+    }
+
+    public void giveItem(Item item) {
+        PacketDistributor.sendToServer(new GiveItemHandler.Message(item));
+    }
+
+    public void changeStructureSaverType(ItemStack stack, StructureSaverSettings.Type type) {
+        PacketDistributor.sendToServer(new UpdateStructureSaverTypeHandler.Message(stack, type));
+    }
+
+    public void updateStructureSaverSettings(ItemStack stack, StructureSaverSettings settings) {
+        PacketDistributor.sendToServer(new UpdateStructureSaverSettingsHandler.Message(stack, settings));
     }
 
     public void updateProfiles(Player player) {

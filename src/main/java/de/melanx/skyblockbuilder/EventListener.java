@@ -137,7 +137,7 @@ public class EventListener {
                 player.getInventory().clearContent();
             }
 
-            SkyblockBuilder.getLogger().info("First time {} joined. Putting into spawn team.", player.getDisplayName());
+            SkyblockBuilder.getLogger().info("First time {} joined. Putting into spawn team.", player.getDisplayName().getString());
             data.addPlayerToTeam(spawn, player);
             try {
                 //noinspection OptionalGetWithoutIsPresent

@@ -3,9 +3,11 @@ package de.melanx.skyblockbuilder.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.screens.CustomizeSkyblockScreen;
 import de.melanx.skyblockbuilder.commands.OpenDumpScreen;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
+import de.melanx.skyblockbuilder.item.StructureSaverSettings;
 import de.melanx.skyblockbuilder.registration.ModBlocks;
 import de.melanx.skyblockbuilder.registration.ModDataComponentTypes;
 import de.melanx.skyblockbuilder.registration.ModItems;
@@ -15,6 +17,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,6 +31,7 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterPresetEditorsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.lwjgl.glfw.GLFW;
@@ -54,6 +58,14 @@ public class ClientEventListener {
             event.accept(ModItems.structureSaver);
             event.accept(ModBlocks.spawnBlock);
         }
+    }
+
+    @SubscribeEvent
+    public void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        ItemProperties.register(ModItems.structureSaver, SkyblockBuilder.getInstance().resource("structure_saver_type"), ((stack, level, entity, seed) -> {
+            StructureSaverSettings.Type type = stack.get(ModDataComponentTypes.structureSaverType);
+            return type == null ? 0 : type.ordinal();
+        }));
     }
 
     private static void registerClientCommands(RegisterClientCommandsEvent event) {
