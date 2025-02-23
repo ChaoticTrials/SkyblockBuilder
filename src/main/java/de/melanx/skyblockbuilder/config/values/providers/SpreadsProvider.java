@@ -19,11 +19,11 @@ public interface SpreadsProvider {
             return new Reference(json.getAsString());
         }
 
-        if (json.isJsonObject()) {
+        if (json.isJsonArray()) {
             return new Direct(TemplateSpreads.CODEC.decode(JsonOps.INSTANCE, json).getOrThrow().getFirst());
         }
 
-        throw new IllegalArgumentException("Unknown spawns: " + json);
+        throw new IllegalArgumentException("Unknown spreads: " + json);
     }
 
     record Reference(String name) implements SpreadsProvider {
