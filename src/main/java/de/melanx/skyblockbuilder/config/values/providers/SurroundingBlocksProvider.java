@@ -13,6 +13,8 @@ public interface SurroundingBlocksProvider {
 
     JsonElement toJson();
 
+    boolean isEmpty();
+
     static SurroundingBlocksProvider fromJson(JsonElement json) {
         if (json.isJsonPrimitive()) {
             return new Reference(json.getAsString());
@@ -40,6 +42,11 @@ public interface SurroundingBlocksProvider {
         public JsonElement toJson() {
             return new JsonPrimitive(this.name);
         }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
     }
 
     record Direct(TemplateSurroundingBlocks templateSurroundingBlocks) implements SurroundingBlocksProvider {
@@ -47,6 +54,11 @@ public interface SurroundingBlocksProvider {
         @Override
         public JsonElement toJson() {
             return TemplateSurroundingBlocks.toJson(this.templateSurroundingBlocks);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return this.templateSurroundingBlocks.blocks().isEmpty() || this.templateSurroundingBlocks.margin() == 0;
         }
     }
 }

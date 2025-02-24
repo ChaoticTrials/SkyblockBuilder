@@ -14,6 +14,8 @@ public interface SpreadsProvider {
 
     JsonElement toJson();
 
+    boolean isEmpty();
+
     static SpreadsProvider fromJson(JsonElement json) {
         if (json.isJsonPrimitive()) {
             return new Reference(json.getAsString());
@@ -41,6 +43,11 @@ public interface SpreadsProvider {
         public JsonElement toJson() {
             return new JsonPrimitive(this.name);
         }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
     }
 
     record Direct(TemplateSpreads templateSpreads) implements SpreadsProvider {
@@ -48,6 +55,11 @@ public interface SpreadsProvider {
         @Override
         public JsonElement toJson() {
             return TemplateSpreads.CODEC.encodeStart(JsonOps.INSTANCE, this.templateSpreads).getOrThrow();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return this.templateSpreads.spreads().isEmpty();
         }
     }
 }

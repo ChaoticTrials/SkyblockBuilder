@@ -90,11 +90,11 @@ public class TemplateInfoMapper implements ValueMapper<TemplateInfo, JsonObject>
             json.add("offset", offsetArray);
         }
 
-        if (templateInfo.surroundingBlocks() != null) {
+        if (templateInfo.surroundingBlocks() != null && !templateInfo.surroundingBlocks().isEmpty()) {
             json.add("surroundingBlocks", templateInfo.surroundingBlocks().toJson());
         }
 
-        if (templateInfo.spreads() != null) {
+        if (templateInfo.spreads() != null && !templateInfo.spreads().isEmpty()) {
             json.add("spreads", templateInfo.spreads().toJson());
         }
 
