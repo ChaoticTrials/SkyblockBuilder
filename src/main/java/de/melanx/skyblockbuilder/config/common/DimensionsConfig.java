@@ -5,7 +5,6 @@ import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
 
 import java.util.List;
-import java.util.Optional;
 
 @RegisterConfig("dimensions")
 public class DimensionsConfig {
@@ -36,9 +35,6 @@ public class DimensionsConfig {
 
         @Config("Should nether use custom generation? [default: true]")
         public static boolean isCustom = true;
-
-        @Config("File name in template directory of a valid template containing a nether portal")
-        public static Optional<String> netherPortalStructure = Optional.empty();
 
         @Config({"A list of biomes for each island in a circle shape around the island.",
                 "First entry will be first circle of that radius. Second entry will be the next ring and the radius will be added to the previous radius.",
