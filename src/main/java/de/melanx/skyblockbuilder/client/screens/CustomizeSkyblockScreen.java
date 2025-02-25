@@ -142,8 +142,9 @@ public class CustomizeSkyblockScreen extends Screen {
             boolean hasSelectedEntry = this.getSelected() != null;
             if (hasSelectedEntry || this.configuredStructureRenderer != null) {
                 RenderSystem.enableBlend();
-                int size = (this.width - this.getRowWidth()) / 3;
                 boolean useIcon = hasSelectedEntry && this.getSelected().icon != null;
+                int size = useIcon ? (this.width - this.getRowWidth()) / 3
+                        : (this.width - this.getRowWidth()) / 2;
 
                 if (useIcon) {
                     //noinspection ConstantConditions
@@ -160,7 +161,10 @@ public class CustomizeSkyblockScreen extends Screen {
                         renderer = this.configuredStructureRenderer;
                     }
 
-                    renderer.render(guiGraphics, (int) ((this.width - this.getRowWidth()) / 2f - (size / 2f)), this.getRowTop(0) + size / 2);
+                    guiGraphics.pose().pushPose();
+                    guiGraphics.pose().translate(0, 0, 1000);
+                    renderer.render(guiGraphics, (int) ((CustomizeSkyblockScreen.this.width - this.getRowWidth()) / 2f - (size / 2f)), CustomizeSkyblockScreen.this.height / 2);
+                    guiGraphics.pose().popPose();
                 }
                 RenderSystem.disableBlend();
             }

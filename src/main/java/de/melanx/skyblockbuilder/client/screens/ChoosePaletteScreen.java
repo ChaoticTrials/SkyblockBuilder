@@ -25,6 +25,7 @@ public class ChoosePaletteScreen extends Screen {
     private int paletteIndex = 0;
     private transient final Map<Integer, TemplateRenderer> structureCache = new HashMap<>();
     private int rows = 1;
+    private int structureRenderSize;
 
     protected ChoosePaletteScreen(CustomizeSkyblockScreen parent, ConfiguredTemplate template) {
         super(SkyComponents.SCREEN_SELECT_PALETTE);
@@ -57,6 +58,8 @@ public class ChoosePaletteScreen extends Screen {
                 .pos(this.width / 2 + 5, this.height - 28)
                 .size(150, 20)
                 .build());
+
+        this.structureRenderSize = (int) (this.height - (this.height * 0.1) - ((this.rows - 1) * (BUTTON_STEP * 2)));
     }
 
     private void buildPaletteButtons() {
@@ -103,15 +106,13 @@ public class ChoosePaletteScreen extends Screen {
     public void resize(@Nonnull Minecraft minecraft, int width, int height) {
         super.resize(minecraft, width, height);
 
-        this.structureCache.forEach((i, renderer) -> renderer.setSize((float) (this.height - (this.height * 0.05) - ((this.rows - 1) * (BUTTON_STEP * 2)))));
+        this.structureCache.forEach((i, renderer) -> renderer.setSize(this.structureRenderSize));
     }
 
     @Override
     public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        int size = (int) (this.height - (this.height * 0.05) - ((this.rows - 1) * (BUTTON_STEP * 2)));
-
-        this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplateRenderer(this.template.getTemplate(), size, this.paletteIndex))
-                .render(guiGraphics, this.width / 2, size / 2 + 10);
+        this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplateRenderer(this.template.getTemplate(), this.structureRenderSize, this.paletteIndex))
+                .render(guiGraphics, this.width / 2, this.structureRenderSize / 2 + (int) (this.height * 0.05));
     }
 }
