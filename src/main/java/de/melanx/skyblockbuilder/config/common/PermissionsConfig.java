@@ -15,7 +15,16 @@ public class PermissionsConfig {
             "This enables the commands in worlds without any skyblock dimension"})
     public static boolean forceSkyblockCheck = false;
 
-    @Config
+    @Config({"Available permissions:",
+            "   team_create",
+            "   team_handle_invites",
+            "   team_handle_join_requests",
+            "   team_leave",
+            "   edit_spawns",
+            "   teleport_to_spawn",
+            "   teleport_to_visiting_island",
+            "   teleport_home",
+            "   teleport_across_dimensions"})
     public static List<PermissionManager.Permission> permissions = List.of(
             PermissionManager.Permission.TEAM_CREATE,
             PermissionManager.Permission.TEAM_HANDLE_INVITES,
@@ -24,7 +33,8 @@ public class PermissionsConfig {
             PermissionManager.Permission.EDIT_SPAWNS,
             PermissionManager.Permission.TELEPORT_TO_SPAWN,
             PermissionManager.Permission.TELEPORT_TO_VISITING_ISLAND,
-            PermissionManager.Permission.TELEPORT_HOME
+            PermissionManager.Permission.TELEPORT_HOME,
+            PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS
     );
 
     @Config("The minimum permission level to bypass the not-allowed permissions")
