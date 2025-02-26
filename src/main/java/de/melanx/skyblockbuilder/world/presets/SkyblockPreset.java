@@ -137,7 +137,7 @@ public class SkyblockPreset extends WorldPreset {
 
     public static FlatLayers getLayers(ResourceKey<Level> levelKey) {
         return WorldConfig.surface
-                ? WorldConfig.surfaceSettings.get(levelKey.location().toString())
+                ? WorldConfig.surfaceSettings.getOrDefault(levelKey.location().toString(), FlatLayers.EMPTY)
                 : FlatLayers.EMPTY;
     }
 
