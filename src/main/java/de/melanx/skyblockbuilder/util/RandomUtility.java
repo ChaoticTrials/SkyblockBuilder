@@ -13,6 +13,7 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.registration.ModBlocks;
 import net.minecraft.ChatFormatting;
+import net.minecraft.FileUtil;
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
@@ -218,7 +219,7 @@ public class RandomUtility {
     }
 
     public static String normalize(String s) {
-        return s.toLowerCase(Locale.ROOT).replaceAll("\\W+", "_");
+        return FileUtil.sanitizeName(s.toLowerCase(Locale.ROOT));
     }
 
     public static Path getFilePath(Path parentFolder, String name, String extension) {
