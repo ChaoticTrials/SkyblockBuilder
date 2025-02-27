@@ -48,7 +48,9 @@ public record TemplateSurroundingBlocks(int margin, List<WeightedBlock> blocks) 
     public static JsonObject toJson(TemplateSurroundingBlocks surroundingBlocks) {
         JsonObject json = new JsonObject();
 
-        json.addProperty("margin", surroundingBlocks.margin());
+        if (surroundingBlocks.margin() != 0) {
+            json.addProperty("margin", surroundingBlocks.margin());
+        }
 
         if (!surroundingBlocks.blocks().isEmpty()) {
             var blocksArray = new JsonArray();
