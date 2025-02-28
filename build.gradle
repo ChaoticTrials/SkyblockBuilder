@@ -61,7 +61,7 @@ mod.configure {
 
     changelog {
         def lines = defaultChangelog.toString().split('\n')
-        def filteredChangelog = lines.findAll { !it.startsWith('- [meta]') }.join('\n')
+        def filteredChangelog = lines.findAll { !it.startsWith('- [[meta]') }.join('\n')
 
         return filteredChangelog
     }
