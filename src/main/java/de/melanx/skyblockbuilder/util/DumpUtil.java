@@ -126,9 +126,9 @@ public class DumpUtil {
                 }
 
                 if (includeSkyblockBuilderWorldData) {
-                    Path data = levelPath.resolve("data").resolve("skyblock_builder.dat");
+                    Path data = levelPath.resolve("data").resolve("skyblockbuilder").resolve("main.dat");
                     if (data.toFile().exists()) {
-                        DumpUtil.addFileToZip(filesArray, zipStream, data, Paths.get("data", "skyblock_builder.dat"));
+                        DumpUtil.addFileToZip(filesArray, zipStream, data, Paths.get("data", "skyblockbuilder", "main.dat"));
                     }
                 }
             }
