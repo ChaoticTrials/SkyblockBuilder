@@ -62,9 +62,8 @@ public class SkyblockDataUpdateHandler extends PacketHandler<SkyblockDataUpdateH
                     buffer.writeUUID(msg.player);
                 },
                 buffer -> {
-                    SkyblockSavedData data = new SkyblockSavedData();
                     Tag tag = buffer.readNbt(NbtAccounter.unlimitedHeap());
-                    SkyblockSavedData.load((CompoundTag) tag);
+                    SkyblockSavedData data = SkyblockSavedData.load((CompoundTag) tag);
                     return new SkyblockDataUpdateHandler.Message(data, buffer.readUUID());
                 }
         );
