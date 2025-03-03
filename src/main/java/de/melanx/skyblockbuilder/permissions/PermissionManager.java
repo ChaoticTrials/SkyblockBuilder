@@ -11,12 +11,14 @@ public class PermissionManager {
     private PermissionManager() {}
 
     public boolean hasPermission(CommandSourceStack commandSourceStack, Permission permission) {
-        return commandSourceStack.hasPermission(PermissionsConfig.minimumPermissionLevelToBypass)
+        return INSTANCE.mayBypassLimitation(commandSourceStack)
+                || commandSourceStack.hasPermission(PermissionsConfig.minimumPermissionLevelToBypass)
                 || PermissionsConfig.permissions.contains(permission);
     }
 
     public boolean hasPermission(Player player, Permission permission) {
-        return player.hasPermissions(PermissionsConfig.minimumPermissionLevelToBypass)
+        return INSTANCE.mayBypassLimitation(player)
+                || player.hasPermissions(PermissionsConfig.minimumPermissionLevelToBypass)
                 || PermissionsConfig.permissions.contains(permission);
     }
 
