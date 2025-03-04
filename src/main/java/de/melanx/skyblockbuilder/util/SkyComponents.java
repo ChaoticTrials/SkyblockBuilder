@@ -81,15 +81,15 @@ public class SkyComponents {
     }
 
     public static MutableComponent denied(String key, Object... args) {
-        return SkyComponents.command("denied." + key, args);
+        return SkyComponents.command("denied." + key, args).withStyle(ChatFormatting.RED);
     }
 
     public static MutableComponent disabled(String key, Object... args) {
-        return SkyComponents.command("disabled." + key, args);
+        return SkyComponents.command("disabled." + key, args).withStyle(ChatFormatting.RED);
     }
 
     public static MutableComponent error(String key, Object... args) {
-        return SkyComponents.command("error." + key, args);
+        return SkyComponents.command("error." + key, args).withStyle(ChatFormatting.RED);
     }
 
     public static MutableComponent info(String key, Object... args) {
