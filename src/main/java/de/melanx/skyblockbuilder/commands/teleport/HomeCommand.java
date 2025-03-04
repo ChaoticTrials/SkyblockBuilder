@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.commands;
+package de.melanx.skyblockbuilder.commands.teleport;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -47,18 +47,18 @@ public class HomeCommand {
             return 0;
         }
 
-        switch (SkyblockHooks.onHome(player, team)) {
-            case DENY:
+        switch (SkyblockHooks.onTeleportHome(player, team)) {
+            case DENY -> {
                 source.sendFailure(SkyComponents.DENIED_TELEPORT_HOME);
                 return 0;
-            case DEFAULT:
+            }
+            case DEFAULT -> {
                 if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_HOME)) {
                     source.sendFailure(SkyComponents.DISABLED_TELEPORT_HOME);
                     return 0;
                 }
-                break;
-            case ALLOW:
-                break;
+            }
+            case ALLOW -> {}
         }
 
         data.getOrCreateMetaInfo(player).setLastTeleport(SkyMeta.TeleportType.HOME, level.getGameTime());

@@ -178,6 +178,8 @@ public class SkyComponents {
     public static final MutableComponent DENIED_RENAME_TEAM = SkyComponents.denied("rename_team");
     public static final MutableComponent DENIED_RESET_SPAWNS = SkyComponents.denied("reset_spawns");
     public static final MutableComponent DENIED_TELEPORT_HOME = SkyComponents.denied("teleport_home");
+    public static final MutableComponent DENIED_VISIT_TEAM = SkyComponents.denied("visit_team");
+    public static final MutableComponent DENIED_TELEPORT_TO_SPAWN = SkyComponents.denied("teleport_to_spawn");
     public static final Function<Component, MutableComponent> DENIED_TOGGLE_REQUEST = arg -> SkyComponents.denied("toggle_request", arg);
     public static final Function<Component, MutableComponent> DENIED_TOGGLE_VISITS = arg -> SkyComponents.denied("toggle_visits", arg);
 
@@ -193,6 +195,7 @@ public class SkyComponents {
     public static final MutableComponent DISABLED_SEND_INVITATIONS = SkyComponents.disabled("send_invitations");
     public static final MutableComponent DISABLED_TEAM_JOIN_REQUEST = SkyComponents.disabled("team_join_request");
     public static final MutableComponent DISABLED_TEAM_VISIT = SkyComponents.disabled("team_visit");
+    public static final MutableComponent DISABLED_TELEPORT_SPAWN = SkyComponents.disabled("teleport_spawn");
     public static final MutableComponent DISABLED_TELEPORT_HOME = SkyComponents.disabled("teleport_home");
     public static final MutableComponent DISABLED_VISIT_TEAM = SkyComponents.disabled("visit_team");
 

@@ -1,8 +1,9 @@
-package de.melanx.skyblockbuilder.commands;
+package de.melanx.skyblockbuilder.commands.teleport;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
@@ -45,19 +46,13 @@ public class VisitCommand {
             return 0;
         }
 
-        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(level.dimension().location())) {
-            source.sendFailure(SkyComponents.ERROR_TELEPORTATION_NOT_ALLOWED_DIMENSION);
+        if (CommandUtil.mayNotTeleport(source, data, player)) {
             return 0;
         }
 
-        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && level != data.getLevel()) {
-            source.sendFailure(SkyComponents.ERROR_TELEPORT_ACROSS_DIMENSIONS);
-            return 0;
-        }
-
-        switch (SkyblockHooks.onVisit(player, team)) {
+        switch (SkyblockHooks.onTeleportToVisit(player, team)) {
             case DENY:
-                source.sendFailure(SkyComponents.DISABLED_VISIT_TEAM);
+                source.sendFailure(SkyComponents.DENIED_VISIT_TEAM);
                 return 0;
             case DEFAULT:
                 if (team.hasPlayer(player)) {

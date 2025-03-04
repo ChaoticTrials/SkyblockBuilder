@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.commands;
+package de.melanx.skyblockbuilder.commands.teleport;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -6,7 +6,9 @@ import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.CommandUtil;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -38,19 +40,22 @@ public class SpawnCommand {
             return 0;
         }
 
-        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
-            source.sendFailure(SkyComponents.ERROR_TELEPORTATION_NOT_ALLOWED_DIMENSION);
+        if (CommandUtil.mayNotTeleport(source, data, player)) {
             return 0;
         }
 
-        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && player.level() != data.getLevel()) {
-            source.sendFailure(SkyComponents.ERROR_TELEPORT_ACROSS_DIMENSIONS);
-            return 0;
-        }
-
-        if (PermissionsConfig.Teleports.disallowTeleportationDuringFalling && player.fallDistance > 1) {
-            source.sendFailure(SkyComponents.ERROR_PREVENT_WHILE_FALLING);
-            return 0;
+        switch (SkyblockHooks.onTeleportToSpawn(player, team)) {
+            case DENY -> {
+                source.sendFailure(SkyComponents.DENIED_TELEPORT_TO_SPAWN);
+                return 0;
+            }
+            case DEFAULT -> {
+                if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_TO_SPAWN)) {
+                    source.sendFailure(SkyComponents.DISABLED_TELEPORT_SPAWN);
+                    return 0;
+                }
+            }
+            case ALLOW -> {}
         }
 
         data.getOrCreateMetaInfo(player).setLastTeleport(SkyMeta.TeleportType.SPAWN, level.getGameTime());

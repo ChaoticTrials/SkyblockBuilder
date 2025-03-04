@@ -17,12 +17,6 @@ import java.util.Set;
 
 public class SkyblockHooks {
 
-    public static SkyblockVisitEvent.Result onVisit(ServerPlayer player, Team team) {
-        SkyblockVisitEvent event = new SkyblockVisitEvent(player, team);
-        NeoForge.EVENT_BUS.post(event);
-        return event.getResult();
-    }
-
     public static Pair<SkyblockManageTeamEvent.Result, Boolean> onToggleVisits(ServerPlayer player, Team team, boolean allowVisits) {
         SkyblockManageTeamEvent.ToggleVisits event = new SkyblockManageTeamEvent.ToggleVisits(player, team, allowVisits);
         NeoForge.EVENT_BUS.post(event);
@@ -106,8 +100,20 @@ public class SkyblockHooks {
         return NeoForge.EVENT_BUS.post(event).isCanceled();
     }
 
-    public static SkyblockTeleportHomeEvent.Result onHome(ServerPlayer player, Team team) {
-        SkyblockTeleportHomeEvent event = new SkyblockTeleportHomeEvent(player, team);
+    public static SkyblockTeleportEvent.Result onTeleportHome(ServerPlayer player, Team team) {
+        SkyblockTeleportEvent event = new SkyblockTeleportEvent.Home(player, team);
+        NeoForge.EVENT_BUS.post(event);
+        return event.getResult();
+    }
+
+    public static SkyblockTeleportEvent.Result onTeleportToSpawn(ServerPlayer player, Team team) {
+        SkyblockTeleportEvent event = new SkyblockTeleportEvent.Spawn(player, team);
+        NeoForge.EVENT_BUS.post(event);
+        return event.getResult();
+    }
+
+    public static SkyblockTeleportEvent.Result onTeleportToVisit(ServerPlayer player, Team team) {
+        SkyblockTeleportEvent event = new SkyblockTeleportEvent.Visit(player, team);
         NeoForge.EVENT_BUS.post(event);
         return event.getResult();
     }

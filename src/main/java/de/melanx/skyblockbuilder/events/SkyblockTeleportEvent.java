@@ -6,17 +6,17 @@ import net.neoforged.bus.api.Event;
 import net.neoforged.neoforge.common.NeoForge;
 
 /**
- * This event fires when a player tries to teleport home.<br>
+ * This event fires when a player tries to teleport home, to spawn, or visit another island.<br>
  * <br>
  * This event is fired on the {@link NeoForge#EVENT_BUS}
  */
-public class SkyblockTeleportHomeEvent extends Event {
+public abstract class SkyblockTeleportEvent extends Event {
 
     private final ServerPlayer player;
     private final Team team;
     private Result result = Result.DEFAULT;
 
-    public SkyblockTeleportHomeEvent(ServerPlayer player, Team team) {
+    protected SkyblockTeleportEvent(ServerPlayer player, Team team) {
         this.player = player;
         this.team = team;
     }
@@ -58,5 +58,35 @@ public class SkyblockTeleportHomeEvent extends Event {
          * Stop process instantly
          */
         DENY
+    }
+
+    /**
+     * This event fires when a player tries to teleport home.
+     */
+    public static class Home extends SkyblockTeleportEvent {
+
+        public Home(ServerPlayer player, Team team) {
+            super(player, team);
+        }
+    }
+
+    /**
+     * This event fires when a player tries to teleport to spawn.
+     */
+    public static class Spawn extends SkyblockTeleportEvent {
+
+        public Spawn(ServerPlayer player, Team team) {
+            super(player, team);
+        }
+    }
+
+    /**
+     * This event fires when a player tries to teleport for visiting another island.
+     */
+    public static class Visit extends SkyblockTeleportEvent {
+
+        public Visit(ServerPlayer player, Team team) {
+            super(player, team);
+        }
     }
 }
