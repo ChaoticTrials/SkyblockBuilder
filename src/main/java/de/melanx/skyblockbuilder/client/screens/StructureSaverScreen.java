@@ -105,10 +105,14 @@ public class StructureSaverScreen extends BaseScreen {
                 .size(60, 20)
                 .build());
         this.addRenderableWidget(Button.builder(Component.empty(), button -> {
-                    switch (this.selectedType) {
-                        case ISLAND -> ClientUtil.openPath(SkyPaths.ISLANDS_DIR);
-                        case SPREAD -> ClientUtil.openPath(SkyPaths.SPREADS_DIR);
-                        case NETHER -> ClientUtil.openPath(SkyPaths.PORTALS_DIR);
+                    if (this.saveToConfig.selected()) {
+                        switch (this.selectedType) {
+                            case ISLAND -> ClientUtil.openPath(SkyPaths.ISLANDS_DIR);
+                            case SPREAD -> ClientUtil.openPath(SkyPaths.SPREADS_DIR);
+                            case NETHER -> ClientUtil.openPath(SkyPaths.PORTALS_DIR);
+                        }
+                    } else {
+                        ClientUtil.openPath(SkyPaths.MOD_EXPORTS);
                     }
                 })
                 .pos(this.x(144), this.y(23))
