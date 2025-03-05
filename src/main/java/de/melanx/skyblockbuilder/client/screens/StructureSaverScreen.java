@@ -288,14 +288,13 @@ public class StructureSaverScreen extends BaseScreen {
         protected void init() {
             super.init();
 
-            if (this.minecraft == null
+            boolean mayNotCheat = this.minecraft == null
                     || this.minecraft.player == null
-                    || !this.minecraft.player.hasPermissions(2)) {
-                return;
-            }
+                    || !(this.minecraft.player.hasPermissions(2)
+                    || this.minecraft.player.isCreative());
 
             Button.Builder buttonBuilder;
-            if (this.missingBlockHasItem) {
+            if (this.missingBlockHasItem && !mayNotCheat) {
                 buttonBuilder = Button.builder(SkyComponents.SCREEN_ERROR_GIVE_BUTTON, button -> {
                     SkyblockBuilder.getNetwork().giveItem(this.type.getRequiredBlock().asItem());
                     this.onClose();
