@@ -13,27 +13,24 @@ import net.minecraft.network.chat.Component;
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class ChoosePaletteScreen extends Screen {
 
     private static final int BUTTON_SIZE = 20;
     private static final int BUTTON_STEP = BUTTON_SIZE + 5;
     private final ConfiguredTemplate template;
-    private final Consumer<Integer> applyIndex;
-    private final Runnable resetIndex;
+    private final ChoosePaletteScreen.OnApply applyIndex;
+    private final ChoosePaletteScreen.OnReset resetIndex;
     private int paletteIndex = 0;
     private transient final Map<Integer, TemplateRenderer> structureCache = new HashMap<>();
     private int rows = 1;
     private int structureRenderSize;
 
-    protected ChoosePaletteScreen(CustomizeSkyblockScreen parent, ConfiguredTemplate template) {
+    protected ChoosePaletteScreen(ConfiguredTemplate template, ChoosePaletteScreen.OnApply onApply, ChoosePaletteScreen.OnReset onReset) {
         super(SkyComponents.SCREEN_SELECT_PALETTE);
         this.template = template;
-        assert parent.getTemplateList() != null;
-        assert parent.getTemplateList().getSelected() != null;
-        this.applyIndex = i -> parent.getTemplateList().getSelected().setPaletteIndex(i);
-        this.resetIndex = () -> parent.getTemplateList().getSelected().resetPaletteIndex();
+        this.applyIndex = onApply;
+        this.resetIndex = onReset;
     }
 
     @Override
@@ -44,7 +41,7 @@ public class ChoosePaletteScreen extends Screen {
         this.buildPaletteButtons();
 
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
-                    this.applyIndex.accept(this.paletteIndex);
+                    this.applyIndex.onApply(this.paletteIndex);
                     this.minecraft.popGuiLayer();
                 })
                 .pos(this.width / 2 - 155, this.height - 28)
@@ -52,7 +49,7 @@ public class ChoosePaletteScreen extends Screen {
                 .build());
 
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
-                    this.resetIndex.run();
+                    this.resetIndex.onReset();
                     this.minecraft.popGuiLayer();
                 })
                 .pos(this.width / 2 + 5, this.height - 28)
@@ -114,5 +111,15 @@ public class ChoosePaletteScreen extends Screen {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplateRenderer(this.template.getTemplate(), this.structureRenderSize, this.paletteIndex))
                 .render(guiGraphics, this.width / 2, this.structureRenderSize / 2 + (int) (this.height * 0.05));
+    }
+
+    @FunctionalInterface
+    public interface OnReset {
+        void onReset();
+    }
+
+    @FunctionalInterface
+    public interface OnApply {
+        void onApply(int paletteIndex);
     }
 }

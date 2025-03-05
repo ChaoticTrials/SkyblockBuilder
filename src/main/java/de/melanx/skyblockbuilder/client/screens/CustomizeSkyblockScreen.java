@@ -234,8 +234,15 @@ public class CustomizeSkyblockScreen extends Screen {
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 if (button == 0) {
-                    if (this.canSelectPalette() && this.isMouseOverPaletteSelection(TemplateList.this.getRowLeft() + TemplateList.this.getRowWidth() - 28, TemplateList.this.getRowTop(this.index) + 1, mouseX, mouseY)) {
-                        Minecraft.getInstance().pushGuiLayer(new ChoosePaletteScreen(CustomizeSkyblockScreen.this, this.template));
+                    if (this.canSelectPalette()
+                            && this.isMouseOverPaletteSelection(
+                            TemplateList.this.getRowLeft() + TemplateList.this.getRowWidth() - 28,
+                            TemplateList.this.getRowTop(this.index) + 1,
+                            mouseX, mouseY
+                    )) {
+                        Minecraft.getInstance().pushGuiLayer(
+                                new ChoosePaletteScreen(this.template, this::setPaletteIndex, this::resetPaletteIndex)
+                        );
                     }
 
                     TemplateList.this.setSelected(this);
