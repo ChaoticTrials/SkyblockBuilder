@@ -6,6 +6,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Fallable;
+import net.neoforged.neoforge.common.Tags;
 import org.moddingx.libx.datagen.DatagenContext;
 import org.moddingx.libx.datagen.provider.tags.CommonTagsProviderBase;
 
@@ -17,14 +18,13 @@ public class ModTagProvider extends CommonTagsProviderBase {
 
     @Override
     public void setup() {
-        //noinspection unchecked
         this.block(ModBlockTags.ADDITIONAL_VALID_SPAWN)
-                .addTags(BlockTags.LEAVES)
+                .addTag(BlockTags.LEAVES)
                 .add(Blocks.WATER);
 
-        //noinspection unchecked
         this.block(ModBlockTags.PREVENT_SCHEDULED_TICK)
-                .addTags(BlockTags.SAND);
+                .addTag(BlockTags.SAND)
+                .addTag(Tags.Blocks.GRAVELS);
 
         for (Block block : BuiltInRegistries.BLOCK.stream()
                 .filter(block -> block instanceof Fallable)
