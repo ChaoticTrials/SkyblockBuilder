@@ -248,7 +248,7 @@ public class SkyblockSavedData extends SavedData {
         }
 
         ServerLevel level = team.getLevel();
-        if (level != null && !this.getOrCreateMetaInfo(player).getPreviousTeamIds().contains(team.getId())) {
+        if (!team.isSpawn() && level != null && !this.getOrCreateMetaInfo(player).getPreviousTeamIds().contains(team.getId())) {
             ServerPlayer onlinePlayer = level.getServer().getPlayerList().getPlayer(player);
             if (onlinePlayer != null && (TemplatesConfig.mainSpawnIsland.isEmpty() || !team.isSpawn())) {
                 RandomUtility.setStartInventory(onlinePlayer);
