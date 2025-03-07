@@ -162,7 +162,7 @@ public class WorldUtil {
 
     // [Vanilla copy] Get flat world info on servers
     public static List<FlatLayerInfo> layersInfoFromString(String settings) {
-        if (settings == null) {
+        if (settings == null || settings.isBlank()) {
             return Lists.newArrayList();
         }
 

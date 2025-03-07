@@ -129,7 +129,7 @@ public class SkyblockPreset extends WorldPreset {
 
     public static List<FlatLayerInfo> getLayers(ResourceKey<Level> levelKey) {
         return WorldConfig.surface
-                ? WorldUtil.layersInfoFromString(WorldConfig.surfaceSettings.get(levelKey.location().toString()))
+                ? WorldUtil.layersInfoFromString(WorldConfig.surfaceSettings.getOrDefault(levelKey.location().toString(), ""))
                 : List.of();
     }
 }
