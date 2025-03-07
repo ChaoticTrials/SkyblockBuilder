@@ -14,6 +14,7 @@ import org.moddingx.libx.impl.config.mappers.special.RecordValueMapper;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Locale;
 
 @RegisterMapper
 public class SpreadInfoMapper implements ValueMapper<TemplateInfo.SpreadInfo, JsonObject> {
@@ -45,7 +46,7 @@ public class SpreadInfoMapper implements ValueMapper<TemplateInfo.SpreadInfo, Js
 
         TemplateInfo.SpreadInfo.Origin origin = TemplateInfo.SpreadInfo.Origin.ZERO;
         if (json.has("origin")) {
-            origin = TemplateInfo.SpreadInfo.Origin.valueOf(json.get("origin").getAsString());
+            origin = TemplateInfo.SpreadInfo.Origin.valueOf(json.get("origin").getAsString().toUpperCase(Locale.ROOT));
         }
 
         return new TemplateInfo.SpreadInfo(json.get("file").getAsString(), minOffset, maxOffset, origin);
