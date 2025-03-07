@@ -54,7 +54,7 @@ public class TemplatesConfig {
             "        \"min\": [ -6, 3, 5 ],",
             "        \"max\": [ 4, 10, 3 ]",
             "    },",
-            "    \"origin\": \"CENTER\"",
+            "    \"origin\": \"center\"",
             "}"})
     public static Map<String, TemplateSpreads> spreadReferences = Map.of("default", TemplateSpreads.EMPTY);
 

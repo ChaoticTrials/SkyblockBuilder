@@ -2,10 +2,10 @@ package de.melanx.skyblockbuilder.spreads;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.melanx.skyblockbuilder.util.SkyCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.tuple.Pair;
-import org.moddingx.libx.codec.MoreCodecs;
 
 import java.util.*;
 
@@ -88,7 +88,7 @@ public class GroupWeightedSpreadEntry implements WeightedSpread {
     public record AutoSpread(Shape shape, int radius) {
 
         public static final Codec<AutoSpread> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                MoreCodecs.enumCodec(Shape.class).optionalFieldOf("shape", Shape.CIRCLE).forGetter(AutoSpread::shape),
+                Shape.CODEC.optionalFieldOf("shape", Shape.CIRCLE).forGetter(AutoSpread::shape),
                 Codec.INT.fieldOf("radius").forGetter(AutoSpread::radius)
         ).apply(instance, AutoSpread::new));
         public static final AutoSpread DEFAULT = new AutoSpread(Shape.CIRCLE, 0);
@@ -177,7 +177,7 @@ public class GroupWeightedSpreadEntry implements WeightedSpread {
             SQUARE(4),
             HEXAGON(6);
 
-            public static final Codec<Shape> CODEC = MoreCodecs.enumCodec(Shape.class);
+            public static final Codec<Shape> CODEC = SkyCodecs.enumCodec(Shape.class);
 
             private final int corners;
 
