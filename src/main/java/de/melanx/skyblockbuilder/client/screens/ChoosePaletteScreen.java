@@ -26,7 +26,7 @@ public class ChoosePaletteScreen extends Screen {
     private int rows = 1;
     private int structureRenderSize;
 
-    protected ChoosePaletteScreen(ConfiguredTemplate template, ChoosePaletteScreen.OnApply onApply, ChoosePaletteScreen.OnReset onReset) {
+    public ChoosePaletteScreen(ConfiguredTemplate template, ChoosePaletteScreen.OnApply onApply, ChoosePaletteScreen.OnReset onReset) {
         super(SkyComponents.SCREEN_SELECT_PALETTE);
         this.template = template;
         this.applyIndex = onApply;
