@@ -75,6 +75,25 @@ public class EventListener {
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(LocateCommand.register());
+        event.getDispatcher().register(Commands.literal("sky")
+                .requires(source -> SkyblockBuilderAPI.teamManagementEnabled())
+                .then(AcceptCommand.register())
+                .then(CreateCommand.register())
+                .then(DeclineCommand.register())
+                .then(HomeCommand.register())
+                .then(InviteCommand.register())
+                .then(JoinCommand.register())
+                .then(LeaveCommand.register())
+                .then(ListCommand.register())
+                .then(SpawnCommand.register())
+                .then(SpawnsCommand.register())
+                .then(TeamCommandBase.register())
+                .then(VisitCommand.register()));
+        event.getDispatcher().register(Commands.literal("skydev")
+                .then(ConvertCommand.register())
+                .then(GenerateCommand.register())
+                .then(InventoryCommand.register())
+                .then(ManageCommand.register().requires(source -> SkyblockBuilderAPI.teamManagementEnabled())));
         event.getDispatcher().register(Commands.literal("skyblock")
                 .requires(source -> SkyblockBuilderAPI.teamManagementEnabled())
                 .then(AcceptCommand.register())
