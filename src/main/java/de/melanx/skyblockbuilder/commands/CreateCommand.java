@@ -12,12 +12,9 @@ import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Random;
 
 public class CreateCommand {
@@ -25,15 +22,12 @@ public class CreateCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Let a player create a team if enabled in config
         return Commands.literal("create").requires(source -> PermissionManager.INSTANCE.hasPermission(source, PermissionManager.Permission.TEAM_CREATE))
-                .executes(context -> CreateCommand.create(context.getSource(), null, Collections.emptyList()))
+                .executes(context -> CreateCommand.create(context.getSource(), null))
                 .then(Commands.argument("name", StringArgumentType.string())
-                        .executes(context -> CreateCommand.create(context.getSource(), StringArgumentType.getString(context, "name"), Collections.emptyList()))
-                        .then(Commands.argument("players", EntityArgument.players())
-                                .requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
-                                .executes(context -> CreateCommand.create(context.getSource(), StringArgumentType.getString(context, "name"), EntityArgument.getPlayers(context, "players")))));
+                        .executes(context -> CreateCommand.create(context.getSource(), StringArgumentType.getString(context, "name"))));
     }
 
-    private static int create(CommandSourceStack source, String name, Collection<ServerPlayer> players) throws CommandSyntaxException {
+    private static int create(CommandSourceStack source, String name) throws CommandSyntaxException {
         WorldUtil.checkSkyblock(source);
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
@@ -45,7 +39,7 @@ public class CreateCommand {
             return 0;
         }
 
-        if (players.isEmpty() && source.getEntity() instanceof ServerPlayer && data.hasPlayerTeam((ServerPlayer) source.getEntity())) {
+        if (source.getEntity() instanceof ServerPlayer player && data.hasPlayerTeam(player)) {
             source.sendFailure(SkyComponents.ERROR_USER_HAS_TEAM);
             return 0;
         }
@@ -58,22 +52,15 @@ public class CreateCommand {
             return 0;
         }
 
-        if (players.isEmpty() && source.getEntity() instanceof ServerPlayer player) {
+        if (source.getEntity() instanceof ServerPlayer player) {
             data.addPlayerToTeam(team, player);
             WorldUtil.teleportToIsland(player, team);
-        } else {
-            players.forEach(player -> {
-                if (data.getTeamFromPlayer(player) != null) {
-                    source.sendFailure(SkyComponents.ERROR_PLAYER_HAS_TEAM.apply(player.getDisplayName().getString()));
-                } else {
-                    data.addPlayerToTeam(team, player);
-                    WorldUtil.teleportToIsland(player, team);
-                }
-            });
+
+            source.sendSuccess(() -> SkyComponents.SUCCESS_CREATE_TEAM.apply(finalName), true);
+            return 1;
         }
 
-        source.sendSuccess(() -> SkyComponents.SUCCESS_CREATE_TEAM.apply(finalName), true);
-        return 1;
+        return 0;
     }
 
     private static String generateName(String name, SkyblockSavedData data) {
