@@ -234,7 +234,7 @@ public class ConfiguredTemplate {
         this.offset = WorldUtil.blockPosFromTag(nbt.getCompound("Offset"));
         this.surroundingMargin = nbt.getInt("SurroundingMargin");
 
-        ListTag surroundingBlocks = nbt.getList("SurroundingBlocks", Tag.TAG_STRING);
+        ListTag surroundingBlocks = nbt.getList("SurroundingBlocks", Tag.TAG_COMPOUND);
         List<TemplateSurroundingBlocks.WeightedBlock> blocks = new ArrayList<>();
         for (Tag tag : surroundingBlocks) {
             CompoundTag blockAndWeight = (CompoundTag) tag;
