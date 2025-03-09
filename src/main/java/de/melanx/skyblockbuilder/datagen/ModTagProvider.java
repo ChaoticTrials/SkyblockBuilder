@@ -19,6 +19,7 @@ public class ModTagProvider extends CommonTagsProviderBase {
     @Override
     public void setup() {
         this.block(ModBlockTags.ADDITIONAL_VALID_SPAWN)
+                .addTag(Tags.Blocks.GLASS_BLOCKS)
                 .addTag(BlockTags.LEAVES)
                 .add(Blocks.WATER);
 
