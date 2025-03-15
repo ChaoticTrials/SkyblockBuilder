@@ -49,18 +49,30 @@ public class WorldUtil {
 
         MinecraftServer server = ((ServerLevel) level).getServer();
 
-        if (!ConfigHandler.Dimensions.Overworld.Default) {
-            return server.overworld().getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
+        // Check if the configured dimension is using a skyblock generator
+        ServerLevel configuredLevel = getConfiguredLevel(server);
+        if (configuredLevel.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator
+                || configuredLevel.getChunkSource().getGenerator() instanceof SkyblockEndChunkGenerator) {
+            return true;
+        }
+
+        // Also check default dimensions if they're configured to be skyblock
+        if (!ConfigHandler.Dimensions.Overworld.Default && server.overworld().getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator) {
+            return true;
         }
 
         if (!ConfigHandler.Dimensions.Nether.Default) {
             ServerLevel nether = server.getLevel(Level.NETHER);
-            return nether != null && nether.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator;
+            if (nether != null && nether.getChunkSource().getGenerator() instanceof SkyblockNoiseBasedChunkGenerator) {
+                return true;
+            }
         }
 
         if (!ConfigHandler.Dimensions.End.Default) {
             ServerLevel end = server.getLevel(Level.END);
-            return end != null && end.getChunkSource().getGenerator() instanceof SkyblockEndChunkGenerator;
+            if (end != null && end.getChunkSource().getGenerator() instanceof SkyblockEndChunkGenerator) {
+                return true;
+            }
         }
 
         return false;
@@ -78,10 +90,19 @@ public class WorldUtil {
         ServerLevel configLevel = server.getLevel(worldKey);
 
         if (configLevel == null) {
-            SkyblockBuilder.getLogger().warn("Configured dimension for spawn does not exist: " + location);
+            if (!ConfigHandler.Spawn.allowDimensionFallback) {
+                throw new IllegalStateException("Configured dimension for spawn does not exist: " + location +
+                        ". Please either:\n" +
+                        "1. Configure a valid dimension\n" +
+                        "2. Enable allowDimensionFallback in the config\n" +
+                        "3. Create the dimension using NBT modification or datapacks. Resources:\n" +
+                        "   - https://misode.github.io/dimension/ (Online Dimension Generator)\n" +
+                        "   - https://minecraft.wiki/w/Dimension_definition (Minecraft Wiki Reference)");
+            }
+            SkyblockBuilder.getLogger().warn("Configured dimension for spawn does not exist: {}. Falling back to overworld.", location);
+            return server.overworld();
         }
-
-        return configLevel != null ? configLevel : server.overworld();
+        return configLevel;
     }
 
     private static BlockPos validPosition(ServerLevel level, Team team) {
@@ -201,12 +222,12 @@ public class WorldUtil {
         }
     }
 
+
     public static int calculateHeightFromLayers(List<FlatLayerInfo> layerInfos) {
         int i = 0;
         for (FlatLayerInfo info : layerInfos) {
             i += info.getHeight();
         }
-
         return i;
     }
 

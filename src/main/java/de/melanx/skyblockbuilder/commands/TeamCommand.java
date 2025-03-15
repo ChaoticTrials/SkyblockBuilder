@@ -238,8 +238,8 @@ public class TeamCommand {
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
-        // check for overworld
-        if (level != source.getServer().getLevel(ConfigHandler.Spawn.dimension)) {
+        // Check if player is in the configured skyblock dimension
+        if (level != WorldUtil.getConfiguredLevel(source.getServer())) {
             source.sendSuccess(Component.translatable("skyblockbuilder.command.error.wrong_position").withStyle(ChatFormatting.RED), false);
             return 0;
         }
@@ -289,8 +289,8 @@ public class TeamCommand {
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
-        // check for overworld
-        if (level != source.getServer().getLevel(ConfigHandler.Spawn.dimension)) {
+        // Check if player is in the configured skyblock dimension
+        if (level != WorldUtil.getConfiguredLevel(source.getServer())) {
             source.sendSuccess(Component.translatable("skyblockbuilder.command.error.wrong_position").withStyle(ChatFormatting.RED), false);
             return 0;
         }

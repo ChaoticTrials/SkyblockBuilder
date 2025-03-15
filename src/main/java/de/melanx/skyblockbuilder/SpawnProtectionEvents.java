@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
@@ -230,14 +231,16 @@ public class SpawnProtectionEvents {
     }
 
     private static boolean isOnSpawn(Level level, BlockPos blockPos) {
+        if (!WorldUtil.isSkyblock(level)) return false;
         ChunkPos pos = new ChunkPos(blockPos);
-        return WorldUtil.isSkyblock(level) && ConfigHandler.Spawn.dimension == level.dimension()
+        return level == WorldUtil.getConfiguredLevel(((ServerLevel) level).getServer())
                 && Math.abs(pos.x) < ConfigHandler.Spawn.spawnProtectionRadius && Math.abs(pos.z) < ConfigHandler.Spawn.spawnProtectionRadius;
     }
 
     private static boolean isOnSpawn(Entity entity) {
+        if (!WorldUtil.isSkyblock(entity.level)) return false;
         ChunkPos pos = new ChunkPos(entity.blockPosition());
-        return WorldUtil.isSkyblock(entity.level) && ConfigHandler.Spawn.dimension == entity.level.dimension()
+        return entity.level == WorldUtil.getConfiguredLevel(((ServerLevel) entity.level).getServer())
                 && Math.abs(pos.x) < ConfigHandler.Spawn.spawnProtectionRadius && Math.abs(pos.z) < ConfigHandler.Spawn.spawnProtectionRadius;
     }
 }

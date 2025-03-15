@@ -136,8 +136,14 @@ public class ConfigHandler {
         @IntRange(min = 0)
         public static int radius = 50;
 
-        @Config({"The dimension the islands will be generated in."})
+        @Config({"The dimension the islands will be generated in.",
+                "This is where skyblock islands will be created and players will spawn."})
         public static ResourceKey<Level> dimension = Level.OVERWORLD;
+
+        @Config({"If true, falls back to overworld when configured dimension doesn't exist.",
+                "If false, throws an error when configured dimension is invalid.",
+                "[default: true]"})
+        public static boolean allowDimensionFallback = true;
 
         public static class Height {
 
