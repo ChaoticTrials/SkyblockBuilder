@@ -129,8 +129,7 @@ public class WorldUtil {
         int top = SpawnConfig.Height.range.top();
         int bottom = SpawnConfig.Height.range.bottom();
 
-        int height;
-        switch (SpawnConfig.Height.heightCalculationType) {
+        int height = switch (SpawnConfig.Height.heightCalculationType) {
             case RANGE_TOP, RANGE_BOTTOM -> {
                 BlockPos.MutableBlockPos spawn = new BlockPos.MutableBlockPos(x, top, z);
                 while (!WorldUtil.isValidSpawn(level, spawn, bottom, top)) {
@@ -145,11 +144,10 @@ public class WorldUtil {
 
                     spawn.move(Direction.DOWN, 1);
                 }
-                height = spawn.getY() + SpawnConfig.Height.offset;
+                yield spawn.getY() + SpawnConfig.Height.offset;
             }
-            // SpawnSettings.Type.SET
-            default -> height = bottom;
-        }
+            case SET -> bottom;
+        };
 
         return Math.max(level.getMinBuildHeight() + 1, height);
     }

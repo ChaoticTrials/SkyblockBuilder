@@ -24,7 +24,13 @@ public final class IslandPos {
     private BlockPos center;
 
     public IslandPos(Level level, int x, int z, ConfiguredTemplate template) {
-        this(x, Mth.clamp(WorldUtil.calcSpawnHeight(level, x, z) + template.getOffset().getY(), level.getMinBuildHeight(), level.getMaxBuildHeight()), z, template.getOffset());
+        this(x,
+                Mth.clamp(
+                        WorldUtil.calcSpawnHeight(level,
+                                IslandPos.calcX(x, template.getOffset()) + (template.getTemplate().getSize().getX() / 2),
+                                IslandPos.calcZ(z, template.getOffset()) + (template.getTemplate().getSize().getZ() / 2)
+                        ) + template.getOffset().getY(), level.getMinBuildHeight(), level.getMaxBuildHeight()),
+                z, template.getOffset());
     }
 
     public IslandPos(int x, int y, int z, ConfiguredTemplate template) {
@@ -34,13 +40,21 @@ public final class IslandPos {
     public IslandPos(int x, int y, int z, BlockPos offset) {
         this.x = x;
         this.z = z;
-        this.center = new BlockPos(this.x * WorldConfig.islandDistance + offset.getX() + TemplatesConfig.defaultOffset, y, this.z * WorldConfig.islandDistance + offset.getZ() + TemplatesConfig.defaultOffset);
+        this.center = new BlockPos(IslandPos.calcX(x, offset), y, IslandPos.calcZ(z, offset));
     }
 
     private IslandPos(int x, int z, BlockPos center) {
         this.x = x;
         this.z = z;
         this.center = center;
+    }
+
+    private static int calcX(int x, BlockPos offset) {
+        return x * WorldConfig.islandDistance + offset.getX() + TemplatesConfig.defaultOffset;
+    }
+
+    private static int calcZ(int z, BlockPos offset) {
+        return z * WorldConfig.islandDistance + offset.getZ() + TemplatesConfig.defaultOffset;
     }
 
     public BlockPos getCenter() {
