@@ -28,7 +28,7 @@ public record SingleSpreadEntry(String file, BlockPos minOffset, BlockPos maxOff
     public static final SingleSpreadEntry DEFAULT = new SingleSpreadEntry("default.nbt", BlockPos.ZERO, BlockPos.ZERO, SpreadInfo.Origin.ZERO);
 
     public SingleSpreadEntry copyWithOffset(BlockPos offset) {
-        return new SingleSpreadEntry(this.file, offset, offset, this.origin);
+        return new SingleSpreadEntry(this.file, this.minOffset.offset(offset), this.maxOffset.offset(offset), this.origin);
     }
 
     private MinMax offset() {
