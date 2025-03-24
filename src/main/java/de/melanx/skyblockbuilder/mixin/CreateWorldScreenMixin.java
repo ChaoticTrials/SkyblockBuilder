@@ -1,27 +1,20 @@
 package de.melanx.skyblockbuilder.mixin;
 
-import com.mojang.serialization.Lifecycle;
 import de.melanx.skyblockbuilder.config.common.ClientConfig;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(CreateWorldScreen.class)
 public abstract class CreateWorldScreenMixin {
 
-    @Redirect(
+    @ModifyVariable(
             method = "onCreate",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lcom/mojang/serialization/Lifecycle;add(Lcom/mojang/serialization/Lifecycle;)Lcom/mojang/serialization/Lifecycle;"
-            )
+            at = @At(value = "STORE", ordinal = 0),
+            ordinal = 0
     )
-    private Lifecycle isExperimental(Lifecycle instance, Lifecycle other) {
-        if (ClientConfig.disableExperimentalWarning) {
-            return Lifecycle.stable();
-        }
-
-        return instance.add(other);
+    private boolean modifyFlag(boolean original) {
+        return original || ClientConfig.disableExperimentalWarning;
     }
 }
