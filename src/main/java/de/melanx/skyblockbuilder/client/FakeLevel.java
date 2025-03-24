@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import io.netty.channel.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -32,6 +33,7 @@ import net.neoforged.neoforge.registries.datamaps.DataMapType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+import java.net.SocketAddress;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -70,7 +72,9 @@ public class FakeLevel extends ClientLevel {
     );
 
     private static ClientPacketListener fakeClientPacketListener() {
-        return new ClientPacketListener(Minecraft.getInstance(), new Connection(PacketFlow.CLIENTBOUND), FAKE_LISTENER_COOKIE) {
+        Connection connection = new Connection(PacketFlow.CLIENTBOUND);
+        connection.channel = new FakeChannel();
+        return new ClientPacketListener(Minecraft.getInstance(), connection, FAKE_LISTENER_COOKIE) {
 
             @Nonnull
             @Override
@@ -83,6 +87,88 @@ public class FakeLevel extends ClientLevel {
     private static DimensionType fakeDimensionType() {
         return new DimensionType(OptionalLong.empty(), true, false, false, false, 1.0, false, false, 0, 256, 256, BlockTags.INFINIBURN_OVERWORLD, BuiltinDimensionTypes.OVERWORLD_EFFECTS, 1,
                 new DimensionType.MonsterSettings(false, false, ConstantInt.ZERO, 0));
+    }
+
+    private static class FakeChannel extends AbstractChannel {
+
+        private static final ChannelMetadata METADATA = new ChannelMetadata(false);
+        private final ChannelConfig config = new DefaultChannelConfig(this);
+
+        protected FakeChannel() {
+            super(null);
+        }
+
+        @Override
+        protected AbstractUnsafe newUnsafe() {
+            return new FakeChannelUnsafe();
+        }
+
+        @Override
+        protected boolean isCompatible(EventLoop loop) {
+            return false;
+        }
+
+        @Override
+        protected SocketAddress localAddress0() {
+            return null;
+        }
+
+        @Override
+        protected SocketAddress remoteAddress0() {
+            return null;
+        }
+
+        @Override
+        protected void doBind(SocketAddress localAddress) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        protected void doDisconnect() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        protected void doClose() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        protected void doBeginRead() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        protected void doWrite(ChannelOutboundBuffer in) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ChannelConfig config() {
+            return this.config;
+        }
+
+        @Override
+        public boolean isOpen() {
+            return false;
+        }
+
+        @Override
+        public boolean isActive() {
+            return false;
+        }
+
+        @Override
+        public ChannelMetadata metadata() {
+            return METADATA;
+        }
+
+        private final class FakeChannelUnsafe extends AbstractUnsafe {
+            @Override
+            public void connect(SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) {
+                promise.setFailure(new UnsupportedOperationException());
+            }
+        }
     }
 
     @SuppressWarnings("NullableProblems")
