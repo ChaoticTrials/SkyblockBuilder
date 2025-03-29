@@ -39,7 +39,7 @@ public class SaveStructureHandler extends PacketHandler<SaveStructureHandler.Mes
         }
 
         ServerLevel level = (ServerLevel) player.level();
-        String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.settings);
+        String name = ItemStructureSaver.saveSchematic(player, level, msg.stack, msg.settings);
         if (name == null) {
             player.displayClientMessage(Component.literal("Failed to save, look at latest.log for more information").withStyle(ChatFormatting.RED), false);
             return;

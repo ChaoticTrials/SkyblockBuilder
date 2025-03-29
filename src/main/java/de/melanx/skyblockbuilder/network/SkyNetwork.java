@@ -36,11 +36,12 @@ public class SkyNetwork extends NetworkX {
         this.register(new SkyblockDataUpdateHandler());
         this.register(new ProfilesUpdateHandler());
         this.register(new UpdateTemplateNamesHandler());
+        this.register(new ExportErrorHandler());
     }
 
     @Override
     protected String getVersion() {
-        return "13";
+        return "14";
     }
 
     public void updateData(Level level, SkyblockSavedData data) {

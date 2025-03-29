@@ -29,7 +29,7 @@ repositories {
 var dev = System.getenv('IS_DEV')?.toBoolean() ?: false
 var releaseType = 'beta'
 var baseVersion = '21.1'
-var libxVersion = '1.21.1-6.0.3'
+var libxVersion = '1.21.1-6.0.5'
 var jeiVersion = '19.21.0.247'
 var curiosVersion = '9.2.2+1.21.1'
 var minementionVersion = '1.20.1-3.0.0'
@@ -98,6 +98,7 @@ dependencies {
 
     implementation "org.moddingx:LibX:${libxVersion}"
     implementation "top.theillusivec4.curios:curios-neoforge:${curiosVersion}"
+//    implementation "curse.maven:forgified-fabric-api-889079:6289153"
 //    implementation "com.teamresourceful.resourcefullib:resourcefullib-neoforge-1.${baseVersion}:${resourcefullibVersion}"
 //    implementation "earth.terrarium.heracles:Heracles-neoforge-1.${baseVersion}:1.1.12"
 //    implementation "earth.terrarium.cadmus:cadmus-neoforge-1.${baseVersion}:1.0.8"

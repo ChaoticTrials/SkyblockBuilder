@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.ClientUtil;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.network.ExportErrorHandler;
 import de.melanx.skyblockbuilder.registration.ModDataComponentTypes;
 import de.melanx.skyblockbuilder.spreads.SpreadInfo;
 import de.melanx.skyblockbuilder.util.*;
@@ -15,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -31,6 +33,8 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.network.PacketDistributor;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 import org.moddingx.libx.config.ConfigManager;
 
 import javax.annotation.Nonnull;
@@ -185,7 +189,13 @@ public class ItemStructureSaver extends Item {
         return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.22")
     public static String saveSchematic(Level level, ItemStack stack, StructureSaverSettings settings) {
+        return ItemStructureSaver.saveSchematic(null, level, stack, settings);
+    }
+
+    public static String saveSchematic(@Nullable ServerPlayer player, Level level, ItemStack stack, StructureSaverSettings settings) {
         StructureTemplate template = new StructureTemplate();
         BoundingBox boundingBox = ItemStructureSaver.getArea(stack);
 
@@ -204,7 +214,7 @@ public class ItemStructureSaver extends Item {
         Set<TemplatesConfig.Spawn> spawnPositions = RandomUtility.fillTemplateFromWorld(template, level, origin, bounds, true, toIgnore);
 
         if (settings.saveToConfig()) {
-            return ItemStructureSaver.exportToConfig(level, stack, settings, spawnPositions, template);
+            return ItemStructureSaver.exportToConfig(player, level, stack, settings, spawnPositions, template);
         }
 
         if (!spawnPositions.isEmpty()) {
@@ -227,7 +237,13 @@ public class ItemStructureSaver extends Item {
         return path.getFileName().toString();
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.22")
     private static String exportToConfig(Level level, ItemStack stack, StructureSaverSettings settings, Set<TemplatesConfig.Spawn> spawnPositions, StructureTemplate template) {
+        return ItemStructureSaver.exportToConfig(null, level, stack, settings, spawnPositions, template);
+    }
+
+    private static String exportToConfig(@Nullable ServerPlayer player, Level level, ItemStack stack, StructureSaverSettings settings, Set<TemplatesConfig.Spawn> spawnPositions, StructureTemplate template) {
         StructureSaverSettings.Type type = stack.getOrDefault(ModDataComponentTypes.structureSaverType, StructureSaverSettings.Type.ISLAND);
         Path configFile = SkyPaths.MOD_CONFIG.resolve("templates.json5");
         try {
@@ -296,7 +312,13 @@ public class ItemStructureSaver extends Item {
             }
 
             return configFile.getFileName().toString();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            if (player != null) {
+                PacketDistributor.sendToPlayer(player, new ExportErrorHandler.Message(
+                        configFile.toString(),
+                        e.getCause().getMessage() != null ? e.getCause().getMessage() : "Unknown reason"));
+            }
+
             throw new IllegalStateException("Failed to overwrite config " + configFile.getFileName());
         }
     }
