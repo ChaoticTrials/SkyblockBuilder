@@ -84,7 +84,7 @@ public class WorldUtil {
     }
 
     public static ServerLevel getConfiguredLevel(MinecraftServer server) {
-        ResourceLocation location = SpawnConfig.spawmDimension.location();
+        ResourceLocation location = SpawnConfig.spawnDimension.location();
         ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, location);
         ServerLevel configLevel = server.getLevel(worldKey);
 

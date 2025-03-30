@@ -246,7 +246,7 @@ public class SpawnProtectionEvents {
 
     private static boolean isOnSpawn(Level level, BlockPos blockPos) {
         ChunkPos pos = new ChunkPos(blockPos);
-        return WorldUtil.isSkyblock(level) && SpawnConfig.spawmDimension == level.dimension()
+        return WorldUtil.isSkyblock(level) && SpawnConfig.spawnDimension == level.dimension()
                 && Math.abs(pos.x) < SpawnConfig.spawnProtectionRadius && Math.abs(pos.z) < SpawnConfig.spawnProtectionRadius
                 && !level.isOutsideBuildHeight(blockPos);
     }

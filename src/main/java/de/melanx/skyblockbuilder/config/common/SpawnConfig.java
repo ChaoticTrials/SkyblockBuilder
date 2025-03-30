@@ -52,7 +52,7 @@ public class SpawnConfig {
     public static int radiusToFindValidSpawn = 50;
 
     @Config({"The dimension the islands will be generated in."})
-    public static ResourceKey<Level> spawmDimension = Level.OVERWORLD;
+    public static ResourceKey<Level> spawnDimension = Level.OVERWORLD;
 
     @Config({"If set to true, the first island will not be generated at 0 ~ 0, but start with the next coordinate.",
             "Useful if end dimension is used for spawns."})

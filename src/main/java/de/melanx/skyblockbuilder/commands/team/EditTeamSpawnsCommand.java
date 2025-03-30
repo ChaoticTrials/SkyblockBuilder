@@ -143,7 +143,7 @@ public class EditTeamSpawnsCommand {
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
-        if (level != source.getServer().getLevel(SpawnConfig.spawmDimension)) {
+        if (level != source.getServer().getLevel(SpawnConfig.spawnDimension)) {
             source.sendFailure(SkyComponents.ERROR_WRONG_POSITION);
             return null;
         }
