@@ -55,8 +55,8 @@ public class WorldUtil {
     }
 
     public static boolean isSkyblock(Level level) {
-        if (PermissionsConfig.forceSkyblockCheck) return true;
         if (!(level instanceof ServerLevel)) return false;
+        if (PermissionsConfig.forceSkyblockCheck) return true;
 
         MinecraftServer server = ((ServerLevel) level).getServer();
 
