@@ -1,15 +1,12 @@
 package de.melanx.skyblockbuilder.client.screens;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
-import de.melanx.skyblockbuilder.template.TemplateRenderer;
+import de.melanx.skyblockbuilder.template.TemplatePreview;
+import de.melanx.skyblockbuilder.template.TemplatePreviewRenderer;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyComponents;
-import de.melanx.skyblockbuilder.util.SkyPaths;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -17,17 +14,13 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -83,7 +76,7 @@ public class CustomizeSkyblockScreen extends Screen {
             if (this.list.getSelected() != null) {
                 paletteIndex.ifPresent(this.list.getSelected()::setPaletteIndex);
             } else {
-                this.list.setConfiguredStructureRenderer(new TemplateRenderer(this.template.getTemplate(), (float) (this.width - this.list.getRowWidth()) / 2, 0));
+                this.list.setConfiguredStructureRenderer(new TemplatePreviewRenderer(new TemplatePreview(this.template), new TemplatePreviewRenderer.Area((this.width - this.list.getRowWidth()) / 2), 0));
             }
         }
     }
@@ -103,17 +96,16 @@ public class CustomizeSkyblockScreen extends Screen {
         this.renderMenuBackground(guiGraphics);
         this.list.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
-        guiGraphics.drawCenteredString(this.font, SkyComponents.SCREEN_SELECT_PALETTE, this.width / 2, 28, Color.GRAY.getRGB());
         this.list.renderEntries(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     class TemplateList extends ObjectSelectionList<TemplateList.TemplateEntry> {
 
-        private transient final Map<String, TemplateRenderer> structureCache = new HashMap<>();
-        private TemplateRenderer configuredStructureRenderer = null;
+        private transient final Map<String, TemplatePreviewRenderer> structureCache = new HashMap<>();
+        private TemplatePreviewRenderer configuredStructureRenderer = null;
 
         public TemplateList() {
-            super(Objects.requireNonNull(CustomizeSkyblockScreen.this.minecraft), CustomizeSkyblockScreen.this.width, CustomizeSkyblockScreen.this.height, 37, 40);
+            super(Objects.requireNonNull(CustomizeSkyblockScreen.this.minecraft), CustomizeSkyblockScreen.this.width, CustomizeSkyblockScreen.this.height - 58, 25, 40);
             AtomicInteger index = new AtomicInteger();
             CustomizeSkyblockScreen.this.templateMap.stream().sorted(Comparator.comparing(ConfiguredTemplate::getName)).forEach(entry -> this.addEntry(
                     new TemplateEntry(entry, index.getAndIncrement())
@@ -140,32 +132,30 @@ public class CustomizeSkyblockScreen extends Screen {
         @Override
         public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             boolean hasSelectedEntry = this.getSelected() != null;
+            this.renderListBackground(guiGraphics);
             if (hasSelectedEntry || this.configuredStructureRenderer != null) {
                 RenderSystem.enableBlend();
-                boolean useIcon = hasSelectedEntry && this.getSelected().icon != null;
-                int size = useIcon ? (this.width - this.getRowWidth()) / 3
-                        : (this.width - this.getRowWidth()) / 2;
-
-                if (useIcon) {
-                    //noinspection ConstantConditions
-                    int iconSize = this.getSelected().icon.getPixels().getHeight();
-                    int leftCenteredX = (((CustomizeSkyblockScreen.this.width - this.getRowWidth()) / 2) / 2) - size / 2;
-                    int centeredY = (CustomizeSkyblockScreen.this.height / 2) - size / 2;
-                    guiGraphics.blit(this.getSelected().iconLocation, leftCenteredX, centeredY, size, size, 0, 0, iconSize, iconSize, iconSize, iconSize);
+                TemplatePreviewRenderer renderer;
+                if (hasSelectedEntry) {
+                    String templateName = this.getSelected().name.getString();
+                    renderer = this.structureCache.computeIfAbsent(templateName,
+                            key -> new TemplatePreviewRenderer(new TemplatePreview(this.getSelected().template),
+                                    new TemplatePreviewRenderer.Area(
+                                            this.width / 100,
+                                            this.getY() + 5,
+                                            (this.width - this.getRowWidth()) / 2 - this.width / 100,
+                                            this.height - 5
+                                    )
+                            )
+                    );
                 } else {
-                    TemplateRenderer renderer;
-                    if (hasSelectedEntry) {
-                        String templateName = this.getSelected().name.getString();
-                        renderer = this.structureCache.computeIfAbsent(templateName, key -> new TemplateRenderer(this.getSelected().template.getTemplate(), size));
-                    } else {
-                        renderer = this.configuredStructureRenderer;
-                    }
-
-                    guiGraphics.pose().pushPose();
-                    guiGraphics.pose().translate(0, 0, 1000);
-                    renderer.render(guiGraphics, (int) ((CustomizeSkyblockScreen.this.width - this.getRowWidth()) / 2f - (size / 2f)), CustomizeSkyblockScreen.this.height / 2);
-                    guiGraphics.pose().popPose();
+                    renderer = this.configuredStructureRenderer;
                 }
+
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(0, 0, 1000);
+                renderer.render(guiGraphics);
+                guiGraphics.pose().popPose();
                 RenderSystem.disableBlend();
             }
         }
@@ -176,10 +166,13 @@ public class CustomizeSkyblockScreen extends Screen {
         }
 
         protected void renderEntries(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            this.enableScissor(guiGraphics);
             super.renderListItems(guiGraphics, mouseX, mouseY, partialTick);
+            guiGraphics.disableScissor();
+            this.renderListSeparators(guiGraphics);
         }
 
-        public void setConfiguredStructureRenderer(@Nullable TemplateRenderer templateRenderer) {
+        public void setConfiguredStructureRenderer(@Nullable TemplatePreviewRenderer templateRenderer) {
             this.configuredStructureRenderer = templateRenderer;
         }
 
@@ -189,10 +182,7 @@ public class CustomizeSkyblockScreen extends Screen {
             private final Component desc;
             private final ConfiguredTemplate template;
             private final boolean tooLong;
-            private final ResourceLocation iconLocation;
             private final int index;
-            private File iconFile;
-            private final DynamicTexture icon;
             private Optional<Integer> paletteIndex = Optional.empty();
 
             public TemplateEntry(ConfiguredTemplate template, int index) {
@@ -200,14 +190,7 @@ public class CustomizeSkyblockScreen extends Screen {
                 this.desc = this.shortened(template.getDescriptionComponent());
                 this.template = template;
                 this.tooLong = !this.desc.getString().equals(template.getDescriptionComponent().getString());
-                this.iconLocation = SkyblockBuilder.getInstance().resource(Util.sanitizeName(template.getName(), ResourceLocation::validPathChar) + "/icon");
                 this.index = index;
-                this.iconFile = SkyPaths.ICONS_DIR.resolve(template.getName().toLowerCase(Locale.ROOT) + ".png").toFile();
-                if (!this.iconFile.isFile()) {
-                    this.iconFile = null;
-                }
-
-                this.icon = this.loadIcon();
             }
 
             @Override
@@ -282,45 +265,11 @@ public class CustomizeSkyblockScreen extends Screen {
 
             public void setPaletteIndex(int index) {
                 this.paletteIndex = Optional.of(index);
-                TemplateList.this.structureCache.put(this.name.getString(), new TemplateRenderer(this.template.getTemplate(), (float) (TemplateList.this.width - TemplateList.this.getRowWidth()) / 2, index));
+                TemplateList.this.structureCache.put(this.name.getString(), new TemplatePreviewRenderer(new TemplatePreview(this.template), new TemplatePreviewRenderer.Area((TemplateList.this.width - TemplateList.this.getRowWidth()) / 2), index));
             }
 
             public Optional<Integer> getPaletteIndex() {
                 return this.paletteIndex;
-            }
-
-            private DynamicTexture loadIcon() {
-                if (this.iconFile != null && this.iconFile.isFile()) {
-                    try {
-                        FileInputStream in = new FileInputStream(this.iconFile);
-
-                        DynamicTexture texture;
-                        try {
-                            NativeImage image = NativeImage.read(in);
-                            Validate.validState(image.getWidth() == image.getHeight(), "Height and width must be equal.");
-                            DynamicTexture tempTexture = new DynamicTexture(image);
-                            Minecraft.getInstance().textureManager.register(this.iconLocation, tempTexture);
-                            texture = tempTexture;
-                        } catch (Throwable throwable) {
-                            try {
-                                in.close();
-                            } catch (Throwable throwable1) {
-                                throwable1.addSuppressed(throwable);
-                            }
-
-                            throw throwable;
-                        }
-
-                        in.close();
-                        return texture;
-                    } catch (Throwable throwable) {
-                        SkyblockBuilder.getLogger().error("Invalid icon for template {}", this.template.getName(), throwable);
-                        return null;
-                    }
-                } else {
-                    Minecraft.getInstance().textureManager.release(this.iconLocation);
-                    return null;
-                }
             }
 
             private Component shortened(Component text) {

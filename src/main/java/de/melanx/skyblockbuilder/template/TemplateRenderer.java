@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.FakeLevel;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -31,6 +32,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 import org.moddingx.libx.render.ClientTickHandler;
 
 import java.util.*;
@@ -40,6 +42,8 @@ import java.util.*;
  * https://github.com/VazkiiMods/Patchouli/blob/35ae32b6b9c9c37a78ecd4867b83ba25304fd0c7/Common/src/main/java/vazkii/patchouli/client/book/page/PageMultiblock.java
  * The license of Patchouli applies to this I guess.
  */
+@Deprecated(forRemoval = true)
+@RemoveIn(minecraft = "1.22")
 public class TemplateRenderer {
 
     private final ClientLevel clientLevel = Objects.requireNonNull(FakeLevel.getInstance());
@@ -61,6 +65,10 @@ public class TemplateRenderer {
     }
 
     public TemplateRenderer(StructureTemplate template, float maxX, float maxY, int fixedPaletteIndex) {
+        if (SharedConstants.IS_RUNNING_IN_IDE) {
+            throw new RuntimeException("Stop using this! Head over to TemplatePreviewRenderer.");
+        }
+
         this.template = template;
         this.maxX = maxX;
         this.maxY = maxY;

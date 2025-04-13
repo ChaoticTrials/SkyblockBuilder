@@ -1,7 +1,8 @@
 package de.melanx.skyblockbuilder.client.screens;
 
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
-import de.melanx.skyblockbuilder.template.TemplateRenderer;
+import de.melanx.skyblockbuilder.template.TemplatePreview;
+import de.melanx.skyblockbuilder.template.TemplatePreviewRenderer;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,7 +23,7 @@ public class ChoosePaletteScreen extends Screen {
     private final ChoosePaletteScreen.OnApply applyIndex;
     private final ChoosePaletteScreen.OnReset resetIndex;
     private int paletteIndex = 0;
-    private transient final Map<Integer, TemplateRenderer> structureCache = new HashMap<>();
+    private transient final Map<Integer, TemplatePreviewRenderer> structureCache = new HashMap<>();
     private int rows = 1;
     private int structureRenderSize;
 
@@ -55,8 +56,6 @@ public class ChoosePaletteScreen extends Screen {
                 .pos(this.width / 2 + 5, this.height - 28)
                 .size(150, 20)
                 .build());
-
-        this.structureRenderSize = (int) (this.height - (this.height * 0.1) - ((this.rows - 1) * (BUTTON_STEP * 2)));
     }
 
     private void buildPaletteButtons() {
@@ -84,12 +83,14 @@ public class ChoosePaletteScreen extends Screen {
             int y = this.height - 60 - (rows - 1 - i) * BUTTON_STEP;
             for (int j = 0; j < buttonsThisRow; j++) {
                 final int currentPaletteIndex = paletteIndex;
-                this.addRenderableWidget(Button.builder(Component.literal(String.valueOf(currentPaletteIndex + 1)),
+                Button indexButton = this.addRenderableWidget(Button.builder(Component.literal(String.valueOf(currentPaletteIndex + 1)),
                                 button -> this.updatePalette(currentPaletteIndex))
                         .pos(startX + (j * BUTTON_STEP), y)
                         .size(BUTTON_SIZE, BUTTON_SIZE)
                         .build()
                 );
+                indexButton.setFocused(paletteIndex == 0);
+
                 paletteIndex++;
             }
         }
@@ -103,14 +104,20 @@ public class ChoosePaletteScreen extends Screen {
     public void resize(@Nonnull Minecraft minecraft, int width, int height) {
         super.resize(minecraft, width, height);
 
-        this.structureCache.forEach((i, renderer) -> renderer.setSize(this.structureRenderSize));
+        this.structureCache.forEach((i, renderer) -> renderer.setArea(this.createArea()));
     }
 
     @Override
     public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplateRenderer(this.template.getTemplate(), this.structureRenderSize, this.paletteIndex))
-                .render(guiGraphics, this.width / 2, this.structureRenderSize / 2 + (int) (this.height * 0.05));
+//        this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplatePreviewRenderer(new TemplatePreview(this.template), new TemplatePreviewRenderer.Area(this.structureRenderSize), this.paletteIndex))
+//                .render(guiGraphics, this.width / 2, this.structureRenderSize / 2 + (int) (this.height * 0.05));
+        this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplatePreviewRenderer(new TemplatePreview(this.template), this.createArea(), this.paletteIndex))
+                .render(guiGraphics);
+    }
+
+    private TemplatePreviewRenderer.Area createArea() {
+        return new TemplatePreviewRenderer.Area(this.width / 100, this.height / 100, this.width - (this.width / 100), this.height - (60 - BUTTON_SIZE + (this.rows) * BUTTON_STEP));
     }
 
     @FunctionalInterface

@@ -47,7 +47,7 @@ public class FakeLevel extends ClientLevel {
                 new ClientLevelData(Difficulty.EASY, false, true),
                 Level.OVERWORLD,
                 new FakeHolder<>(FakeLevel.fakeDimensionType()),
-                0, 0, () -> null,
+                0, 0, Minecraft.getInstance()::getProfiler,
                 new LevelRenderer(Minecraft.getInstance(),
                         Minecraft.getInstance().getEntityRenderDispatcher(),
                         Minecraft.getInstance().getBlockEntityRenderDispatcher(),

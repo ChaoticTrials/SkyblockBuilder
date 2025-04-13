@@ -152,6 +152,7 @@
   "skyblockbuilder.screen.error.title": "Error",
   "skyblockbuilder.screen.error.message": "Mindestens ein Block fehlt:",
   "skyblockbuilder.screen.error.button.give": "Zu Inventar hinzufügen",
+  "skyblockbuilder.screen.error.customize.failed_loading": "Vorschau nicht korrekt, Fehler in Blöcken oder Entitäten gefunden",
   "skyblockbuilder.schematic.saved": "Schema gespeichert in %s",
 
   "skyblockbuilder.compat.disabled_management": "Diese und andere Teamverwaltungsfunktionen sind aktuell durch %s deaktiviert.",

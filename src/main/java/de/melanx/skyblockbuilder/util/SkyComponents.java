@@ -324,6 +324,7 @@ public class SkyComponents {
     public static final MutableComponent SCREEN_ERROR_TITLE = SkyComponents.errorScreen("title");
     public static final MutableComponent SCREEN_ERROR_MESSAGE = SkyComponents.errorScreen("message");
     public static final MutableComponent SCREEN_ERROR_GIVE_BUTTON = SkyComponents.errorScreen("button.give");
+    public static final MutableComponent SCREEN_ERROR_LOAD_TEMPLATE = SkyComponents.errorScreen("customize.failed_loading");
 
     // Miscellaneous
     public static final Function<String, MutableComponent> SCHEMATIC_SAVED = path -> Component.translatable("skyblockbuilder.schematic.saved", path);
