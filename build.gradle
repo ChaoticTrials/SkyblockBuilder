@@ -8,7 +8,6 @@ buildscript {
 }
 
 apply from: 'https://moddingx.github.io/ModUtils/v5/mod.gradle'
-apply plugin: 'org.moddingx.modgradle.coremods'
 apply plugin: 'org.moddingx.modgradle.cursedep'
 apply plugin: 'maven-publish'
 mod['version'] = getVersion(mod.minecraft + "-" + mod.base_version, new URL(mod.remote_maven + "/" + group.replace('.', '/') + "/" + name + "/maven-metadata.xml"))
@@ -49,8 +48,6 @@ dependencies {
     runtimeOnly fg.deobf("de.melanx:DefaultWorldType:1.20.1-4.0.4")
 
 //    runtimeOnly curse.mod(556904, 4016840) // Cosmopolis Mod 1.19.X-12.0
-
-    coremods 'org.moddingx:CoreModTypes:5.0.2-2'
 }
 
 
