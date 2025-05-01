@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
+import de.melanx.skyblockbuilder.config.common.InventoryConfig;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
@@ -231,9 +232,11 @@ public class SkyblockSavedData extends SavedData {
         }
 
         ServerLevel level = team.getLevel();
-        if (!team.isSpawn() && level != null && !this.getOrCreateMetaInfo(player).getPreviousTeamIds().contains(team.getId())) {
+        if (level != null
+                && (InventoryConfig.initialInventoryType == InventoryConfig.InitialInventoryType.SPAWN) == team.isSpawn()
+                && !this.getOrCreateMetaInfo(player).getPreviousTeamIds().contains(team.getId())) {
             ServerPlayer onlinePlayer = level.getServer().getPlayerList().getPlayer(player);
-            if (onlinePlayer != null && (TemplatesConfig.spawn.isEmpty() || !team.isSpawn())) {
+            if (onlinePlayer != null) {
                 RandomUtility.setStartInventory(onlinePlayer);
             }
         }

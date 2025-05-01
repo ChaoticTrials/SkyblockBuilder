@@ -12,4 +12,14 @@ public class InventoryConfig {
 
     @Config("Should players' items be dropped when leaving a team? [default: true]")
     public static boolean dropItems = true;
+
+    @Config({"When should players receive their starting inventory?",
+            "  SPAWN - when joining world first time",
+            "  TEAM  - when joining a team for the first time"})
+    public static InitialInventoryType initialInventoryType = InitialInventoryType.TEAM;
+
+    public enum InitialInventoryType {
+        SPAWN,
+        TEAM
+    }
 }
