@@ -81,8 +81,8 @@ mod.configure {
             require 'libx'
             optional 'minemention'
             optional 'curios'
-//            optional 'heracles'
-//            optional 'cadmus'
+//            optional 'odyssey-quests'
+//            optional 'odyssey-claims'
         }
         curseforge {
             projectId 446691
