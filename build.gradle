@@ -41,7 +41,7 @@ mod.configure {
     versioning {
         if (dev) {
             def gitCommitHash = ['git', 'rev-parse', 'HEAD'].execute().text.trim()
-            constant baseVersion + (gitCommitHash ? "-${gitCommitHash}" : '')
+            constant baseVersion + '.999' + (gitCommitHash ? "-${gitCommitHash}" : '')
         } else {
             base baseVersion
             maven 'https://maven.melanx.de/release'

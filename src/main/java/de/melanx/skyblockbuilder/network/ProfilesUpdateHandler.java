@@ -32,6 +32,10 @@ public class ProfilesUpdateHandler extends PacketHandler<ProfilesUpdateHandler.M
 
     public record Message(Set<GameProfile> profiles) implements CustomPacketPayload {
 
+        public Message(Set<GameProfile> profiles) {
+            this.profiles = Set.copyOf(profiles);
+        }
+
         public static final StreamCodec<RegistryFriendlyByteBuf, ProfilesUpdateHandler.Message> CODEC = StreamCodec.of(
                 (buffer, msg) -> {
                     int size = msg.profiles.size();
