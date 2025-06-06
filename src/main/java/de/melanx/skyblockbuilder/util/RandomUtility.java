@@ -1,7 +1,6 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.yggdrasil.ProfileResult;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
@@ -98,70 +97,88 @@ public class RandomUtility {
 
     public static Set<GameProfile> getGameProfiles(ServerLevel level) {
         MinecraftServer server = level.getServer();
-
         net.minecraft.server.players.GameProfileCache profileCache = server.getProfileCache();
-        Set<GameProfile> profiles = Sets.newConcurrentHashSet();
-        Set<UUID> handledIds = Sets.newConcurrentHashSet();
-        handledIds.add(Util.NIL_UUID);
 
-        // load the cache and look for all profiles
+        Set<GameProfile> profiles = new HashSet<>();
+        Set<UUID> cachedIds = new HashSet<>();
+
         //noinspection DataFlowIssue
-        profileCache.load().forEach(profileInfo -> {
-            GameProfile profile = profileInfo.getProfile();
-            profiles.add(profile);
-            handledIds.add(profile.getId());
+        profileCache.load().forEach(info -> {
+            GameProfile gp = info.getProfile();
+            if (gp.getId().equals(Util.NIL_UUID)) {
+                return;
+            }
+
+            profiles.add(gp);
+            cachedIds.add(gp.getId());
         });
 
-        int cachedProfilesAmount = profiles.size() - 1;
-        int usedCachedProfilesAmount = 0;
+        final int cachedProfilesAmount = cachedIds.size();
+        Set<UUID> usedCachedIds = new HashSet<>();
         int uncachedProfilesAmount = 0;
         int totalProfilesAmount = 0;
 
         // check if all the members were in the cache and add these tags if needed
         for (Team team : SkyblockSavedData.get(level).getTeams()) {
             for (UUID id : team.getPlayers()) {
+                if (id.equals(Util.NIL_UUID)) continue;
+
                 totalProfilesAmount++;
-                if (handledIds.contains(id)) {
-                    usedCachedProfilesAmount++;
+
+                if (cachedIds.contains(id)) {
+                    usedCachedIds.add(id);
                     continue;
                 }
 
                 String lastKnownUsername = UsernameCache.getLastKnownUsername(id);
                 if (lastKnownUsername != null) {
                     profiles.add(new GameProfile(id, lastKnownUsername));
+                    uncachedProfilesAmount++;
+                    continue;
+                }
+
+                Optional<GameProfile> cachedNow = profileCache.get(id);
+                if (cachedNow.isPresent()) {
+                    profiles.add(cachedNow.get());
+                    uncachedProfilesAmount++;
                     continue;
                 }
 
                 uncachedProfilesAmount++;
-                Optional<GameProfile> gameProfile = profileCache.get(id);
-                if (gameProfile.isPresent()) {
-                    profiles.add(gameProfile.get());
-                } else {
-                    GameProfile profile;
-                    GameProfile unnamedProfile = new GameProfile(id, "Unknown");
-                    boolean enforceProfileSecurity = CustomizationConfig.forceUnsecureProfileNames || level.getServer().enforceSecureProfile();
-                    try {
-                        ProfileResult profileResult = server.getSessionService().fetchProfile(id, enforceProfileSecurity);
-                        profile = profileResult != null ? profileResult.profile() : unnamedProfile;
-                    } catch (IllegalArgumentException e) {
-                        SkyblockBuilder.getLogger().error("Problems filling profile properties for id {} with requiring secure {}", id, enforceProfileSecurity);
-                        profile = unnamedProfile;
-                    }
 
-                    if (profile.getName() != null) {
-                        profileCache.add(profile);
-                        profiles.add(profile);
-                    } else {
-                        SkyblockBuilder.getLogger().info("No profile found for id {}", id);
-                        profiles.add(new GameProfile(profile.getId(), "Unknown"));
-                    }
-                }
+                boolean enforceProfileSecurity = CustomizationConfig.forceUnsecureProfileNames || server.enforceSecureProfile();
+
+                GameProfile fetched = fetchProfileOrUnknown(server, id, enforceProfileSecurity);
+                profileCache.add(fetched);
+                profiles.add(fetched);
             }
         }
 
-        SkyblockBuilder.getLogger().info("Cached profiles: {} ({} unused), uncached profiles: {}, total profiles: {}", cachedProfilesAmount, cachedProfilesAmount - usedCachedProfilesAmount, uncachedProfilesAmount, totalProfilesAmount);
+        int usedCachedProfilesAmount = usedCachedIds.size();
+        int unusedCachedProfilesAmount = cachedProfilesAmount - usedCachedProfilesAmount;
+
+        SkyblockBuilder.getLogger().info(
+                "Cached profiles: {} ({} unused), uncached profiles: {}, total profiles: {}",
+                cachedProfilesAmount, unusedCachedProfilesAmount,
+                uncachedProfilesAmount, totalProfilesAmount
+        );
 
         return profiles;
+    }
+
+    private static GameProfile fetchProfileOrUnknown(MinecraftServer server,
+            UUID id,
+            boolean enforceSecure) {
+        GameProfile unnamed = new GameProfile(id, "Unknown");
+        try {
+            ProfileResult result = server.getSessionService().fetchProfile(id, enforceSecure);
+            return result != null ? result.profile() : unnamed;
+        } catch (IllegalArgumentException ex) {
+            SkyblockBuilder.getLogger().error(
+                    "Problems filling profile properties for id {} with requiring secure {}",
+                    id, enforceSecure);
+            return unnamed;
+        }
     }
 
     /**
