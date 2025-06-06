@@ -1,7 +1,6 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.ModBlocks;
@@ -25,6 +24,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -123,69 +123,86 @@ public class RandomUtility {
 
     public static Set<GameProfile> getGameProfiles(ServerLevel level) {
         MinecraftServer server = level.getServer();
+        GameProfileCache profileCache = server.getProfileCache();
 
-        net.minecraft.server.players.GameProfileCache profileCache = server.getProfileCache();
-        Set<GameProfile> profiles = Sets.newConcurrentHashSet();
-        Set<UUID> handledIds = Sets.newConcurrentHashSet();
-        handledIds.add(Util.NIL_UUID);
+        Set<GameProfile> profiles = new HashSet<>();
+        Set<UUID> cachedIds = new HashSet<>();
 
-        // load the cache and look for all profiles
         //noinspection DataFlowIssue
-        profileCache.load().forEach(profileInfo -> {
-            GameProfile profile = profileInfo.getProfile();
-            profiles.add(profile);
-            handledIds.add(profile.getId());
+        profileCache.load().forEach(info -> {
+            GameProfile gp = info.getProfile();
+            if (gp.getId().equals(Util.NIL_UUID)) {
+                return;
+            }
+
+            profiles.add(gp);
+            cachedIds.add(gp.getId());
         });
 
-        int cachedProfilesAmount = profiles.size() - 1;
-        int usedCachedProfilesAmount = 0;
+        final int cachedProfilesAmount = cachedIds.size();
+        Set<UUID> usedCachedIds = new HashSet<>();
         int uncachedProfilesAmount = 0;
         int totalProfilesAmount = 0;
 
         // check if all the members were in the cache and add these tags if needed
         for (Team team : SkyblockSavedData.get(level).getTeams()) {
             for (UUID id : team.getPlayers()) {
+                if (id.equals(Util.NIL_UUID)) continue;
+
                 totalProfilesAmount++;
-                if (handledIds.contains(id)) {
-                    usedCachedProfilesAmount++;
+
+                if (cachedIds.contains(id)) {
+                    usedCachedIds.add(id);
                     continue;
                 }
 
                 if (UsernameCache.containsUUID(id)) {
                     String lastKnownUsername = UsernameCache.getLastKnownUsername(id);
                     profiles.add(new GameProfile(id, lastKnownUsername));
+                    uncachedProfilesAmount++;
+                    continue;
+                }
+
+                Optional<GameProfile> cachedNow = profileCache.get(id);
+                if (cachedNow.isPresent()) {
+                    profiles.add(cachedNow.get());
+                    uncachedProfilesAmount++;
                     continue;
                 }
 
                 uncachedProfilesAmount++;
-                Optional<GameProfile> gameProfile = profileCache.get(id);
-                if (gameProfile.isPresent()) {
-                    profiles.add(gameProfile.get());
-                } else {
-                    GameProfile profile;
-                    GameProfile unnamedProfile = new GameProfile(id, null);
-                    boolean enforceProfileSecurity = CustomizationConfig.forceUnsecureProfileNames || level.getServer().enforceSecureProfile();
-                    try {
-                        profile = server.getSessionService().fillProfileProperties(unnamedProfile, enforceProfileSecurity);
-                    } catch (IllegalArgumentException e) {
-                        SkyblockBuilder.getLogger().error("Problems filling profile properties for id {} with requiring secure {}", id, enforceProfileSecurity);
-                        profile = unnamedProfile;
-                    }
 
-                    if (profile.getName() != null) {
-                        profileCache.add(profile);
-                        profiles.add(profile);
-                    } else {
-                        SkyblockBuilder.getLogger().info("No profile found for id {}", id);
-                        profiles.add(new GameProfile(profile.getId(), "Unknown"));
-                    }
-                }
+                boolean enforceProfileSecurity = CustomizationConfig.forceUnsecureProfileNames || server.enforceSecureProfile();
+
+                GameProfile fetched = fetchProfileOrUnknown(server, id, enforceProfileSecurity);
+                profileCache.add(fetched);
+                profiles.add(fetched);
             }
         }
 
-        SkyblockBuilder.getLogger().info("Cached profiles: {} ({} unused), uncached profiles: {}, total profiles: {}", cachedProfilesAmount, cachedProfilesAmount - usedCachedProfilesAmount, uncachedProfilesAmount, totalProfilesAmount);
+        int usedCachedProfilesAmount = usedCachedIds.size();
+        int unusedCachedProfilesAmount = cachedProfilesAmount - usedCachedProfilesAmount;
+
+        SkyblockBuilder.getLogger().info(
+                "Cached profiles: {} ({} unused), uncached profiles: {}, total profiles: {}",
+                cachedProfilesAmount, unusedCachedProfilesAmount,
+                uncachedProfilesAmount, totalProfilesAmount
+        );
 
         return profiles;
+    }
+
+    private static GameProfile fetchProfileOrUnknown(MinecraftServer server, UUID id, boolean enforceSecure) {
+        GameProfile unnamed = new GameProfile(id, "Unknown");
+        try {
+            GameProfile profile = server.getSessionService().fillProfileProperties(new GameProfile(id, null), enforceSecure);
+
+            return profile.getName() != null ? profile : unnamed;
+        } catch (IllegalArgumentException ex) {
+            SkyblockBuilder.getLogger().error("Problems filling profile properties for id {} with requiring secure {}", id, enforceSecure);
+
+            return unnamed;
+        }
     }
 
     /**
