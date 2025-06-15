@@ -24,6 +24,7 @@ import org.moddingx.libx.impl.config.ConfigState;
 
 import javax.annotation.Nullable;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -171,7 +172,9 @@ public class DumpUtil {
 
     private static void addFileToZip(JsonArray fileCollector, ZipOutputStream zipStream, Path filePath, Path zipEntryPath) throws IOException {
         try (InputStream inputStream = Files.newInputStream(filePath)) {
-            ZipEntry zipEntry = new ZipEntry(zipEntryPath.toString());
+            // force ZIP-standard forward‐slashes because of Windows
+            String name = zipEntryPath.toString().replace(File.separatorChar, '/');
+            ZipEntry zipEntry = new ZipEntry(name);
             zipStream.putNextEntry(zipEntry);
             byte[] buffer = new byte[1024];
 
@@ -183,20 +186,22 @@ public class DumpUtil {
 
             JsonObject fileData = new JsonObject();
             fileData.addProperty("name", zipEntryPath.getFileName().toString());
-            fileData.addProperty("path", zipEntryPath.toString().replace('\\', '/'));
+            fileData.addProperty("path", name);
             fileCollector.add(fileData);
         }
     }
 
     private static void addStringToZip(JsonArray fileCollector, ZipOutputStream zipStream, String content, Path zipEntryPath) throws IOException {
-        ZipEntry zipEntry = new ZipEntry(zipEntryPath.toString());
+        // force ZIP-standard forward‐slashes because of Windows
+        String name = zipEntryPath.toString().replace(File.separatorChar, '/');
+        ZipEntry zipEntry = new ZipEntry(name);
         zipStream.putNextEntry(zipEntry);
         zipStream.write(content.getBytes());
         zipStream.closeEntry();
 
         JsonObject fileData = new JsonObject();
         fileData.addProperty("name", zipEntryPath.getFileName().toString());
-        fileData.addProperty("path", zipEntryPath.toString().replace('\\', '/'));
+        fileData.addProperty("path", name);
         fileCollector.add(fileData);
     }
 
