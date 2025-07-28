@@ -21,6 +21,7 @@ import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
@@ -90,10 +91,11 @@ public class EventListener {
                 .then(TeamCommandBase.register())
                 .then(VisitCommand.register()));
         event.getDispatcher().register(Commands.literal("skydev")
+                .requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
                 .then(ConvertCommand.register())
                 .then(GenerateCommand.register())
                 .then(InventoryCommand.register())
-                .then(ManageCommand.register().requires(source -> SkyblockBuilderAPI.teamManagementEnabled())));
+                .then(ManageCommand.register()));
         event.getDispatcher().register(Commands.literal("skyblock")
                 .requires(source -> SkyblockBuilderAPI.teamManagementEnabled())
                 .then(AcceptCommand.register())

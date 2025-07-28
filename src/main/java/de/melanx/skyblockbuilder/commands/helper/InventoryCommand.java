@@ -38,8 +38,8 @@ public class InventoryCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("inventory")
+                .requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
                 .then(Commands.literal("export")
-                        .requires(PermissionManager.INSTANCE::mayExecuteOpCommand)
                         .executes(context -> InventoryCommand.exportInventory(context.getSource())));
     }
 
@@ -88,7 +88,7 @@ public class InventoryCommand {
         for (int slot : Inventory.ALL_ARMOR_SLOTS) {
             ItemStack item = inventory.armor.get(slot);
             if (!item.isEmpty()) {
-                EquipmentSlot equipmentSlot = switch (slot) {
+                EquipmentSlot equipmentSlot = switch(slot) {
                     case 0 -> EquipmentSlot.FEET;
                     case 1 -> EquipmentSlot.LEGS;
                     case 2 -> EquipmentSlot.CHEST;
