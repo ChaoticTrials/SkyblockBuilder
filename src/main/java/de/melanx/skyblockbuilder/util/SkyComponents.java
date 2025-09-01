@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.util;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.locale.Language;
@@ -217,6 +218,10 @@ public class SkyComponents {
     public static final MutableComponent ERROR_REMOVE_SPAWN0 = SkyComponents.error("remove_spawn0");
     public static final MutableComponent ERROR_REMOVE_SPAWN1 = SkyComponents.error("remove_spawn1");
     public static final MutableComponent ERROR_SPREAD_NOT_EXIST = SkyComponents.error("spread_not_exist");
+    public static final Function<String, MutableComponent> ERROR_NAME_LENGTH = teamName -> {
+        teamName = teamName.length() > Team.MAX_NAME_LENGTH + 5 ? teamName.substring(0, Team.MAX_NAME_LENGTH) + "[...]" : teamName;
+        return SkyComponents.error("name_length", teamName);
+    };
     public static final Function<String, MutableComponent> ERROR_TEAM_ALREADY_EXIST = teamName -> SkyComponents.error("team_already_exist", teamName);
     public static final MutableComponent ERROR_TEAM_NOT_EXIST = SkyComponents.error("team_not_exist");
     public static final MutableComponent ERROR_TELEPORT_ACROSS_DIMENSIONS = SkyComponents.error("teleport_across_dimensions");

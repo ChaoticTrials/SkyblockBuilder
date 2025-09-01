@@ -270,6 +270,10 @@ public class SkyblockSavedData extends SavedData {
             return null;
         }
 
+        if (teamName.length() > Team.MAX_NAME_LENGTH) {
+            return null;
+        }
+
         return this.createTeam(teamName, TemplateData.get(this.level).getConfiguredTemplate());
     }
 

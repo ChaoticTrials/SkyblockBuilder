@@ -47,6 +47,8 @@ public class Team {
     private static final String POS = "pos";
     private static final String SIZE = "size";
 
+    public static final int MAX_NAME_LENGTH = 64;
+
     private final SkyblockSavedData data;
     private final Set<UUID> players = new CopyOnWriteArraySet<>();
     private final Set<UUID> joinRequests = new CopyOnWriteArraySet<>();

@@ -44,6 +44,11 @@ public class CreateCommand {
             return 0;
         }
 
+        if (name.length() > Team.MAX_NAME_LENGTH) {
+            source.sendFailure(SkyComponents.ERROR_NAME_LENGTH.apply(name));
+            return 0;
+        }
+
         Team team = data.createTeam(name);
 
         String finalName = name;
