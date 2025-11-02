@@ -65,6 +65,11 @@ public class RenameTeamCommand {
             return false;
         }
 
+        if (newName.length() > Team.MAX_NAME_LENGTH) {
+            source.sendFailure(SkyComponents.ERROR_NAME_LENGTH.apply(newName));
+            return false;
+        }
+
         ServerPlayer player = oldName == null ? source.getPlayerOrException() : null;
         SkyblockManageTeamEvent.Rename event = SkyblockHooks.onRename(player, team, newName);
         data.renameTeam(team, event.getPlayer(), event.getNewName());
