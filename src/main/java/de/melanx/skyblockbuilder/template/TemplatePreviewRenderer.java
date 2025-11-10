@@ -67,6 +67,7 @@ public class TemplatePreviewRenderer {
     private int paletteIndex;
     private Area area;
     private DynamicTexture icon;
+    private long lastTick;
 
     public TemplatePreviewRenderer(TemplatePreview preview, Area area) {
         this(preview, area, -1);
@@ -125,12 +126,13 @@ public class TemplatePreviewRenderer {
         rotMat.rotation(Axis.YP.rotationDegrees(-45));
         guiGraphics.pose().translate(offX, 0, offZ);
 
-        // Finally apply the rotations
+        // Finally, apply the rotations
         eye.mul(rotMat);
         this.renderElements(guiGraphics, template);
 
         guiGraphics.pose().popPose();
-        if (ClientTickHandler.ticksInGame() % 40 == 0) {
+        if (ClientTickHandler.ticksInGame() % 40 == 0 && ClientTickHandler.ticksInGame() != this.lastTick) {
+            this.lastTick = ClientTickHandler.ticksInGame();
             if (this.fixedPaletteIndex) {
                 return;
             }
