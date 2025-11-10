@@ -89,7 +89,10 @@ public class ChoosePaletteScreen extends Screen {
                         .size(BUTTON_SIZE, BUTTON_SIZE)
                         .build()
                 );
-                indexButton.setFocused(paletteIndex == 0);
+
+                if (paletteIndex == 0) {
+                    this.setFocused(indexButton);
+                }
 
                 paletteIndex++;
             }
@@ -110,8 +113,6 @@ public class ChoosePaletteScreen extends Screen {
     @Override
     public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-//        this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplatePreviewRenderer(new TemplatePreview(this.template), new TemplatePreviewRenderer.Area(this.structureRenderSize), this.paletteIndex))
-//                .render(guiGraphics, this.width / 2, this.structureRenderSize / 2 + (int) (this.height * 0.05));
         this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplatePreviewRenderer(new TemplatePreview(this.template), this.createArea(), this.paletteIndex))
                 .render(guiGraphics);
     }
