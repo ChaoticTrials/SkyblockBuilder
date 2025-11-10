@@ -3,11 +3,13 @@ package de.melanx.skyblockbuilder.client;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.*;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
@@ -31,12 +33,13 @@ import java.util.stream.Stream;
 
 public class FakeLevel extends ClientLevel {
 
+    private static final ResourceKey<Level> FAKE_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource("fake"));
     private static FakeLevel instance;
 
     public FakeLevel() {
         super(FakeLevel.fakeClientPacketListener(),
                 new ClientLevelData(Difficulty.EASY, false, true),
-                Level.OVERWORLD,
+                FakeLevel.FAKE_LEVEL_KEY,
                 new FakeHolder<>(FakeLevel.fakeDimensionType()),
                 0, 0, () -> null,
                 new LevelRenderer(Minecraft.getInstance(),
