@@ -139,14 +139,7 @@ public class CustomizeSkyblockScreen extends Screen {
                 if (hasSelectedEntry) {
                     String templateName = this.getSelected().name.getString();
                     renderer = this.structureCache.computeIfAbsent(templateName,
-                            key -> new TemplatePreviewRenderer(new TemplatePreview(this.getSelected().template),
-                                    new TemplatePreviewRenderer.Area(
-                                            this.width / 100,
-                                            this.getY() + 5,
-                                            (this.width - this.getRowWidth()) / 2 - this.width / 100,
-                                            this.height - 5
-                                    )
-                            )
+                            key -> new TemplatePreviewRenderer(new TemplatePreview(this.getSelected().template), this.createTemplateRendererArea())
                     );
                 } else {
                     renderer = this.configuredStructureRenderer;
@@ -174,6 +167,15 @@ public class CustomizeSkyblockScreen extends Screen {
 
         public void setConfiguredStructureRenderer(@Nullable TemplatePreviewRenderer templateRenderer) {
             this.configuredStructureRenderer = templateRenderer;
+        }
+
+        private TemplatePreviewRenderer.Area createTemplateRendererArea() {
+            return new TemplatePreviewRenderer.Area(
+                    this.width / 100,
+                    this.getY() + 5,
+                    (this.width - this.getRowWidth()) / 2 - this.width / 100,
+                    this.height - 5
+            );
         }
 
         class TemplateEntry extends ObjectSelectionList.Entry<TemplateEntry> {
@@ -265,7 +267,7 @@ public class CustomizeSkyblockScreen extends Screen {
 
             public void setPaletteIndex(int index) {
                 this.paletteIndex = Optional.of(index);
-                TemplateList.this.structureCache.put(this.name.getString(), new TemplatePreviewRenderer(new TemplatePreview(this.template), new TemplatePreviewRenderer.Area((TemplateList.this.width - TemplateList.this.getRowWidth()) / 2), index));
+                TemplateList.this.structureCache.put(this.name.getString(), new TemplatePreviewRenderer(new TemplatePreview(this.template), TemplateList.this.createTemplateRendererArea(), index));
             }
 
             public Optional<Integer> getPaletteIndex() {
