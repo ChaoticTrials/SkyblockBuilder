@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.world.presets;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
+import de.melanx.skyblockbuilder.datagen.SkyblockBiomeParameters;
 import de.melanx.skyblockbuilder.util.BiomeSourceConverter;
 import de.melanx.skyblockbuilder.world.SkyBiomeSource;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
@@ -104,7 +105,7 @@ public class SkyblockPreset extends WorldPreset {
             HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings,
             HolderLookup<Biome> biomes
     ) {
-        BiomeSource biomeSource = BiomeSourceConverter.customBiomeSource(Level.OVERWORLD, MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), biomes);
+        BiomeSource biomeSource = MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(SkyblockBiomeParameters.KEY));
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
 
         biomeSource = SkyblockPreset.convertBiomeSource((MultiNoiseBiomeSource) biomeSource, biomes, DimensionsConfig.Overworld.centeredBiomes);

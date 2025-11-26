@@ -6,14 +6,13 @@ import de.melanx.skyblockbuilder.client.ClientEventListener;
 import de.melanx.skyblockbuilder.compat.heracles.HeraclesCompat;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
-import de.melanx.skyblockbuilder.datagen.BlockStatesProvider;
-import de.melanx.skyblockbuilder.datagen.ItemModelProvider;
-import de.melanx.skyblockbuilder.datagen.ModTagProvider;
-import de.melanx.skyblockbuilder.datagen.WorldPresetProvider;
+import de.melanx.skyblockbuilder.datagen.*;
 import de.melanx.skyblockbuilder.network.SkyNetwork;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.SkyPaths;
+import de.melanx.skyblockbuilder.world.presets.BiomeParametersPreset;
 import net.minecraft.Util;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -54,6 +53,7 @@ public final class SkyblockBuilder extends ModXRegistration {
 
         DatagenSystem.create(this, system -> {
             system.addRegistryProvider(WorldPresetProvider::new);
+            system.addRegistryProvider(SkyblockBiomeParameters::new);
             system.addDataProvider(ItemModelProvider::new);
             system.addDataProvider(ModTagProvider::new);
             system.addDataProvider(BlockStatesProvider::new);
@@ -76,6 +76,8 @@ public final class SkyblockBuilder extends ModXRegistration {
         if (PermissionsConfig.forceSkyblockCheck) {
             SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled");
         }
+
+        MultiNoiseBiomeSourceParameterList.Preset.BY_NAME.put(BiomeParametersPreset.FILTERED_OVERWORLD.id(), BiomeParametersPreset.FILTERED_OVERWORLD);
     }
 
     @Override
