@@ -14,6 +14,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +31,7 @@ public class CustomizeSkyblockScreen extends Screen {
     private static final ResourceLocation SELECT_PALETTE = ResourceLocation.withDefaultNamespace("textures/gui/sprites/widget/page_forward.png");
     private final Screen parent;
     private final List<ConfiguredTemplate> templateMap;
+    private final RegistryAccess registryAccess;
     private final BiConsumer<ConfiguredTemplate, Optional<Integer>> applyTemplate;
     private TemplateList list;
     private Button doneButton;
@@ -38,6 +40,7 @@ public class CustomizeSkyblockScreen extends Screen {
     public CustomizeSkyblockScreen(CreateWorldScreen parent, WorldCreationContext context) {
         super(Component.translatable("generator.skyblockbuilder.skyblock"));
         this.parent = parent;
+        this.registryAccess = context.worldgenLoadContext();
         TemplateLoader.updateTemplates();
         this.template = TemplateLoader.getConfiguredTemplate();
         this.templateMap = TemplateLoader.getConfiguredTemplates();
@@ -76,7 +79,14 @@ public class CustomizeSkyblockScreen extends Screen {
             if (this.list.getSelected() != null) {
                 paletteIndex.ifPresent(this.list.getSelected()::setPaletteIndex);
             } else {
-                this.list.setConfiguredStructureRenderer(new TemplatePreviewRenderer(new TemplatePreview(this.template), new TemplatePreviewRenderer.Area((this.width - this.list.getRowWidth()) / 2), 0));
+                this.list.setConfiguredStructureRenderer(
+                        new TemplatePreviewRenderer(
+                                new TemplatePreview(this.template),
+                                new TemplatePreviewRenderer.Area((this.width - this.list.getRowWidth()) / 2),
+                                this.registryAccess,
+                                0
+                        )
+                );
             }
         }
     }
@@ -139,7 +149,7 @@ public class CustomizeSkyblockScreen extends Screen {
                 if (hasSelectedEntry) {
                     String templateName = this.getSelected().name.getString();
                     renderer = this.structureCache.computeIfAbsent(templateName,
-                            key -> new TemplatePreviewRenderer(new TemplatePreview(this.getSelected().template), this.createTemplateRendererArea())
+                            key -> new TemplatePreviewRenderer(new TemplatePreview(this.getSelected().template), this.createTemplateRendererArea(), CustomizeSkyblockScreen.this.registryAccess)
                     );
                 } else {
                     renderer = this.configuredStructureRenderer;
@@ -226,7 +236,7 @@ public class CustomizeSkyblockScreen extends Screen {
                             mouseX, mouseY
                     )) {
                         Minecraft.getInstance().pushGuiLayer(
-                                new ChoosePaletteScreen(this.template, this::setPaletteIndex, this::resetPaletteIndex)
+                                new ChoosePaletteScreen(this.template, CustomizeSkyblockScreen.this.registryAccess, this::setPaletteIndex, this::resetPaletteIndex)
                         );
                     }
 
@@ -267,7 +277,12 @@ public class CustomizeSkyblockScreen extends Screen {
 
             public void setPaletteIndex(int index) {
                 this.paletteIndex = Optional.of(index);
-                TemplateList.this.structureCache.put(this.name.getString(), new TemplatePreviewRenderer(new TemplatePreview(this.template), TemplateList.this.createTemplateRendererArea(), index));
+                TemplateList.this.structureCache.put(this.name.getString(), new TemplatePreviewRenderer(
+                        new TemplatePreview(this.template),
+                        TemplateList.this.createTemplateRendererArea(),
+                        CustomizeSkyblockScreen.this.registryAccess,
+                        index
+                ));
             }
 
             public Optional<Integer> getPaletteIndex() {

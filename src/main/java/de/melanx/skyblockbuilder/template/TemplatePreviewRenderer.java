@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -54,7 +55,7 @@ import java.util.*;
  */
 public class TemplatePreviewRenderer {
 
-    private final ClientLevel clientLevel = Optional.ofNullable(Minecraft.getInstance().level).orElse(FakeLevel.getInstance());
+    private final ClientLevel clientLevel;
     private final TemplatePreview preview;
     private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
     private final transient Map<StructureTemplate.StructureEntityInfo, Entity> entityCache = new HashMap<>();
@@ -70,11 +71,16 @@ public class TemplatePreviewRenderer {
     private long lastTick;
 
     public TemplatePreviewRenderer(TemplatePreview preview, Area area) {
-        this(preview, area, -1);
+        this(preview, area, Optional.ofNullable(Minecraft.getInstance().level).orElseThrow(() -> new IllegalArgumentException("Consider using another constructor")).registryAccess());
     }
 
-    public TemplatePreviewRenderer(TemplatePreview preview, Area area, int fixedPaletteIndex) {
+    public TemplatePreviewRenderer(TemplatePreview preview, Area area, RegistryAccess registryAccess) {
+        this(preview, area, registryAccess, -1);
+    }
+
+    public TemplatePreviewRenderer(TemplatePreview preview, Area area, RegistryAccess registryAccess, int fixedPaletteIndex) {
         Calendar calendar = Calendar.getInstance();
+        this.clientLevel = Optional.ofNullable(Minecraft.getInstance().level).orElse(FakeLevel.getInstance(registryAccess));
         this.aprilUpsideDown = ClientConfig.allowAprilFools && calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;
         this.preview = preview;
         this.area = area;

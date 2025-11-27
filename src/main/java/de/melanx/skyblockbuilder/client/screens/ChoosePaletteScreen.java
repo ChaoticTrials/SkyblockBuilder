@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
@@ -20,16 +21,17 @@ public class ChoosePaletteScreen extends Screen {
     private static final int BUTTON_SIZE = 20;
     private static final int BUTTON_STEP = BUTTON_SIZE + 5;
     private final ConfiguredTemplate template;
+    private final RegistryAccess registryAccess;
     private final ChoosePaletteScreen.OnApply applyIndex;
     private final ChoosePaletteScreen.OnReset resetIndex;
     private int paletteIndex = 0;
     private transient final Map<Integer, TemplatePreviewRenderer> structureCache = new HashMap<>();
     private int rows = 1;
-    private int structureRenderSize;
 
-    public ChoosePaletteScreen(ConfiguredTemplate template, ChoosePaletteScreen.OnApply onApply, ChoosePaletteScreen.OnReset onReset) {
+    public ChoosePaletteScreen(ConfiguredTemplate template, RegistryAccess registryAccess, ChoosePaletteScreen.OnApply onApply, ChoosePaletteScreen.OnReset onReset) {
         super(SkyComponents.SCREEN_SELECT_PALETTE);
         this.template = template;
+        this.registryAccess = registryAccess;
         this.applyIndex = onApply;
         this.resetIndex = onReset;
     }
@@ -113,7 +115,7 @@ public class ChoosePaletteScreen extends Screen {
     @Override
     public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplatePreviewRenderer(new TemplatePreview(this.template), this.createArea(), this.paletteIndex))
+        this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplatePreviewRenderer(new TemplatePreview(this.template), this.createArea(), this.registryAccess, this.paletteIndex))
                 .render(guiGraphics);
     }
 

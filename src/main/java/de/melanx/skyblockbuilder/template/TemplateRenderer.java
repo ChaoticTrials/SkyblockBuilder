@@ -46,7 +46,7 @@ import java.util.*;
 @RemoveIn(minecraft = "1.22")
 public class TemplateRenderer {
 
-    private final ClientLevel clientLevel = Objects.requireNonNull(FakeLevel.getInstance());
+    private final ClientLevel clientLevel = Objects.requireNonNull(FakeLevel.getInstance(null));
     private final StructureTemplate template;
     private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
     private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
