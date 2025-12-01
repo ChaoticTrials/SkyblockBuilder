@@ -210,7 +210,7 @@ public class CustomizeSkyblockScreen extends Screen {
                 guiGraphics.drawString(CustomizeSkyblockScreen.this.font, this.name, left + 5, top + 7, Color.WHITE.getRGB());
                 guiGraphics.drawString(CustomizeSkyblockScreen.this.font, this.desc, left + 5, top + 22, Color.GRAY.getRGB());
 
-                if (this.canSelectPalette()) {
+                if (this.template.canSelectPalette()) {
                     int textureX = left + width - 28;
                     int textureY = top + 1;
 
@@ -229,7 +229,7 @@ public class CustomizeSkyblockScreen extends Screen {
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 if (button == 0) {
-                    if (this.canSelectPalette()
+                    if (this.template.canSelectPalette()
                             && this.isMouseOverPaletteSelection(
                             TemplateList.this.getRowLeft() + TemplateList.this.getRowWidth() - 28,
                             TemplateList.this.getRowTop(this.index) + 1,
@@ -252,12 +252,8 @@ public class CustomizeSkyblockScreen extends Screen {
                 return super.isMouseOver(mouseX, mouseY);
             }
 
-            private boolean canSelectPalette() {
-                return this.template.getTemplate().palettes.size() > 1 && this.template.allowPaletteSelection();
-            }
-
             private boolean isMouseOverPaletteSelection(int textureX, int textureY, double mouseX, double mouseY) {
-                if (!this.canSelectPalette()) {
+                if (!this.template.canSelectPalette()) {
                     return false;
                 }
 

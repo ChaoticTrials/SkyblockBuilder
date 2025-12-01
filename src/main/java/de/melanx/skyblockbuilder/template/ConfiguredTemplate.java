@@ -178,6 +178,10 @@ public class ConfiguredTemplate {
         return this.allowPaletteSelection;
     }
 
+    public boolean canSelectPalette() {
+        return this.allowPaletteSelection && this.template.palettes.size() > 1;
+    }
+
     @Nonnull
     public CompoundTag write(CompoundTag nbt) {
         CompoundTag template = this.template.save(new CompoundTag());

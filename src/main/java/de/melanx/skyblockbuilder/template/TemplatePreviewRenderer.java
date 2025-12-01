@@ -27,6 +27,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -159,8 +160,13 @@ public class TemplatePreviewRenderer {
             return;
         }
 
+        NativeImage imagePixels = this.icon.getPixels();
+        if (imagePixels == null) {
+            return;
+        }
+
         //noinspection ConstantConditions
-        int iconSize = this.icon.getPixels().getHeight();
+        int iconSize = imagePixels.getHeight();
         int renderSize = Math.min(this.area.width(), this.area.height());
 
         int x = this.area.width() < this.area.height() ? this.area.minX : this.area.minX + (this.area.maxX / 2) - (renderSize / 2);
@@ -335,8 +341,9 @@ public class TemplatePreviewRenderer {
     }
 
     private void loadIcon() {
+        ResourceLocation iconLocation = this.preview.getIcon().location();
         if (this.preview.getType() != TemplatePreview.PreviewType.IMAGE) {
-            Minecraft.getInstance().textureManager.release(this.preview.getIcon().location());
+            Minecraft.getInstance().textureManager.release(iconLocation);
             this.icon = null;
             return;
         }
@@ -349,7 +356,10 @@ public class TemplatePreviewRenderer {
                 NativeImage image = NativeImage.read(in);
                 Validate.validState(image.getWidth() == image.getHeight(), "Height and width must be equal.");
                 DynamicTexture tempTexture = new DynamicTexture(image);
-                Minecraft.getInstance().textureManager.register(this.preview.getIcon().location(), tempTexture);
+                if (this.fixedPaletteIndex) {
+                    iconLocation = iconLocation.withSuffix("_" + this.paletteIndex);
+                }
+                Minecraft.getInstance().textureManager.register(iconLocation, tempTexture);
                 texture = tempTexture;
             } catch (Throwable throwable) {
                 try {
