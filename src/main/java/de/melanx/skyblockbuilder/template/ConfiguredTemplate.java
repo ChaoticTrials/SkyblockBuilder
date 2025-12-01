@@ -214,6 +214,7 @@ public class ConfiguredTemplate {
 
         DataResult<Tag> encode = TemplateSpreads.CODEC.encodeStart(NbtOps.INSTANCE, this.templateSpreads);
         encode.resultOrPartial(SkyblockBuilder.getLogger()::error).ifPresent(tag -> nbt.put("Spreads", tag));
+        nbt.putBoolean("AllowPaletteSelection", this.allowPaletteSelection);
 
         return nbt;
     }
@@ -249,6 +250,7 @@ public class ConfiguredTemplate {
         }
         this.surroundingBlocks = WeightedRandomList.create(blocks);
         this.templateSpreads = TemplateSpreads.CODEC.decode(NbtOps.INSTANCE, nbt.get("Spreads")).resultOrPartial().orElseGet(() -> Pair.of(TemplateSpreads.EMPTY, new CompoundTag())).getFirst();
+        this.allowPaletteSelection = nbt.getBoolean("AllowPaletteSelection");
     }
 
     public ConfiguredTemplate copy() {
