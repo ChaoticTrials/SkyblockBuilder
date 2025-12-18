@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
+import de.melanx.skyblockbuilder.datagen.ModBiomeTagProvider;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -13,7 +14,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.biome.OverworldBiomeBuilder;
-import net.neoforged.neoforge.common.Tags;
 import org.moddingx.libx.util.data.ResourceList;
 
 import javax.annotation.Nonnull;
@@ -58,7 +58,7 @@ public class BiomeParametersPreset implements MultiNoiseBiomeSourceParameterList
 
         BIOMES.listElementIds().forEach(biomeResourceKey -> {
             Optional<Holder.Reference<Biome>> biomeReference = BIOMES.get(biomeResourceKey);
-            if (!addedBiomes.contains(biomeResourceKey) && biomeReference.isPresent() && biomeReference.get().is(Tags.Biomes.IS_OVERWORLD) && resourceList.test(biomeResourceKey.location())) {
+            if (!addedBiomes.contains(biomeResourceKey) && biomeReference.isPresent() && biomeReference.get().is(ModBiomeTagProvider.IS_OVERWORLD) && resourceList.test(biomeResourceKey.location())) {
                 builder.add(Pair.of(WorldUtil.pointFor(biomeResourceKey), valueGetter.apply(biomeResourceKey)));
             }
         });
