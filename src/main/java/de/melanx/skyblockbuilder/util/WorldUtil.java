@@ -21,7 +21,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,6 +187,28 @@ public class WorldUtil {
         array.add(pos.getY());
         array.add(pos.getZ());
         return array;
+    }
+
+    public static Climate.ParameterPoint pointFor(ResourceKey<Biome> key) {
+        long seed = key.location().toString().hashCode();
+        seed ^= (seed >>> 33);
+        seed *= 0xff51afd7ed558ccdL;
+        seed ^= (seed >>> 33);
+        seed *= 0xc4ceb9fe1a85ec53L;
+        seed ^= (seed >>> 33);
+
+        RandomSource r = RandomSource.create(seed);
+
+        // climate params are generally in [-2, 2], offset in [0, 1]
+        float t = r.nextFloat() * 4f - 2f;
+        float h = r.nextFloat() * 4f - 2f;
+        float c = r.nextFloat() * 4f - 2f;
+        float e = r.nextFloat() * 4f - 2f;
+        float d = r.nextFloat() * 4f - 2f;
+        float w = r.nextFloat() * 4f - 2f;
+        float o = r.nextFloat();
+
+        return Climate.parameters(t, h, c, e, d, w, o);
     }
 
     public enum SpawnDirection {
