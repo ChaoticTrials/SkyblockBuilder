@@ -6,6 +6,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.screens.CustomizeSkyblockScreen;
 import de.melanx.skyblockbuilder.commands.OpenDumpScreen;
+import de.melanx.skyblockbuilder.config.common.ClientConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
 import de.melanx.skyblockbuilder.item.StructureSaverSettings;
 import de.melanx.skyblockbuilder.registration.ModBlocks;
@@ -27,6 +29,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterPresetEditorsEvent;
@@ -49,6 +52,10 @@ public class ClientEventListener {
 
     @SubscribeEvent
     public void onRegisterPresetEditors(RegisterPresetEditorsEvent event) {
+        if (TemplatesConfig.mainSpawnIsland.isPresent() && ModList.get().isLoaded("skyguis") && ClientConfig.removeCustomizeButton) {
+            return;
+        }
+
         event.register(SkyblockPreset.KEY, CustomizeSkyblockScreen::new);
     }
 
@@ -118,7 +125,7 @@ public class ClientEventListener {
             return;
         }
 
-        Direction direction = switch (event.getKey()) {
+        Direction direction = switch(event.getKey()) {
             case GLFW.GLFW_KEY_KP_8 -> player.getDirection();
             case GLFW.GLFW_KEY_KP_2 -> player.getDirection().getOpposite();
             case GLFW.GLFW_KEY_KP_4 -> player.getDirection().getCounterClockWise();

@@ -9,6 +9,9 @@ public class ClientConfig {
     @Config("Should the experimental warning pop up on every new world creation? No, I don't think so, but you can re-enable it.")
     public static boolean disableExperimentalWarning = true;
 
+    @Config("This disables the \"Customize\" buttton if Sky GUIs is loaded")
+    public static boolean removeCustomizeButton = true;
+
     @Config
     public static boolean allowAprilFools = true;
 }
