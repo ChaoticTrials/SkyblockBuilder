@@ -52,6 +52,7 @@ public class SkyblockPreset extends WorldPreset {
                 dimensionTypes, noises, noiseGeneratorSettings, biomes
         )));
         this.biomes = biomes;
+        BiomeParametersPreset.init(biomes);
     }
 
     public HolderLookup.RegistryLookup<Biome> getBiomes() {
