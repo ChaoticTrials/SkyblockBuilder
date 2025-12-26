@@ -40,6 +40,12 @@ public class SkyBiomeSource extends MultiNoiseBiomeSource {
 
     @Nonnull
     @Override
+    public Climate.ParameterList<Holder<Biome>> parameters() {
+        return this.parent.parameters();
+    }
+
+    @Nonnull
+    @Override
     public Holder<Biome> getNoiseBiome(int x, int y, int z, @Nonnull Climate.Sampler sampler) {
         int radius = 0;
 
