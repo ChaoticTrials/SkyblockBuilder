@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.world;
+package de.melanx.skyblockbuilder.world.biomesource;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -22,9 +22,9 @@ public class SkyBiomeSource extends MultiNoiseBiomeSource {
 
     public static final MapCodec<SkyBiomeSource> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                     Codec.list(CenterBiome.CODEC.codec()).fieldOf("center_biome").forGetter(biomeSource -> biomeSource.centerBiomes),
-                    MultiNoiseBiomeSource.CODEC.fieldOf("parent").forGetter(biomeSource -> biomeSource.parent)
+                    BiomeSource.CODEC.fieldOf("parent").forGetter(biomeSource -> biomeSource.parent)
             )
-            .apply(instance, SkyBiomeSource::new));
+            .apply(instance, (centerBiomes, biomeSource) -> new SkyBiomeSource(centerBiomes, (MultiNoiseBiomeSource) biomeSource)));
 
     public SkyBiomeSource(List<CenterBiome> centerBiomes, MultiNoiseBiomeSource parent) {
         super(parent.parameters);
