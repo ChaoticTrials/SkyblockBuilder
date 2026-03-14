@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
 @Mod(value = "skyblockbuilder")
 public final class SkyblockBuilder extends ModXRegistration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyblockBuilder.class);
     private static SkyblockBuilder instance;
     private final SkyNetwork network;
-    private final Logger logger = LoggerFactory.getLogger(SkyblockBuilder.class);
     public static final Gson PRETTY_GSON = Util.make(() -> {
         GsonBuilder gsonbuilder = new GsonBuilder();
         gsonbuilder.disableHtmlEscaping();
@@ -96,7 +96,7 @@ public final class SkyblockBuilder extends ModXRegistration {
     }
 
     public static Logger getLogger() {
-        return instance.logger;
+        return LOGGER;
     }
 
     @Override
