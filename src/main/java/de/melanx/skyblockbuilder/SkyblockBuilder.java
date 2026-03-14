@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
 @Mod("skyblockbuilder")
 public final class SkyblockBuilder extends ModXRegistration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyblockBuilder.class);
     private static SkyblockBuilder instance;
     private final SkyNetwork network;
-    private final Logger logger;
     public static final Gson PRETTY_GSON = Util.make(() -> {
         GsonBuilder gsonbuilder = new GsonBuilder();
         gsonbuilder.disableHtmlEscaping();
@@ -44,7 +44,6 @@ public final class SkyblockBuilder extends ModXRegistration {
     public SkyblockBuilder() {
         instance = this;
         this.network = new SkyNetwork();
-        this.logger = LoggerFactory.getLogger(SkyblockBuilder.class);
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientEventListener::new);
 
@@ -94,7 +93,7 @@ public final class SkyblockBuilder extends ModXRegistration {
     }
 
     public static Logger getLogger() {
-        return instance.logger;
+        return LOGGER;
     }
 
     @Override
