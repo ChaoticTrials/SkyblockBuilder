@@ -29,8 +29,11 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.Deflater;
@@ -39,9 +42,11 @@ import java.util.zip.ZipOutputStream;
 
 public class DumpUtil {
 
-    public static final int MANIFEST_VERSION = 1;
+    public static final int MANIFEST_VERSION = 2;
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-HHmmss");
     private static final Map<String, IModInfo> MOD_INFO_MAP = ModList.get().getMods().stream().collect(Collectors.toMap(IModInfo::getModId, info -> info));
+    private static final Pattern IP_PATTERN = Pattern.compile("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b");
+    private static final Set<String> HASH_SKIP_MODS = Set.of("minecraft", "neoforge");
 
     public static Component getIssueUrl() {
         IModInfo modInfo = MOD_INFO_MAP.get(SkyblockBuilder.getInstance().modid);
@@ -84,6 +89,27 @@ public class DumpUtil {
                 }
             }
 
+            JsonObject modHashes = new JsonObject();
+            JsonObject sbHashes = DumpUtil.computeModHashes(MOD_INFO_MAP.get(SkyblockBuilder.getInstance().modid));
+            if (sbHashes != null) {
+                modHashes.add(SkyblockBuilder.getInstance().modid, sbHashes);
+            }
+
+            for (IModInfo.ModVersion dependency : MOD_INFO_MAP.get(SkyblockBuilder.getInstance().modid).getDependencies()) {
+                String depId = dependency.getModId();
+                if (HASH_SKIP_MODS.contains(depId)) {
+                    continue;
+                }
+
+                IModInfo modInfo = MOD_INFO_MAP.get(depId);
+                if (modInfo != null) {
+                    JsonObject hashes = DumpUtil.computeModHashes(modInfo);
+                    if (hashes != null) {
+                        modHashes.add(depId, hashes);
+                    }
+                }
+            }
+
             JsonArray filesArray = new JsonArray();
             if (includeConfigs) {
                 DumpUtil.addDirToZip(filesArray, SkyPaths.MOD_CONFIG, zipStream, Paths.get("config"), false);
@@ -93,7 +119,7 @@ public class DumpUtil {
                     ResourceLocation key = entry.getKey();
                     String value = entry.getValue();
 
-                    Path filePath = Paths.get("config", "changed_values", key.getPath() + ".json5");
+                    Path filePath = Paths.get("config", "changed_values", key.getPath() + ".diff");
                     DumpUtil.addStringToZip(filesArray, zipStream, value, filePath);
                 }
             }
@@ -115,21 +141,26 @@ public class DumpUtil {
                 if (includeLog) {
                     Path latestLog = FMLPaths.GAMEDIR.get().resolve("logs").resolve("latest.log");
                     if (latestLog.toFile().exists()) {
-                        DumpUtil.addFileToZip(filesArray, zipStream, latestLog, Paths.get("logs", "latest.log"));
+                        DumpUtil.addCensoredFileToZip(filesArray, zipStream, latestLog, Paths.get("logs", "latest.log"));
+                    }
+
+                    Path debugLog = FMLPaths.GAMEDIR.get().resolve("logs").resolve("debug.log");
+                    if (debugLog.toFile().exists()) {
+                        DumpUtil.addCensoredFileToZip(filesArray, zipStream, debugLog, Paths.get("logs", "debug.log"));
                     }
                 }
 
                 if (includeCrashReport) {
                     Optional<Path> crashReportOptional = DumpUtil.findLatestCrashReport();
                     if (crashReportOptional.isPresent()) {
-                        DumpUtil.addFileToZip(filesArray, zipStream, crashReportOptional.get(), Paths.get("logs", "crash-report.txt"));
+                        DumpUtil.addCensoredFileToZip(filesArray, zipStream, crashReportOptional.get(), Paths.get("logs", "crash-report.txt"));
                     }
                 }
 
                 if (includeSkyblockBuilderWorldData) {
-                    Path data = levelPath.resolve("data").resolve("skyblockbuilder").resolve("main.dat");
-                    if (data.toFile().exists()) {
-                        DumpUtil.addFileToZip(filesArray, zipStream, data, Paths.get("data", "skyblockbuilder", "main.dat"));
+                    Path dataDir = levelPath.resolve("data").resolve("skyblockbuilder");
+                    if (Files.isDirectory(dataDir)) {
+                        DumpUtil.addDirToZip(filesArray, dataDir, zipStream, Paths.get("data", "skyblockbuilder"), false);
                     }
                 }
             }
@@ -139,6 +170,7 @@ public class DumpUtil {
             manifest.addProperty("manifest_id", UUID.randomUUID().toString());
             manifest.add("settings", settings);
             manifest.add("versions", modVersions);
+            manifest.add("hashes", modHashes);
             manifest.add("files", filesArray);
             DumpUtil.addStringToZip(filesArray, zipStream, SkyblockBuilder.PRETTY_GSON.toJson(manifest), Paths.get("manifest.json"));
         } catch (IOException e) {
@@ -227,30 +259,38 @@ public class DumpUtil {
     private static Map<ResourceLocation, String> configDiffs() {
         Map<ResourceLocation, String> configDiffs = new HashMap<>();
         for (ResourceLocation id : ConfigManager.configs()) {
-            if (id.getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
-
-
-                ConfigImpl config = ConfigImpl.getConfig(id);
-                ConfigState currentState = config.stateFromValues();
-                ConfigState defaultState = DumpUtil.getDefaultConfigState(config);
-                if (defaultState == null) {
-                    continue;
-                }
-
-                Set<ConfigKey> changedValues = new HashSet<>();
-                for (ConfigKey configKey : config.keys.values()) {
-                    if (!currentState.getValue(configKey).equals(defaultState.getValue(configKey))) {
-                        changedValues.add(configKey);
-                    }
-                }
-
-                if (changedValues.isEmpty()) {
-                    continue;
-                }
-
-                String configDiff = "{\n" + DumpUtil.applyIndent(currentState.writeObject(changedValues, config.groups, 0)) + "\n}\n";
-                configDiffs.put(id, configDiff);
+            if (!id.getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
+                continue;
             }
+
+            ConfigImpl config = ConfigImpl.getConfig(id);
+            ConfigState currentState = config.stateFromValues();
+            ConfigState defaultState = DumpUtil.getDefaultConfigState(config);
+            if (defaultState == null) {
+                continue;
+            }
+
+            Set<ConfigKey> changedValues = new HashSet<>();
+            for (ConfigKey configKey : config.keys.values()) {
+                if (!currentState.getValue(configKey).equals(defaultState.getValue(configKey))) {
+                    changedValues.add(configKey);
+                }
+            }
+
+            if (changedValues.isEmpty()) {
+                continue;
+            }
+
+            String defaultContent = "{\n" + DumpUtil.applyIndent(defaultState.writeObject(changedValues, config.groups, 0)) + "\n}\n";
+            String currentContent = "{\n" + DumpUtil.applyIndent(currentState.writeObject(changedValues, config.groups, 0)) + "\n}\n";
+            String diff = DumpUtil.computeUnifiedDiff(defaultContent, currentContent, "default/" + id.getPath(), "current/" + id.getPath());
+
+            // Skip if the serialized output is identical despite value-level inequality (e.g., ResourceList quirks)
+            if (!DumpUtil.hasActualChanges(diff)) {
+                continue;
+            }
+
+            configDiffs.put(id, diff);
         }
 
         return configDiffs;
@@ -265,6 +305,97 @@ public class DumpUtil {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             return null;
         }
+    }
+
+    @Nullable
+    private static JsonObject computeModHashes(IModInfo modInfo) {
+        IModFileInfo fileInfo = modInfo.getOwningFile();
+        if (fileInfo instanceof ModFileInfo modFileInfo) {
+            //noinspection UnstableApiUsage
+            Path jarPath = modFileInfo.getFile().getFilePath();
+            if (Files.isRegularFile(jarPath)) {
+                try {
+                    byte[] bytes = Files.readAllBytes(jarPath);
+                    JsonObject hashes = new JsonObject();
+                    hashes.addProperty("md5", DumpUtil.hashBytes(bytes, "MD5"));
+                    hashes.addProperty("sha1", DumpUtil.hashBytes(bytes, "SHA-1"));
+                    hashes.addProperty("sha512", DumpUtil.hashBytes(bytes, "SHA-512"));
+                    return hashes;
+                } catch (IOException | NoSuchAlgorithmException e) {
+                    SkyblockBuilder.getLogger().warn("Failed to compute hashes for {}", modInfo.getModId(), e);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static String hashBytes(byte[] bytes, String algorithm) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance(algorithm);
+        byte[] hashBytes = digest.digest(bytes);
+        StringBuilder sb = new StringBuilder(hashBytes.length * 2);
+
+        for (byte b : hashBytes) {
+            sb.append(String.format("%02x", b));
+        }
+
+        return sb.toString();
+    }
+
+    private static void addCensoredFileToZip(JsonArray fileCollector, ZipOutputStream zipStream, Path filePath, Path zipEntryPath) throws IOException {
+        String content = Files.readString(filePath);
+        DumpUtil.addStringToZip(fileCollector, zipStream, IP_PATTERN.matcher(content).replaceAll("[REDACTED]"), zipEntryPath);
+    }
+
+    private static String computeUnifiedDiff(String oldContent, String newContent, String oldLabel, String newLabel) {
+        String[] oldLines = oldContent.split("\n", -1);
+        String[] newLines = newContent.split("\n", -1);
+        int m = oldLines.length;
+        int n = newLines.length;
+
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (oldLines[i - 1].equals(newLines[j - 1])) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+
+        List<String> diffLines = new ArrayList<>();
+        int i = m, j = n;
+        while (i > 0 || j > 0) {
+            if (i > 0 && j > 0 && oldLines[i - 1].equals(newLines[j - 1])) {
+                diffLines.addFirst(" " + oldLines[i - 1]);
+                i--;
+                j--;
+            } else if (j > 0 && (i == 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+                diffLines.addFirst("+" + newLines[j - 1]);
+                j--;
+            } else {
+                diffLines.addFirst("-" + oldLines[i - 1]);
+                i--;
+            }
+        }
+
+        return "--- " + oldLabel + "\n+++ " + newLabel + "\n" + String.join("\n", diffLines) + "\n";
+    }
+
+    // Returns true if the diff (past its two header lines) contains at least one + or - line
+    private static boolean hasActualChanges(String diff) {
+        int firstNewline = diff.indexOf('\n');
+        int secondNewline = firstNewline < 0 ? -1 : diff.indexOf('\n', firstNewline + 1);
+
+        String body = secondNewline < 0 ? "" : diff.substring(secondNewline + 1);
+        for (String line : body.split("\n", -1)) {
+            if (line.startsWith("+") || line.startsWith("-")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static String applyIndent(String input) {

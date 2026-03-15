@@ -42,5 +42,12 @@ versionRange = "[1.21.1,)"
 ordering = "AFTER"
 side = "BOTH"
 
+[[dependencies.${ mod.modid }]]
+modId = "skyguis"
+type = "optional"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
 [[mixins]]
 config = "${mod.modid}.mixins.json"
