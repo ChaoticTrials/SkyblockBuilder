@@ -183,5 +183,6 @@
   "skyblockbuilder.screen.dump.success": "Successfully created %s",
   "skyblockbuilder.screen.dump.success.server": "on server",
   "skyblockbuilder.screen.dump.create_issue": "You may open an issue here:",
-  "skyblockbuilder.screen.dump.failure": "You do not have permission to create a data dump on the server."
+  "skyblockbuilder.screen.dump.failure": "You do not have permission to create a data dump on the server.",
+  "skyblockbuilder.screen.dump.info": "This dump may contain personal data, including player names, UUIDs, and file system paths in the logs."
 }
