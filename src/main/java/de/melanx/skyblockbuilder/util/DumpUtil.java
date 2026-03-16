@@ -46,6 +46,7 @@ public class DumpUtil {
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-HHmmss");
     private static final Map<String, IModInfo> MOD_INFO_MAP = ModList.get().getMods().stream().collect(Collectors.toMap(IModInfo::getModId, info -> info));
     private static final Pattern IP_PATTERN = Pattern.compile("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b");
+    private static final Pattern CHAT_MESSAGE_PATTERN = Pattern.compile("(?i)<([^>]+)>(.*)");
     private static final Set<String> HASH_SKIP_MODS = Set.of("minecraft", "neoforge");
 
     public static Component getIssueUrl() {
@@ -158,9 +159,9 @@ public class DumpUtil {
                 }
 
                 if (includeSkyblockBuilderWorldData) {
-                    Path dataDir = levelPath.resolve("data").resolve("skyblockbuilder");
-                    if (Files.isDirectory(dataDir)) {
-                        DumpUtil.addDirToZip(filesArray, dataDir, zipStream, Paths.get("data", "skyblockbuilder"), false);
+                    Path data = levelPath.resolve("data").resolve("skyblock_builder.dat");
+                    if (data.toFile().exists()) {
+                        DumpUtil.addFileToZip(filesArray, zipStream, data, Paths.get("data", "skyblock_builder.dat"));
                     }
                 }
             }
@@ -311,7 +312,6 @@ public class DumpUtil {
     private static JsonObject computeModHashes(IModInfo modInfo) {
         IModFileInfo fileInfo = modInfo.getOwningFile();
         if (fileInfo instanceof ModFileInfo modFileInfo) {
-            //noinspection UnstableApiUsage
             Path jarPath = modFileInfo.getFile().getFilePath();
             if (Files.isRegularFile(jarPath)) {
                 try {
@@ -343,8 +343,13 @@ public class DumpUtil {
     }
 
     private static void addCensoredFileToZip(JsonArray fileCollector, ZipOutputStream zipStream, Path filePath, Path zipEntryPath) throws IOException {
+        String home = System.getProperty("user.home");
         String content = Files.readString(filePath);
-        DumpUtil.addStringToZip(fileCollector, zipStream, IP_PATTERN.matcher(content).replaceAll("[REDACTED]"), zipEntryPath);
+        content = IP_PATTERN.matcher(content).replaceAll("[REDACTED]");
+        content = CHAT_MESSAGE_PATTERN.matcher(content).replaceAll("<REDACTED>");
+        content = content.replace(home + File.separator, "~" + File.separator);
+        content = content.replace(home + "/", "~/");
+        DumpUtil.addStringToZip(fileCollector, zipStream, content, zipEntryPath);
     }
 
     private static String computeUnifiedDiff(String oldContent, String newContent, String oldLabel, String newLabel) {
