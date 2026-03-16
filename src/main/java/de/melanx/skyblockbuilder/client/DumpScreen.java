@@ -6,10 +6,13 @@ import de.melanx.skyblockbuilder.util.DumpUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.moddingx.libx.render.RenderHelper;
@@ -20,6 +23,7 @@ import java.nio.file.Path;
 
 public class DumpScreen extends BaseScreen {
 
+    private static final ResourceLocation INFO_ICON = new ResourceLocation("minecraft", "textures/gui/info_icon.png");
     private static final int CHECKBOX_X = 10;
     private static final int CHECKBOX_FIRST_Y = 25;
     private static final int TEXT_X = CHECKBOX_X + 17;
@@ -51,6 +55,11 @@ public class DumpScreen extends BaseScreen {
         this.includeSkyblockBuilderWorldData = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i++), 10, true));
         this.generateOnServer = this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X), this.y(CHECKBOX_FIRST_Y + ROW_OFFSET * i), 10, false));
         this.generateOnServer.visible = this.isOpPlayer;
+        ImageWidget infoImageWidget = new ImageWidget(16, 16, DumpScreen.INFO_ICON);
+        infoImageWidget.setTooltip(Tooltip.create(Component.translatable("skyblockbuilder.screen.dump.info")));
+        infoImageWidget.setX(this.x(this.getXSize() - 22));
+        infoImageWidget.setY(this.y(4));
+        this.addRenderableWidget(infoImageWidget);
         this.addRenderableWidget(Button.builder(Component.translatable("skyblockbuilder.screen.dump.button.create"), button -> {
                     if (this.generateOnServer.selected()) {
                         SkyblockBuilder.getNetwork().createSkyblockDump(

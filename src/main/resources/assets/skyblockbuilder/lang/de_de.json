@@ -174,5 +174,6 @@
   "skyblockbuilder.screen.dump.success": "Erfolgreich erstellt %s",
   "skyblockbuilder.screen.dump.success.server": "auf dem Server",
   "skyblockbuilder.screen.dump.create_issue": "Du kannst eine Problemmeldung hier erstellen:",
-  "skyblockbuilder.screen.dump.failure": "Sie haben keine Berechtigung, ein Abbild auf dem Server zu erstellen."
+  "skyblockbuilder.screen.dump.failure": "Sie haben keine Berechtigung, ein Abbild auf dem Server zu erstellen.",
+  "skyblockbuilder.screen.dump.info": "Dieser Dump kann personenbezogene Daten enthalten, darunter Spielernamen, UUIDs und Dateipfade in den Logs."
 }
