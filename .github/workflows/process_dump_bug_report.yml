@@ -6,7 +6,7 @@ on:
       - opened
 
 jobs:
-  lol:
+  check_for_dump_file:
     runs-on: ubuntu-latest
     steps:
       - name: Extract dump link
@@ -26,16 +26,20 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.DUMPVIEWER_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{"url": "${{ steps.extract.outputs.url }}"}')
-          viewer_url=$(echo "$response" | jq -r '.url')
-          echo "viewer_url=$viewer_url" >> $GITHUB_OUTPUT
+          dump_id=$(echo "$response" | jq -r '.id')
+          echo "dump_id=$dump_id" >> $GITHUB_OUTPUT
 
       - name: Post comment
-        if: steps.api.outputs.viewer_url != ''
+        if: steps.api.outputs.dump_id != ''
         run: |
           gh api /repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
-            --field body='Dump file detected! View it here: ${{ steps.api.outputs.viewer_url }}'
+            --field body='Dump file detected! View it here: https://dumps.chaotictrials.de/${{ steps.api.outputs.dump_id }}'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Add Label if Zip Link is Present
         if: steps.extract.outputs.url != ''
         run: |
           gh api /repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels --field labels='["zip-file-link"]'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
