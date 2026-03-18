@@ -8,6 +8,8 @@ on:
 jobs:
   check_for_dump_file:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Extract dump link
         id: extract
@@ -32,14 +34,18 @@ jobs:
       - name: Post comment
         if: steps.api.outputs.dump_id != ''
         run: |
-          gh api /repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
-            --field body='Dump file detected! View it here: https://dumps.chaotictrials.de/${{ steps.api.outputs.dump_id }}'
+          gh issue comment "$NUMBER" --body "$BODY"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          BODY: "Dump file uploaded to https://dumps.chaotictrials.de/${{ steps.api.outputs.dump_id }}"
 
       - name: Add Label if Zip Link is Present
         if: steps.extract.outputs.url != ''
-        run: |
-          gh api /repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels --field labels='["zip-file-link"]'
+        run: gh issue edit "$NUMBER" --add-label "$LABELS"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          LABELS: "zip-file-link"
