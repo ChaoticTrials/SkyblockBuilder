@@ -44,8 +44,9 @@ jobs:
             exit 0
           fi
 
-          # Initialize an array to store the missing keys
+          # Initialize arrays to store the missing keys and parsing errors
           MISSING_KEYS=()
+          PARSING_ERRORS=()
           # Iterate over each file
           for FILE in $FILES; do
             # Check if the file is not the default English translation
@@ -53,27 +54,64 @@ jobs:
               # Get the modid and language key from the file path
               MODID=$(echo $FILE | cut -d'/' -f5)
               LANGUAGE_KEY=$(echo $FILE | cut -d'/' -f7 | cut -d'.' -f1)
+          
+              # First check if the JSON file is valid
+              if ! JQ_ERROR=$(jq '.' $FILE 2>&1 >/dev/null); then
+                # Extract the error message
+                ERROR_MSG=$(echo "$JQ_ERROR" | grep -oP 'parse error: .+' | head -1 || echo "Invalid JSON format")
+                PARSING_ERRORS+=("$FILE: $ERROR_MSG")
+                echo "Error parsing $FILE: $ERROR_MSG"
+                continue
+              fi
+          
               # Check if all keys from the default English translation are included in this file
-              KEYS=$(jq -n --slurpfile en src/main/resources/assets/$MODID/lang/en_us.json --slurpfile current $FILE '($en[0] | keys) - ($current[0] | keys)' )
-              if [[ $KEYS != "[]" ]]; then
+              KEYS=$(jq -n --slurpfile en src/main/resources/assets/$MODID/lang/en_us.json --slurpfile current $FILE '($en[0] | keys) - ($current[0] | keys)' 2>/dev/null || echo "[]")
+              if [[ $KEYS != "[]" && $KEYS != *"error"* ]]; then
                 MISSING_KEYS+=("$LANGUAGE_KEY: $KEYS")
               fi
             fi
           done
 
-          # Post a comment on the pull request with the missing keys or a success message
+          # Create review.md file
+          touch review.md
+          
+          # Add parsing errors to the review if any
+          if [[ ${#PARSING_ERRORS[@]} -gt 0 ]]; then
+            echo "# 🚨 JSON Parsing Errors 🚨" > review.md
+            for ERROR in "${PARSING_ERRORS[@]}"; do
+              FILE_PATH=$(echo "$ERROR" | cut -d':' -f1)
+              ERROR_MSG=$(echo "$ERROR" | cut -d':' -f2-)
+              echo "## Failed to parse file \`$FILE_PATH\`" >> review.md
+              echo "" >> review.md
+              echo "$ERROR_MSG" >> review.md
+              echo "" >> review.md
+            done
+          fi
+          
+          # Add missing translation keys to the review if any
           if [[ ${#MISSING_KEYS[@]} -gt 0 ]]; then
-            echo "# 🚨 Missing translation keys 🚨" > review.md
+            # If we already have parsing errors, add a separator
+            if [[ ${#PARSING_ERRORS[@]} -gt 0 ]]; then
+              echo "---" >> review.md
+              echo "" >> review.md
+              echo "# 🚨 Missing translation keys 🚨" >> review.md
+            else
+              echo "# 🚨 Missing translation keys 🚨" > review.md
+            fi
+          
             for MISSING_KEY in "${MISSING_KEYS[@]}"; do
               LANGUAGE=$(echo $MISSING_KEY | cut -d':' -f1)
-              KEYS=$(echo $MISSING_KEY | cut -d':' -f2 | jq -r '.[]')
+              KEYS=$(echo $MISSING_KEY | cut -d':' -f2 | jq -r '.[]' 2>/dev/null || echo "Could not parse keys")
               echo "## **$LANGUAGE**" >> review.md
               for KEY in $KEYS; do
                 echo "- $KEY" >> review.md
               done
               echo "" >> review.md
             done
+          fi
 
+          # Post a comment on the pull request with issues or a success message
+          if [[ ${#MISSING_KEYS[@]} -gt 0 || ${#PARSING_ERRORS[@]} -gt 0 ]]; then
             # Request changes on the pull request
             gh pr review "$PR_NUMBER" --repo "$REPO_FULL_NAME" --request-changes --body-file review.md
           else
