@@ -48,7 +48,7 @@ public class TemplateRenderer {
     private final float maxY;
     private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
     private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
-    private final transient Set<Entity> erroredEntities = Collections.newSetFromMap(new WeakHashMap<>());
+    private final transient Set<UUID> erroredEntities = Collections.newSetFromMap(new WeakHashMap<>());
     private int index = 0;
 
     public TemplateRenderer(StructureTemplate template, float maxSize) {
@@ -190,14 +190,14 @@ public class TemplateRenderer {
         for (StructureTemplate.StructureEntityInfo entityInfo : template.entityInfoList) {
             Optional<Entity> maybe = EntityType.create(entityInfo.nbt, this.clientLevel);
             if (maybe.isPresent()) {
+                Entity entity = maybe.get();
+                if (this.erroredEntities.contains(entity.getUUID())) {
+                    continue;
+                }
+
                 Vec3 pos = entityInfo.pos;
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(pos.x(), pos.y(), pos.z());
-
-                Entity entity = maybe.get();
-                if (this.erroredEntities.contains(entity)) {
-                    continue;
-                }
 
                 try {
                     EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
@@ -205,7 +205,7 @@ public class TemplateRenderer {
                     EntityRenderer<? super Entity> renderer = entityRenderDispatcher.getRenderer(entity);
                     renderer.render(entity, entity.getYRot(), 0, guiGraphics.pose(), buffers, LightTexture.pack(15, 15));
                 } catch (Exception e) {
-                    this.erroredEntities.add(entity);
+                    this.erroredEntities.add(entity.getUUID());
                     SkyblockBuilder.getLogger().error("An exception occurred rendering entity", e);
                 } finally {
                     guiGraphics.pose().popPose();
