@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder;
 
+import de.melanx.skyblockbuilder.world.SkyBiomeSource;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.Registry;
@@ -16,5 +17,8 @@ public class Registration {
         // chunk generators
         Registry.register(BuiltInRegistries.CHUNK_GENERATOR, SkyblockBuilder.getInstance().resource("noise_based"), SkyblockNoiseBasedChunkGenerator.CODEC);
         Registry.register(BuiltInRegistries.CHUNK_GENERATOR, SkyblockBuilder.getInstance().resource("the_end"), SkyblockEndChunkGenerator.CODEC);
+
+        // biome sources
+        Registry.register(BuiltInRegistries.BIOME_SOURCE, SkyblockBuilder.getInstance().resource("sky"), SkyBiomeSource.CODEC);
     }
 }

@@ -1,15 +1,18 @@
 package de.melanx.skyblockbuilder.world.presets;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.DimensionsConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.util.BiomeSourceConverter;
 import de.melanx.skyblockbuilder.util.WorldPresetUtil;
 import de.melanx.skyblockbuilder.util.WorldUtil;
+import de.melanx.skyblockbuilder.world.SkyBiomeSource;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockEndChunkGenerator;
 import de.melanx.skyblockbuilder.world.chunkgenerators.SkyblockNoiseBasedChunkGenerator;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.*;
@@ -25,6 +28,7 @@ import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import org.moddingx.libx.util.lazy.LazyValue;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,7 +107,8 @@ public class SkyblockPreset extends WorldPreset {
         MultiNoiseBiomeSource biomeSource = (MultiNoiseBiomeSource) BiomeSourceConverter.customBiomeSource(Level.OVERWORLD, MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), biomes);
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
 
-        return new SkyblockNoiseBasedChunkGenerator(biomeSource, settings, Level.OVERWORLD, SkyblockPreset.getLayers(Level.OVERWORLD));
+        BiomeSource finalSource = SkyblockPreset.convertBiomeSource(biomeSource, biomes, DimensionsConfig.Overworld.centeredBiomes);
+        return new SkyblockNoiseBasedChunkGenerator(finalSource, settings, Level.OVERWORLD, SkyblockPreset.getLayers(Level.OVERWORLD));
     }
 
     private static ChunkGenerator netherChunkGenerator(
@@ -114,6 +119,7 @@ public class SkyblockPreset extends WorldPreset {
         BiomeSource biomeSource = BiomeSourceConverter.customBiomeSource(Level.NETHER, MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER)), biomes);
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.NETHER);
 
+        biomeSource = SkyblockPreset.convertBiomeSource((MultiNoiseBiomeSource) biomeSource, biomes, DimensionsConfig.Nether.centeredBiomes);
         return new SkyblockNoiseBasedChunkGenerator(biomeSource, settings, Level.NETHER, SkyblockPreset.getLayers(Level.NETHER));
     }
 
@@ -125,6 +131,26 @@ public class SkyblockPreset extends WorldPreset {
         Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.END);
 
         return new SkyblockEndChunkGenerator(biomeSource, settings, Level.END, SkyblockPreset.getLayers(Level.END));
+    }
+
+    private static BiomeSource convertBiomeSource(MultiNoiseBiomeSource biomeSource, HolderLookup<Biome> biomes, List<DimensionsConfig.UnregisteredCenterBiome> unregisteredCenterBiomes) {
+        if (unregisteredCenterBiomes.isEmpty()) {
+            return biomeSource;
+        }
+
+        List<SkyBiomeSource.CenterBiome> centerBiomes = new ArrayList<>();
+
+        unregisteredCenterBiomes.forEach(biomeConfig -> {
+            ResourceKey<Biome> resourceKey = ResourceKey.create(Registries.BIOME, biomeConfig.id());
+            Optional<Holder.Reference<Biome>> optionalHolder = biomes.get(resourceKey);
+            if (optionalHolder.isEmpty()) {
+                SkyblockBuilder.getLogger().error("Could not find biome {} for center biome {}. Use minecraft:plains as fallback.", resourceKey, biomeConfig.id());
+                optionalHolder = Optional.of(biomes.getOrThrow(Biomes.PLAINS));
+            }
+            centerBiomes.add(new SkyBiomeSource.CenterBiome(optionalHolder.get(), biomeConfig.radius()));
+        });
+
+        return new SkyBiomeSource(centerBiomes, biomeSource);
     }
 
     public static List<FlatLayerInfo> getLayers(ResourceKey<Level> levelKey) {

@@ -15,10 +15,7 @@ import de.melanx.skyblockbuilder.commands.operator.GenerateCommand;
 import de.melanx.skyblockbuilder.commands.operator.ManageCommand;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
 import de.melanx.skyblockbuilder.config.StartingInventory;
-import de.melanx.skyblockbuilder.config.common.CustomizationConfig;
-import de.melanx.skyblockbuilder.config.common.InventoryConfig;
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
-import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
@@ -283,6 +280,24 @@ public class EventListener {
 
             if (PermissionsConfig.forceSkyblockCheck) {
                 SkyblockBuilder.getLogger().warn("'forceSkyblockCheck' is enabled");
+            }
+        }
+
+        if (event.getConfigClass() == WorldConfig.class || event.getConfigClass() == DimensionsConfig.class || event.getConfigClass() == SpawnConfig.class) {
+            int overworldCenterBiomesRadius = DimensionsConfig.Overworld.centeredBiomes.stream()
+                    .mapToInt(DimensionsConfig.UnregisteredCenterBiome::radius)
+                    .sum();
+
+            int netherCenterBiomesRadius = DimensionsConfig.Nether.centeredBiomes.stream()
+                    .mapToInt(DimensionsConfig.UnregisteredCenterBiome::radius)
+                    .sum();
+
+            if (SpawnConfig.dimension == Level.OVERWORLD && overworldCenterBiomesRadius > WorldConfig.islandDistance) {
+                SkyblockBuilder.getLogger().warn("The overworld center biomes radius is higher than the island distance. This will result in unwanted behaviour.");
+            }
+
+            if (SpawnConfig.dimension == Level.NETHER && netherCenterBiomesRadius > WorldConfig.islandDistance) {
+                SkyblockBuilder.getLogger().warn("The nether center biomes radius is higher than the island distance. This will result in unwanted behaviour.");
             }
         }
     }
