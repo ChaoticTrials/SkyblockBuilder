@@ -1,3 +1,4 @@
+import com.modrinth.minotaur.dependencies.ModDependency
 import org.w3c.dom.Document
 import org.w3c.dom.NodeList
 
@@ -82,6 +83,38 @@ publishing {
     }
 }
 publish.dependsOn('reobfJar')
+
+// Copied from ModUtils v5 to use the updated version number and file name.
+// See here:
+// https://github.com/ModdingX/ModUtils/blob/48b7aae7b6dcb52c77eb0868b4b4d74f930bda77/scripts/mod/upload_modrinth.gradle
+apply plugin: 'com.modrinth.minotaur'
+String modrinthChangelog = mod.gitChangelog()
+modrinth {
+    if ('modrinth_auth' in secrets) {
+        token = secrets.modrinth_auth.toString()
+    } else if (System.getenv('MODRINTH_UPLOAD_TOKEN')) {
+        token = System.getenv('MODRINTH_UPLOAD_TOKEN')
+    } else {
+        token = ''
+    }
+    projectId = mod.modrinth.project
+    versionNumber = project.version
+    versionName = jar.getArchiveFileName().get()
+    uploadFile = jar
+    if (mod.sources) {
+        additionalFiles = [sourceJar]
+    }
+
+    changelog = modrinthChangelog
+    versionType = mod.modrinth.release
+    gameVersions = mod.modrinth.versions
+    loaders = ["forge"]
+
+    dependencies = []
+    mod.modrinth.requirements.each { dependencies.add(new ModDependency(it, "required")) }
+    mod.modrinth.optionals.each { dependencies.add(new ModDependency(it, "optional")) }
+}
+project.tasks.getByName('modrinth').dependsOn('reobfJar')
 
 
 private static String getVersion(String baseVersion, URL url) {
