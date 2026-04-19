@@ -134,9 +134,9 @@ public class ScreenCustomizeSkyblock extends Screen {
                 } else {
                     String templateName = this.getSelected().name.getString();
                     if (!this.structureCache.containsKey(templateName)) {
-                        this.structureCache.put(templateName, new TemplateRenderer(this.getSelected().template.getTemplate(), size));
+                        this.structureCache.put(templateName, new TemplateRenderer(this.getSelected().template.getTemplate(), (float) ((this.width - this.getRowWidth()) / 2 - this.width / 100), this.height - 5));
                     }
-                    this.structureCache.get(templateName).render(guiGraphics, 103, 182);
+                    this.structureCache.get(templateName).render(guiGraphics, ((this.width - this.getRowWidth()) / 2 - this.width / 100) / 2, (this.height - 5) / 2);
                 }
                 RenderSystem.disableBlend();
             }
