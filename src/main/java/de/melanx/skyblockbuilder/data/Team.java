@@ -34,6 +34,7 @@ public class Team {
     private static final String NAME = "name";
     private static final String VISITS = "visits";
     private static final String ALLOW_JOIN_REQUESTS = "allow_join_requests";
+    private static final String NETHER_SPREADS_PLACED = "nether_spreads_placed";
     private static final String CREATED_AT = "created_at";
     private static final String LAST_CHANGED = "last_changed";
     private static final String PLAYERS = "players";
@@ -403,6 +404,7 @@ public class Team {
         nbt.putString(NAME, this.name != null ? this.name : "");
         nbt.putBoolean(VISITS, this.allowVisits);
         nbt.putBoolean(ALLOW_JOIN_REQUESTS, this.allowJoinRequests);
+        nbt.putBoolean(NETHER_SPREADS_PLACED, this.netherSpreadsPlaced);
         nbt.putLong(CREATED_AT, this.createdAt);
         nbt.putLong(LAST_CHANGED, this.lastChanged);
 
@@ -461,6 +463,7 @@ public class Team {
         this.name = nbt.getString(NAME);
         this.allowVisits = nbt.getBoolean(VISITS);
         this.allowJoinRequests = nbt.getBoolean(ALLOW_JOIN_REQUESTS);
+        this.netherSpreadsPlaced = nbt.getBoolean(NETHER_SPREADS_PLACED);
         this.createdAt = nbt.getLong(CREATED_AT);
         this.lastChanged = nbt.getLong(LAST_CHANGED);
 
