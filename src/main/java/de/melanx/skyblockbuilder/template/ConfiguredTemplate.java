@@ -92,12 +92,46 @@ public class ConfiguredTemplate {
         if (spreadConfig.getOrigin() != SpreadInfo.Origin.ZERO) {
             offset = offset.offset(SpreadInfo.Origin.originOffset(spreadConfig.getOrigin(), this.template));
         }
+
         BlockPos offsetPos = pos.offset(offset);
         spreadConfig.getTemplate().placeInWorld(serverLevel, offsetPos, offsetPos, settings, random, flags);
         ConfiguredTemplate.clearBlockTicks(serverLevel, blockTicks, offsetPos, spreadConfig.getTemplate());
         if (team != null) {
             team.addSpread(spreadConfig.getFileNameWithoutExtension(), offsetPos, new BlockPos(spreadConfig.template.getSize()));
         }
+    }
+
+    public static void placeNetherSpreads(TemplateSpreads spreads, ServerLevel level, @Nullable Team team, BlockPos portalPos, RandomSource random, int flags) {
+        if (team != null && team.isNetherSpreadsPlaced()) {
+            return;
+        }
+
+        LevelTicks<Block> blockTicks = level.getBlockTicks();
+
+        for (Either<SingleSpreadEntry, GroupWeightedSpreadEntry> either : spreads.spreads()) {
+            either.ifLeft(single -> ConfiguredTemplate.placeNetherSingleSpread(single, blockTicks, level, portalPos, random, flags))
+                    .ifRight(group -> {
+                        for (SingleSpreadEntry entry : group.chooseEntries(random)) {
+                            ConfiguredTemplate.placeNetherSingleSpread(entry, blockTicks, level, portalPos, random, flags);
+                        }
+                    });
+        }
+
+        if (team != null) {
+            team.markNetherSpreadsPlaced();
+        }
+    }
+
+    private static void placeNetherSingleSpread(SingleSpreadEntry entry, LevelTicks<Block> blockTicks, ServerLevel level, BlockPos portalPos, RandomSource random, int flags) {
+        SpreadConfig spreadConfig = new SpreadConfig(entry);
+        BlockPos offset = spreadConfig.getRandomOffset(random);
+        if (spreadConfig.getOrigin() != SpreadInfo.Origin.ZERO) {
+            offset = offset.offset(SpreadInfo.Origin.originOffset(spreadConfig.getOrigin(), spreadConfig.getTemplate()));
+        }
+
+        BlockPos offsetPos = portalPos.offset(offset);
+        spreadConfig.getTemplate().placeInWorld(level, offsetPos, offsetPos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, random, flags);
+        ConfiguredTemplate.clearBlockTicks(level, blockTicks, offsetPos, spreadConfig.getTemplate());
     }
 
     private ConfiguredTemplate() {}

@@ -1,5 +1,9 @@
 package de.melanx.skyblockbuilder.mixin;
 
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.NetherPortalTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
@@ -67,11 +71,26 @@ public abstract class NetherPortalBlockMixin {
                 destination.random,
                 Block.UPDATE_ALL);
 
+        BlockPos portalBlockPos = startPos.offset(netherPortalTemplate.getPortalOffset().multiply(-1).rotate(rotation));
+
+        if (!TemplatesConfig.netherSpreads.spreads().isEmpty()) {
+            SkyblockSavedData data = SkyblockSavedData.get(destination.getServer().overworld());
+            Team team = data.getTeamFromPlayer(entity.getUUID());
+            if (team == null) {
+                Team spawn = data.getSpawn();
+                if (spawn.getPlayers().contains(entity.getUUID())) {
+                    team = spawn;
+                }
+            }
+
+            ConfiguredTemplate.placeNetherSpreads(TemplatesConfig.netherSpreads, destination, team, portalBlockPos, destination.random, Block.UPDATE_ALL);
+        }
+
         if (!worldBorder.isWithinBounds(startPos)) {
             cir.setReturnValue(null);
         }
 
-        BlockUtil.FoundRectangle rectangle = new BlockUtil.FoundRectangle(startPos.offset(netherPortalTemplate.getPortalOffset().multiply(-1).rotate(rotation)), 2, 3);
+        BlockUtil.FoundRectangle rectangle = new BlockUtil.FoundRectangle(portalBlockPos, 2, 3);
         cir.setReturnValue(NetherPortalBlock.getDimensionTransitionFromExit(entity, pos, rectangle, destination, DimensionTransition.PLAY_PORTAL_SOUND));
     }
 }

@@ -109,7 +109,9 @@ public class SkyPaths {
         String fileContent = """
                 This directory is only for providing custom portals. At the moment, you only may set a custom portal when entering the nether.
                 To do so, call your file "to_nether.nbt" or "to_nether.snbt".
-                It needs to contain at least one nether portal block. If that is destroyed, the structure would re-generate when re-entering the nether.""";
+                It needs to contain at least one nether portal block. If that is destroyed, the structure would re-generate when re-entering the nether.
+                To place additional structures around the portal on a team's first nether visit, use the "netherSpreads" config in templates.json5.
+                Spread files are saved to the spreads directory (not this one) using the structure saver item in spread mode.""";
 
         if (Files.exists(PORTALS_INFORMATION_FILE) && Files.readString(PORTALS_INFORMATION_FILE).equals(fileContent)) {
             return;

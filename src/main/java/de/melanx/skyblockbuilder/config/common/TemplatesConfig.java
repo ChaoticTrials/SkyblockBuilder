@@ -58,6 +58,17 @@ public class TemplatesConfig {
             "}"})
     public static Map<String, TemplateSpreads> spreadReferences = Map.of("default", TemplateSpreads.EMPTY);
 
+    @Config({"A list of spreads to place around the nether portal on a team's first nether visit.",
+            "Requires to_nether.[s]nbt to be configured.",
+            "Uses the same format as a direct spreads definition (a JSON array of spread entries).",
+            "Example: ",
+            "{",
+            "    \"file\": \"nether_island.nbt\",",
+            "    \"offset\": [ 0, 8, 0 ],",
+            "    \"origin\": \"center\"",
+            "}"})
+    public static TemplateSpreads netherSpreads = TemplateSpreads.EMPTY;
+
     @Config({"The default offset from 0, 0 to generate the islands",
             "Can be used to generate them in the middle of .mca files",
             "This applies on top of the \"offset\" defined in each template"})

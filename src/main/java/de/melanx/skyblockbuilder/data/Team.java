@@ -61,6 +61,7 @@ public class Team {
     private String name;
     private boolean allowVisits;
     private boolean allowJoinRequests;
+    private boolean netherSpreadsPlaced;
     private long createdAt;
     private long lastChanged;
 
@@ -338,6 +339,15 @@ public class Team {
 
     public Set<String> getAllSpreadNames() {
         return this.placedSpreads.keySet();
+    }
+
+    public void markNetherSpreadsPlaced() {
+        this.netherSpreadsPlaced = true;
+        this.data.setDirty();
+    }
+
+    public boolean isNetherSpreadsPlaced() {
+        return this.netherSpreadsPlaced;
     }
 
     public void sendJoinRequest(Player requestingPlayer) {
