@@ -1,11 +1,11 @@
 package de.melanx.skyblockbuilder.spreads;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.util.SkyCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
@@ -13,21 +13,23 @@ public class GroupWeightedSpreadEntry implements WeightedSpread {
 
     public static final int DEFAULT_WEIGHT = 1;
 
-    public static final Codec<GroupWeightedSpreadEntry> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                    SingleWeightedSpreadEntry.CODEC.listOf().fieldOf("entries").forGetter(GroupWeightedSpreadEntry::entries),
-                    Codec.INT.optionalFieldOf("weight", DEFAULT_WEIGHT).forGetter(GroupWeightedSpreadEntry::weight),
-                    Codec.INT.optionalFieldOf("amount").forGetter(GroupWeightedSpreadEntry::amount),
-                    AutoSpread.CODEC.optionalFieldOf("auto_spread").forGetter(GroupWeightedSpreadEntry::autoSpread)
-            ).apply(instance, GroupWeightedSpreadEntry::new));
+    public static final Codec<GroupWeightedSpreadEntry> CODEC = Codec.lazyInitialized(() ->
+            RecordCodecBuilder.create(instance ->
+                    instance.group(
+                            Codec.either(SingleWeightedSpreadEntry.CODEC, GroupWeightedSpreadEntry.CODEC)
+                                    .listOf().fieldOf("entries").forGetter(GroupWeightedSpreadEntry::entries),
+                            Codec.INT.optionalFieldOf("weight", DEFAULT_WEIGHT).forGetter(GroupWeightedSpreadEntry::weight),
+                            Codec.INT.optionalFieldOf("amount").forGetter(GroupWeightedSpreadEntry::amount),
+                            AutoSpread.CODEC.optionalFieldOf("auto_spread").forGetter(GroupWeightedSpreadEntry::autoSpread)
+                    ).apply(instance, GroupWeightedSpreadEntry::new)));
     public static GroupWeightedSpreadEntry EMPTY = new GroupWeightedSpreadEntry(List.of(), DEFAULT_WEIGHT, Optional.empty(), Optional.empty());
 
-    private final List<SingleWeightedSpreadEntry> entries;
+    private final List<Either<SingleWeightedSpreadEntry, GroupWeightedSpreadEntry>> entries;
     private final int weight;
     private final int amount;
     private final Optional<AutoSpread> autoSpread;
 
-    public GroupWeightedSpreadEntry(List<SingleWeightedSpreadEntry> entries, int weight, Optional<Integer> amount, Optional<AutoSpread> autoSpread) {
+    public GroupWeightedSpreadEntry(List<Either<SingleWeightedSpreadEntry, GroupWeightedSpreadEntry>> entries, int weight, Optional<Integer> amount, Optional<AutoSpread> autoSpread) {
         this.entries = entries;
         this.weight = weight;
         this.amount = amount.orElse(entries.size());
@@ -39,7 +41,7 @@ public class GroupWeightedSpreadEntry implements WeightedSpread {
         return this.weight;
     }
 
-    private List<SingleWeightedSpreadEntry> entries() {
+    private List<Either<SingleWeightedSpreadEntry, GroupWeightedSpreadEntry>> entries() {
         return List.copyOf(this.entries);
     }
 
@@ -57,25 +59,38 @@ public class GroupWeightedSpreadEntry implements WeightedSpread {
         }
 
         Set<SingleSpreadEntry> selectedEntries = new HashSet<>();
-        List<Pair<SingleWeightedSpreadEntry, Integer>> weightedEntries = this.entries.stream()
-                .map(entry -> Pair.of(entry, entry.weight()))
-                .toList();
 
         if (this.amount().isEmpty()) {
-            selectedEntries.addAll(this.entries.stream().map(SingleWeightedSpreadEntry::spread).toList());
+            for (Either<SingleWeightedSpreadEntry, GroupWeightedSpreadEntry> entry : this.entries) {
+                entry.ifLeft(single -> selectedEntries.add(single.spread()))
+                        .ifRight(group -> selectedEntries.addAll(group.chooseEntries(random)));
+            }
         } else {
-            int totalWeight = weightedEntries.stream().mapToInt(Pair::getRight).sum();
+            List<Integer> weights = this.entries.stream()
+                    .map(e -> e.map(WeightedSpread::weight, WeightedSpread::weight))
+                    .toList();
+            int totalWeight = weights.stream().mapToInt(Integer::intValue).sum();
+            Set<Integer> selectedIndices = new HashSet<>();
 
-            while (selectedEntries.size() < this.amount) {
+            while (selectedIndices.size() < this.amount) {
                 int rand = random.nextInt(totalWeight);
                 int cumulativeWeight = 0;
-
-                for (Pair<SingleWeightedSpreadEntry, Integer> pair : weightedEntries) {
-                    cumulativeWeight += pair.getRight();
-                    if (rand < cumulativeWeight && !selectedEntries.contains(pair.getLeft().spread())) {
-                        selectedEntries.add(pair.getLeft().spread());
-                        break;
+                for (int i = 0; i < this.entries.size(); i++) {
+                    cumulativeWeight += weights.get(i);
+                    if (rand >= cumulativeWeight) {
+                        continue;
                     }
+
+                    if (selectedIndices.contains(i)) {
+                        break; // already picked — retry the roll
+                    }
+
+                    selectedIndices.add(i);
+                    Either<SingleWeightedSpreadEntry, GroupWeightedSpreadEntry> entry = this.entries.get(i);
+                    entry.ifLeft(e -> selectedEntries.add(e.spread()))
+                            .ifRight(g -> selectedEntries.addAll(g.chooseEntries(random)));
+
+                    break;
                 }
             }
         }
