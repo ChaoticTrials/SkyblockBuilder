@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.data;
 
-import com.google.common.collect.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
@@ -48,7 +49,7 @@ import java.util.concurrent.ConcurrentMap;
  * https://github.com/VazkiiMods/Botania/blob/1.16.x-forge/src/main/java/vazkii/botania/common/world/SkyblockSavedData.java
  */
 @SuppressWarnings({"unused", "UnusedReturnValue"})
-public class SkyblockSavedData extends SavedData {
+public abstract class SkyblockSavedData extends SavedData {
 
     public static final String ISLANDS = "islands";
     public static final String ISLAND = "island";
@@ -61,15 +62,24 @@ public class SkyblockSavedData extends SavedData {
     private static SkyblockSavedData clientInstance;
     public static final UUID SPAWN_ID = Util.NIL_UUID;
 
-    private ServerLevel level;
-    private ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
-    private ConcurrentMap<UUID, Team> skyblocks = new ConcurrentHashMap<>();
-    private BiMap<String, UUID> skyblockIds = Maps.synchronizedBiMap(HashBiMap.create());
-    private BiMap<UUID, IslandPos> skyblockPositions = Maps.synchronizedBiMap(HashBiMap.create());
-    private Spiral spiral = new Spiral();
+    protected final TeamRegistry registry = new TeamRegistry();
+    protected ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
+
+    protected abstract IslandPos nextIslandPos(ConfiguredTemplate template);
+
+    protected abstract IslandPos nextSpawnPos(ConfiguredTemplate template);
+
+    protected abstract void onTeamDeleted(Team team);
+
+    @Nullable
+    public abstract ServerLevel getLevelFor(Team team);
+
+    public ServerLevel getLevel() {
+        return this.getLevelFor(null);
+    }
 
     public static SavedData.Factory<SkyblockSavedData> factory() {
-        return new SavedData.Factory<>(SkyblockSavedData::new, (nbt, provider) -> SkyblockSavedData.load(nbt));
+        return new SavedData.Factory<>(SingleWorldImpl::new, (nbt, provider) -> SingleWorldImpl.loadImpl(nbt));
     }
 
     public static SkyblockSavedData get(Level level) {
@@ -78,11 +88,11 @@ public class SkyblockSavedData extends SavedData {
 
             DimensionDataStorage storage = server.overworld().getDataStorage();
             SkyblockSavedData data = storage.computeIfAbsent(SkyblockSavedData.factory(), NAME);
-            data.level = WorldUtil.getConfiguredLevel(server);
+            ((SingleWorldImpl) data).level = WorldUtil.getConfiguredLevel(server);
             data.getOrCreateMetaInfo(Util.NIL_UUID);
             return data;
         } else {
-            return clientInstance == null ? new SkyblockSavedData() : clientInstance;
+            return clientInstance == null ? new SingleWorldImpl() : clientInstance;
         }
     }
 
@@ -90,18 +100,23 @@ public class SkyblockSavedData extends SavedData {
         clientInstance = data;
     }
 
+    public static SkyblockSavedData load(CompoundTag nbt) {
+        return SingleWorldImpl.loadImpl(nbt);
+    }
+
     public Team getSpawn() {
-        if (this.skyblocks.get(SPAWN_ID) != null) {
-            return this.skyblocks.get(SPAWN_ID);
+        if (this.registry.getById(SPAWN_ID) != null) {
+            return this.registry.getById(SPAWN_ID);
         }
 
         SkyblockBuilder.getLogger().info("Successfully generated spawn.");
-        Team team = this.createTeam("Spawn", TemplatesConfig.mainSpawnIsland.flatMap(templateInfo -> Optional.of(new ConfiguredTemplate(templateInfo))).orElse(TemplateData.get(this.level).getConfiguredTemplate()));
+        ServerLevel level = this.getLevel();
+        Team team = this.createTeam("Spawn", TemplatesConfig.mainSpawnIsland.flatMap(templateInfo -> Optional.of(new ConfiguredTemplate(templateInfo))).orElse(TemplateData.get(level).getConfiguredTemplate()));
         //noinspection ConstantConditions
         team.addPlayer(Util.NIL_UUID);
 
         if (ModList.get().isLoaded(CadmusCompat.MODID)) {
-            CadmusCompat.protectSpawn(this.level, team);
+            CadmusCompat.protectSpawn(level, team);
         }
 
         this.setDirty();
@@ -109,24 +124,17 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public Optional<Team> getSpawnOption() {
-        return Optional.ofNullable(this.skyblocks.get(SPAWN_ID));
+        return Optional.ofNullable(this.registry.getById(SPAWN_ID));
     }
 
     public Pair<IslandPos, Team> create(String teamName, ConfiguredTemplate template) {
         IslandPos islandPos;
         Team team;
         if (teamName.equalsIgnoreCase("spawn")) {
-            int[] pos = new int[]{0, 0};
-            if (SpawnConfig.skipCenterIslandCreation) {
-                pos = this.spiral.next();
-            }
-            islandPos = new IslandPos(this.level, pos[0], pos[1], template);
+            islandPos = this.nextSpawnPos(template);
             team = new Team(this, islandPos, SPAWN_ID);
         } else {
-            do {
-                int[] pos = this.spiral.next();
-                islandPos = new IslandPos(this.level, pos[0], pos[1], template);
-            } while (this.skyblockPositions.containsValue(islandPos));
+            islandPos = this.nextIslandPos(template);
             team = new Team(this, islandPos);
         }
 
@@ -135,75 +143,38 @@ public class SkyblockSavedData extends SavedData {
         team.setPossibleSpawns(positions);
         team.setName(teamName);
 
-        this.skyblocks.put(team.getId(), team);
-        this.skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
-        this.skyblockPositions.put(team.getId(), islandPos);
+        this.registry.add(team);
 
         this.setDirty();
         return Pair.of(islandPos, team);
     }
 
-    public static SkyblockSavedData load(CompoundTag nbt) {
-        SkyblockSavedData data = new SkyblockSavedData();
-        ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
-        ConcurrentMap<UUID, Team> skyblocks = new ConcurrentHashMap<>();
-        BiMap<String, UUID> skyblockIds = Maps.synchronizedBiMap(HashBiMap.create());
-        BiMap<UUID, IslandPos> skyblockPositions = Maps.synchronizedBiMap(HashBiMap.create());
-        for (Tag inbt : nbt.getList(ISLANDS, Tag.TAG_COMPOUND)) {
-            CompoundTag tag = (CompoundTag) inbt;
-
-            IslandPos island = IslandPos.fromTag(tag.getCompound(ISLAND));
-            Team team = Team.create(data, tag);
-
-            skyblocks.put(team.getId(), team);
-            skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
-            skyblockPositions.put(team.getId(), island);
-        }
-
-        for (Tag inbt : nbt.getList(META_INFO, Tag.TAG_COMPOUND)) {
-            CompoundTag tag = (CompoundTag) inbt;
-
-            UUID player = tag.getUUID(PLAYER);
-            SkyMeta meta = SkyMeta.get(data, tag.getCompound(META));
-            metaInfo.put(player, meta);
-        }
-        data.metaInfo = metaInfo;
-        data.skyblocks = skyblocks;
-        data.skyblockIds = skyblockIds;
-        data.skyblockPositions = skyblockPositions;
-        data.spiral = Spiral.fromArray(nbt.getIntArray(SPIRAL_STATE));
-
-        return data;
-    }
-
     @Nonnull
     @Override
     public CompoundTag save(@Nonnull CompoundTag compound, @Nonnull HolderLookup.Provider registries) {
-        ListTag islands = new ListTag();
-        for (Team team : this.skyblocks.values()) {
-            islands.add(team.serializeNBT());
-        }
+        // Subclass handles spiral_state; base class saves islands and meta_information
+        ListTag islands = this.registry.saveToList();
 
-        ListTag metaInfo = new ListTag();
+        ListTag metaInfoList = new ListTag();
         for (Map.Entry<UUID, SkyMeta> entry : this.metaInfo.entrySet()) {
             SkyMeta meta = entry.getValue();
             CompoundTag entryTag = new CompoundTag();
             entryTag.putUUID(PLAYER, entry.getKey());
             entryTag.put(META, meta.save());
 
-            metaInfo.add(entryTag);
+            metaInfoList.add(entryTag);
         }
 
-        compound.putIntArray(SPIRAL_STATE, this.spiral.toIntArray());
         compound.put(ISLANDS, islands);
-        compound.put(META_INFO, metaInfo);
+        compound.put(META_INFO, metaInfoList);
 
         return compound;
     }
 
     @Nullable
     public IslandPos getTeamIsland(UUID teamId) {
-        return this.skyblockPositions.get(teamId);
+        Team team = this.registry.getById(teamId);
+        return team != null ? team.getIsland() : null;
     }
 
     public boolean hasPlayerTeam(Player player) {
@@ -220,7 +191,7 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public boolean addPlayerToTeam(UUID teamId, UUID playerId) {
-        Team team = this.skyblocks.get(teamId);
+        Team team = this.registry.getById(teamId);
 
         if (team != null) {
             return team.addPlayer(playerId);
@@ -234,9 +205,10 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public boolean addPlayerToTeam(String teamName, UUID player) {
-        UUID teamId = this.skyblockIds.get(teamName.toLowerCase(Locale.ROOT));
+        Team team = this.registry.getByName(teamName);
+        if (team == null) return false;
 
-        return this.addPlayerToTeam(teamId, player);
+        return this.addPlayerToTeam(team.getId(), player);
     }
 
     public boolean addPlayerToTeam(Team team, Player player) {
@@ -266,7 +238,8 @@ public class SkyblockSavedData extends SavedData {
 
     @Nullable
     public Team createTeam(String teamName) {
-        if (this.level == null) {
+        ServerLevel level = this.getLevel();
+        if (level == null) {
             return null;
         }
 
@@ -274,12 +247,12 @@ public class SkyblockSavedData extends SavedData {
             return null;
         }
 
-        return this.createTeam(teamName, TemplateData.get(this.level).getConfiguredTemplate());
+        return this.createTeam(teamName, TemplateData.get(level).getConfiguredTemplate());
     }
 
     @Nullable
     public Team createTeam(String teamName, ConfiguredTemplate template) {
-        if (this.teamExists(teamName) || this.level == null) {
+        if (this.teamExists(teamName) || this.getLevel() == null) {
             return null;
         }
 
@@ -288,13 +261,12 @@ public class SkyblockSavedData extends SavedData {
         List<TemplatesConfig.Spawn> possibleSpawns = new ArrayList<>(this.getPossibleSpawns(team.getIsland(), template));
         team.setPossibleSpawns(possibleSpawns);
 
+        ServerLevel level = this.getLevel();
         BlockPos center = team.getIsland().getCenter();
-        template.placeInWorld(this.level, team, TemplateUtil.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
-        SkyblockSavedData.surround(this.level, center, template);
+        template.placeInWorld(level, team, TemplateUtil.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
+        SkyblockSavedData.surround(level, center, template);
 
-        this.skyblocks.put(team.getId(), team);
-        this.skyblockIds.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
-        this.skyblockPositions.put(team.getId(), team.getIsland());
+        // team was already added to registry in create(); no need to add again
 
         SkyblockBuilder.getLogger().info("Created team {} ({}) at {} with template {}", team.getName(), team.getId(), center, template.getName());
         this.setDirty();
@@ -321,8 +293,7 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public boolean removePlayerFromTeam(UUID player) {
-        for (Map.Entry<UUID, Team> entry : this.skyblocks.entrySet()) {
-            Team team = entry.getValue();
+        for (Team team : this.registry.all()) {
             if (team.isSpawn()) continue;
             if (team.hasPlayer(player)) {
                 boolean removed = team.removePlayer(player);
@@ -350,30 +321,34 @@ public class SkyblockSavedData extends SavedData {
 
     @Nullable
     public Team getTeam(String name) {
-        return this.getTeam(this.skyblockIds.get(name.toLowerCase(Locale.ROOT)));
+        return this.registry.getByName(name);
     }
 
     @Nullable
     public Team getTeam(UUID teamId) {
-        return this.skyblocks.get(teamId);
+        return this.registry.getById(teamId);
     }
 
     public boolean deleteTeam(String team) {
-        UUID teamId = this.skyblockIds.get(team.toLowerCase(Locale.ROOT));
-
-        return this.deleteTeam(teamId);
+        Team t = this.registry.getByName(team);
+        if (t == null) return false;
+        return this.deleteTeam(t.getId());
     }
 
     public boolean deleteTeam(UUID teamId) {
-        Team removedTeam = this.skyblocks.remove(teamId);
+        Team removedTeam = this.registry.getById(teamId);
 
         if (removedTeam == null) {
             return false;
         }
 
-        this.skyblockIds.inverse().remove(teamId);
-        this.skyblockPositions.inverse().remove(removedTeam.getIsland());
-        this.skyblocks.get(SPAWN_ID).addPlayers(removedTeam.getPlayers());
+        Team spawn = this.registry.getById(SPAWN_ID);
+        if (spawn != null) {
+            spawn.addPlayers(removedTeam.getPlayers());
+        }
+
+        this.registry.remove(teamId);
+        this.onTeamDeleted(removedTeam);
 
         return true;
     }
@@ -391,21 +366,24 @@ public class SkyblockSavedData extends SavedData {
             return null;
         }
 
-        Team team = this.skyblocks.getOrDefault(meta.getTeamId(), this.skyblocks.get(SPAWN_ID));
+        Team team = this.registry.getById(meta.getTeamId());
+        if (team == null) {
+            team = this.registry.getById(SPAWN_ID);
+        }
 
         return team == null || team.isSpawn() ? null : team;
     }
 
     public boolean teamExists(String name) {
-        return this.skyblockIds.containsKey(name.toLowerCase(Locale.ROOT));
+        return this.registry.containsName(name);
     }
 
     public boolean teamExists(UUID teamId) {
-        return this.skyblocks.containsKey(teamId);
+        return this.registry.containsId(teamId);
     }
 
     public Collection<Team> getTeams() {
-        return this.skyblocks.values();
+        return this.registry.all();
     }
 
     public void addInvite(Team team, Player invitor, Player player) {
@@ -468,7 +446,7 @@ public class SkyblockSavedData extends SavedData {
             this.addPlayerToTeam(team.getName(), id);
             meta.resetInvites();
             //noinspection ConstantConditions
-            WorldUtil.teleportToIsland(this.level.getServer().getPlayerList().getPlayer(id), team);
+            WorldUtil.teleportToIsland(this.getLevel().getServer().getPlayerList().getPlayer(id), team);
             this.setDirty();
 
             return true;
@@ -494,11 +472,9 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public void renameTeam(Team team, @Nullable ServerPlayer player, String name) {
-        String oldName = team.getName().toLowerCase();
-        this.skyblockIds.remove(oldName);
-
-        team.setName(name);
-        this.skyblockIds.put(name.toLowerCase(Locale.ROOT), team.getId());
+        String oldName = team.getName();
+        // registry.rename internally calls team.setName(newName)
+        this.registry.rename(team.getId(), name);
 
         Component playerName = player != null ? player.getDisplayName() : Component.literal("Server");
 
@@ -516,11 +492,11 @@ public class SkyblockSavedData extends SavedData {
     }
 
     public Set<TemplatesConfig.Spawn> getPossibleSpawns(IslandPos pos, ConfiguredTemplate template) {
-        if (!this.skyblockPositions.containsValue(pos)) {
+        if (!this.registry.containsPosition(pos)) {
             return initialPossibleSpawns(pos.getCenter(), template);
         }
 
-        return this.skyblocks.get(this.skyblockPositions.inverse().get(pos)).getPossibleSpawns();
+        return this.registry.getByPosition(pos).getPossibleSpawns();
     }
 
     public static Set<TemplatesConfig.Spawn> initialPossibleSpawns(BlockPos center, ConfiguredTemplate template) {
@@ -553,9 +529,10 @@ public class SkyblockSavedData extends SavedData {
     @Override
     public void setDirty() {
         super.setDirty();
-        if (this.level != null) {
-            SkyblockBuilder.getNetwork().updateData(this.level, this);
-            for (ServerPlayer player : this.level.getServer().getPlayerList().getPlayers()) {
+        ServerLevel level = this.getLevel();
+        if (level != null) {
+            SkyblockBuilder.getNetwork().updateData(level, this);
+            for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
                 player.refreshTabListName();
             }
         }
@@ -578,8 +555,70 @@ public class SkyblockSavedData extends SavedData {
         super.save(file, registries);
     }
 
-    @Nullable
-    public ServerLevel getLevel() {
-        return this.level;
+    private static final class SingleWorldImpl extends SkyblockSavedData {
+
+        private ServerLevel level;
+        private Spiral spiral = new Spiral();
+
+        @Override
+        protected IslandPos nextSpawnPos(ConfiguredTemplate template) {
+            if (SpawnConfig.skipCenterIslandCreation) {
+                int[] pos = this.spiral.next();
+                return new IslandPos(this.level, pos[0], pos[1], template);
+            }
+
+            return new IslandPos(this.level, 0, 0, template);
+        }
+
+        @Override
+        protected IslandPos nextIslandPos(ConfiguredTemplate template) {
+            IslandPos islandPos;
+            do {
+                int[] pos = this.spiral.next();
+                islandPos = new IslandPos(this.level, pos[0], pos[1], template);
+            } while (this.registry.containsPosition(islandPos));
+            return islandPos;
+        }
+
+        @Override
+        protected void onTeamDeleted(Team team) {
+            // Nothing extra needed in single-world mode
+        }
+
+        @Nullable
+        @Override
+        public ServerLevel getLevelFor(Team team) {
+            return this.level;
+        }
+
+        @Nonnull
+        @Override
+        public CompoundTag save(@Nonnull CompoundTag compound, @Nonnull HolderLookup.Provider registries) {
+            super.save(compound, registries);
+
+            compound.putIntArray(SPIRAL_STATE, this.spiral.toIntArray());
+
+            return compound;
+        }
+
+        private static SkyblockSavedData loadImpl(CompoundTag nbt) {
+            SingleWorldImpl data = new SingleWorldImpl();
+            ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
+
+            data.registry.loadFromList(nbt.getList(ISLANDS, Tag.TAG_COMPOUND), data);
+
+            for (Tag inbt : nbt.getList(META_INFO, Tag.TAG_COMPOUND)) {
+                CompoundTag tag = (CompoundTag) inbt;
+
+                UUID player = tag.getUUID(PLAYER);
+                SkyMeta meta = SkyMeta.get(data, tag.getCompound(META));
+                metaInfo.put(player, meta);
+            }
+
+            data.metaInfo = metaInfo;
+            data.spiral = Spiral.fromArray(nbt.getIntArray(SPIRAL_STATE));
+
+            return data;
+        }
     }
 }

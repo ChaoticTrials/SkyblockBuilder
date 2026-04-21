@@ -377,7 +377,7 @@ public class Team {
 
     @Nullable
     public ServerLevel getLevel() {
-        return this.data.getLevel();
+        return this.data.getLevelFor(this);
     }
 
     public void broadcast(MutableComponent msg, Style style) {
