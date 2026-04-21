@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
  */
 public final class IslandPos {
 
+    public static final IslandPos CENTERED = new IslandPos(0, 0, BlockPos.ZERO);
     public static final String ISLAND_X = "island_x";
     public static final String ISLAND_Z = "island_z";
     public static final String CENTER_POS = "center_pos";

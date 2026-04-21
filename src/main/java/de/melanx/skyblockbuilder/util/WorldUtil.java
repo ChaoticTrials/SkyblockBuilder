@@ -28,6 +28,7 @@ import net.minecraft.world.level.biome.Climate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class WorldUtil {
@@ -47,7 +48,10 @@ public class WorldUtil {
         }
 
         //noinspection ConstantConditions
-        ServerLevel level = WorldUtil.getConfiguredLevel(server);
+        ServerLevel level = server.getLevel(team.getTeamLevelKey());
+        if (level == null) {
+            level = Objects.requireNonNull(server.getLevel(server.overworld().dimension()));
+        }
 
         TemplatesConfig.Spawn spawn = WorldUtil.validPosition(level, team);
         player.teleportTo(level, spawn.pos().getX() + 0.5, spawn.pos().getY() + 0.2, spawn.pos().getZ() + 0.5, spawn.direction().getYRot(), 0);

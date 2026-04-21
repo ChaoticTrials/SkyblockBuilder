@@ -14,6 +14,7 @@ repositories {
         name = "Team Resourceful"
         url = "https://maven.teamresourceful.com/repository/maven-public/"
     }
+    maven { url "https://maven.commoble.net/" }
     exclusiveContent {
         forRepository {
             maven {
@@ -117,5 +118,6 @@ dependencies {
 
     runtimeOnly "mezz.jei:jei-1.${baseVersion}-neoforge:${jeiVersion}"
     runtimeOnly "de.melanx:DefaultWorldType:1.21-5.0.0"
+    implementation "net.commoble.infiniverse:infiniverse-1.21:2.0.1.0"
     compileOnly(jarJar(project(":coremods")))
 }

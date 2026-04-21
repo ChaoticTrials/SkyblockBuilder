@@ -55,4 +55,7 @@ public class WorldConfig {
 
     @Config("If a player is leaving a team, it will teleported to overworld spawn instead of spawn island.")
     public static boolean leaveToOverworld = false;
+
+    @Config("Each team will get its own main dimension.")
+    public static boolean dimensionPerTeam = false;
 }

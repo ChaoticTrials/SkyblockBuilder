@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
+import de.melanx.skyblockbuilder.compat.infiniverse.InfiniverseCompat;
 import de.melanx.skyblockbuilder.config.common.InventoryConfig;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
@@ -16,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -128,15 +130,8 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public Pair<IslandPos, Team> create(String teamName, ConfiguredTemplate template) {
-        IslandPos islandPos;
-        Team team;
-        if (teamName.equalsIgnoreCase("spawn")) {
-            islandPos = this.nextSpawnPos(template);
-            team = new Team(this, islandPos, SPAWN_ID);
-        } else {
-            islandPos = this.nextIslandPos(template);
-            team = new Team(this, islandPos);
-        }
+        Team team = this.createTeamInternally(teamName, template);
+        IslandPos islandPos = team.getIsland();
 
         Set<TemplatesConfig.Spawn> positions = initialPossibleSpawns(islandPos.getCenter(), template);
 
@@ -147,6 +142,17 @@ public abstract class SkyblockSavedData extends SavedData {
 
         this.setDirty();
         return Pair.of(islandPos, team);
+    }
+
+    private Team createTeamInternally(String teamName, ConfiguredTemplate template) {
+        IslandPos islandPos;
+        boolean isSpawn = teamName.equalsIgnoreCase("spawn");
+
+        if (isSpawn) {
+            return new Team(this, this.nextSpawnPos(template), SPAWN_ID);
+        }
+
+        return new Team(this, this.nextSpawnPos(template));
     }
 
     @Nonnull
@@ -263,8 +269,18 @@ public abstract class SkyblockSavedData extends SavedData {
 
         ServerLevel level = this.getLevel();
         BlockPos center = team.getIsland().getCenter();
-        template.placeInWorld(level, team, TemplateUtil.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
-        SkyblockSavedData.surround(level, center, template);
+
+        ServerLevel teamLevel = this.getLevel();
+
+        if (InfiniverseCompat.useInfiniverse()) {
+            teamLevel = InfiniverseCompat.getOrCreateLevel(level.getServer(), team.getTeamLevelKey(), level.registryAccess());
+            if (!team.isSpawn()) {
+                InfiniverseCompat.getOrCreateNetherLevel(level.getServer(), team.getTeamNetherLevelKey(), level.registryAccess());
+            }
+        }
+
+        template.placeInWorld(teamLevel, team, TemplateUtil.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
+        SkyblockSavedData.surround(teamLevel, center, template);
 
         // team was already added to registry in create(); no need to add again
 
@@ -350,6 +366,13 @@ public abstract class SkyblockSavedData extends SavedData {
         this.registry.remove(teamId);
         this.onTeamDeleted(removedTeam);
 
+        if (InfiniverseCompat.useInfiniverse()) {
+            InfiniverseCompat.markDimensionForUnregistration(this.getLevel().getServer(), removedTeam.getTeamLevelKey());
+            if (!removedTeam.isSpawn()) {
+                InfiniverseCompat.markDimensionForUnregistration(this.getLevel().getServer(), removedTeam.getTeamNetherLevelKey());
+            }
+        }
+
         return true;
     }
 
@@ -383,7 +406,7 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public Collection<Team> getTeams() {
-        return this.registry.all();
+        return Collections.unmodifiableCollection(this.registry.all());
     }
 
     public void addInvite(Team team, Player invitor, Player player) {
@@ -619,6 +642,20 @@ public abstract class SkyblockSavedData extends SavedData {
             data.spiral = Spiral.fromArray(nbt.getIntArray(SPIRAL_STATE));
 
             return data;
+        }
+    }
+
+    public void restoreInfiniverseDimensions(MinecraftServer server) {
+        if (!InfiniverseCompat.useInfiniverse()) {
+            return;
+        }
+
+        RegistryAccess registryAccess = server.registryAccess();
+        for (Team team : this.registry.all()) {
+            InfiniverseCompat.getOrCreateLevel(server, team.getTeamLevelKey(), registryAccess);
+            if (!team.isSpawn()) {
+                InfiniverseCompat.getOrCreateNetherLevel(server, team.getTeamNetherLevelKey(), registryAccess);
+            }
         }
     }
 }
