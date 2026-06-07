@@ -35,12 +35,19 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean saveToC
                 return true;
             }
 
+            if (!player.hasPermissions(2)) {
+                player.displayClientMessage(Component.translatable("skyblockbuilder.error.not_allowed").withStyle(ChatFormatting.RED), false);
+                SkyblockBuilder.getLogger().warn("Player {} tried to save a structure without permission", player.getGameProfile());
+                return true;
+            }
+
             ServerLevel level = (ServerLevel) player.level();
             String name = ItemStructureSaver.saveSchematic(level, msg.stack, msg.saveToConfig, msg.ignoreAir, msg.asSnbt, msg.netherValidation, msg.name);
             if (name == null) {
                 player.displayClientMessage(Component.literal("Failed to save, look at latest.log for more information").withStyle(ChatFormatting.RED), false);
                 return true;
             }
+
             ItemStack stack = ItemStructureSaver.removeTags(msg.stack);
             player.setItemInHand(InteractionHand.MAIN_HAND, stack);
             Path fullPath = msg.saveToConfig ? SkyPaths.MOD_CONFIG.resolve(name) : SkyPaths.MOD_EXPORTS.resolve(name);
@@ -48,6 +55,7 @@ public record SaveStructureMessage(ItemStack stack, String name, boolean saveToC
             MutableComponent component = Component.translatable("skyblockbuilder.schematic.saved", savedPath.toString().replace('\\', '/'));
             SkyblockBuilder.getLogger().info("Saved structure (and spawn points) to: {}", fullPath);
             player.displayClientMessage(component, true);
+
             return true;
         }
     }
