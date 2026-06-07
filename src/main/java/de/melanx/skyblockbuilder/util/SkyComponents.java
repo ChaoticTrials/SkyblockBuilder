@@ -335,6 +335,7 @@ public class SkyComponents {
     public static final Function<String, MutableComponent> SCHEMATIC_SAVED = path -> Component.translatable("skyblockbuilder.schematic.saved", path);
     public static final MutableComponent NO_SKYBLOCK = Component.translatable("skyblockbuilder.error.no_skyblock");
     public static final Function<String, MutableComponent> COMPAT_DISABLED_MANAGEMENT = modIds -> Component.translatable("skyblockbuilder.compat.disabled_management", modIds);
+    public static final MutableComponent NOT_ALLOWED_GENERIC = SkyComponents.translatable("error.not_allowed").withStyle(ChatFormatting.RED);
 
     // Integration Components
     public static final MutableComponent MINEMENTION_TEAM = Component.translatable("minemention.skyblockbuilder.team");

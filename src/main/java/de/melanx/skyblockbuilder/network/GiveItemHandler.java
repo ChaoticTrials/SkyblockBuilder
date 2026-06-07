@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.network;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
@@ -24,8 +25,15 @@ public class GiveItemHandler extends PacketHandler<GiveItemHandler.Message> {
 
     @Override
     public void handle(Message msg, IPayloadContext ctx) {
-        if (ctx.player() instanceof ServerPlayer player) {
+        if (!(ctx.player() instanceof ServerPlayer player)) {
+            return;
+        }
+
+        if (player.hasPermissions(2)) {
             player.addItem(new ItemStack(msg.item));
+        } else {
+            player.sendSystemMessage(SkyComponents.NOT_ALLOWED_GENERIC);
+            SkyblockBuilder.getLogger().info("Player {} tried to give item {}", player.getGameProfile().getName(), msg.item);
         }
     }
 
