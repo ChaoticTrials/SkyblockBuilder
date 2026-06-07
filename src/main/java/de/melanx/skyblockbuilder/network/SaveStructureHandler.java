@@ -38,6 +38,12 @@ public class SaveStructureHandler extends PacketHandler<SaveStructureHandler.Mes
             return;
         }
 
+        if (!player.hasPermissions(2)) {
+            player.sendSystemMessage(SkyComponents.NOT_ALLOWED_GENERIC);
+            SkyblockBuilder.getLogger().warn("Player {} tried to save a structure without permission", player.getGameProfile());
+            return;
+        }
+
         ServerLevel level = (ServerLevel) player.level();
         String name = ItemStructureSaver.saveSchematic(player, level, msg.stack, msg.settings);
         if (name == null) {
