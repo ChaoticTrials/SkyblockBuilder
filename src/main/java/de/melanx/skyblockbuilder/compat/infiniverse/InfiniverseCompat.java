@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.compat.infiniverse;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
@@ -82,6 +83,15 @@ public class InfiniverseCompat {
     }
 
     public static boolean useInfiniverse() {
-        return WorldConfig.dimensionPerTeam && ModList.get().isLoaded(MODID);
+        if (!WorldConfig.dimensionPerTeam) {
+            return false;
+        }
+
+        if (!ModList.get().isLoaded(MODID)) {
+            SkyblockBuilder.getLogger().warn("Infiniverse needs to be installed for dimensions per team! Falling back to shared dimensions.");
+            return false;
+        }
+
+        return true;
     }
 }

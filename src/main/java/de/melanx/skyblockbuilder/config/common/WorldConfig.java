@@ -56,6 +56,9 @@ public class WorldConfig {
     @Config("If a player is leaving a team, it will teleported to overworld spawn instead of spawn island.")
     public static boolean leaveToOverworld = false;
 
-    @Config("Each team will get its own main dimension.")
+    @Config({"EXPERIMENTAL - needs proper testing!",
+            "Each team will get its own main dimension. Requires Infiniverse to be installed",
+            "- https://www.curseforge.com/minecraft/mc-mods/infiniverse",
+            "- https://modrinth.com/mod/infiniverse"})
     public static boolean dimensionPerTeam = false;
 }

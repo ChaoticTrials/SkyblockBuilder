@@ -171,6 +171,7 @@
   "task.skyblockbuilder.spread_location.title.plural": "Find %s Spreads",
   "heracles.skyblockbuilder.reset_quest_progress": "Reset quest progression.",
   "cadmus.skyblockbuilder.claim_spawn": "Successfully claimed spawn chunks.",
+  "infiniverse.skyblockbuilder.not_loaded": "Infiniverse needs to be installed for dimensions per team! Falling back to shared dimensions.",
 
   "skyblockbuilder.screen.dump.title": "Skyblock Builder Dump",
   "skyblockbuilder.screen.dump.text.configs": "Configs",
