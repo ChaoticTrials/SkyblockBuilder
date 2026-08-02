@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.data;
 
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
@@ -8,6 +9,7 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -15,10 +17,12 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModList;
 
 import javax.annotation.Nonnull;
@@ -57,6 +61,7 @@ public class Team {
     private final Set<TemplatesConfig.Spawn> defaultPossibleSpawns = new CopyOnWriteArraySet<>();
     private final Map<String, Set<PlacedSpread>> placedSpreads = new ConcurrentHashMap<>();
 
+    private ResourceKey<Level> teamLevelKey;
     private UUID teamId;
     private IslandPos island;
     private String name;
@@ -100,6 +105,21 @@ public class Team {
 
     public UUID getId() {
         return this.teamId;
+    }
+
+    public ResourceKey<Level> getTeamLevelKey() {
+        // need to do this in case id is null first
+        if (this.teamLevelKey == null) {
+            String path = this.isSpawn() ? "spawn" : this.teamId.toString().replace("-", "") + "_overworld";
+            this.teamLevelKey = ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource(path));
+        }
+
+        return this.teamLevelKey;
+    }
+
+    public ResourceKey<Level> getTeamNetherLevelKey() {
+        return ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource(
+                this.teamId.toString().replace("-", "") + "_nether"));
     }
 
     public void setName(String name) {

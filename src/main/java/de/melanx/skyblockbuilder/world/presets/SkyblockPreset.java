@@ -115,7 +115,7 @@ public class SkyblockPreset extends WorldPreset {
         return new SkyblockNoiseBasedChunkGenerator(biomeSource, settings, Level.OVERWORLD, SkyblockPreset.getLayers(Level.OVERWORLD));
     }
 
-    private static ChunkGenerator netherChunkGenerator(
+    public static ChunkGenerator netherChunkGenerator(
             HolderGetter<MultiNoiseBiomeSourceParameterList> noises,
             HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings,
             HolderLookup<Biome> biomes

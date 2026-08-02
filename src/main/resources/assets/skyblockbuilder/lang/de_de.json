@@ -171,6 +171,7 @@
   "task.skyblockbuilder.spread_location.title.plural": "Finde %s Ausbreitungen",
   "heracles.skyblockbuilder.reset_quest_progress": "Questfortschritt wurde zurückgesetzt.",
   "cadmus.skyblockbuilder.claim_spawn": "Spawnchunks erfolgreich geclaimt.",
+  "infiniverse.skyblockbuilder.not_loaded": "Infiniverse muss für Dimensionen pro Team installiert sein! Es wird stattdessen auf geteilte Dimensionen zurückgegriffen.",
 
   "skyblockbuilder.screen.dump.title": "Skyblock Builder Abbild",
   "skyblockbuilder.screen.dump.text.configs": "Konfigurationen",

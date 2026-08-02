@@ -17,6 +17,7 @@ import de.melanx.skyblockbuilder.commands.teleport.HomeCommand;
 import de.melanx.skyblockbuilder.commands.teleport.SpawnCommand;
 import de.melanx.skyblockbuilder.commands.teleport.VisitCommand;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
+import de.melanx.skyblockbuilder.compat.infiniverse.InfiniverseCompat;
 import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -142,6 +143,11 @@ public class EventListener {
             ServerPlayer player = (ServerPlayer) event.getEntity();
             Team spawn = data.getSpawn();
             GameProfileCache.addProfiles(Set.of(player.getGameProfile()));
+
+            if (WorldConfig.dimensionPerTeam && !ModList.get().isLoaded(InfiniverseCompat.MODID) && player.hasPermissions(Commands.LEVEL_GAMEMASTERS)) {
+                player.sendSystemMessage(Component.translatable("infiniverse.skyblockbuilder.not_loaded").withStyle(ChatFormatting.RED));
+            }
+
             if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
                 if (!data.hasPlayerTeam(player) && !spawn.hasPlayer(player)) {
                     if (InventoryConfig.dropItems) {
