@@ -1,9 +1,8 @@
 package de.melanx.skyblockbuilder.config;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
 import com.mojang.serialization.JsonOps;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.CuriosCompat;
@@ -17,10 +16,7 @@ import net.neoforged.fml.ModList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 public class StartingInventory {
@@ -37,7 +33,7 @@ public class StartingInventory {
 
         try {
             String s = IOUtils.toString(new InputStreamReader(new FileInputStream(startInventoryConfig)));
-            JsonObject json = GsonHelper.parse(s, true);
+            JsonObject json = fromJson(new StringReader(s), JsonObject.class);
 
             if (json.has("items")) {
                 JsonArray items = json.getAsJsonArray("items");
@@ -80,5 +76,20 @@ public class StartingInventory {
 
     public static List<Pair<EquipmentSlot, ItemStack>> getStarterItems() {
         return ImmutableList.copyOf(StartingInventory.STARTER_ITEMS);
+    }
+
+    public static <T> T fromJson(Reader reader, Class<T> type) {
+        try {
+            JsonReader jsonReader = new JsonReader(reader);
+            jsonReader.setStrictness(Strictness.LENIENT);
+            T result = SkyblockBuilder.PRETTY_GSON.getAdapter(type).read(jsonReader);
+            if (result == null) {
+                throw new JsonParseException("JSON data was null or empty");
+            } else {
+                return result;
+            }
+        } catch (IOException var5) {
+            throw new JsonParseException(var5);
+        }
     }
 }

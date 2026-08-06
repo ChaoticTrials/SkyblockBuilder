@@ -56,7 +56,7 @@ public class SpawnsCommand {
             BlockPos pos = spawn.pos();
             source.sendSystemMessage(Component.literal(" - ").append(RandomUtility.getFormattedPos(pos)));
             if (source.getEntity() instanceof ServerPlayer player) {
-                level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, true, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);
+                level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, true, true, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);
             } else {
                 level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 10);
             }

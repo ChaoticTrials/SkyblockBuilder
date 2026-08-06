@@ -20,7 +20,7 @@ public class NetherPortalTemplate {
     public NetherPortalTemplate(File file) {
         // todo config for custom portal overworld -> nether || nether -> overworld
         try {
-            this.structure.load(BuiltInRegistries.BLOCK.asLookup(), TemplateUtil.readTemplate(file.toPath()));
+            this.structure.load(BuiltInRegistries.BLOCK, TemplateUtil.readTemplate(file.toPath()));
         } catch (IOException | CommandSyntaxException e) {
             throw new RuntimeException(e);
         }

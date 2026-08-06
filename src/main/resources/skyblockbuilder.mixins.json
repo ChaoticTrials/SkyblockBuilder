@@ -4,7 +4,7 @@
   "refmap": "skyblockbuilder.refmap.json",
   "package": "de.melanx.skyblockbuilder.mixin",
   "minVersion": "0.8",
-  "client": [ "CreateWorldScreenMixin", "LivingEntityRendererMixin", "WorldOpenFlowsMixin" ],
+  "client": [ "CreateWorldScreenMixin", "LivingEntityRendererMixin" ],
   "server": [ ],
-  "mixins": [ "BaseFireBlockMixin", "NetherPortalBlockMixin", "PackRepositoryMixin", "ServerMainMixin" ]
+  "mixins": [ "BaseFireBlockMixin", "NetherPortalBlockMixin", "PackRepositoryMixin", "ServerPlayerMixin" ]
 }

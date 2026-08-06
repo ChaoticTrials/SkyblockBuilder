@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.mixin;
 
-import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BaseFireBlockMixin {
 
     @Inject(method = "inPortalDimension", at = @At(value = "RETURN"), cancellable = true)
-    private static void test(Level level, CallbackInfoReturnable<Boolean> cir) {
-        if (level.dimension().location().getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
+    private static void inPortalDimension(Level level, CallbackInfoReturnable<Boolean> cir) {
+        if (!cir.getReturnValueZ() && WorldUtil.isTeamPortalDimension(level)) {
             cir.setReturnValue(true);
         }
     }

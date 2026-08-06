@@ -14,12 +14,13 @@ import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.*;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.levelgen.*;
@@ -84,7 +85,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
             int zs = cp.getMinBlockZ();
             int xe = cp.getMaxBlockX();
             int ze = cp.getMaxBlockZ();
-            int y = level.getMinBuildHeight();
+            int y = level.getMinY();
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             for (FlatLayerConfig info : this.flatLayers.layers()) {
                 BlockState state = info.getBlockState();
@@ -96,9 +97,9 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                                 if (!info.checkChance(level.getRandom())) {
                                     state = info.getBlockState();
                                 } else {
-                                    Optional<FlatLayerConfig.WeightedBlockEntry> maybeBlock = info.getExtraBlocks().getRandom(level.getRandom());
+                                    Optional<Block> maybeBlock = info.getExtraBlocks().getRandom(level.getRandom());
                                     if (maybeBlock.isPresent()) {
-                                        state = maybeBlock.get().block().defaultBlockState();
+                                        state = maybeBlock.get().defaultBlockState();
                                     }
                                 }
                             }
@@ -106,7 +107,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                             pos.setX(x);
                             pos.setY(y);
                             pos.setZ(z);
-                            chunk.setBlockState(pos, state, false);
+                            chunk.setBlockState(pos, state);
                         }
                     }
                     y++;
@@ -124,7 +125,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     @Nullable
     @Override
     public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(@Nonnull ServerLevel level, @Nonnull HolderSet<Structure> structureHolderSet, @Nonnull BlockPos pos, int searchRadius, boolean skipKnownStructures) {
-        List<Holder<Structure>> holders = structureHolderSet.stream().filter(holder -> holder.unwrapKey().isPresent() && StructuresConfig.structuresToGenerate.test(holder.unwrapKey().get().location())).toList();
+        List<Holder<Structure>> holders = structureHolderSet.stream().filter(holder -> holder.unwrapKey().isPresent() && StructuresConfig.structuresToGenerate.test(holder.unwrapKey().get().identifier())).toList();
 
         if (holders.isEmpty()) {
             return null;
@@ -143,14 +144,14 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     @Override
     public int getBaseHeight(int x, int z, @Nonnull Heightmap.Types heightmapType, @Nonnull LevelHeightAccessor level, @Nonnull RandomState randomState) {
         if (WorldConfig.surface) {
-            return level.getMinBuildHeight() + this.layerHeight;
+            return level.getMinY() + this.layerHeight;
         }
 
         return this.parent.getBaseHeight(x, z, heightmapType, level, randomState);
     }
 
     @Override
-    public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState random, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk, @Nonnull GenerationStep.Carving step) {
+    public void applyCarvers(@Nonnull WorldGenRegion level, long seed, @Nonnull RandomState random, @Nonnull BiomeManager biomeManager, @Nonnull StructureManager structureManager, @Nonnull ChunkAccess chunk) {
         if (this.flatLayers.isEmpty()) {
             return;
         }
@@ -159,7 +160,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
         ChunkPos chunkPos = chunk.getPos();
         Aquifer aquifer = noiseChunk.aquifer();
-        CarvingMask carvingMask = ((ProtoChunk) chunk).getOrCreateCarvingMask(step);
+        CarvingMask carvingMask = ((ProtoChunk) chunk).getOrCreateCarvingMask();
         WorldgenRandom worldGenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
         BiomeManager differentBiomeManager = biomeManager.withDifferentSource((x, y, z) -> this.biomeSource.getNoiseBiome(x, y, z, random.sampler()));
         CarvingContext carvingContext = new CarvingContext(this, level.registryAccess(), chunk.getHeightAccessorForGeneration(), noiseChunk, random, this.settings.value().surfaceRule());
@@ -167,22 +168,22 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         int i = 8;
         for (int j = -i; j <= i; ++j) {
             for (int k = -i; k <= i; ++k) {
-                ChunkPos tempChunkPos = new ChunkPos(chunkPos.x + j, chunkPos.z + k);
+                ChunkPos tempChunkPos = new ChunkPos(chunkPos.x() + j, chunkPos.z() + k);
                 //noinspection deprecation
-                BiomeGenerationSettings biomeGenerationSettings = level.getChunk(tempChunkPos.x, tempChunkPos.z).carverBiome(() -> {
+                BiomeGenerationSettings biomeGenerationSettings = level.getChunk(tempChunkPos.x(), tempChunkPos.z()).carverBiome(() -> {
                     //noinspection deprecation
                     return this.getBiomeGenerationSettings(this.biomeSource.getNoiseBiome(QuartPos.fromBlock(tempChunkPos.getMinBlockX()), 0, QuartPos.fromBlock(tempChunkPos.getMinBlockZ()), random.sampler()));
                 });
 
                 int l = 0;
-                for (Holder<ConfiguredWorldCarver<?>> holder : biomeGenerationSettings.getCarvers(step)) {
+                for (Holder<ConfiguredWorldCarver<?>> holder : biomeGenerationSettings.getCarvers()) {
                     // my change
-                    if (holder.unwrapKey().isPresent() && !WorldConfig.carvers.getOrDefault(this.dimension.location().toString(), ResourceList.ALLOW_LIST).test(holder.unwrapKey().get().location())) {
+                    if (holder.unwrapKey().isPresent() && !WorldConfig.carvers.getOrDefault(this.dimension.identifier().toString(), ResourceList.ALLOW_LIST).test(holder.unwrapKey().get().identifier())) {
                         continue;
                     }
 
                     ConfiguredWorldCarver<?> configuredCarver = holder.value();
-                    worldGenRandom.setLargeFeatureSeed(seed + (long) l, tempChunkPos.x, tempChunkPos.z);
+                    worldGenRandom.setLargeFeatureSeed(seed + (long) l, tempChunkPos.x(), tempChunkPos.z());
                     if (configuredCarver.isStartChunk(worldGenRandom)) {
                         configuredCarver.carve(carvingContext, chunk, differentBiomeManager::getBiome, worldGenRandom, aquifer, tempChunkPos, carvingMask);
                     }
@@ -203,10 +204,10 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
     @Override
     public void applyBiomeDecoration(@Nonnull WorldGenLevel level, @Nonnull ChunkAccess chunk, @Nonnull StructureManager structureManager) {
         ChunkPos chunkPos = chunk.getPos();
-        SectionPos sectionPos = SectionPos.of(chunkPos, level.getMinSection());
+        SectionPos sectionPos = SectionPos.of(chunkPos, level.getMinSectionY());
         BlockPos blockpos = sectionPos.origin();
 
-        Registry<Structure> structureRegistry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        Registry<Structure> structureRegistry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         Map<Integer, List<Structure>> map = structureRegistry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
         List<FeatureSorter.StepFeatureData> stepFeatureDataList = this.featuresPerStep.get();
         WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
@@ -214,7 +215,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
 
         Set<Holder<Biome>> possibleBiomes = new ObjectArraySet<>();
         ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach((pos) -> {
-            ChunkAccess chunkaccess = level.getChunk(pos.x, pos.z);
+            ChunkAccess chunkaccess = level.getChunk(pos.x(), pos.z());
             for (LevelChunkSection chunkSection : chunkaccess.getSections()) {
                 chunkSection.getBiomes().getAll(possibleBiomes::add);
             }
@@ -224,14 +225,14 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
         int dataSize = stepFeatureDataList.size();
 
         try {
-            Registry<PlacedFeature> placedFeatureRegistry = level.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
+            Registry<PlacedFeature> placedFeatureRegistry = level.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
             int maxDecorations = Math.max(GenerationStep.Decoration.values().length, dataSize);
 
             for (int i = 0; i < maxDecorations; ++i) {
                 int index = 0;
                 if (structureManager.shouldGenerateStructures()) {
                     for (Structure structure : map.getOrDefault(i, Collections.emptyList())) {
-                        ResourceLocation location = level.registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(structure);
+                        Identifier location = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getKey(structure);
                         if (!StructuresConfig.structuresToGenerate.test(location)) {
                             continue;
                         }
@@ -276,7 +277,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                         PlacedFeature placedfeature = stepFeatureData.features().get(featureIndex);
                         // The only reason why I needed to copy the code - checking if it should be placed
                         Optional<ResourceKey<ConfiguredFeature<?, ?>>> optionalResourceKey = placedfeature.feature().unwrapKey();
-                        if (optionalResourceKey.isPresent() && !StructuresConfig.featuresToGenerate.test(optionalResourceKey.get().location())) {
+                        if (optionalResourceKey.isPresent() && !StructuresConfig.featuresToGenerate.test(optionalResourceKey.get().identifier())) {
                             continue;
                         }
 
@@ -298,7 +299,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
             level.setCurrentlyGenerating(null);
         } catch (Exception e) {
             CrashReport report = CrashReport.forThrowable(e, "Biome decoration");
-            report.addCategory("Generation").setDetail("CenterX", chunkPos.x).setDetail("CenterZ", chunkPos.z).setDetail("Seed", decorationSeed);
+            report.addCategory("Generation").setDetail("CenterX", chunkPos.x()).setDetail("CenterZ", chunkPos.z()).setDetail("Seed", decorationSeed);
             throw new ReportedException(report);
         }
     }

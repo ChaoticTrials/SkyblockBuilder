@@ -25,7 +25,7 @@ import java.util.function.Function;
 public class BiomeParametersPreset implements MultiNoiseBiomeSourceParameterList.Preset.SourceProvider {
 
     public static final MultiNoiseBiomeSourceParameterList.Preset FILTERED_OVERWORLD = new MultiNoiseBiomeSourceParameterList.Preset(
-            SkyblockBuilder.getInstance().resource("filtered_overworld"), new BiomeParametersPreset());
+            SkyblockBuilder.getInstance().id("filtered_overworld"), new BiomeParametersPreset());
 
     private static HolderLookup.RegistryLookup<Biome> BIOMES;
 
@@ -41,10 +41,10 @@ public class BiomeParametersPreset implements MultiNoiseBiomeSourceParameterList
 
     private <T> Climate.ParameterList<T> generateOverworldBiomes(Function<ResourceKey<Biome>, T> valueGetter) {
         ImmutableList.Builder<Pair<Climate.ParameterPoint, T>> builder = ImmutableList.builder();
-        ResourceList resourceList = WorldConfig.biomes.getOrDefault(Level.OVERWORLD.location().toString(), ResourceList.DENY_LIST);
+        ResourceList resourceList = WorldConfig.biomes.getOrDefault(Level.OVERWORLD.identifier().toString(), ResourceList.DENY_LIST);
         Set<ResourceKey<Biome>> addedBiomes = new HashSet<>();
         Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer = (p -> {
-            if (resourceList.test(p.getSecond().location())) {
+            if (resourceList.test(p.getSecond().identifier())) {
                 builder.add(p.mapSecond(valueGetter));
                 addedBiomes.add(p.getSecond());
             }
@@ -57,7 +57,7 @@ public class BiomeParametersPreset implements MultiNoiseBiomeSourceParameterList
 
         BIOMES.listElementIds().forEach(biomeResourceKey -> {
             Optional<Holder.Reference<Biome>> biomeReference = BIOMES.get(biomeResourceKey);
-            if (!addedBiomes.contains(biomeResourceKey) && biomeReference.isPresent() && resourceList.test(biomeResourceKey.location())) {
+            if (!addedBiomes.contains(biomeResourceKey) && biomeReference.isPresent() && resourceList.test(biomeResourceKey.identifier())) {
                 builder.add(Pair.of(WorldUtil.pointFor(biomeResourceKey), valueGetter.apply(biomeResourceKey)));
             }
         });

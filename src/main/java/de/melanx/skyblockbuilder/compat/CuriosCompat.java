@@ -26,7 +26,7 @@ public class CuriosCompat {
     private static final List<Pair<String, ItemStack>> STARTER_ITEMS = new ArrayList<>();
 
     public static void dropInventory(Player player) {
-        if (player.level().isClientSide) {
+        if (player.level().isClientSide()) {
             return;
         }
 

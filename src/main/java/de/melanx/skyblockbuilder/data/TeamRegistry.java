@@ -1,9 +1,6 @@
 package de.melanx.skyblockbuilder.data;
 
 import de.melanx.skyblockbuilder.world.IslandPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -19,11 +16,11 @@ public class TeamRegistry {
     private final ConcurrentHashMap<IslandPos, UUID> byPosition = new ConcurrentHashMap<>();
 
     public void add(Team team) {
-        this.byId.put(team.getId(), team);
-        this.byName.put(team.getName().toLowerCase(Locale.ROOT), team.getId());
+        this.byId.put(team.id(), team);
+        this.byName.put(team.getName().toLowerCase(Locale.ROOT), team.id());
 
         if (team.getIsland() != null) {
-            this.byPosition.put(team.getIsland(), team.getId());
+            this.byPosition.put(team.getIsland(), team.id());
         }
     }
 
@@ -87,25 +84,5 @@ public class TeamRegistry {
 
     public int size() {
         return this.byId.size();
-    }
-
-    public ListTag saveToList() {
-        ListTag list = new ListTag();
-        for (Team team : this.byId.values()) {
-            list.add(team.serializeNBT());
-        }
-
-        return list;
-    }
-
-    public void loadFromList(ListTag list, SkyblockSavedData data) {
-        this.byId.clear();
-        this.byName.clear();
-        this.byPosition.clear();
-
-        for (Tag tag : list) {
-            Team team = Team.create(data, (CompoundTag) tag);
-            this.add(team);
-        }
     }
 }

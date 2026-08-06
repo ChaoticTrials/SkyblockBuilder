@@ -1,14 +1,15 @@
 package de.melanx.skyblockbuilder.coremods;
 
-import cpw.mods.modlauncher.api.ITransformer;
-import net.neoforged.neoforgespi.coremod.ICoreMod;
+import de.melanx.skyblockbuilder.coremods.compat.EnderIoCompat;
+import de.melanx.skyblockbuilder.coremods.compat.TeleportCakesCompat;
+import net.neoforged.neoforgespi.transformation.ClassProcessorProvider;
 
-import java.util.List;
-
-public class SkyblockBuilderCoreMod implements ICoreMod {
+public class SkyblockBuilderCoreMod implements ClassProcessorProvider {
 
     @Override
-    public Iterable<? extends ITransformer<?>> getTransformers() {
-        return List.of(new WorldPresetCodec());
+    public void createProcessors(Context context, Collector collector) {
+        collector.add(new WorldPresetCodec());
+        collector.add(new TeleportCakesCompat());
+        collector.add(new EnderIoCompat());
     }
 }

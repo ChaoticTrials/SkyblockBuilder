@@ -7,6 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -17,7 +18,7 @@ import javax.annotation.Nonnull;
 
 public class GiveItemHandler extends PacketHandler<GiveItemHandler.Message> {
 
-    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("give_item"));
+    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().id("give_item"));
 
     protected GiveItemHandler() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -29,11 +30,11 @@ public class GiveItemHandler extends PacketHandler<GiveItemHandler.Message> {
             return;
         }
 
-        if (player.hasPermissions(2)) {
+        if (player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
             player.addItem(new ItemStack(msg.item));
         } else {
             player.sendSystemMessage(SkyComponents.NOT_ALLOWED_GENERIC);
-            SkyblockBuilder.getLogger().info("Player {} tried to give item {}", player.getGameProfile().getName(), msg.item);
+            SkyblockBuilder.getLogger().info("Player {} tried to give item {}", player.getGameProfile().name(), msg.item);
         }
     }
 

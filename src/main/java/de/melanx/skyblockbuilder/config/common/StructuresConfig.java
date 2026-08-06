@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.config.common;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
 import org.moddingx.libx.util.data.ResourceList;
@@ -12,7 +12,7 @@ public class StructuresConfig {
             "A list with all possible structures can be found in config/skyblockbuilder/data/structures.txt",
             "WARNING: This only works for vanilla dimensions (Overworld, Nether, End), or ones that were created using the Skyblock Builder structure"})
     public static ResourceList structuresToGenerate = new ResourceList(true, b -> {
-        b.simple(ResourceLocation.withDefaultNamespace("fortress"));
+        b.simple(Identifier.withDefaultNamespace("fortress"));
     });
 
     @Config({"All the features that should be generated.",
@@ -21,7 +21,7 @@ public class StructuresConfig {
             "WARNING: Some features like trees need special surface!",
             "WARNING: This only works for vanilla dimensions (Overworld, Nether, End), or ones that were created using the Skyblock Builder structure"})
     public static ResourceList featuresToGenerate = new ResourceList(true, b -> {
-        b.simple(ResourceLocation.withDefaultNamespace("end_spike"));
-        b.simple(ResourceLocation.withDefaultNamespace("end_gateway_return"));
+        b.simple(Identifier.withDefaultNamespace("end_spike"));
+        b.simple(Identifier.withDefaultNamespace("end_gateway_return"));
     });
 }

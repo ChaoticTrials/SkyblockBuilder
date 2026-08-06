@@ -23,11 +23,21 @@ jobs:
       - name: Send to dump viewer API
         id: api
         if: steps.extract.outputs.url != ''
+        env:
+          DUMP_URL: ${{ steps.extract.outputs.url }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_HTML_URL: ${{ github.event.issue.html_url }}
         run: |
+          body=$(jq -n \
+            --arg url "$DUMP_URL" \
+            --arg name "Issue #$ISSUE_NUMBER - $ISSUE_TITLE" \
+            --arg link "$ISSUE_HTML_URL" \
+            '{url: $url, name: $name, link: $link}')
           response=$(curl -s -X POST https://dumps.chaotictrials.de/api/dump/import \
             -H "Authorization: Bearer ${{ secrets.DUMPVIEWER_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{"url": "${{ steps.extract.outputs.url }}"}')
+            -d "$body")
           dump_id=$(echo "$response" | jq -r '.id')
           echo "dump_id=$dump_id" >> $GITHUB_OUTPUT
 

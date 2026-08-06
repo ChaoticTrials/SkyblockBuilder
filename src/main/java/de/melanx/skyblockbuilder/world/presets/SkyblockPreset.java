@@ -35,7 +35,7 @@ import java.util.Optional;
 
 public class SkyblockPreset extends WorldPreset {
 
-    public static final ResourceKey<WorldPreset> KEY = ResourceKey.create(Registries.WORLD_PRESET, SkyblockBuilder.getInstance().resource("skyblock"));
+    public static final ResourceKey<WorldPreset> KEY = ResourceKey.create(Registries.WORLD_PRESET, SkyblockBuilder.getInstance().id("skyblock"));
 
     // Must be lazy as we can't access the full registry while deserializing.
     private final LazyValue<WorldPreset> actualPreset;
@@ -140,7 +140,7 @@ public class SkyblockPreset extends WorldPreset {
 
     public static FlatLayers getLayers(ResourceKey<Level> levelKey) {
         return WorldConfig.surface
-                ? WorldConfig.surfaceSettings.getOrDefault(levelKey.location().toString(), FlatLayers.EMPTY)
+                ? WorldConfig.surfaceSettings.getOrDefault(levelKey.identifier().toString(), FlatLayers.EMPTY)
                 : FlatLayers.EMPTY;
     }
 

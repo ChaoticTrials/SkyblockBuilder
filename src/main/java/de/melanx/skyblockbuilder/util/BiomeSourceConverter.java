@@ -5,8 +5,8 @@ import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.*;
 import org.moddingx.libx.util.data.ResourceList;
@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 public class BiomeSourceConverter {
 
     public static BiomeSource customBiomeSource(ResourceKey<Level> level, BiomeSource baseSource, HolderLookup<Biome> biomes) {
-        ResourceList resourceList = WorldConfig.biomes.get(level.location().toString());
+        ResourceList resourceList = WorldConfig.biomes.get(level.identifier().toString());
         if (resourceList != null) {
             Set<Holder<Biome>> newBiomes = new HashSet<>();
             for (Holder<Biome> possibleBiome : baseSource.possibleBiomes()) {
                 Optional<ResourceKey<Biome>> optionalResourceKey = possibleBiome.unwrapKey();
                 optionalResourceKey.ifPresent(key -> {
-                    ResourceLocation location = key.location();
+                    Identifier location = key.identifier();
                     if (resourceList.test(location)) {
                         newBiomes.add(possibleBiome);
                     }
@@ -31,7 +31,7 @@ public class BiomeSourceConverter {
             }
 
             if (newBiomes.isEmpty()) {
-                biomes.listElementIds().filter(biomeKey -> resourceList.test(biomeKey.location())).forEach(key -> newBiomes.add(biomes.getOrThrow(key)));
+                biomes.listElementIds().filter(biomeKey -> resourceList.test(biomeKey.identifier())).forEach(key -> newBiomes.add(biomes.getOrThrow(key)));
             } else {
                 SkyblockBuilder.getLogger().warn("Skipping biome filtering as all biomes were filtered out: {}", level);
                 newBiomes.addAll(baseSource.possibleBiomes());
@@ -45,7 +45,7 @@ public class BiomeSourceConverter {
                 List<Pair<Climate.ParameterPoint, Holder<Biome>>> parameters = new ArrayList<>(((MultiNoiseBiomeSource) baseSource).parameters().values()).stream().filter(pair -> {
                     Holder<Biome> holder = pair.getSecond();
                     Optional<ResourceKey<Biome>> optionalResourceKey = holder.unwrapKey();
-                    return optionalResourceKey.filter(biomeResourceKey -> resourceList.test(biomeResourceKey.location())).isPresent();
+                    return optionalResourceKey.filter(biomeResourceKey -> resourceList.test(biomeResourceKey.identifier())).isPresent();
                 }).collect(Collectors.toList());
                 if (parameters.isEmpty()) {
                     newBiomes.forEach(holder -> parameters.add(Pair.of(WorldUtil.pointFor(Objects.requireNonNull(holder.getKey())), holder)));

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.moddingx.libx.mod.ModX;
 import org.moddingx.libx.network.NetworkX;
@@ -45,7 +46,7 @@ public class SkyNetwork extends NetworkX {
     }
 
     public void updateData(Level level, SkyblockSavedData data) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             for (ServerPlayer player : ((ServerLevel) level).getServer().getPlayerList().getPlayers()) {
                 this.updateData(player, data);
             }
@@ -53,46 +54,46 @@ public class SkyNetwork extends NetworkX {
     }
 
     public void updateData(Player player, @Nullable SkyblockSavedData data) {
-        if (!player.getCommandSenderWorld().isClientSide) {
-            SkyblockDataUpdateHandler.Message msg = new SkyblockDataUpdateHandler.Message(data != null ? data : SkyblockSavedData.get(player.getCommandSenderWorld()), player.getGameProfile().getId());
+        if (!player.level().isClientSide()) {
+            SkyblockDataUpdateHandler.Message msg = new SkyblockDataUpdateHandler.Message(data != null ? data : SkyblockSavedData.get(player.level()), player.getGameProfile().id());
             PacketDistributor.sendToPlayer((ServerPlayer) player, msg);
         }
     }
 
-    public void deleteTags(ItemStack stack) {
-        PacketDistributor.sendToServer(new DeleteTagsHandler.Message(stack));
+    public void deleteTags() {
+        ClientPacketDistributor.sendToServer(new DeleteTagsHandler.Message());
     }
 
     public void createSkyblockDump(boolean includeConfigs, boolean includeTemplates, boolean includeLevelDat, boolean includeLog, boolean includeCrashReport, boolean includeSkyblockBuilderWorldData) {
-        PacketDistributor.sendToServer(new CreateSkyblockDumpHandler.Message(includeConfigs, includeTemplates, includeLevelDat, includeLog, includeCrashReport, includeSkyblockBuilderWorldData));
+        ClientPacketDistributor.sendToServer(new CreateSkyblockDumpHandler.Message(includeConfigs, includeTemplates, includeLevelDat, includeLog, includeCrashReport, includeSkyblockBuilderWorldData));
     }
 
     public void saveStructure(ItemStack stack, StructureSaverSettings settings) {
-        PacketDistributor.sendToServer(new SaveStructureHandler.Message(stack, settings));
+        ClientPacketDistributor.sendToServer(new SaveStructureHandler.Message(stack, settings));
     }
 
     public void giveItem(Item item) {
-        PacketDistributor.sendToServer(new GiveItemHandler.Message(item));
+        ClientPacketDistributor.sendToServer(new GiveItemHandler.Message(item));
     }
 
     public void changeStructureSaverType(ItemStack stack, StructureSaverSettings.Type type) {
-        PacketDistributor.sendToServer(new UpdateStructureSaverTypeHandler.Message(stack, type));
+        ClientPacketDistributor.sendToServer(new UpdateStructureSaverTypeHandler.Message(stack, type));
     }
 
     public void updateStructureSaverSettings(ItemStack stack, StructureSaverSettings settings) {
-        PacketDistributor.sendToServer(new UpdateStructureSaverSettingsHandler.Message(stack, settings));
+        ClientPacketDistributor.sendToServer(new UpdateStructureSaverSettingsHandler.Message(stack, settings));
     }
 
     public void updateProfiles(Player player) {
-        if (player.getCommandSenderWorld().isClientSide) {
+        if (player.level().isClientSide()) {
             return;
         }
 
-        this.sendProfilesInBatches((ServerPlayer) player, RandomUtility.getGameProfiles((ServerLevel) player.getCommandSenderWorld()));
+        this.sendProfilesInBatches((ServerPlayer) player, RandomUtility.getGameProfiles((ServerLevel) player.level()));
     }
 
     public void updateProfiles(Level level) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             return;
         }
 
@@ -101,7 +102,7 @@ public class SkyNetwork extends NetworkX {
     }
 
     public void updateTemplateNames(Player player, List<String> names) {
-        if (player.level().isClientSide) {
+        if (player.level().isClientSide()) {
             return;
         }
 

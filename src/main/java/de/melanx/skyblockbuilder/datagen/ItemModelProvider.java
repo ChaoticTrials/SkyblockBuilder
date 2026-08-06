@@ -1,9 +1,14 @@
 package de.melanx.skyblockbuilder.datagen;
 
-import de.melanx.skyblockbuilder.SkyblockBuilder;
-import net.minecraft.resources.ResourceLocation;
+import de.melanx.skyblockbuilder.item.StructureSaverSettings;
+import de.melanx.skyblockbuilder.registration.ModDataComponentTypes;
+import de.melanx.skyblockbuilder.registration.ModItems;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.model.ItemModelUtils;
+import net.minecraft.client.data.models.model.ModelTemplates;
+import net.minecraft.client.renderer.item.properties.select.ComponentContents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import org.moddingx.libx.datagen.DatagenContext;
 import org.moddingx.libx.datagen.provider.model.ItemModelProviderBase;
 
@@ -19,14 +24,22 @@ public class ItemModelProvider extends ItemModelProviderBase {
     }
 
     @Override
-    protected void defaultItem(ResourceLocation id, Item item) {
-        ItemModelBuilder builder = this.withExistingParent(id.getPath(), ItemModelProviderBase.GENERATED);
-        for (int i = 0; i < 3; i++) {
-            String name = id.getPath() + (i == 0 ? "" : String.format("_%02d", i));
-            builder.override().predicate(SkyblockBuilder.getInstance().resource("structure_saver_type"), i).model(
-                    this.withExistingParent(name, ItemModelProviderBase.GENERATED)
-                            .texture("layer0", ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "item/" + name))
-            ).end();
+    protected void defaultItem(Item item, ItemModelGenerators itemModels) {
+        if (item != ModItems.structureSaver) {
+            super.defaultItem(item, itemModels);
+            return;
         }
+
+        Identifier island = itemModels.createFlatItemModel(item, ModelTemplates.FLAT_ITEM);
+        Identifier spread = itemModels.createFlatItemModel(item, "_01", ModelTemplates.FLAT_ITEM);
+        Identifier nether = itemModels.createFlatItemModel(item, "_02", ModelTemplates.FLAT_ITEM);
+
+        itemModels.itemModelOutput.accept(item, ItemModelUtils.select(
+                new ComponentContents<>(ModDataComponentTypes.structureSaverType),
+                ItemModelUtils.plainModel(island),
+                ItemModelUtils.when(StructureSaverSettings.Type.ISLAND, ItemModelUtils.plainModel(island)),
+                ItemModelUtils.when(StructureSaverSettings.Type.SPREAD, ItemModelUtils.plainModel(spread)),
+                ItemModelUtils.when(StructureSaverSettings.Type.NETHER, ItemModelUtils.plainModel(nether))
+        ));
     }
 }

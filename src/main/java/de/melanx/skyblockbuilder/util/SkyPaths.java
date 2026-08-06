@@ -139,14 +139,14 @@ public class SkyPaths {
 
     public static void generateFeatureInformation(MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(FEATURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        Stream<Holder.Reference<ConfiguredFeature<?, ?>>> stream = server.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).holders();
+        Stream<Holder.Reference<ConfiguredFeature<?, ?>>> stream = server.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).listElements();
 
         //noinspection DuplicatedCode
-        stream.sorted(Comparator.comparing(holder -> holder.key().location().toString())).forEach(holder -> {
+        stream.sorted(Comparator.comparing(holder -> holder.key().identifier().toString())).forEach(holder -> {
             try {
-                w.write(holder.key().location() + "\n");
+                w.write(holder.key().identifier() + "\n");
             } catch (IOException e) {
-                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().location(), e);
+                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().identifier(), e);
             }
         });
 
@@ -155,14 +155,14 @@ public class SkyPaths {
 
     public static void generateStructureInformation(MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(STRUCTURES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        Stream<Holder.Reference<Structure>> stream = server.registryAccess().registryOrThrow(Registries.STRUCTURE).holders();
+        Stream<Holder.Reference<Structure>> stream = server.registryAccess().lookupOrThrow(Registries.STRUCTURE).listElements();
 
         //noinspection DuplicatedCode
-        stream.sorted(Comparator.comparing(holder -> holder.key().location().toString())).forEach(holder -> {
+        stream.sorted(Comparator.comparing(holder -> holder.key().identifier().toString())).forEach(holder -> {
             try {
-                w.write(holder.key().location() + "\n");
+                w.write(holder.key().identifier() + "\n");
             } catch (IOException e) {
-                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().location(), e);
+                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().identifier(), e);
             }
         });
 
@@ -171,14 +171,14 @@ public class SkyPaths {
 
     public static void generateBiomeInformation(MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(BIOMES_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        Stream<Holder.Reference<Biome>> stream = server.registryAccess().registryOrThrow(Registries.BIOME).holders();
+        Stream<Holder.Reference<Biome>> stream = server.registryAccess().lookupOrThrow(Registries.BIOME).listElements();
 
         //noinspection DuplicatedCode
-        stream.sorted(Comparator.comparing(holder -> holder.key().location().toString())).forEach(holder -> {
+        stream.sorted(Comparator.comparing(holder -> holder.key().identifier().toString())).forEach(holder -> {
             try {
-                w.write(holder.key().location() + "\n");
+                w.write(holder.key().identifier() + "\n");
             } catch (IOException e) {
-                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().location(), e);
+                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().identifier(), e);
             }
         });
 
@@ -187,14 +187,14 @@ public class SkyPaths {
 
     public static void generateCarversInformation(MinecraftServer server) throws IOException {
         BufferedWriter w = Files.newBufferedWriter(CARVERS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        Stream<Holder.Reference<ConfiguredWorldCarver<?>>> stream = server.registryAccess().registryOrThrow(Registries.CONFIGURED_CARVER).holders();
+        Stream<Holder.Reference<ConfiguredWorldCarver<?>>> stream = server.registryAccess().lookupOrThrow(Registries.CONFIGURED_CARVER).listElements();
 
         //noinspection DuplicatedCode
-        stream.sorted(Comparator.comparing(holder -> holder.key().location().toString())).forEach(holder -> {
+        stream.sorted(Comparator.comparing(holder -> holder.key().identifier().toString())).forEach(holder -> {
             try {
-                w.write(holder.key().location() + "\n");
+                w.write(holder.key().identifier() + "\n");
             } catch (IOException e) {
-                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().location(), e);
+                SkyblockBuilder.getLogger().error("Failed to write '{}' to file", holder.key().identifier(), e);
             }
         });
 
@@ -205,7 +205,7 @@ public class SkyPaths {
         BufferedWriter w = Files.newBufferedWriter(DIMENSIONS_FILE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
         for (ResourceKey<Level> levelKey : server.levelKeys()) {
-            w.write(levelKey.location() + "\n");
+            w.write(levelKey.identifier() + "\n");
         }
 
         w.close();

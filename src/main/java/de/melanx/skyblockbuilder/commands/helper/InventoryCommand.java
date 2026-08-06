@@ -33,8 +33,11 @@ import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class InventoryCommand {
+
+    private static final Set<EquipmentSlot> ARMOR_SLOTS = Set.of(EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD);
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("inventory")
@@ -77,27 +80,15 @@ public class InventoryCommand {
         JsonArray items = new JsonArray();
         Inventory inventory = player.getInventory();
 
-        for (ItemStack item : player.getInventory().items) {
+        for (ItemStack item : player.getInventory().getNonEquipmentItems()) {
             InventoryCommand.addItemWithSlot(items, item, registryOps);
         }
 
-        for (ItemStack item : player.getInventory().offhand) {
-            InventoryCommand.addItemWithSlot(items, item, EquipmentSlot.OFFHAND, registryOps);
-        }
+        InventoryCommand.addItemWithSlot(items, player.getInventory().getItem(Inventory.SLOT_OFFHAND), EquipmentSlot.OFFHAND, registryOps);
 
-        for (int slot : Inventory.ALL_ARMOR_SLOTS) {
-            ItemStack item = inventory.armor.get(slot);
-            if (!item.isEmpty()) {
-                EquipmentSlot equipmentSlot = switch(slot) {
-                    case 0 -> EquipmentSlot.FEET;
-                    case 1 -> EquipmentSlot.LEGS;
-                    case 2 -> EquipmentSlot.CHEST;
-                    case 3 -> EquipmentSlot.HEAD;
-                    default -> EquipmentSlot.MAINHAND;
-                };
-
-                InventoryCommand.addItemWithSlot(items, item, equipmentSlot, registryOps);
-            }
+        for (EquipmentSlot slot : InventoryCommand.ARMOR_SLOTS) {
+            ItemStack item = inventory.getItem(slot.getIndex(Inventory.INVENTORY_SIZE));
+            InventoryCommand.addItemWithSlot(items, item, slot, registryOps);
         }
 
         return items;

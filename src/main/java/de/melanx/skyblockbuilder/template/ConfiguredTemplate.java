@@ -2,8 +2,8 @@ package de.melanx.skyblockbuilder.template;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
@@ -21,37 +21,72 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.ticks.LevelTicks;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ConfiguredTemplate {
 
+    // no vanilla codec present
+    private static final Codec<StructureTemplate> TEMPLATE_CODEC = CompoundTag.CODEC.xmap(
+            nbt -> {
+                StructureTemplate template = new StructureTemplate();
+                template.load(BuiltInRegistries.BLOCK, nbt);
+                return template;
+            },
+            template -> template.save(new CompoundTag())
+    );
+
+    public static final Codec<ConfiguredTemplate> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            TEMPLATE_CODEC.fieldOf("Template").forGetter(template -> template.template),
+            TemplatesConfig.Spawn.CODEC.listOf().optionalFieldOf("Spawns", List.of()).forGetter(template -> List.copyOf(template.defaultSpawns)),
+            Codec.STRING.optionalFieldOf("Name", "").forGetter(template -> template.name),
+            Codec.STRING.optionalFieldOf("Desc", "").forGetter(template -> template.desc),
+            BlockPos.CODEC.optionalFieldOf("Offset", BlockPos.ZERO).forGetter(template -> template.offset),
+            Codec.INT.optionalFieldOf("SurroundingMargin", 0).forGetter(template -> template.surroundingMargin),
+            WeightedList.codec(BuiltInRegistries.BLOCK.byNameCodec()).optionalFieldOf("SurroundingBlocks", WeightedList.of()).forGetter(template -> template.surroundingBlocks),
+            TemplateSpreads.CODEC.optionalFieldOf("Spreads", TemplateSpreads.EMPTY).forGetter(template -> template.templateSpreads),
+            Codec.BOOL.optionalFieldOf("AllowPaletteSelection", false).forGetter(template -> template.allowPaletteSelection)
+    ).apply(instance, ConfiguredTemplate::new));
+
     private final Set<TemplatesConfig.Spawn> defaultSpawns = new HashSet<>();
-    private StructureTemplate template;
-    private String name;
-    private String desc;
-    private BlockPos offset;
-    private int surroundingMargin;
-    private WeightedRandomList<TemplateSurroundingBlocks.WeightedBlock> surroundingBlocks;
-    private TemplateSpreads templateSpreads;
-    private boolean allowPaletteSelection;
+    private final StructureTemplate template;
+    private final String name;
+    private final String desc;
+    private final BlockPos offset;
+    private final int surroundingMargin;
+    private final WeightedList<Block> surroundingBlocks;
+    private final TemplateSpreads templateSpreads;
+    private final boolean allowPaletteSelection;
+
+    private ConfiguredTemplate(StructureTemplate template, List<TemplatesConfig.Spawn> defaultSpawns, String name, String desc,
+            BlockPos offset, int surroundingMargin, WeightedList<Block> surroundingBlocks,
+            TemplateSpreads templateSpreads, boolean allowPaletteSelection) {
+        this.template = template;
+        this.defaultSpawns.addAll(defaultSpawns);
+        this.name = name;
+        this.desc = desc;
+        this.offset = offset;
+        this.surroundingMargin = surroundingMargin;
+        this.surroundingBlocks = surroundingBlocks;
+        this.templateSpreads = templateSpreads;
+        this.allowPaletteSelection = allowPaletteSelection;
+    }
 
     public ConfiguredTemplate(TemplateInfo info) {
         StructureTemplate template = new StructureTemplate();
@@ -59,7 +94,7 @@ public class ConfiguredTemplate {
         try {
             Path file = SkyPaths.ISLANDS_DIR.resolve(info.file());
             nbt = TemplateUtil.readTemplate(file);
-            template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
+            template.load(BuiltInRegistries.BLOCK, nbt);
         } catch (IOException | CommandSyntaxException e) {
             SkyblockBuilder.getLogger().error("Template with name {} is incorrect.", info.file(), e);
         }
@@ -70,7 +105,9 @@ public class ConfiguredTemplate {
         this.desc = info.desc();
         this.offset = info.offset();
         this.surroundingMargin = info.surroundingBlocks().templateSurroundingBlocks().margin();
-        this.surroundingBlocks = WeightedRandomList.create(info.surroundingBlocks().templateSurroundingBlocks().blocks());
+        this.surroundingBlocks = WeightedList.of(info.surroundingBlocks().templateSurroundingBlocks().blocks().stream()
+                .map(TemplateSurroundingBlocks.WeightedBlock::weighted)
+                .toList());
         this.templateSpreads = info.spreads().templateSpreads();
         this.allowPaletteSelection = info.allowPaletteSelection();
     }
@@ -133,8 +170,6 @@ public class ConfiguredTemplate {
         spreadConfig.getTemplate().placeInWorld(level, offsetPos, offsetPos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, random, flags);
         ConfiguredTemplate.clearBlockTicks(level, blockTicks, offsetPos, spreadConfig.getTemplate());
     }
-
-    private ConfiguredTemplate() {}
 
     private static Set<TemplatesConfig.Spawn> collectSpawns(TemplateSpawns spawns) {
         Set<TemplatesConfig.Spawn> combinedSpawns = new HashSet<>();
@@ -204,7 +239,7 @@ public class ConfiguredTemplate {
         return this.surroundingMargin;
     }
 
-    public WeightedRandomList<TemplateSurroundingBlocks.WeightedBlock> getSurroundingBlocks() {
+    public WeightedList<Block> getSurroundingBlocks() {
         return this.surroundingBlocks;
     }
 
@@ -216,86 +251,16 @@ public class ConfiguredTemplate {
         return this.allowPaletteSelection && this.template.palettes.size() > 1;
     }
 
-    @Nonnull
-    public CompoundTag write(CompoundTag nbt) {
-        CompoundTag template = this.template.save(new CompoundTag());
-
-        ListTag spawns = new ListTag();
-        for (TemplatesConfig.Spawn spawn : this.defaultSpawns) {
-            BlockPos pos = spawn.pos();
-            CompoundTag posTag = WorldUtil.blockPosToTag(pos);
-            posTag.putString("Direction", spawn.direction().name());
-
-            spawns.add(posTag);
-        }
-
-        nbt.put("Template", template);
-        nbt.put("Spawns", spawns);
-        nbt.putString("Name", this.name);
-        nbt.putString("Desc", this.desc);
-
-        nbt.put("Offset", WorldUtil.blockPosToTag(this.offset));
-        nbt.putInt("SurroundingMargin", this.surroundingMargin);
-
-        ListTag surroundingBlocks = new ListTag();
-        this.surroundingBlocks.unwrap().forEach(weightedBlock -> {
-            CompoundTag blockAndWeight = new CompoundTag();
-            blockAndWeight.putString("block", Objects.requireNonNull(BuiltInRegistries.BLOCK.getKey(weightedBlock.block()), "This block doesn't exist: " + weightedBlock.block()).toString());
-            blockAndWeight.putInt("weight", Math.max(weightedBlock.weight(), 1));
-            surroundingBlocks.add(blockAndWeight);
-        });
-        nbt.put("SurroundingBlocks", surroundingBlocks);
-
-        DataResult<Tag> encode = TemplateSpreads.CODEC.encodeStart(NbtOps.INSTANCE, this.templateSpreads);
-        encode.resultOrPartial(SkyblockBuilder.getLogger()::error).ifPresent(tag -> nbt.put("Spreads", tag));
-        nbt.putBoolean("AllowPaletteSelection", this.allowPaletteSelection);
-
-        return nbt;
-    }
-
-    public void read(CompoundTag nbt) {
-        if (nbt == null) return;
-        StructureTemplate template = new StructureTemplate();
-        template.load(BuiltInRegistries.BLOCK.asLookup(), nbt.getCompound("Template"));
-        this.template = template;
-
-        ListTag spawns = nbt.getList("Spawns", Tag.TAG_COMPOUND);
-        this.defaultSpawns.clear();
-        for (Tag tag : spawns) {
-            CompoundTag posTag = (CompoundTag) tag;
-            BlockPos pos = WorldUtil.blockPosFromTag(posTag);
-            WorldUtil.SpawnDirection direction = WorldUtil.SpawnDirection.valueOf(posTag.getString("Direction"));
-            this.defaultSpawns.add(new TemplatesConfig.Spawn(pos, direction));
-        }
-
-        this.name = nbt.getString("Name");
-        this.desc = nbt.getString("Desc");
-        this.offset = WorldUtil.blockPosFromTag(nbt.getCompound("Offset"));
-        this.surroundingMargin = nbt.getInt("SurroundingMargin");
-
-        ListTag surroundingBlocks = nbt.getList("SurroundingBlocks", Tag.TAG_COMPOUND);
-        List<TemplateSurroundingBlocks.WeightedBlock> blocks = new ArrayList<>();
-        for (Tag tag : surroundingBlocks) {
-            CompoundTag blockAndWeight = (CompoundTag) tag;
-            //noinspection DataFlowIssue
-            Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(blockAndWeight.get("block").getAsString()));
-            int weight = blockAndWeight.getInt("weight");
-            blocks.add(new TemplateSurroundingBlocks.WeightedBlock(block, weight));
-        }
-        this.surroundingBlocks = WeightedRandomList.create(blocks);
-        this.templateSpreads = TemplateSpreads.CODEC.decode(NbtOps.INSTANCE, nbt.get("Spreads")).resultOrPartial().orElseGet(() -> Pair.of(TemplateSpreads.EMPTY, new CompoundTag())).getFirst();
-        this.allowPaletteSelection = nbt.getBoolean("AllowPaletteSelection");
-    }
-
+    /**
+     * Deep copy via a codec round-trip -- {@link StructureTemplate} is mutable and
+     * {@link #onlyWithPalette(int)} rewrites its palettes, so callers must not share one.
+     */
     public ConfiguredTemplate copy() {
-        CompoundTag nbt = this.write(new CompoundTag());
-        return ConfiguredTemplate.fromTag(nbt);
-    }
+        Tag tag = CODEC.encodeStart(NbtOps.INSTANCE, this)
+                .getOrThrow(error -> new IllegalStateException("Failed to copy configured template: " + error));
 
-    public static ConfiguredTemplate fromTag(@Nonnull CompoundTag nbt) {
-        ConfiguredTemplate info = new ConfiguredTemplate();
-        info.read(nbt);
-        return info;
+        return CODEC.parse(NbtOps.INSTANCE, tag)
+                .getOrThrow(error -> new IllegalStateException("Failed to copy configured template: " + error));
     }
 
     public ConfiguredTemplate onlyWithPalette(int paletteIndex) {
@@ -322,7 +287,7 @@ public class ConfiguredTemplate {
             try {
                 Path file = SkyPaths.SPREADS_DIR.resolve(fileName);
                 nbt = TemplateUtil.readTemplate(file);
-                template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
+                template.load(BuiltInRegistries.BLOCK, nbt);
             } catch (IOException | CommandSyntaxException e) {
                 SkyblockBuilder.getLogger().error("Template with file name {} is incorrect.", fileName, e);
             }

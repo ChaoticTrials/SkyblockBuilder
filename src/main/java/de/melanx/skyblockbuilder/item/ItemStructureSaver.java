@@ -13,18 +13,17 @@ import de.melanx.skyblockbuilder.util.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -34,7 +33,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.moddingx.libx.annotation.meta.RemoveIn;
 import org.moddingx.libx.config.ConfigManager;
 
 import javax.annotation.Nonnull;
@@ -44,9 +42,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class ItemStructureSaver extends Item {
 
@@ -54,8 +52,8 @@ public class ItemStructureSaver extends Item {
     private static final MutableComponent TOOLTIP_SAVE = SkyComponents.ITEM_STRUCTURE_SAVER_SAVE_TOOLTIP.withStyle(ChatFormatting.GOLD);
     private static final MutableComponent TOOLTIP_RESTORE = SkyComponents.ITEM_STRUCTURE_SAVER_RESTORE_TOOLTIP.withStyle(ChatFormatting.GOLD);
 
-    public ItemStructureSaver() {
-        super(new Properties().stacksTo(1));
+    public ItemStructureSaver(Item.Properties properties) {
+        super(properties);
     }
 
     @Nonnull
@@ -64,7 +62,7 @@ public class ItemStructureSaver extends Item {
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
 
-        if (!context.getLevel().isClientSide && player != null && player.isShiftKeyDown()) {
+        if (!context.getLevel().isClientSide() && player != null && player.isShiftKeyDown()) {
             ItemStack stack = context.getItemInHand();
             CompoundTag positions = stack.get(ModDataComponentTypes.positions);
 
@@ -74,7 +72,7 @@ public class ItemStructureSaver extends Item {
 
             if (!positions.contains("Position1")) {
                 positions.put("Position1", NbtUtils.writeBlockPos(pos));
-                player.displayClientMessage(SkyComponents.STRUCTURE_SAVER_POS.apply(1, pos.getX(), pos.getY(), pos.getZ()), false);
+                player.sendSystemMessage(SkyComponents.STRUCTURE_SAVER_POS.apply(1, pos.getX(), pos.getY(), pos.getZ()));
                 stack.remove(ModDataComponentTypes.previousPositions);
 
                 stack.set(ModDataComponentTypes.positions, positions);
@@ -83,7 +81,7 @@ public class ItemStructureSaver extends Item {
 
             if (!positions.contains("Position2")) {
                 positions.put("Position2", NbtUtils.writeBlockPos(pos));
-                player.displayClientMessage(SkyComponents.STRUCTURE_SAVER_POS.apply(2, pos.getX(), pos.getY(), pos.getZ()), false);
+                player.sendSystemMessage(SkyComponents.STRUCTURE_SAVER_POS.apply(2, pos.getX(), pos.getY(), pos.getZ()));
 
                 stack.set(ModDataComponentTypes.positions, positions.copy());
                 return InteractionResult.SUCCESS;
@@ -105,36 +103,36 @@ public class ItemStructureSaver extends Item {
 
     @Nonnull
     @Override
-    public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand hand) {
+    public InteractionResult use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         CompoundTag positions = stack.get(ModDataComponentTypes.positions);
 
         if (positions == null) {
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         }
 
         if (!positions.contains("Position1") || !positions.contains("Position2")) {
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         }
 
         // prevent instant save
         if (!positions.contains("CanSave")) {
             positions.putBoolean("CanSave", true);
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         }
 
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             ClientUtil.openItemScreen(stack);
         }
 
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltip, tooltipFlag);
+    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context, @Nonnull TooltipDisplay display, @Nonnull Consumer<Component> builder, @Nonnull TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, display, builder, tooltipFlag);
 
-        tooltip.add(stack.getOrDefault(ModDataComponentTypes.structureSaverType, StructureSaverSettings.Type.ISLAND).getTooltip());
+        builder.accept(stack.getOrDefault(ModDataComponentTypes.structureSaverType, StructureSaverSettings.Type.ISLAND).getTooltip());
 
         CompoundTag positions = stack.get(ModDataComponentTypes.positions);
 
@@ -144,23 +142,23 @@ public class ItemStructureSaver extends Item {
 
         if (positions.contains("Position1")) {
             Optional<BlockPos> pos = NbtUtils.readBlockPos(positions, "Position1");
-            pos.ifPresent(blockPos -> tooltip.add(SkyComponents.ITEM_STRUCTURE_SAVER_POSITION_TOOLTIP.apply(1, blockPos.getX(), blockPos.getY(), blockPos.getZ()).withStyle(ChatFormatting.DARK_GRAY)));
+            pos.ifPresent(blockPos -> builder.accept(SkyComponents.ITEM_STRUCTURE_SAVER_POSITION_TOOLTIP.apply(1, blockPos.getX(), blockPos.getY(), blockPos.getZ()).withStyle(ChatFormatting.DARK_GRAY)));
         }
 
         if (positions.contains("Position2")) {
             Optional<BlockPos> pos = NbtUtils.readBlockPos(positions, "Position2");
-            pos.ifPresent(blockPos -> tooltip.add(SkyComponents.ITEM_STRUCTURE_SAVER_POSITION_TOOLTIP.apply(2, blockPos.getX(), blockPos.getY(), blockPos.getZ()).withStyle(ChatFormatting.DARK_GRAY)));
+            pos.ifPresent(blockPos -> builder.accept(SkyComponents.ITEM_STRUCTURE_SAVER_POSITION_TOOLTIP.apply(2, blockPos.getX(), blockPos.getY(), blockPos.getZ()).withStyle(ChatFormatting.DARK_GRAY)));
         }
 
         if (positions.contains("CanSave")) {
-            tooltip.add(TOOLTIP_SAVE);
+            builder.accept(TOOLTIP_SAVE);
         } else {
-            tooltip.add(TOOLTIP_INFO);
+            builder.accept(TOOLTIP_INFO);
         }
 
         CompoundTag previousPositions = stack.get(ModDataComponentTypes.previousPositions);
         if (previousPositions != null) {
-            tooltip.add(TOOLTIP_RESTORE);
+            builder.accept(TOOLTIP_RESTORE);
         }
     }
 
@@ -187,12 +185,6 @@ public class ItemStructureSaver extends Item {
         int maxZ = Math.max(pos1.get().getZ(), pos2.get().getZ());
 
         return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.22")
-    public static String saveSchematic(Level level, ItemStack stack, StructureSaverSettings settings) {
-        return ItemStructureSaver.saveSchematic(null, level, stack, settings);
     }
 
     public static String saveSchematic(@Nullable ServerPlayer player, Level level, ItemStack stack, StructureSaverSettings settings) {
@@ -235,12 +227,6 @@ public class ItemStructureSaver extends Item {
         }
 
         return path.getFileName().toString();
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.22")
-    private static String exportToConfig(Level level, ItemStack stack, StructureSaverSettings settings, Set<TemplatesConfig.Spawn> spawnPositions, StructureTemplate template) {
-        return ItemStructureSaver.exportToConfig(null, level, stack, settings, spawnPositions, template);
     }
 
     private static String exportToConfig(@Nullable ServerPlayer player, Level level, ItemStack stack, StructureSaverSettings settings, Set<TemplatesConfig.Spawn> spawnPositions, StructureTemplate template) {
@@ -306,7 +292,7 @@ public class ItemStructureSaver extends Item {
             // write and reload config
             Files.writeString(configFile, SkyblockBuilder.PRETTY_GSON.toJson(config));
             ConfigManager.reloadConfig(TemplatesConfig.class);
-            if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+            if (FMLEnvironment.getDist() == Dist.DEDICATED_SERVER) {
                 ConfigManager.reloadConfig(TemplatesConfig.class);
 //                ConfigManager.synchronize(level.getServer(), TemplatesConfig.class);
             }

@@ -1,16 +1,15 @@
 package de.melanx.skyblockbuilder.network;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.RegistryOps;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
@@ -20,7 +19,7 @@ import java.util.UUID;
 
 public class SkyblockDataUpdateHandler extends PacketHandler<SkyblockDataUpdateHandler.Message> {
 
-    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("skyblock_data_update"));
+    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().id("skyblock_data_update"));
 
     protected SkyblockDataUpdateHandler() {
         super(TYPE, PacketFlow.CLIENTBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -35,39 +34,26 @@ public class SkyblockDataUpdateHandler extends PacketHandler<SkyblockDataUpdateH
 
         public static final StreamCodec<RegistryFriendlyByteBuf, Message> CODEC = StreamCodec.of(
                 (buffer, msg) -> {
-                    CompoundTag tag = msg.data.save(new CompoundTag(), msg.data.getLevel().registryAccess());
-                    if (tag.contains("MetaInformation")) {
-                        SkyMeta meta = null;
-                        for (Tag inbt : tag.getList("MetaInformation", Tag.TAG_COMPOUND)) {
-                            CompoundTag mtag = (CompoundTag) inbt;
+                    // only the receiving player's meta is encoded, everyone else's stays on the server
+                    RegistryOps<Tag> ops = buffer.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+                    Tag tag = SkyblockSavedData.makeCodec(msg.data.getLevel(), msg.player)
+                            .encodeStart(ops, msg.data)
+                            .getOrThrow(error -> new IllegalStateException("Failed to encode Skyblock data: " + error));
 
-                            UUID player = mtag.getUUID("Player");
-                            if (msg.player.equals(player)) {
-                                meta = SkyMeta.get(msg.data, mtag.getCompound("Meta"));
-                                break;
-                            }
-                        }
-                        tag.remove("MetaInformation");
-                        if (meta != null) {
-                            ListTag metaInfo = new ListTag();
-                            CompoundTag playerMeta = new CompoundTag();
-                            playerMeta.putUUID("Player", msg.player);
-                            playerMeta.put("Meta", meta.save());
-                            metaInfo.add(playerMeta);
-                            tag.put("MetaInformation", metaInfo);
-                        }
-                    }
                     buffer.writeNbt(tag);
                     buffer.writeUUID(msg.player);
                 },
                 buffer -> {
                     Tag tag = buffer.readNbt(NbtAccounter.unlimitedHeap());
-                    if (!(tag instanceof CompoundTag ctag)) {
-                        throw new IllegalStateException("There's something weird happening when updating Skyblock data: " + tag);
+                    if (tag == null) {
+                        throw new IllegalStateException("There's something weird happening when updating Skyblock data: no payload");
                     }
 
-                    boolean multiDimensional = ctag.getBoolean("MultiDimensional");
-                    SkyblockSavedData data = SkyblockSavedData.load(ctag, multiDimensional);
+                    RegistryOps<Tag> ops = buffer.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+                    SkyblockSavedData data = SkyblockSavedData.makeCodec(null)
+                            .parse(ops, tag)
+                            .getOrThrow(error -> new IllegalStateException("Failed to decode Skyblock data: " + error));
+
                     return new SkyblockDataUpdateHandler.Message(data, buffer.readUUID());
                 }
         );

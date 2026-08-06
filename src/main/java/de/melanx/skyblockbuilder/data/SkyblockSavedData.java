@@ -2,6 +2,9 @@ package de.melanx.skyblockbuilder.data;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import de.melanx.skyblockbuilder.compat.CadmusCompat;
@@ -9,39 +12,35 @@ import de.melanx.skyblockbuilder.compat.infiniverse.InfiniverseCompat;
 import de.melanx.skyblockbuilder.config.common.InventoryConfig;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
-import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
+import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.util.*;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.neoforged.fml.ModList;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -54,13 +53,11 @@ import java.util.concurrent.ConcurrentMap;
 public abstract class SkyblockSavedData extends SavedData {
 
     public static final String ISLANDS = "islands";
-    public static final String ISLAND = "island";
     public static final String META_INFO = "meta_information";
-    public static final String PLAYER = "player";
-    public static final String META = "meta";
     public static final String SPIRAL_STATE = "spiral_state";
+    public static final String MULTI_DIMENSIONAL = "multi_dimensional";
 
-    private static final String NAME = "skyblockbuilder/main";
+    private static final Identifier ID = SkyblockBuilder.getInstance().id("skyblockbuilder/main");
     private static SkyblockSavedData clientInstance;
     public static final UUID SPAWN_ID = Util.NIL_UUID;
 
@@ -72,6 +69,7 @@ public abstract class SkyblockSavedData extends SavedData {
     protected abstract IslandPos nextSpawnPos(ConfiguredTemplate template);
 
     protected abstract void onTeamCreated(Team team, ConfiguredTemplate template);
+
     protected abstract void onTeamDeleted(Team team);
 
     @Nullable
@@ -83,19 +81,73 @@ public abstract class SkyblockSavedData extends SavedData {
         return this.getLevelFor(null);
     }
 
-    public static SavedData.Factory<SkyblockSavedData> factory() {
-        return new SavedData.Factory<>(
-                () -> InfiniverseCompat.useInfiniverse() ? new MultiWorldImpl() : new SingleWorldImpl(),
-                (nbt, provider) -> nbt.getBoolean("MultiDimensional") ? MultiWorldImpl.loadImpl(nbt) : SingleWorldImpl.loadImpl(nbt)
+    public static SavedDataType<SkyblockSavedData> type() {
+        return new SavedDataType<>(ID,
+                level -> InfiniverseCompat.useInfiniverse()
+                        ? new MultiWorldImpl(level != null ? level.getServer() : null)
+                        : new SingleWorldImpl(level),
+                SkyblockSavedData::makeCodec
         );
     }
 
+    public static Codec<SkyblockSavedData> makeCodec(@Nullable ServerLevel level) {
+        return makeCodec(level, null);
+    }
+
+    /**
+     * @param metaFilter when non-null, only this player's {@link SkyMeta} is encoded. Used for the
+     *                   client sync packet so a player never receives everyone else's invites.
+     */
+    public static Codec<SkyblockSavedData> makeCodec(@Nullable ServerLevel level, @Nullable UUID metaFilter) {
+        MapCodec<SingleWorldImpl> single = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Team.CODEC.listOf().optionalFieldOf(ISLANDS, List.of()).forGetter(SkyblockSavedData::teams),
+                SkyMeta.CODEC.listOf().optionalFieldOf(META_INFO, List.of()).forGetter(data -> data.metas(metaFilter)),
+                Spiral.CODEC.optionalFieldOf(SPIRAL_STATE).forGetter(data -> Optional.of(data.spiral))
+        ).apply(instance, (teams, metas, spiral) ->
+                new SingleWorldImpl(level, teams, metas, spiral.orElseGet(Spiral::new))));
+
+        MapCodec<MultiWorldImpl> multi = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Team.CODEC.listOf().optionalFieldOf(ISLANDS, List.of()).forGetter(SkyblockSavedData::teams),
+                SkyMeta.CODEC.listOf().optionalFieldOf(META_INFO, List.of()).forGetter(data -> data.metas(metaFilter))
+        ).apply(instance, (teams, metas) ->
+                new MultiWorldImpl(level != null ? level.getServer() : null, teams, metas)));
+
+        return Codec.BOOL.dispatch(MULTI_DIMENSIONAL,
+                data -> data instanceof MultiWorldImpl,
+                flag -> flag ? multi : single);
+    }
+
+    protected List<Team> teams() {
+        return List.copyOf(this.registry.all());
+    }
+
+    protected List<SkyMeta> metas(@Nullable UUID filter) {
+        return this.metaInfo.values().stream()
+                .filter(meta -> filter == null || filter.equals(meta.getOwner()))
+                .toList();
+    }
+
+    /**
+     * Teams and metas are decoded before this instance exists, so they arrive unbound.
+     */
+    protected void loadInto(List<Team> teams, List<SkyMeta> metas) {
+        for (Team team : teams) {
+            team.bindData(this);
+            this.registry.add(team);
+        }
+
+        for (SkyMeta meta : metas) {
+            meta.bindData(this);
+            this.metaInfo.put(meta.getOwner(), meta);
+        }
+    }
+
     public static SkyblockSavedData get(Level level) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             MinecraftServer server = ((ServerLevel) level).getServer();
 
-            DimensionDataStorage storage = server.overworld().getDataStorage();
-            SkyblockSavedData data = storage.computeIfAbsent(SkyblockSavedData.factory(), NAME);
+            SavedDataStorage storage = server.overworld().getDataStorage();
+            SkyblockSavedData data = storage.computeIfAbsent(SkyblockSavedData.type());
             if (data instanceof MultiWorldImpl multi) {
                 multi.server = server;
             } else if (data instanceof SingleWorldImpl single) {
@@ -104,16 +156,12 @@ public abstract class SkyblockSavedData extends SavedData {
             data.getOrCreateMetaInfo(Util.NIL_UUID);
             return data;
         } else {
-            return clientInstance == null ? new SingleWorldImpl() : clientInstance;
+            return clientInstance == null ? new SingleWorldImpl(null) : clientInstance;
         }
     }
 
     public static void updateClient(SkyblockSavedData data) {
         clientInstance = data;
-    }
-
-    public static SkyblockSavedData load(CompoundTag nbt, boolean multiDimensional) {
-        return multiDimensional ? MultiWorldImpl.loadImpl(nbt) : SingleWorldImpl.loadImpl(nbt);
     }
 
     public Team getSpawn() {
@@ -166,28 +214,6 @@ public abstract class SkyblockSavedData extends SavedData {
         return new Team(this, this.nextIslandPos(template));
     }
 
-    @Nonnull
-    @Override
-    public CompoundTag save(@Nonnull CompoundTag compound, @Nonnull HolderLookup.Provider registries) {
-        // Subclass handles spiral_state; base class saves islands and meta_information
-        ListTag islands = this.registry.saveToList();
-
-        ListTag metaInfoList = new ListTag();
-        for (Map.Entry<UUID, SkyMeta> entry : this.metaInfo.entrySet()) {
-            SkyMeta meta = entry.getValue();
-            CompoundTag entryTag = new CompoundTag();
-            entryTag.putUUID(PLAYER, entry.getKey());
-            entryTag.put(META, meta.save());
-
-            metaInfoList.add(entryTag);
-        }
-
-        compound.put(ISLANDS, islands);
-        compound.put(META_INFO, metaInfoList);
-
-        return compound;
-    }
-
     @Nullable
     public IslandPos getTeamIsland(UUID teamId) {
         Team team = this.registry.getById(teamId);
@@ -195,7 +221,7 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public boolean hasPlayerTeam(Player player) {
-        return this.hasPlayerTeam(player.getGameProfile().getId());
+        return this.hasPlayerTeam(player.getGameProfile().id());
     }
 
     public boolean hasPlayerTeam(UUID player) {
@@ -204,7 +230,7 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public boolean addPlayerToTeam(UUID teamId, Player player) {
-        return this.addPlayerToTeam(teamId, player.getGameProfile().getId());
+        return this.addPlayerToTeam(teamId, player.getGameProfile().id());
     }
 
     public boolean addPlayerToTeam(UUID teamId, UUID playerId) {
@@ -218,18 +244,18 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public boolean addPlayerToTeam(String teamName, Player player) {
-        return this.addPlayerToTeam(teamName, player.getGameProfile().getId());
+        return this.addPlayerToTeam(teamName, player.getGameProfile().id());
     }
 
     public boolean addPlayerToTeam(String teamName, UUID player) {
         Team team = this.registry.getByName(teamName);
         if (team == null) return false;
 
-        return this.addPlayerToTeam(team.getId(), player);
+        return this.addPlayerToTeam(team.id(), player);
     }
 
     public boolean addPlayerToTeam(Team team, Player player) {
-        return this.addPlayerToTeam(team, player.getGameProfile().getId());
+        return this.addPlayerToTeam(team, player.getGameProfile().id());
     }
 
     public boolean addPlayerToTeam(Team team, UUID player) {
@@ -240,7 +266,7 @@ public abstract class SkyblockSavedData extends SavedData {
         ServerLevel level = team.getLevel();
         if (level != null
                 && (InventoryConfig.initialInventoryType == InventoryConfig.InitialInventoryType.SPAWN) == team.isSpawn()
-                && !this.getOrCreateMetaInfo(player).getPreviousTeamIds().contains(team.getId())) {
+                && !this.getOrCreateMetaInfo(player).getPreviousTeamIds().contains(team.id())) {
             ServerPlayer onlinePlayer = level.getServer().getPlayerList().getPlayer(player);
             if (onlinePlayer != null) {
                 RandomUtility.setStartInventory(onlinePlayer);
@@ -287,14 +313,14 @@ public abstract class SkyblockSavedData extends SavedData {
 
         // team was already added to registry in create(); no need to add again
 
-        SkyblockBuilder.getLogger().info("Created team {} ({}) at {} with template {}", team.getName(), team.getId(), center, template.getName());
+        SkyblockBuilder.getLogger().info("Created team {} ({}) at {} with template {}", team.getName(), team.id(), center, template.getName());
         this.setDirty();
         return team;
     }
 
     @Nullable
     public Team createTeamAndJoin(String teamName, Player player) {
-        return this.createTeamAndJoin(teamName, player.getGameProfile().getId());
+        return this.createTeamAndJoin(teamName, player.getGameProfile().id());
     }
 
     @Nullable
@@ -308,7 +334,7 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public boolean removePlayerFromTeam(Player player) {
-        return this.removePlayerFromTeam(player.getGameProfile().getId());
+        return this.removePlayerFromTeam(player.getGameProfile().id());
     }
 
     public boolean removePlayerFromTeam(UUID player) {
@@ -351,7 +377,7 @@ public abstract class SkyblockSavedData extends SavedData {
     public boolean deleteTeam(String team) {
         Team t = this.registry.getByName(team);
         if (t == null) return false;
-        return this.deleteTeam(t.getId());
+        return this.deleteTeam(t.id());
     }
 
     public boolean deleteTeam(UUID teamId) {
@@ -374,7 +400,7 @@ public abstract class SkyblockSavedData extends SavedData {
 
     @Nullable
     public Team getTeamFromPlayer(Player player) {
-        return this.getTeamFromPlayer(player.getGameProfile().getId());
+        return this.getTeamFromPlayer(player.getGameProfile().id());
     }
 
     @Nullable
@@ -406,14 +432,14 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public void addInvite(Team team, Player invitor, Player player) {
-        this.addInvite(team, invitor, player.getGameProfile().getId());
+        this.addInvite(team, invitor, player.getGameProfile().id());
     }
 
     public void addInvite(Team team, Player invitor, UUID id) {
         SkyMeta meta = this.getOrCreateMetaInfo(id);
 
-        if (!meta.getInvites().contains(team.getId())) {
-            meta.addInvite(team.getId());
+        if (!meta.getInvites().contains(team.id())) {
+            meta.addInvite(team.id());
             team.broadcast(SkyComponents.EVENT_INVITE_PLAYER.apply(invitor.getDisplayName(), GameProfileCache.getName(id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         }
 
@@ -421,7 +447,7 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public boolean hasInvites(Player player) {
-        return this.hasInvites(player.getGameProfile().getId());
+        return this.hasInvites(player.getGameProfile().id());
     }
 
     public boolean hasInvites(UUID player) {
@@ -430,17 +456,17 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public boolean hasInviteFrom(Team team, Player player) {
-        return this.hasInviteFrom(team, player.getGameProfile().getId());
+        return this.hasInviteFrom(team, player.getGameProfile().id());
     }
 
     public boolean hasInviteFrom(Team team, UUID player) {
         SkyMeta meta = this.metaInfo.get(player);
 
-        return meta != null && meta.getInvites().contains(team.getId());
+        return meta != null && meta.getInvites().contains(team.id());
     }
 
     public List<UUID> getInvites(Player player) {
-        return this.getInvites(player.getGameProfile().getId());
+        return this.getInvites(player.getGameProfile().id());
     }
 
     public List<UUID> getInvites(UUID player) {
@@ -449,7 +475,7 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public boolean acceptInvite(Team team, Player player) {
-        return this.acceptInvite(team, player.getGameProfile().getId());
+        return this.acceptInvite(team, player.getGameProfile().id());
     }
 
     public boolean acceptInvite(Team team, UUID id) {
@@ -459,7 +485,7 @@ public abstract class SkyblockSavedData extends SavedData {
             return false;
         }
 
-        if (meta.getInvites().contains(team.getId())) {
+        if (meta.getInvites().contains(team.id())) {
             team.broadcast(SkyComponents.EVENT_ACCEPT_INVITE.apply(GameProfileCache.getName(id)), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
 
             this.addPlayerToTeam(team.getName(), id);
@@ -475,7 +501,7 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public boolean declineInvite(Team team, Player player) {
-        return this.declineInvite(team, player.getGameProfile().getId());
+        return this.declineInvite(team, player.getGameProfile().id());
     }
 
     public boolean declineInvite(Team team, UUID id) {
@@ -485,7 +511,7 @@ public abstract class SkyblockSavedData extends SavedData {
             return false;
         }
 
-        meta.removeInvite(team.getId());
+        meta.removeInvite(team.id());
         this.setDirty();
         return true;
     }
@@ -493,7 +519,7 @@ public abstract class SkyblockSavedData extends SavedData {
     public void renameTeam(Team team, @Nullable ServerPlayer player, String name) {
         String oldName = team.getName();
         // registry.rename internally calls team.setName(newName)
-        this.registry.rename(team.getId(), name);
+        this.registry.rename(team.id(), name);
 
         Component playerName = player != null ? player.getDisplayName() : Component.literal("Server");
 
@@ -503,7 +529,7 @@ public abstract class SkyblockSavedData extends SavedData {
     }
 
     public SkyMeta getOrCreateMetaInfo(Player player) {
-        return this.getOrCreateMetaInfo(player.getGameProfile().getId());
+        return this.getOrCreateMetaInfo(player.getGameProfile().id());
     }
 
     public SkyMeta getOrCreateMetaInfo(UUID id) {
@@ -539,8 +565,8 @@ public abstract class SkyblockSavedData extends SavedData {
         RandomSource random = RandomSource.create();
         BlockPos.betweenClosedStream(outside).forEach(blockPos -> {
             if (!box.isInside(blockPos)) {
-                Optional<TemplateSurroundingBlocks.WeightedBlock> optional = configuredTemplate.getSurroundingBlocks().getRandom(random);
-                optional.ifPresent(weightedBlock -> level.setBlock(blockPos, weightedBlock.block().defaultBlockState(), Block.UPDATE_CLIENTS));
+                Optional<Block> optional = configuredTemplate.getSurroundingBlocks().getRandom(random);
+                optional.ifPresent(block -> level.setBlock(blockPos, block.defaultBlockState(), Block.UPDATE_CLIENTS));
             }
         });
     }
@@ -561,23 +587,20 @@ public abstract class SkyblockSavedData extends SavedData {
         super.setDirty();
     }
 
-    @Override
-    public void save(@Nonnull File file, @Nonnull HolderLookup.Provider registries) {
-        if (this.isDirty()) {
-            try {
-                Files.createDirectories(file.toPath().getParent());
-            } catch (IOException e) {
-                SkyblockBuilder.getLogger().error("Could not create directory: {}", file.getAbsolutePath(), e);
-            }
-        }
-
-        super.save(file, registries);
-    }
-
     private static final class SingleWorldImpl extends SkyblockSavedData {
 
         private ServerLevel level;
         private Spiral spiral = new Spiral();
+
+        public SingleWorldImpl(ServerLevel level) {
+            this.level = level;
+        }
+
+        private SingleWorldImpl(@Nullable ServerLevel level, List<Team> teams, List<SkyMeta> metas, Spiral spiral) {
+            this(level);
+            this.spiral = spiral;
+            this.loadInto(teams, metas);
+        }
 
         @Override
         protected IslandPos nextSpawnPos(ConfiguredTemplate template) {
@@ -620,40 +643,20 @@ public abstract class SkyblockSavedData extends SavedData {
             // Nothing extra needed in single-world mode
         }
 
-        @Nonnull
-        @Override
-        public CompoundTag save(@Nonnull CompoundTag compound, @Nonnull HolderLookup.Provider registries) {
-            super.save(compound, registries);
-
-            compound.putIntArray(SPIRAL_STATE, this.spiral.toIntArray());
-
-            return compound;
-        }
-
-        private static SkyblockSavedData loadImpl(CompoundTag nbt) {
-            SingleWorldImpl data = new SingleWorldImpl();
-            ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
-
-            data.registry.loadFromList(nbt.getList(ISLANDS, Tag.TAG_COMPOUND), data);
-
-            for (Tag inbt : nbt.getList(META_INFO, Tag.TAG_COMPOUND)) {
-                CompoundTag tag = (CompoundTag) inbt;
-
-                UUID player = tag.getUUID(PLAYER);
-                SkyMeta meta = SkyMeta.get(data, tag.getCompound(META));
-                metaInfo.put(player, meta);
-            }
-
-            data.metaInfo = metaInfo;
-            data.spiral = Spiral.fromArray(nbt.getIntArray(SPIRAL_STATE));
-
-            return data;
-        }
     }
 
     private static final class MultiWorldImpl extends SkyblockSavedData {
 
         private MinecraftServer server;
+
+        public MultiWorldImpl(MinecraftServer server) {
+            this.server = server;
+        }
+
+        private MultiWorldImpl(@Nullable MinecraftServer server, List<Team> teams, List<SkyMeta> metas) {
+            this(server);
+            this.loadInto(teams, metas);
+        }
 
         @Override
         protected IslandPos nextIslandPos(ConfiguredTemplate template) {
@@ -667,24 +670,28 @@ public abstract class SkyblockSavedData extends SavedData {
 
         @Override
         protected void onTeamCreated(Team team, ConfiguredTemplate template) {
-            ServerLevel level = InfiniverseCompat.getOrCreateLevel(this.server, team.getTeamLevelKey(), this.server.registryAccess());
+            ServerLevel level = this.getOrCreateTeamDimensions(this.server, team, this.server.registryAccess());
+            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
 
             if (level == null) {
-                throw new IllegalStateException("Failed to create dimension " + team.getTeamLevelKey().location());
+                throw new IllegalStateException("Failed to create dimension " + teamLevelKey.identifier());
             }
 
-            if (!team.isSpawn()) {
-                InfiniverseCompat.getOrCreateNetherLevel(this.server, team.getTeamNetherLevelKey(), this.server.registryAccess());
-            }
-
-            team.setIsland(new IslandPos(this.getLevelFor(team), 0, 0, template));
+            team.setIsland(new IslandPos(level, 0, 0, template));
         }
 
         @Override
         protected void onTeamDeleted(Team team) {
-            InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamLevelKey());
+            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
+            InfiniverseCompat.markDimensionForUnregistration(this.server, teamLevelKey);
+
             if (!team.isSpawn()) {
-                InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamNetherLevelKey());
+                if (WorldConfig.DimensionPerTeam.overworld && !teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
+                    InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamOverworldLevelKey());
+                }
+                if (WorldConfig.DimensionPerTeam.nether && !teamLevelKey.equals(team.getTeamNetherLevelKey())) {
+                    InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamNetherLevelKey());
+                }
             }
         }
 
@@ -705,40 +712,25 @@ public abstract class SkyblockSavedData extends SavedData {
         public void restoreInfiniverseDimensions(MinecraftServer server) {
             RegistryAccess registryAccess = server.registryAccess();
             for (Team team : this.registry.all()) {
-                InfiniverseCompat.getOrCreateLevel(server, team.getTeamLevelKey(), registryAccess);
-                if (!team.isSpawn()) {
+                this.getOrCreateTeamDimensions(server, team, registryAccess);
+            }
+        }
+
+        private ServerLevel getOrCreateTeamDimensions(MinecraftServer server, Team team, RegistryAccess registryAccess) {
+            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
+            ServerLevel level = InfiniverseCompat.getOrCreateLevel(server, teamLevelKey, registryAccess);
+
+            // the dimension holding the island is always per team, the others only if they are not shared
+            if (!team.isSpawn()) {
+                if (WorldConfig.DimensionPerTeam.overworld && !teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
+                    InfiniverseCompat.getOrCreateOverworldLevel(server, team.getTeamOverworldLevelKey(), registryAccess);
+                }
+                if (WorldConfig.DimensionPerTeam.nether && !teamLevelKey.equals(team.getTeamNetherLevelKey())) {
                     InfiniverseCompat.getOrCreateNetherLevel(server, team.getTeamNetherLevelKey(), registryAccess);
                 }
             }
-        }
 
-        @Nonnull
-        @Override
-        public CompoundTag save(@Nonnull CompoundTag compound, @Nonnull HolderLookup.Provider registries) {
-            CompoundTag nbt = super.save(compound, registries);
-
-            nbt.putBoolean("MultiDimensional", true);
-
-            return nbt;
-        }
-
-        private static SkyblockSavedData loadImpl(CompoundTag nbt) {
-            MultiWorldImpl data = new MultiWorldImpl();
-            ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
-
-            data.registry.loadFromList(nbt.getList(ISLANDS, Tag.TAG_COMPOUND), data);
-
-            for (Tag inbt : nbt.getList(META_INFO, Tag.TAG_COMPOUND)) {
-                CompoundTag tag = (CompoundTag) inbt;
-
-                UUID player = tag.getUUID(PLAYER);
-                SkyMeta meta = SkyMeta.get(data, tag.getCompound(META));
-                metaInfo.put(player, meta);
-            }
-
-            data.metaInfo = metaInfo;
-
-            return data;
+            return level;
         }
     }
 }

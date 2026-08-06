@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 
 public class UpdateStructureSaverTypeHandler extends PacketHandler<UpdateStructureSaverTypeHandler.Message> {
 
-    public static final CustomPacketPayload.Type<UpdateStructureSaverTypeHandler.Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("update_structure_saver_type"));
+    public static final CustomPacketPayload.Type<UpdateStructureSaverTypeHandler.Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().id("update_structure_saver_type"));
 
     protected UpdateStructureSaverTypeHandler() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);

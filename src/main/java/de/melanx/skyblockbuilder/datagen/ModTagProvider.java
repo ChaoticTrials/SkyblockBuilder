@@ -20,7 +20,7 @@ public class ModTagProvider extends CommonTagsProviderBase {
 
     public ModTagProvider(DatagenContext context) {
         super(context);
-        this.modBiomeTagProvider = new ModBiomeTagProvider(context.output(), CompletableFuture.completedFuture(context.registries().registryAccess()), context.mod().modid, context.fileHelper());
+        this.modBiomeTagProvider = new ModBiomeTagProvider(context.output(), CompletableFuture.completedFuture(context.registries().registryAccess()), context.mod().modid);
     }
 
     @Nonnull

@@ -4,10 +4,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
-import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class TemplatePreview {
     private StructureTemplate loadedRenderingTemplate;
 
     public TemplatePreview(ConfiguredTemplate template) {
-        this.id = Util.sanitizeName(template.getName().toLowerCase(Locale.ROOT), ResourceLocation::validPathChar);
+        this.id = Util.sanitizeName(template.getName().toLowerCase(Locale.ROOT), Identifier::validPathChar);
         this.icon = TemplatePreview.searchForIconFile(this.id);
         this.renderingTemplatePath = TemplatePreview.searchForTemplateFile(this.id);
         this.template = template;
@@ -41,7 +41,7 @@ public class TemplatePreview {
     private static Icon searchForIconFile(String id) {
         Path pngPath = SkyPaths.ICONS_DIR.resolve(id + ".png");
 
-        return Files.exists(pngPath) ? new Icon(SkyblockBuilder.getInstance().resource(id + "/icon"), pngPath) : null;
+        return Files.exists(pngPath) ? new Icon(SkyblockBuilder.getInstance().id(id + "/icon"), pngPath) : null;
     }
 
     private static Path searchForTemplateFile(String id) {
@@ -72,7 +72,7 @@ public class TemplatePreview {
 
         try {
             CompoundTag nbt = TemplateUtil.readTemplate(this.renderingTemplatePath);
-            structureTemplate.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
+            structureTemplate.load(BuiltInRegistries.BLOCK, nbt);
         } catch (IOException | CommandSyntaxException e) {
             throw new RuntimeException("Expected file at " + this.id + ".[s]nbt", e);
         }
@@ -82,7 +82,7 @@ public class TemplatePreview {
         return structureTemplate;
     }
 
-    public record Icon(ResourceLocation location, Path path) {}
+    public record Icon(Identifier location, Path path) {}
 
     public enum PreviewType {
         IMAGE,

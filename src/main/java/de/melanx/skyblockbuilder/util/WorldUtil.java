@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.util;
 import com.google.gson.JsonArray;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.Codec;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.compat.infiniverse.InfiniverseCompat;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
@@ -17,42 +18,43 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class WorldUtil {
 
     public static void teleportToIsland(ServerPlayer player, Team team) {
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = player.level().getServer();
 
         if (WorldConfig.leaveToOverworld && team.isSpawn()) {
-            Team playersTeam = SkyblockSavedData.get(player.serverLevel()).getTeamFromPlayer(player);
+            Team playersTeam = SkyblockSavedData.get(player.level()).getTeamFromPlayer(player);
             if (playersTeam == null || playersTeam.isSpawn()) {
-                //noinspection DataFlowIssue
-                ServerLevel overworld = server.overworld();
-                BlockPos worldSpawn = overworld.getSharedSpawnPos();
-                player.teleportTo(overworld, worldSpawn.getX(), worldSpawn.getY(), worldSpawn.getZ(), 0, 0);
+                ServerLevel overworld = server.findRespawnDimension();
+                LevelData.RespawnData respawn = overworld.getRespawnData();
+                Vec3 pos = player.adjustSpawnLocation(overworld, respawn.pos()).getBottomCenter();
+                player.teleportTo(overworld, pos.x, pos.y, pos.z, Set.of(), respawn.yaw(), respawn.pitch(), false);
                 return;
             }
         }
 
-        //noinspection ConstantConditions
         ServerLevel level;
         if (InfiniverseCompat.useInfiniverse()) {
-            level = server.getLevel(team.getTeamLevelKey());
+            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
+            level = server.getLevel(teamLevelKey);
             if (level == null) {
-                SkyblockBuilder.getLogger().error("Team dimension {} is unavailable", team.getTeamLevelKey().location());
+                SkyblockBuilder.getLogger().error("Team dimension {} is unavailable", teamLevelKey.identifier());
                 return;
             }
         } else {
@@ -60,10 +62,10 @@ public class WorldUtil {
         }
 
         TemplatesConfig.Spawn spawn = WorldUtil.validPosition(level, team);
-        player.teleportTo(level, spawn.pos().getX() + 0.5, spawn.pos().getY() + 0.2, spawn.pos().getZ() + 0.5, spawn.direction().getYRot(), 0);
+        player.teleportTo(level, spawn.pos().getX() + 0.5, spawn.pos().getY() + 0.2, spawn.pos().getZ() + 0.5, Set.of(), spawn.direction().getYRot(), 0, false);
 
-        if (player.getRespawnPosition() == null && team.hasPlayer(player)) {
-            player.setRespawnPosition(level.dimension(), spawn.pos(), spawn.direction().getYRot(), true, false);
+        if (player.getRespawnConfig() == null && team.hasPlayer(player)) {
+            player.setRespawnPosition(new ServerPlayer.RespawnConfig(LevelData.RespawnData.of(level.dimension(), spawn.pos(), spawn.direction().getYRot(), 0f), true), false);
         }
 
         if (PermissionsConfig.Teleports.negateFallDamage) {
@@ -101,6 +103,119 @@ public class WorldUtil {
         return dimension == SpawnConfig.spawnDimension || dimension == Team.SPAWN_LEVEL_KEY;
     }
 
+    // The dimension a team dimension is a copy of, every other dimension is its own original
+    public static ResourceKey<Level> resolveOriginalDimension(ResourceKey<Level> dimension) {
+        Identifier identifier = dimension.identifier();
+        if (!identifier.getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
+            return dimension;
+        }
+
+        // the spawn island is a copy of the configured spawn dimension, just like the main dimension of a team
+        if (dimension == Team.SPAWN_LEVEL_KEY) {
+            return SpawnConfig.spawnDimension;
+        }
+
+        String path = identifier.getPath();
+
+        if (path.endsWith("_overworld")) {
+            return Level.OVERWORLD;
+        }
+
+        if (path.endsWith("_nether")) {
+            return Level.NETHER;
+        }
+
+        if (path.endsWith("_main")) {
+            return SpawnConfig.spawnDimension;
+        }
+
+        return dimension;
+    }
+
+    // Vanilla only allows portals in the overworld and the nether. A team dimension is never one of them, so the
+    // dimensions replacing them for a team have to be allowed as well. Dimensions based on a custom spawn dimension
+    // are not, as the dimension they are a copy of would not allow portals either.
+    public static boolean isTeamPortalDimension(Level level) {
+        if (!InfiniverseCompat.useInfiniverse()) {
+            return false;
+        }
+
+        if (!level.dimension().identifier().getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
+            return false;
+        }
+
+        ResourceKey<Level> original = WorldUtil.resolveOriginalDimension(level.dimension());
+
+        return original == Level.OVERWORLD || original == Level.NETHER;
+    }
+
+    public static boolean isNetherDimension(Level level) {
+        return WorldUtil.resolveOriginalDimension(level.dimension()) == Level.NETHER;
+    }
+
+    // Portals always lead to the vanilla dimensions. If the player belongs to a team, they have to lead to the
+    // dimensions of that team instead. Dimensions a team does not have are left shared with everyone.
+    public static ResourceKey<Level> resolvePortalDestination(Entity entity, Level currentLevel, ResourceKey<Level> destination) {
+        if (!InfiniverseCompat.useInfiniverse() || (destination != Level.OVERWORLD && destination != Level.NETHER)) {
+            return destination;
+        }
+
+        ResourceKey<Level> requestedDestination = WorldUtil.isNetherDimension(currentLevel) ? Level.OVERWORLD : Level.NETHER;
+
+        return WorldUtil.resolveTeamDimension(entity, requestedDestination);
+    }
+
+    // Use this for every teleport of a player that is not a portal, the position tells apart a world spawn from a real overworld
+    public static ResourceKey<Level> resolveTeleportDestination(ServerPlayer player, ResourceKey<Level> destination, Vec3 position) {
+        if (InfiniverseCompat.useInfiniverse() && destination == Level.OVERWORLD) {
+            LevelData.RespawnData respawn = player.level().getServer().getRespawnData();
+            if (respawn.dimension() != destination && respawn.pos().equals(BlockPos.containing(position))) {
+                return respawn.dimension();
+            }
+        }
+
+        return WorldUtil.resolveTeamDimension(player, destination);
+    }
+
+    // Use this only when no position is at hand, the two methods above wrap it with the destination they trust
+    public static ResourceKey<Level> resolveTeamDimension(Entity entity, ResourceKey<Level> destination) {
+        if (!InfiniverseCompat.useInfiniverse() || (destination != Level.OVERWORLD && destination != Level.NETHER)) {
+            return destination;
+        }
+
+        if (!(entity.level() instanceof ServerLevel serverLevel)) {
+            return destination;
+        }
+
+        MinecraftServer server = serverLevel.getServer();
+        SkyblockSavedData data = SkyblockSavedData.get(server.overworld());
+        Team team = data.getTeamFromPlayer(entity.getUUID());
+        if (team == null) {
+            Team spawn = data.getSpawn();
+            if (!spawn.getPlayers().contains(entity.getUUID())) {
+                return destination;
+            }
+
+            team = spawn;
+        }
+
+        boolean toOverworld = destination == Level.OVERWORLD;
+        ResourceKey<Level> teamLevelKey = toOverworld
+                ? team.getTeamOverworldLevelKey()
+                : team.getTeamNetherLevelKey();
+
+        if (server.getLevel(teamLevelKey) != null) {
+            return teamLevelKey;
+        }
+
+        // the spawn team has no own overworld, so the island itself is the way back
+        if (toOverworld && server.getLevel(team.getTeamLevelKey()) != null) {
+            return team.getTeamLevelKey();
+        }
+
+        return destination;
+    }
+
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {
         if (!isSkyblock(source.getServer().overworld())) {
             throw new SimpleCommandExceptionType(SkyComponents.NO_SKYBLOCK).create();
@@ -108,7 +223,7 @@ public class WorldUtil {
     }
 
     public static ServerLevel getConfiguredLevel(MinecraftServer server) {
-        ResourceLocation location = SpawnConfig.spawnDimension.location();
+        Identifier location = SpawnConfig.spawnDimension.identifier();
         ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, location);
         ServerLevel configLevel = server.getLevel(worldKey);
 
@@ -138,7 +253,7 @@ public class WorldUtil {
     }
 
     public static boolean isValidSpawn(Level level, BlockPos pos) {
-        return WorldUtil.isValidSpawn(level, pos, level.getMinBuildHeight(), level.getMaxBuildHeight());
+        return WorldUtil.isValidSpawn(level, pos, level.getMinY(), level.getMaxY());
     }
 
     public static boolean isValidSpawn(Level level, BlockPos pos, int bottom, int top) {
@@ -153,11 +268,11 @@ public class WorldUtil {
         int top = SpawnConfig.Height.range.top();
         int bottom = SpawnConfig.Height.range.bottom();
 
-        int height = switch (SpawnConfig.Height.heightCalculationType) {
+        int height = switch(SpawnConfig.Height.heightCalculationType) {
             case RANGE_TOP, RANGE_BOTTOM -> {
                 BlockPos.MutableBlockPos spawn = new BlockPos.MutableBlockPos(x, top, z);
                 while (!WorldUtil.isValidSpawn(level, spawn, bottom, top)) {
-                    if (spawn.getY() <= level.getMinBuildHeight()) {
+                    if (spawn.getY() <= level.getMinY()) {
                         if (SpawnConfig.Height.heightCalculationType == SpawnSettings.Type.RANGE_TOP) {
                             spawn.setY(top);
                         } else {
@@ -173,7 +288,7 @@ public class WorldUtil {
             case SET -> bottom;
         };
 
-        return Math.max(level.getMinBuildHeight() + 1, height);
+        return Math.max(level.getMinY() + 1, height);
     }
 
     public static CompoundTag blockPosToTag(BlockPos pos) {
@@ -185,12 +300,12 @@ public class WorldUtil {
         return posTag;
     }
 
-    public static BlockPos blockPosFromTag(CompoundTag posTag) {
-        return new BlockPos(
-                posTag.getInt("posX"),
-                posTag.getInt("posY"),
-                posTag.getInt("posZ")
-        );
+    public static BlockPos blockPosFromTag(Optional<CompoundTag> posTag) {
+        return posTag.map(compoundTag -> new BlockPos(
+                compoundTag.getIntOr("posX", 0),
+                compoundTag.getIntOr("posY", 0),
+                compoundTag.getIntOr("posZ", 0)
+        )).orElse(BlockPos.ZERO);
     }
 
     public static BlockPos blockPosFromJsonArray(JsonArray json) {
@@ -211,7 +326,7 @@ public class WorldUtil {
     }
 
     public static Climate.ParameterPoint pointFor(ResourceKey<Biome> key) {
-        long seed = key.location().toString().hashCode();
+        long seed = key.identifier().toString().hashCode();
         seed ^= (seed >>> 33);
         seed *= 0xff51afd7ed558ccdL;
         seed ^= (seed >>> 33);
@@ -234,9 +349,11 @@ public class WorldUtil {
 
     public enum SpawnDirection {
         NORTH(180),
-        EAST(270),
+        EAST(-90),
         SOUTH(0),
         WEST(90);
+
+        public static final Codec<SpawnDirection> CODEC = SkyCodecs.enumCodec(SpawnDirection.class);
 
         private final int yRot;
 
@@ -245,7 +362,7 @@ public class WorldUtil {
         }
 
         public static SpawnDirection fromDirection(Direction direction) {
-            return switch (direction) {
+            return switch(direction) {
                 case NORTH -> NORTH;
                 case EAST -> EAST;
                 case WEST -> WEST;

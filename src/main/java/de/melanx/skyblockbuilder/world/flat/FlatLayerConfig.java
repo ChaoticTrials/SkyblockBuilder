@@ -4,18 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.random.Weight;
-import net.minecraft.util.random.WeightedEntry;
-import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 public class FlatLayerConfig {
 
@@ -28,7 +24,7 @@ public class FlatLayerConfig {
     private final Block block;
     private final int height;
     private final Extras extras;
-    private WeightedRandomList<WeightedBlockEntry> weightedBlockEntries;
+    private WeightedList<Block> weightedBlockEntries;
 
     public FlatLayerConfig(Block block) {
         this(block, 1);
@@ -60,9 +56,9 @@ public class FlatLayerConfig {
         return random.nextDouble() < this.extras.chance;
     }
 
-    public WeightedRandomList<WeightedBlockEntry> getExtraBlocks() {
+    public WeightedList<Block> getExtraBlocks() {
         if (this.weightedBlockEntries == null) {
-            this.weightedBlockEntries = WeightedRandomList.create(this.extras.extraBlocks());
+            this.weightedBlockEntries = this.extras.extraBlocks();
         }
 
         return this.weightedBlockEntries;
@@ -89,9 +85,9 @@ public class FlatLayerConfig {
         String blockName = info[info.length - 1];
 
         Block block;
-        ResourceLocation blockId = ResourceLocation.tryParse(blockName);
+        Identifier blockId = Identifier.tryParse(blockName);
         try {
-            block = BuiltInRegistries.BLOCK.get(blockId);
+            block = BuiltInRegistries.BLOCK.getValue(blockId);
         } catch (Exception exception) {
             SkyblockBuilder.getLogger().error("Error while parsing surface settings string => {}", exception.getMessage());
             return null;
@@ -117,30 +113,16 @@ public class FlatLayerConfig {
         return sb.toString();
     }
 
-    public record Extras(List<WeightedBlockEntry> extraBlocks, double chance) {
+    public record Extras(WeightedList<Block> extraBlocks, double chance) {
 
-        public static final Extras EMPTY = new Extras(List.of(), 0.0D);
+        public static final Extras EMPTY = new Extras(WeightedList.of(), 0.0D);
         public static final Codec<Extras> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                WeightedBlockEntry.CODEC.listOf().fieldOf("blocks").forGetter(Extras::extraBlocks),
+                WeightedList.codec(Block.CODEC).fieldOf("blocks").forGetter(Extras::extraBlocks),
                 Codec.DOUBLE.fieldOf("chance").forGetter(Extras::chance)
         ).apply(instance, Extras::new));
 
         public boolean isEmpty() {
             return this == EMPTY || this.extraBlocks.isEmpty();
-        }
-    }
-
-    public record WeightedBlockEntry(Block block, int weight) implements WeightedEntry {
-
-        public static final Codec<WeightedBlockEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                BuiltInRegistries.BLOCK.byNameCodec().fieldOf("block").orElse(Blocks.AIR).forGetter(WeightedBlockEntry::block),
-                Codec.INT.optionalFieldOf("weight", 1).forGetter(WeightedBlockEntry::weight)
-        ).apply(instance, WeightedBlockEntry::new));
-
-        @Nonnull
-        @Override
-        public Weight getWeight() {
-            return Weight.of(this.weight);
         }
     }
 }

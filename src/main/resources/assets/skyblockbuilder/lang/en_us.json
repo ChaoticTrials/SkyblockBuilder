@@ -176,7 +176,7 @@
   "skyblockbuilder.screen.dump.title": "Skyblock Builder Dump",
   "skyblockbuilder.screen.dump.text.configs": "Configs",
   "skyblockbuilder.screen.dump.text.templates": "Templates and Spreads",
-  "skyblockbuilder.screen.dump.text.level_dat": "level.dat",
+  "skyblockbuilder.screen.dump.text.level_dat": "level.dat + world_gen_settings.dat",
   "skyblockbuilder.screen.dump.text.latest_log": "latest.log",
   "skyblockbuilder.screen.dump.text.crash_report": "crash-<latest>.txt",
   "skyblockbuilder.screen.dump.text.data_file": "Skyblock Data File",

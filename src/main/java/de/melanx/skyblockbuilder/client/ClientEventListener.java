@@ -1,48 +1,42 @@
 package de.melanx.skyblockbuilder.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import de.melanx.skyblockbuilder.SkyblockBuilder;
+import de.melanx.skyblockbuilder.client.render.TemplatePreviewPipRenderer;
+import de.melanx.skyblockbuilder.client.render.TemplatePreviewRenderState;
 import de.melanx.skyblockbuilder.client.screens.CustomizeSkyblockScreen;
 import de.melanx.skyblockbuilder.commands.OpenDumpScreen;
 import de.melanx.skyblockbuilder.config.common.ClientConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
-import de.melanx.skyblockbuilder.item.StructureSaverSettings;
 import de.melanx.skyblockbuilder.registration.ModBlocks;
 import de.melanx.skyblockbuilder.registration.ModDataComponentTypes;
 import de.melanx.skyblockbuilder.registration.ModItems;
+import de.melanx.skyblockbuilder.util.NbtUtils;
 import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.gizmos.GizmoStyle;
+import net.minecraft.gizmos.Gizmos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
-import net.neoforged.neoforge.client.event.RegisterPresetEditorsEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.lwjgl.glfw.GLFW;
-import org.moddingx.libx.render.RenderHelperLevel;
 
 import java.util.Optional;
 
 public class ClientEventListener {
+
+    private static final int BOUNDING_BOX_COLOR = 0xFFE6E6E6;
 
     public ClientEventListener() {
         NeoForge.EVENT_BUS.addListener(ClientEventListener::onKeyInput);
@@ -60,19 +54,16 @@ public class ClientEventListener {
     }
 
     @SubscribeEvent
+    public void registerPictureInPictureRenderers(RegisterPictureInPictureRenderersEvent event) {
+        event.register(TemplatePreviewRenderState.class, TemplatePreviewPipRenderer::new);
+    }
+
+    @SubscribeEvent
     public void buildCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.structureSaver);
             event.accept(ModBlocks.spawnBlock);
         }
-    }
-
-    @SubscribeEvent
-    public void registerClientExtensions(RegisterClientExtensionsEvent event) {
-        ItemProperties.register(ModItems.structureSaver, SkyblockBuilder.getInstance().resource("structure_saver_type"), ((stack, level, entity, seed) -> {
-            StructureSaverSettings.Type type = stack.get(ModDataComponentTypes.structureSaverType);
-            return type == null ? 0 : type.ordinal();
-        }));
     }
 
     private static void registerClientCommands(RegisterClientCommandsEvent event) {
@@ -81,9 +72,9 @@ public class ClientEventListener {
         );
     }
 
-    private static void renderBoundingBox(RenderLevelStageEvent event) {
+    private static void renderBoundingBox(ExtractLevelRenderStateEvent event) {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null || !(player.getMainHandItem().getItem() instanceof ItemStructureSaver) || event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
+        if (player == null || !(player.getMainHandItem().getItem() instanceof ItemStructureSaver)) {
             return;
         }
 
@@ -93,16 +84,7 @@ public class ClientEventListener {
             return;
         }
 
-        PoseStack poseStack = event.getPoseStack();
-        poseStack.pushPose();
-        RenderHelperLevel.loadCameraPosition(event.getCamera(), poseStack, area.minX(), area.minY(), area.minZ());
-
-        MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
-        VertexConsumer buffer = source.getBuffer(RenderType.LINES);
-
-        LevelRenderer.renderLineBox(poseStack, buffer, 0, 0, 0, area.maxX() - area.minX() + 1, area.maxY() - area.minY() + 1, area.maxZ() - area.minZ() + 1, 0.9F, 0.9F, 0.9F, 1.0F);
-        source.endBatch(RenderType.LINES);
-        poseStack.popPose();
+        Gizmos.cuboid(AABB.of(area), GizmoStyle.stroke(BOUNDING_BOX_COLOR));
     }
 
     private static void onKeyInput(InputEvent.Key event) {

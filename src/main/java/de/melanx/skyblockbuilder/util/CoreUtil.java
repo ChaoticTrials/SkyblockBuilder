@@ -7,13 +7,54 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
+import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import org.moddingx.libx.codec.MoreCodecs;
 
+import javax.annotation.Nullable;
+import java.util.List;
+
 public class CoreUtil {
+
+    public static boolean isDimensionValid(List<ResourceKey<Level>> dimensions, ResourceKey<Level> dimension) {
+        if (dimensions.contains(dimension)) {
+            return true;
+        }
+
+        ResourceKey<Level> original = WorldUtil.resolveOriginalDimension(dimension);
+
+        return original != dimension && dimensions.contains(original);
+    }
+
+    @Nullable
+    public static ServerLevel resolveLevel(MinecraftServer server, ResourceKey<Level> dimension, ServerPlayer player) {
+        return server.getLevel(SkyblockHooks.onChangeDimension(player, dimension));
+    }
+
+    public static boolean redirectToTeamIsland(ServerPlayer player, ResourceKey<Level> dimension) {
+        if (SkyblockHooks.onChangeDimension(player, dimension) == dimension) {
+            return false;
+        }
+
+        Team team = SkyblockSavedData.get(player.level()).getTeamFromPlayer(player);
+        if (team == null) {
+            return false;
+        }
+
+        WorldUtil.teleportToIsland(player, team);
+
+        return true;
+    }
 
     public static Codec<WorldPreset> augmentWorldPresetCodec(Codec<WorldPreset> codec) {
         Codec<SkyblockPreset> skyblockCodecBase = RecordCodecBuilder.create(instance -> instance.group(

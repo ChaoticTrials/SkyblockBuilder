@@ -12,7 +12,7 @@
 //import earth.terrarium.heracles.api.tasks.QuestTasks;
 //import earth.terrarium.heracles.api.tasks.storage.defaults.BooleanTaskStorage;
 //import net.minecraft.nbt.NumericTag;
-//import net.minecraft.resources.ResourceLocation;
+//import net.minecraft.resources.Identifier;
 //import net.minecraft.server.level.ServerPlayer;
 //import net.minecraft.world.item.Items;
 //
@@ -47,8 +47,8 @@
 //    private static class Type implements QuestTaskType<SpreadLocationTask> {
 //
 //        @Override
-//        public ResourceLocation id() {
-//            return SkyblockBuilder.getInstance().resource("spread_location");
+//        public Identifier id() {
+//            return SkyblockBuilder.getInstance().id("spread_location");
 //        }
 //
 //        public Codec<SpreadLocationTask> codec(String id) {

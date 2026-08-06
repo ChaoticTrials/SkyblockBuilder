@@ -1,7 +1,6 @@
 package de.melanx.skyblockbuilder.client.screens;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.ClientUtil;
 import de.melanx.skyblockbuilder.client.SizeableCheckbox;
@@ -12,16 +11,19 @@ import de.melanx.skyblockbuilder.registration.ModDataComponentTypes;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -38,18 +40,18 @@ import java.util.function.Supplier;
 
 public class StructureSaverScreen extends BaseScreen {
 
-    private static final ResourceLocation[] UNSELECTED_TOP_TABS = new ResourceLocation[]{
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_1"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_2"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_3")
+    private static final Identifier[] UNSELECTED_TOP_TABS = new Identifier[]{
+            Identifier.withDefaultNamespace("container/creative_inventory/tab_top_unselected_1"),
+            Identifier.withDefaultNamespace("container/creative_inventory/tab_top_unselected_2"),
+            Identifier.withDefaultNamespace("container/creative_inventory/tab_top_unselected_3")
     };
-    private static final ResourceLocation[] SELECTED_TOP_TABS = new ResourceLocation[]{
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_1"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_2"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_3")
+    private static final Identifier[] SELECTED_TOP_TABS = new Identifier[]{
+            Identifier.withDefaultNamespace("container/creative_inventory/tab_top_selected_1"),
+            Identifier.withDefaultNamespace("container/creative_inventory/tab_top_selected_2"),
+            Identifier.withDefaultNamespace("container/creative_inventory/tab_top_selected_3")
     };
 
-    private static final ResourceLocation SCREEN_LOCATION = ResourceLocation.fromNamespaceAndPath(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
+    private static final Identifier SCREEN_LOCATION = Identifier.fromNamespaceAndPath(SkyblockBuilder.getInstance().modid, "textures/gui/structure_saver.png");
     private static final Component SAVE_TO_CONFIG = SkyComponents.ITEM_STRUCTURE_SAVER_SAVE_TO_CONFIG_TOOLTIP;
     private static final Component IGNORE_AIR = SkyComponents.ITEM_STRUCTURE_SAVER_IGNORE_AIR_TOOLTIP;
     private static final Component SNBT = SkyComponents.ITEM_STRUCTURE_SAVER_NBT_TO_SNBT_TOOLTIP;
@@ -98,7 +100,7 @@ public class StructureSaverScreen extends BaseScreen {
                 .size(60, 20)
                 .build());
         this.addRenderableWidget(Button.builder(SkyComponents.SCREEN_BUTTON_DELETE, button -> {
-                    SkyblockBuilder.getNetwork().deleteTags(this.stack);
+                    SkyblockBuilder.getNetwork().deleteTags();
                     this.onClose();
                 })
                 .pos(this.x(77), this.y(50))
@@ -161,58 +163,56 @@ public class StructureSaverScreen extends BaseScreen {
     }
 
     @Override
-    public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(@Nonnull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.blit(SCREEN_LOCATION, this.x(146), this.y(25), 0, 0, 16, 16, 16, 16);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, SCREEN_LOCATION, this.x(146), this.y(25), 16, 16, 16, 16, 16, 16);
 
         StructureSaverSettings.Type hoveredType = this.getHoveredTypeTab(mouseX, mouseY);
         if (hoveredType != null) {
-            this.setTooltipForNextRenderPass(hoveredType.getTooltip());
+            guiGraphics.setTooltipForNextFrame(this.font, hoveredType.getTooltip(), mouseX, mouseY);
         }
     }
 
     @Override
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractBackground(@Nonnull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         for (int i = 0; i < 3; i++) {
             if (i == this.selectedType.ordinal()) {
                 continue;
             }
 
-            guiGraphics.blitSprite(UNSELECTED_TOP_TABS[i], this.x(i * 27), this.y(-28), 26, 32);
-            guiGraphics.renderItem(StructureSaverSettings.Type.values()[i].getStack(), this.x((i * 27) + 5), this.y(-19));
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, UNSELECTED_TOP_TABS[i], this.x(i * 27), this.y(-28), 26, 32);
+            guiGraphics.item(StructureSaverSettings.Type.values()[i].getStack(), this.x((i * 27) + 5), this.y(-19));
         }
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderHelper.renderGuiBackground(guiGraphics, this.x(0), this.y(0), this.getXSize(), this.getYSize());
+        RenderHelper.renderGuiBackground(RenderPipelines.GUI_TEXTURED, guiGraphics, this.x(0), this.y(0), this.getXSize(), this.getYSize());
 
-        this.name.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawString(this.font, this.title, this.x(10), this.y(8), Color.DARK_GRAY.getRGB(), false);
+        this.name.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.text(this.font, this.title, this.x(10), this.y(8), Color.DARK_GRAY.getRGB(), false);
 
-        guiGraphics.pose().pushPose();
+        guiGraphics.pose().pushMatrix();
         float scale = 0.9f;
-        guiGraphics.pose().scale(scale, scale, scale);
-        guiGraphics.drawString(this.font, SAVE_TO_CONFIG, (int) ((this.saveToConfig.getX() + 13) / scale), (int) ((this.saveToConfig.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, IGNORE_AIR, (int) ((this.ignoreAir.getX() + 13) / scale), (int) ((this.ignoreAir.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, SNBT, (int) ((this.nbtToSnbt.getX() + 13) / scale), (int) ((this.nbtToSnbt.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, KEEP_POSITIONS, (int) ((this.keepPositions.getX() + 13) / scale), (int) ((this.keepPositions.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().scale(scale, scale);
+        guiGraphics.text(this.font, SAVE_TO_CONFIG, (int) ((this.saveToConfig.getX() + 13) / scale), (int) ((this.saveToConfig.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.text(this.font, IGNORE_AIR, (int) ((this.ignoreAir.getX() + 13) / scale), (int) ((this.ignoreAir.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.text(this.font, SNBT, (int) ((this.nbtToSnbt.getX() + 13) / scale), (int) ((this.nbtToSnbt.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.text(this.font, KEEP_POSITIONS, (int) ((this.keepPositions.getX() + 13) / scale), (int) ((this.keepPositions.getY() + 2) / scale), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.pose().popMatrix();
 
         if (this.saveToConfig.isHovered()) {
-            guiGraphics.renderTooltip(this.font, SAVE_TO_CONFIG_DESC, mouseX, mouseY);
+            guiGraphics.setTooltipForNextFrame(this.font, SAVE_TO_CONFIG_DESC, mouseX, mouseY);
         } else if (this.ignoreAir.isHovered()) {
-            guiGraphics.renderTooltip(this.font, IGNORE_AIR_DESC, mouseX, mouseY);
+            guiGraphics.setTooltipForNextFrame(this.font, IGNORE_AIR_DESC, mouseX, mouseY);
         } else if (this.nbtToSnbt.isHovered()) {
-            guiGraphics.renderTooltip(this.font, SNBT_DESC, mouseX, mouseY);
+            guiGraphics.setTooltipForNextFrame(this.font, SNBT_DESC, mouseX, mouseY);
         } else if (this.keepPositions.isHovered()) {
-            guiGraphics.renderTooltip(this.font, KEEP_POSITIONS_DESC, mouseX, mouseY);
+            guiGraphics.setTooltipForNextFrame(this.font, KEEP_POSITIONS_DESC, mouseX, mouseY);
         }
 
-        guiGraphics.blitSprite(SELECTED_TOP_TABS[this.selectedType.ordinal()], this.x(this.selectedType.ordinal() * 27), this.y(-28), 26, 32);
-        guiGraphics.renderItem(this.selectedType.getStack(), this.x((this.selectedType.ordinal() * 27) + 5), this.y(-19));
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SELECTED_TOP_TABS[this.selectedType.ordinal()], this.x(this.selectedType.ordinal() * 27), this.y(-28), 26, 32);
+        guiGraphics.item(this.selectedType.getStack(), this.x((this.selectedType.ordinal() * 27) + 5), this.y(-19));
     }
 
     @Nullable
@@ -235,9 +235,9 @@ public class StructureSaverScreen extends BaseScreen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(@Nonnull MouseButtonEvent event, boolean doubleClick) {
         this.currentSettings = new StructureSaverSettings(this.name.getValue(), this.saveToConfig.selected(), this.ignoreAir.selected(), this.nbtToSnbt.selected(), this.keepPositions.selected());
-        StructureSaverSettings.Type hoveredType = this.getHoveredTypeTab((int) mouseX, (int) mouseY);
+        StructureSaverSettings.Type hoveredType = this.getHoveredTypeTab((int) event.x(), (int) event.y());
         if (hoveredType != null) {
             SkyblockBuilder.getNetwork().changeStructureSaverType(this.stack, hoveredType);
             this.stack.set(ModDataComponentTypes.structureSaverType, hoveredType);
@@ -247,7 +247,7 @@ public class StructureSaverScreen extends BaseScreen {
             return true;
         }
 
-        boolean result = super.mouseClicked(mouseX, mouseY, button);
+        boolean result = super.mouseClicked(event, doubleClick);
         if (result) {
             SkyblockBuilder.getNetwork().updateStructureSaverSettings(this.stack, this.currentSettings);
         }
@@ -256,15 +256,15 @@ public class StructureSaverScreen extends BaseScreen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        InputConstants.Key mapping = InputConstants.getKey(keyCode, scanCode);
+    public boolean keyPressed(@Nonnull KeyEvent event) {
+        InputConstants.Key mapping = InputConstants.getKey(event);
         //noinspection ConstantConditions
-        if (keyCode != InputConstants.KEY_ESCAPE && (this.minecraft.options.keyInventory.isActiveAndMatches(mapping)
+        if (event.key() != InputConstants.KEY_ESCAPE && (this.minecraft.options.keyInventory.isActiveAndMatches(mapping)
                 || this.minecraft.options.keyDrop.isActiveAndMatches(mapping))) {
             return true;
         }
 
-        boolean result = super.keyPressed(keyCode, scanCode, modifiers);
+        boolean result = super.keyPressed(event);
         if (result) {
             this.currentSettings = new StructureSaverSettings(this.name.getValue(), this.saveToConfig.selected(), this.ignoreAir.selected(), this.nbtToSnbt.selected(), this.keepPositions.selected());
             SkyblockBuilder.getNetwork().updateStructureSaverSettings(this.stack, this.currentSettings);
@@ -288,10 +288,7 @@ public class StructureSaverScreen extends BaseScreen {
         protected void init() {
             super.init();
 
-            boolean mayNotCheat = this.minecraft == null
-                    || this.minecraft.player == null
-                    || !(this.minecraft.player.hasPermissions(2)
-                    || this.minecraft.player.isCreative());
+            boolean mayNotCheat = this.minecraft.player == null || !(this.minecraft.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || this.minecraft.player.isCreative());
 
             Button.Builder buttonBuilder;
             if (this.missingBlockHasItem && !mayNotCheat) {
@@ -312,23 +309,21 @@ public class StructureSaverScreen extends BaseScreen {
         }
 
         @Override
-        public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-            super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        public void extractBackground(@Nonnull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+            super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
 
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderHelper.renderGuiBackground(guiGraphics, this.x(0), this.y(0), this.getXSize(), this.getYSize());
+            RenderHelper.renderGuiBackground(RenderPipelines.GUI_TEXTURED, guiGraphics, this.x(0), this.y(0), this.getXSize(), this.getYSize());
 
-            guiGraphics.drawString(this.font, this.title, this.centeredX(this.font.width(this.title)), this.y(8), Color.RED.getRGB(), false);
-            guiGraphics.drawString(this.font, SkyComponents.SCREEN_ERROR_MESSAGE, this.x(10), this.y(25), Color.DARK_GRAY.getRGB(), false);
+            guiGraphics.text(this.font, this.title, this.centeredX(this.font.width(this.title)), this.y(8), Color.RED.getRGB(), false);
+            guiGraphics.text(this.font, SkyComponents.SCREEN_ERROR_MESSAGE, this.x(10), this.y(25), Color.DARK_GRAY.getRGB(), false);
 
             int blockX = this.x(15);
             if (this.missingBlockHasItem) {
-                guiGraphics.renderItem(new ItemStack(this.type.getRequiredBlock()), this.x(10), this.y(38));
+                guiGraphics.item(new ItemStack(this.type.getRequiredBlock()), this.x(10), this.y(38));
                 blockX += 15;
             }
 
-            guiGraphics.drawString(this.font, this.type.getRequiredBlock().getName(), blockX, this.y(43), Color.DARK_GRAY.getRGB(), false);
+            guiGraphics.text(this.font, this.type.getRequiredBlock().getName(), blockX, this.y(43), Color.DARK_GRAY.getRGB(), false);
         }
     }
 }

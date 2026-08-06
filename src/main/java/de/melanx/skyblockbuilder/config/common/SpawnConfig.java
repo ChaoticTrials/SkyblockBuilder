@@ -2,8 +2,8 @@ package de.melanx.skyblockbuilder.config.common;
 
 import de.melanx.skyblockbuilder.SpawnProtectionEvents;
 import de.melanx.skyblockbuilder.config.SpawnSettings;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
@@ -17,18 +17,18 @@ public class SpawnConfig {
 
     @Config("The entities which you can interact with within the spawn protection")
     public static ResourceList interactionEntitiesInSpawnProtection = new ResourceList(true, builder -> {
-        builder.simple(ResourceLocation.fromNamespaceAndPath("corpse", "corpse"));
+        builder.simple(Identifier.fromNamespaceAndPath("corpse", "corpse"));
     });
 
     @Config("The blocks which you can interact with within the spawn protection")
     public static ResourceList interactionBlocksInSpawnProtection = new ResourceList(true, builder -> {
-        builder.simple(ResourceLocation.fromNamespaceAndPath("gravestone", "gravestone"));
-        builder.simple(ResourceLocation.fromNamespaceAndPath("tombstone", "grave_simple"));
+        builder.simple(Identifier.fromNamespaceAndPath("gravestone", "gravestone"));
+        builder.simple(Identifier.fromNamespaceAndPath("tombstone", "grave_simple"));
     });
 
     @Config("The items which you can interact with within the spawn protection")
     public static ResourceList interactionItemsInSpawnProtection = new ResourceList(true, builder -> {
-        builder.simple(ResourceLocation.fromNamespaceAndPath("tombstone", "grave_key"));
+        builder.simple(Identifier.fromNamespaceAndPath("tombstone", "grave_key"));
     });
 
     @Config("The radius of chunks where to apply spawn protection. In this area, only op players can avoid this.")

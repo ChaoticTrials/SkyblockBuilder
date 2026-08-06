@@ -4,8 +4,7 @@ import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplatePreview;
 import de.melanx.skyblockbuilder.template.TemplatePreviewRenderer;
 import de.melanx.skyblockbuilder.util.SkyComponents;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.RegistryAccess;
@@ -106,17 +105,29 @@ public class ChoosePaletteScreen extends Screen {
     }
 
     @Override
-    public void resize(@Nonnull Minecraft minecraft, int width, int height) {
-        super.resize(minecraft, width, height);
+    public void resize(int width, int height) {
+        super.resize(width, height);
 
         this.structureCache.forEach((i, renderer) -> renderer.setArea(this.createArea()));
     }
 
     @Override
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        if (this.isInGameUi()) {
+            this.extractTransparentBackground(graphics);
+        } else {
+            if (this.minecraft.level == null) {
+                this.extractPanorama(graphics, a);
+            }
+
+            this.extractBlurredBackground(graphics);
+            this.extractMenuBackground(graphics);
+        }
+
+        this.minecraft.gui.extractDeferredSubtitles();
+
         this.structureCache.computeIfAbsent(this.paletteIndex, key -> new TemplatePreviewRenderer(new TemplatePreview(this.template), this.createArea(), this.registryAccess, this.paletteIndex))
-                .render(guiGraphics);
+                .render(graphics);
     }
 
     private TemplatePreviewRenderer.Area createArea() {

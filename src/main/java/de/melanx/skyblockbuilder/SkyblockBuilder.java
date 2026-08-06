@@ -2,6 +2,7 @@ package de.melanx.skyblockbuilder;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.Strictness;
 import de.melanx.skyblockbuilder.client.ClientEventListener;
 import de.melanx.skyblockbuilder.compat.heracles.HeraclesCompat;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
@@ -11,7 +12,7 @@ import de.melanx.skyblockbuilder.network.SkyNetwork;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.SkyPaths;
 import de.melanx.skyblockbuilder.world.presets.BiomeParametersPreset;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -35,7 +36,7 @@ public final class SkyblockBuilder extends ModXRegistration {
     public static final Gson PRETTY_GSON = Util.make(() -> {
         GsonBuilder gsonbuilder = new GsonBuilder();
         gsonbuilder.disableHtmlEscaping();
-        gsonbuilder.setLenient();
+        gsonbuilder.setStrictness(Strictness.LENIENT);
         gsonbuilder.setPrettyPrinting();
         return gsonbuilder.create();
     });

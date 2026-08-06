@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -83,7 +83,7 @@ public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
             private int posZ;
 
             public BlockPosWidget(Screen screen, BlockPos value, @Nullable AbstractWidget xWidget, @Nullable AbstractWidget yWidget,
-                                  @Nullable AbstractWidget zWidget, WidgetProperties<BlockPos> properties) {
+                    @Nullable AbstractWidget zWidget, WidgetProperties<BlockPos> properties) {
                 super(properties.x(), properties.y(), properties.width(), properties.height());
                 this.font = Minecraft.getInstance().font;
                 this.posX = value.getX();
@@ -116,10 +116,10 @@ public class BlockPosMapper implements ValueMapper<BlockPos, JsonArray> {
             }
 
             @Override
-            protected void renderWidgetContent(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-                guiGraphics.drawString(this.font, "X", this.getX(), this.getY() + 6, Color.GRAY.getRGB());
-                guiGraphics.drawString(this.font, "Y", this.getX() + 63, this.getY() + 6, Color.GRAY.getRGB());
-                guiGraphics.drawString(this.font, "Z", this.getX() + 128, this.getY() + 6, Color.GRAY.getRGB());
+            protected void extractWidgetContent(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+                guiGraphics.text(this.font, "X", this.getX(), this.getY() + 6, Color.GRAY.getRGB());
+                guiGraphics.text(this.font, "Y", this.getX() + 63, this.getY() + 6, Color.GRAY.getRGB());
+                guiGraphics.text(this.font, "Z", this.getX() + 128, this.getY() + 6, Color.GRAY.getRGB());
             }
         }
     }

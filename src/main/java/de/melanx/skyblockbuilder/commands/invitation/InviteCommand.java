@@ -19,7 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class InviteCommand {
 
-    public static final HoverEvent COPY_TEXT = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"));
+    public static final HoverEvent COPY_TEXT = new HoverEvent.ShowText(Component.translatable("chat.copy.click"));
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         // Invites the given player
@@ -71,10 +71,10 @@ public class InviteCommand {
         MutableComponent invite = SkyComponents.INFO_INVITED_TO_TEAM0.apply(player.getDisplayName().getString(), team.getName()).withStyle(ChatFormatting.GOLD);
         invite.append(Component.literal("/skyblock accept \"" + team.getName() + "\"").setStyle(Style.EMPTY
                 .withHoverEvent(COPY_TEXT)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock accept \"" + team.getName() + "\""))
+                .withClickEvent(new ClickEvent.SuggestCommand("/skyblock accept \"" + team.getName() + "\""))
                 .applyFormat(ChatFormatting.UNDERLINE).applyFormat(ChatFormatting.GOLD)));
         invite.append(SkyComponents.INFO_INVITED_TO_TEAM1.withStyle(ChatFormatting.GOLD));
-        invitePlayer.displayClientMessage(invite, false);
+        invitePlayer.sendSystemMessage(invite, false);
 
         return 1;
     }

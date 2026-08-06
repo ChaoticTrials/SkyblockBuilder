@@ -19,7 +19,7 @@ import java.nio.file.Path;
 
 public class CreateSkyblockDumpHandler extends PacketHandler<CreateSkyblockDumpHandler.Message> {
 
-    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("create_skyblock_dump"));
+    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().id("create_skyblock_dump"));
 
     protected CreateSkyblockDumpHandler() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);

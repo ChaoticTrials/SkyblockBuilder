@@ -1,20 +1,18 @@
 package de.melanx.skyblockbuilder.coremods;
 
-import cpw.mods.modlauncher.api.ITransformer;
-import cpw.mods.modlauncher.api.ITransformerVotingContext;
-import cpw.mods.modlauncher.api.TargetType;
-import cpw.mods.modlauncher.api.TransformerVoteResult;
+import net.neoforged.neoforgespi.transformation.ProcessorName;
+import net.neoforged.neoforgespi.transformation.SimpleMethodProcessor;
+import net.neoforged.neoforgespi.transformation.SimpleTransformationContext;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
 
-public class WorldPresetCodec implements ITransformer<MethodNode> {
+public class WorldPresetCodec extends SimpleMethodProcessor {
 
-    @Nonnull
     @Override
-    public MethodNode transform(MethodNode method, ITransformerVotingContext context) {
+    public void transform(MethodNode method, SimpleTransformationContext context) {
         InsnList target = new InsnList();
         target.add(
                 new MethodInsnNode(Opcodes.INVOKESTATIC,
@@ -29,7 +27,7 @@ public class WorldPresetCodec implements ITransformer<MethodNode> {
                 FieldInsnNode field = (FieldInsnNode) insn;
                 if (field.owner.equals("net/minecraft/world/level/levelgen/presets/WorldPreset") && field.name.equals("DIRECT_CODEC")) {
                     method.instructions.insertBefore(insn, target);
-                    return method;
+                    return;
                 }
             }
         }
@@ -39,15 +37,9 @@ public class WorldPresetCodec implements ITransformer<MethodNode> {
 
     @Nonnull
     @Override
-    public TransformerVoteResult castVote(ITransformerVotingContext context) {
-        return TransformerVoteResult.YES;
-    }
-
-    @Nonnull
-    @Override
-    public Set<Target<MethodNode>> targets() {
+    public Set<Target> targets() {
         return Set.of(
-                Target.targetMethod(
+                new Target(
                         "net.minecraft.world.level.levelgen.presets.WorldPreset",
                         "<clinit>",
                         "()V"
@@ -55,9 +47,8 @@ public class WorldPresetCodec implements ITransformer<MethodNode> {
         );
     }
 
-    @Nonnull
     @Override
-    public TargetType<MethodNode> getTargetType() {
-        return TargetType.METHOD;
+    public ProcessorName name() {
+        return new ProcessorName("skyblockbuilder", "world_preset_codec");
     }
 }

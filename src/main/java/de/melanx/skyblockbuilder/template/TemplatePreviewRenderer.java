@@ -2,45 +2,55 @@ package de.melanx.skyblockbuilder.template;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.FakeLevel;
+import de.melanx.skyblockbuilder.client.render.TemplatePreviewPipRenderer;
+import de.melanx.skyblockbuilder.client.render.TemplatePreviewRenderState;
 import de.melanx.skyblockbuilder.config.common.ClientConfig;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockModelRenderState;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.apache.commons.lang3.Validate;
+import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
-import org.joml.Vector4f;
+import org.joml.Matrix4fc;
 import org.moddingx.libx.render.ClientTickHandler;
 
 import java.io.FileInputStream;
@@ -56,6 +66,10 @@ import java.util.*;
  */
 public class TemplatePreviewRenderer {
 
+    private static final float COS_30 = Mth.cos(30F * Mth.DEG_TO_RAD);
+    private static final float SIN_30 = 0.5F;
+    private static final Matrix4fc NO_TRANSFORMATION = new Matrix4f();
+
     private final ClientLevel clientLevel;
     private final TemplatePreview preview;
     private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
@@ -64,11 +78,13 @@ public class TemplatePreviewRenderer {
     private final transient Set<UUID> erroredEntities = Collections.newSetFromMap(new WeakHashMap<>());
     private final transient Set<StructureTemplate.StructureEntityInfo> loadFailedEntities = Collections.newSetFromMap(new WeakHashMap<>());
     private final transient Set<StructureTemplate.StructureEntityInfo> erroredEntityInfos = Collections.newSetFromMap(new WeakHashMap<>());
+    private final transient BlockModelRenderState blockModelRenderState = new BlockModelRenderState();
     private final boolean fixedPaletteIndex;
     private final boolean aprilUpsideDown;
     private int paletteIndex;
     private Area area;
     private DynamicTexture icon;
+    private Identifier iconLocation;
     private long lastTick;
 
     public TemplatePreviewRenderer(TemplatePreview preview, Area area) {
@@ -93,65 +109,49 @@ public class TemplatePreviewRenderer {
         this.area = area;
     }
 
-    protected void renderTemplate(GuiGraphics guiGraphics) {
+    /**
+     * Draws the structure into the picture in picture texture. Called by the
+     * {@link TemplatePreviewPipRenderer}, the pose stack is already
+     * centered in the target area and scaled to gui pixels.
+     */
+    public void renderTemplate(PoseStack poseStack, SubmitNodeCollector submitNodeCollector) {
         StructureTemplate template = this.preview.getRenderingTemplatePath();
         Vec3i size = template.getSize();
         int sizeX = size.getX();
         int sizeY = size.getY();
         int sizeZ = size.getZ();
-        float diagonal = (float) Math.sqrt(sizeX * sizeX + sizeZ * sizeZ);
-        float scaleX = this.area.width() / diagonal;
-        float scaleY = (float) this.area.height() / diagonal * 0.88F;
-        float scale = -Math.min(scaleX, scaleY);
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(this.area.minX + (float) this.area.width() / 2, this.area.minY + (float) this.area.height() / 2, 1000);
-        guiGraphics.pose().scale(scale, scale, scale);
+        float radius = (float) Math.sqrt(sizeX * sizeX + sizeZ * sizeZ) / 2F + 1; // +1 covers the offZ pivot offset
+        float projectedWidth = radius * 2F;
+        float projectedHeight = sizeY * COS_30 + radius * 2F * SIN_30 + sizeZ * 0.16F * COS_30;
+        float scale = Math.min(this.area.width() / projectedWidth, this.area.height() / projectedHeight);
+
+        poseStack.pushPose();
+        // the picture in picture pipeline already mirrors the z axis, so only x and y need to be flipped here
+        poseStack.scale(-scale, -scale, scale);
         if (ClientConfig.allowAprilFools && this.aprilUpsideDown) {
-            guiGraphics.pose().scale(1, -1, -1);
+            poseStack.scale(1, -1, -1);
         }
-        guiGraphics.pose().translate(-(float) sizeX / 2, -(float) sizeY / 2, 0);
+        poseStack.translate(-(float) sizeX / 2, -(float) sizeY / 2, 0);
 
-        // Initial eye pos somewhere off in the distance in the -Z direction
-        Vector4f eye = new Vector4f(0, 0, -1000, 1);
-        Matrix4f rotMat = new Matrix4f();
-        rotMat.identity();
-
-        // For each GL rotation done, track the opposite to keep the eye pos accurate
-        guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(-30F));
-        rotMat.rotation(Axis.XP.rotationDegrees(30));
-        guiGraphics.pose().translate(0, -sizeZ * 0.16F, 0);
+        poseStack.mulPose(Axis.XP.rotationDegrees(-30F));
+        poseStack.translate(0, -sizeZ * 0.16F, 0);
 
         float offX = (float) -sizeX / 2;
         float offZ = (float) -sizeZ / 2 + 1;
 
         float time = ClientTickHandler.ticksInGame();
-        guiGraphics.pose().translate(-offX, 0, -offZ);
-        guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(time));
-        rotMat.rotation(Axis.YP.rotationDegrees(-time));
-        guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(45));
-        rotMat.rotation(Axis.YP.rotationDegrees(-45));
-        guiGraphics.pose().translate(offX, 0, offZ);
+        poseStack.translate(-offX, 0, -offZ);
+        poseStack.mulPose(Axis.YP.rotationDegrees(time));
+        poseStack.mulPose(Axis.YP.rotationDegrees(45));
+        poseStack.translate(offX, 0, offZ);
 
-        // Finally, apply the rotations
-        eye.mul(rotMat);
-        this.renderElements(guiGraphics, template);
+        this.renderElements(poseStack, submitNodeCollector, template);
 
-        guiGraphics.pose().popPose();
-        if (ClientTickHandler.ticksInGame() % 40 == 0 && ClientTickHandler.ticksInGame() != this.lastTick) {
-            this.lastTick = ClientTickHandler.ticksInGame();
-            if (this.fixedPaletteIndex) {
-                return;
-            }
-
-            this.paletteIndex++;
-            if (this.paletteIndex >= template.palettes.size()) {
-                this.paletteIndex = 0;
-            }
-        }
+        poseStack.popPose();
     }
 
-    protected void renderIcon(GuiGraphics guiGraphics) {
+    private void renderIcon(GuiGraphicsExtractor guiGraphics) {
         if (this.icon == null) {
             this.loadIcon();
         }
@@ -161,109 +161,149 @@ public class TemplatePreviewRenderer {
         }
 
         NativeImage imagePixels = this.icon.getPixels();
+        //noinspection ConstantValue
         if (imagePixels == null) {
             return;
         }
 
-        //noinspection ConstantConditions
         int iconSize = imagePixels.getHeight();
         int renderSize = Math.min(this.area.width(), this.area.height());
 
         int x = this.area.width() < this.area.height() ? this.area.minX : this.area.minX + (this.area.maxX / 2) - (renderSize / 2);
         int y = this.area.width() > this.area.height() ? this.area.minY : this.area.minY + (this.area.maxY / 2) - (renderSize / 2);
-        guiGraphics.blit(this.preview.getIcon().location(), x, y, renderSize, renderSize, 0, 0, iconSize, iconSize, iconSize, iconSize);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, this.iconLocation, x, y, 0, 0, renderSize, renderSize, iconSize, iconSize, iconSize, iconSize);
     }
 
-    public void render(GuiGraphics guiGraphics) {
+    public void render(GuiGraphicsExtractor guiGraphics) {
         if (this.preview.getType() == TemplatePreview.PreviewType.IMAGE) {
             this.renderIcon(guiGraphics);
         } else {
-            this.renderTemplate(guiGraphics);
+            guiGraphics.submitPictureInPictureRenderState(new TemplatePreviewRenderState(
+                    this,
+                    this.area.minX, this.area.minY, this.area.maxX, this.area.maxY,
+                    1,
+                    new Matrix3x2f(guiGraphics.pose()),
+                    guiGraphics.peekScissorStack()
+            ));
+
+            this.tickPalette();
             if (!this.erroredTiles.isEmpty() || !this.erroredEntities.isEmpty() || !this.erroredEntityInfos.isEmpty() || !this.loadFailedEntities.isEmpty()) {
-                guiGraphics.drawWordWrap(Minecraft.getInstance().font, SkyComponents.SCREEN_ERROR_LOAD_TEMPLATE, 5, this.area.minY, this.area.maxX - 10, 0xFFFFFF);
+                guiGraphics.textWithWordWrap(Minecraft.getInstance().font, SkyComponents.SCREEN_ERROR_LOAD_TEMPLATE, 5, this.area.minY, this.area.maxX - 10, 0xFFFFFF);
             }
         }
     }
 
-    private void renderElements(GuiGraphics guiGraphics, StructureTemplate template) {
-        guiGraphics.pose().pushPose();
-        ItemBlockRenderTypes.setFancy(Minecraft.useFancyGraphics());
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-        guiGraphics.pose().translate(0, 0, -1);
+    private void tickPalette() {
+        if (ClientTickHandler.ticksInGame() % 40 == 0 && ClientTickHandler.ticksInGame() != this.lastTick) {
+            this.lastTick = ClientTickHandler.ticksInGame();
+            if (this.fixedPaletteIndex) {
+                return;
+            }
 
-        MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
-
-        this.doWorldRenderPass(guiGraphics, template, buffers);
-        this.doTileEntityRenderPass(guiGraphics, template, buffers);
-        this.doEntityRenderPass(guiGraphics, template, buffers);
-
-        buffers.endBatch();
-        guiGraphics.pose().popPose();
+            this.paletteIndex++;
+            if (this.paletteIndex >= this.preview.getRenderingTemplatePath().palettes.size()) {
+                this.paletteIndex = 0;
+            }
+        }
     }
 
-    private void doWorldRenderPass(GuiGraphics guiGraphics, StructureTemplate template, MultiBufferSource.BufferSource buffers) {
+    private void renderElements(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, StructureTemplate template) {
+        Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ENTITY_IN_UI);
+        CameraRenderState camera = new CameraRenderState();
+
+        this.doWorldRenderPass(poseStack, submitNodeCollector, template);
+        this.doTileEntityRenderPass(poseStack, submitNodeCollector, template, camera);
+        this.doEntityRenderPass(poseStack, submitNodeCollector, template, camera);
+    }
+
+    private void doWorldRenderPass(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, StructureTemplate template) {
         StructureTemplate.Palette palette = template.palettes.get(this.paletteIndex);
         for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
             BlockPos pos = blockInfo.pos();
-            BlockState bs = blockInfo.state();
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(pos.getX(), pos.getY(), pos.getZ());
-            this.renderForMultiblock(bs, pos, guiGraphics, buffers);
-            guiGraphics.pose().popPose();
+            BlockState state = blockInfo.state();
+            poseStack.pushPose();
+            poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
+            this.renderForMultiblock(state, pos, poseStack, submitNodeCollector);
+            poseStack.popPose();
         }
     }
 
-    private void renderForMultiblock(BlockState state, BlockPos pos, GuiGraphics guiGraphics, MultiBufferSource.BufferSource buffers) {
-        if (state.getRenderShape() == RenderShape.MODEL) {
-            BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-            BakedModel model = blockRenderer.getBlockModel(state);
-            for (RenderType layer : model.getRenderTypes(state, this.clientLevel.random, ModelData.EMPTY)) {
-                guiGraphics.pose().pushPose();
-                Lighting.setupForFlatItems();
-                Vec3 vec3 = state.getOffset(this.clientLevel, pos);
-                guiGraphics.pose().translate(vec3.x, vec3.y, vec3.z);
-                blockRenderer.renderSingleBlock(state, guiGraphics.pose(), buffers, (int) (LightTexture.FULL_BLOCK * 0.8), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, layer);
-                guiGraphics.pose().popPose();
-            }
+    private void renderForMultiblock(BlockState state, BlockPos pos, PoseStack poseStack, SubmitNodeCollector submitNodeCollector) {
+        if (state.getRenderShape() != RenderShape.MODEL) {
+            return;
         }
+
+        BlockStateModel model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state);
+        BlockModelRenderState renderState = this.blockModelRenderState;
+        renderState.clear();
+
+        boolean translucent = model.hasMaterialFlag(BlockAndTintGetter.EMPTY, BlockPos.ZERO, state, BakedQuad.FLAG_TRANSLUCENT);
+        List<BlockStateModelPart> parts = renderState.setupModel(TemplatePreviewRenderer.NO_TRANSFORMATION, translucent);
+        model.collectParts(BlockAndTintGetter.EMPTY, BlockPos.ZERO, state, renderState.scratchRandomSource(state.getSeed(pos)), parts);
+        for (BlockTintSource tint : Minecraft.getInstance().getBlockColors().getTintSources(state)) {
+            renderState.tintLayers().add(tint.color(state));
+        }
+
+        if (renderState.isEmpty()) {
+            return;
+        }
+
+        poseStack.pushPose();
+        Vec3 offset = state.getOffset(pos);
+        poseStack.translate(offset.x, offset.y, offset.z);
+        renderState.submitMultiLayer(poseStack, submitNodeCollector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+        poseStack.popPose();
     }
 
-    private void doTileEntityRenderPass(GuiGraphics guiGraphics, StructureTemplate template, MultiBufferSource buffers) {
+    private void doTileEntityRenderPass(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, StructureTemplate template, CameraRenderState camera) {
+        BlockEntityRenderDispatcher dispatcher = Minecraft.getInstance().getBlockEntityRenderDispatcher();
         StructureTemplate.Palette palette = template.palettes.get(this.paletteIndex);
         for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
             BlockPos pos = blockInfo.pos();
             BlockState state = blockInfo.state();
 
             BlockEntity te = null;
-            if (state.getBlock() instanceof EntityBlock) {
-                te = this.teCache.computeIfAbsent(pos.immutable(), p -> ((EntityBlock) state.getBlock()).newBlockEntity(pos, state));
+            if (state.getBlock() instanceof EntityBlock entityBlock) {
+                te = this.teCache.computeIfAbsent(pos.immutable(), p -> entityBlock.newBlockEntity(pos, state));
             }
 
-            if (te != null && !this.erroredTiles.contains(te)) {
-                te.setLevel(this.clientLevel);
+            if (te == null || this.erroredTiles.contains(te)) {
+                continue;
+            }
 
-                // fake cached state in case the renderer checks it as we don't want to query the actual world
-                //noinspection deprecation
-                te.setBlockState(state);
+            te.setLevel(this.clientLevel);
 
-                guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(pos.getX(), pos.getY(), pos.getZ());
-                try {
-                    BlockEntityRenderer<BlockEntity> renderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(te);
-                    if (renderer != null) {
-                        renderer.render(te, 0, guiGraphics.pose(), buffers, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY);
-                    }
-                } catch (Exception e) {
-                    this.erroredTiles.add(te);
-                    SkyblockBuilder.getLogger().error("An exception occurred rendering tile entity", e);
-                } finally {
-                    guiGraphics.pose().popPose();
-                }
+            // fake cached state in case the renderer checks it as we don't want to query the actual world
+            //noinspection deprecation
+            te.setBlockState(state);
+
+            poseStack.pushPose();
+            poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
+            try {
+                this.submitBlockEntity(dispatcher, te, poseStack, submitNodeCollector, camera);
+            } catch (Exception e) {
+                this.erroredTiles.add(te);
+                SkyblockBuilder.getLogger().error("An exception occurred rendering tile entity", e);
+            } finally {
+                poseStack.popPose();
             }
         }
     }
 
-    private void doEntityRenderPass(GuiGraphics guiGraphics, StructureTemplate template, MultiBufferSource buffers) {
+    private <T extends BlockEntity, S extends BlockEntityRenderState> void submitBlockEntity(BlockEntityRenderDispatcher dispatcher, T blockEntity, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
+        BlockEntityRenderer<T, S> renderer = dispatcher.getRenderer(blockEntity);
+        if (renderer == null) {
+            return;
+        }
+
+        S renderState = renderer.createRenderState();
+        renderer.extractRenderState(blockEntity, renderState, 0, Vec3.ZERO, null);
+        renderState.lightCoords = LightCoordsUtil.FULL_BRIGHT;
+        renderer.submit(renderState, poseStack, submitNodeCollector, camera);
+    }
+
+    private void doEntityRenderPass(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, StructureTemplate template, CameraRenderState camera) {
+        EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         for (StructureTemplate.StructureEntityInfo entityInfo : template.entityInfoList) {
             if (this.erroredEntityInfos.contains(entityInfo)) {
                 continue;
@@ -271,31 +311,7 @@ public class TemplatePreviewRenderer {
 
             Entity entity;
             try {
-                entity = this.entityCache.computeIfAbsent(entityInfo, info -> {
-                    Optional<Entity> maybe = EntityType.by(info.nbt).map(type -> type.create(this.clientLevel));
-                    if (maybe.isEmpty()) {
-                        SkyblockBuilder.getLogger().error("Could not create entity of type {}", info.nbt.getString("id"));
-                        this.erroredEntityInfos.add(info);
-                        return null;
-                    }
-
-                    Entity e = maybe.get();
-                    try {
-                        try {
-                            e.load(info.nbt);
-                        } catch (Exception ex) {
-                            this.setPosition(e, info.nbt);
-                            this.loadFailedEntities.add(info);
-                            SkyblockBuilder.getLogger().error("An exception occurred loading entity: {}", String.valueOf(ex));
-                        }
-
-                        return e;
-                    } catch (Exception ex) {
-                        this.loadFailedEntities.add(info);
-                        SkyblockBuilder.getLogger().error("An exception occurred creating entity", ex);
-                        return null;
-                    }
-                });
+                entity = this.entityCache.computeIfAbsent(entityInfo, this::loadEntity);
 
                 if (entity == null) {
                     continue;
@@ -311,41 +327,48 @@ public class TemplatePreviewRenderer {
             }
 
             Vec3 pos = entityInfo.pos;
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(pos.x(), pos.y(), pos.z());
+            poseStack.pushPose();
+            poseStack.translate(pos.x(), pos.y(), pos.z());
 
             try {
-                EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-                entityRenderDispatcher.prepare(this.clientLevel, Minecraft.getInstance().gameRenderer.getMainCamera(), entity);
-                EntityRenderer<? super Entity> renderer = entityRenderDispatcher.getRenderer(entity);
-                renderer.render(entity, entity.getYRot(), 0, guiGraphics.pose(), buffers, LightTexture.pack(15, 15));
+                EntityRenderState renderState = dispatcher.extractEntity(entity, 0);
+                renderState.shadowPieces.clear();
+                renderState.outlineColor = EntityRenderState.NO_OUTLINE;
+                renderState.lightCoords = LightCoordsUtil.FULL_BRIGHT;
+                dispatcher.submit(renderState, camera, 0, 0, 0, poseStack, submitNodeCollector);
             } catch (Exception e) {
                 this.erroredEntities.add(entity.getUUID());
                 SkyblockBuilder.getLogger().error("An exception occurred rendering entity", e);
             } finally {
-                guiGraphics.pose().popPose();
+                poseStack.popPose();
             }
         }
     }
 
-    private void setPosition(Entity entity, CompoundTag compound) {
-        ListTag pos = compound.getList("Pos", CompoundTag.TAG_DOUBLE);
-        ListTag rot = compound.getList("Rotation", CompoundTag.TAG_FLOAT);
-        double maxHorizontalPosition = 30_000_000;
-        entity.setPosRaw(
-                Mth.clamp(pos.getDouble(0), -maxHorizontalPosition, maxHorizontalPosition),
-                Mth.clamp(pos.getDouble(1), -20_000_000, 20_000_000),
-                Mth.clamp(pos.getDouble(2), -maxHorizontalPosition, maxHorizontalPosition)
-        );
-        entity.setYRot(rot.getFloat(0));
-        entity.setXRot(rot.getFloat(1));
+    private Entity loadEntity(StructureTemplate.StructureEntityInfo info) {
+        try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(SkyblockBuilder.getLogger())) {
+            ValueInput input = TagValueInput.create(reporter, this.clientLevel.registryAccess(), info.nbt);
+            Optional<Entity> entity = EntityType.create(input, this.clientLevel, EntitySpawnReason.LOAD);
+            if (entity.isEmpty()) {
+                SkyblockBuilder.getLogger().error("Could not create entity of type {}", info.nbt.getString("id"));
+                this.erroredEntityInfos.add(info);
+                return null;
+            }
+
+            return entity.get();
+        } catch (Exception e) {
+            this.loadFailedEntities.add(info);
+            SkyblockBuilder.getLogger().error("An exception occurred loading entity", e);
+            return null;
+        }
     }
 
     private void loadIcon() {
-        ResourceLocation iconLocation = this.preview.getIcon().location();
+        Identifier iconLocation = this.preview.getIcon().location();
         if (this.preview.getType() != TemplatePreview.PreviewType.IMAGE) {
             Minecraft.getInstance().textureManager.release(iconLocation);
             this.icon = null;
+            this.iconLocation = null;
             return;
         }
 
@@ -356,11 +379,12 @@ public class TemplatePreviewRenderer {
             try {
                 NativeImage image = NativeImage.read(in);
                 Validate.validState(image.getWidth() == image.getHeight(), "Height and width must be equal.");
-                DynamicTexture tempTexture = new DynamicTexture(image);
                 if (this.fixedPaletteIndex) {
                     iconLocation = iconLocation.withSuffix("_" + this.paletteIndex);
                 }
-                Minecraft.getInstance().textureManager.register(iconLocation, tempTexture);
+                Identifier registeredLocation = iconLocation;
+                DynamicTexture tempTexture = new DynamicTexture(registeredLocation::toString, image);
+                Minecraft.getInstance().textureManager.register(registeredLocation, tempTexture);
                 texture = tempTexture;
             } catch (Throwable throwable) {
                 try {
@@ -374,6 +398,7 @@ public class TemplatePreviewRenderer {
 
             in.close();
             this.icon = texture;
+            this.iconLocation = iconLocation;
         } catch (Throwable throwable) {
             SkyblockBuilder.getLogger().error("Invalid icon for template {}", this.preview, throwable);
         }

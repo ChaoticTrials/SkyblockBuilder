@@ -1,6 +1,5 @@
 package de.melanx.skyblockbuilder.commands.helper;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -16,7 +15,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.UserNameToIdResolver;
 import net.minecraft.util.StringUtil;
 
 import java.util.Comparator;
@@ -72,13 +72,12 @@ public class ListCommand {
         }
 
         Team team = validationResult.team();
-        GameProfileCache profileCache = source.getServer().getProfileCache();
-        assert profileCache != null;
+        UserNameToIdResolver profileCache = source.getServer().services().nameToIdCache();
         source.sendSuccess(() -> SkyComponents.INFO_TEAM_DETAILED.apply(team.getName(), team.getPlayers().size()), false);
         team.getPlayers().forEach(id -> {
-            Optional<GameProfile> profile = profileCache.get(id);
+            Optional<NameAndId> profile = profileCache.get(id);
             if (profile.isPresent()) {
-                String name = profile.get().getName();
+                String name = profile.get().name();
                 if (!StringUtil.isNullOrEmpty(name)) {
                     source.sendSuccess(() -> Component.literal("- " + name), false);
                 }

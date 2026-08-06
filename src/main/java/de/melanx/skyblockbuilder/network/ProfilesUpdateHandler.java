@@ -3,8 +3,9 @@ package de.melanx.skyblockbuilder.network;
 import com.mojang.authlib.GameProfile;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -15,11 +16,10 @@ import org.moddingx.libx.network.PacketHandler;
 import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class ProfilesUpdateHandler extends PacketHandler<ProfilesUpdateHandler.Message> {
 
-    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("profiles_update"));
+    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().id("profiles_update"));
 
     protected ProfilesUpdateHandler() {
         super(TYPE, PacketFlow.CLIENTBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -36,34 +36,15 @@ public class ProfilesUpdateHandler extends PacketHandler<ProfilesUpdateHandler.M
             this.profiles = Set.copyOf(profiles);
         }
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, ProfilesUpdateHandler.Message> CODEC = StreamCodec.of(
-                (buffer, msg) -> {
-                    int size = msg.profiles.size();
-                    buffer.writeVarInt(size);
-                    msg.profiles.forEach(profile -> {
-                        CompoundTag tag = new CompoundTag();
-                        tag.putUUID("Id", profile.getId());
-                        tag.putString("Name", profile.getName());
-                        buffer.writeNbt(tag);
-                    });
-                },
-                buffer -> {
-                    int size = buffer.readVarInt();
-                    Set<GameProfile> profiles = new HashSet<>();
-                    for (int i = 0; i < size; i++) {
-                        CompoundTag tag = buffer.readNbt();
-                        if (tag == null) {
-                            continue;
-                        }
-
-                        UUID id = tag.getUUID("Id");
-                        String name = tag.getString("Name");
-                        profiles.add(new GameProfile(id, name));
-                    }
-
-                    return new ProfilesUpdateHandler.Message(profiles);
-                }
+        private static final StreamCodec<RegistryFriendlyByteBuf, GameProfile> PROFILE = StreamCodec.composite(
+                UUIDUtil.STREAM_CODEC, GameProfile::id,
+                ByteBufCodecs.STRING_UTF8, GameProfile::name,
+                GameProfile::new
         );
+
+        private static final StreamCodec<RegistryFriendlyByteBuf, Set<GameProfile>> PROFILES = ByteBufCodecs.collection(HashSet::new, PROFILE);
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, ProfilesUpdateHandler.Message> CODEC = PROFILES.map(Message::new, Message::profiles);
 
         @Nonnull
         @Override

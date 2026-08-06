@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 public class CommandUtil {
 
     public static boolean mayNotTeleport(CommandSourceStack source, SkyblockSavedData data, ServerPlayer player) {
-        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().location())) {
+        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(player.level().dimension().identifier())) {
             source.sendFailure(SkyComponents.ERROR_TELEPORTATION_NOT_ALLOWED_DIMENSION);
             return true;
         }

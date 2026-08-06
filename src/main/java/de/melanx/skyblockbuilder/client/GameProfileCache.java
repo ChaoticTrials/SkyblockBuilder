@@ -2,7 +2,7 @@ package de.melanx.skyblockbuilder.client;
 
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.util.Locale;
 import java.util.Map;
@@ -16,8 +16,8 @@ public class GameProfileCache {
 
     public static void addProfiles(Set<GameProfile> profiles) {
         for (GameProfile profile : profiles) {
-            uuidProfiles.put(profile.getId(), profile);
-            nameProfiles.put(profile.getName().toLowerCase(Locale.ROOT), profile);
+            uuidProfiles.put(profile.id(), profile);
+            nameProfiles.put(profile.name().toLowerCase(Locale.ROOT), profile);
         }
     }
 
@@ -35,7 +35,7 @@ public class GameProfileCache {
             return "";
         }
 
-        return profile.getName();
+        return profile.name();
     }
 
     public static UUID getId(String name) {
@@ -44,6 +44,6 @@ public class GameProfileCache {
             return Util.NIL_UUID;
         }
 
-        return profile.getId();
+        return profile.id();
     }
 }

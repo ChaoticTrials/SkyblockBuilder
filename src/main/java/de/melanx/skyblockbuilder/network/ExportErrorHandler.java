@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 
 public class ExportErrorHandler extends PacketHandler<ExportErrorHandler.Message> {
 
-    public static final CustomPacketPayload.Type<ExportErrorHandler.Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("export_error"));
+    public static final CustomPacketPayload.Type<ExportErrorHandler.Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().id("export_error"));
 
     protected ExportErrorHandler() {
         super(TYPE, PacketFlow.CLIENTBOUND, ExportErrorHandler.Message.CODEC, HandlerThread.MAIN);

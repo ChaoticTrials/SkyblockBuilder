@@ -1,6 +1,5 @@
 package de.melanx.skyblockbuilder.client.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.template.TemplatePreview;
@@ -8,16 +7,18 @@ import de.melanx.skyblockbuilder.template.TemplatePreviewRenderer;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,7 +29,7 @@ import java.util.function.BiConsumer;
 
 public class CustomizeSkyblockScreen extends Screen {
 
-    private static final ResourceLocation SELECT_PALETTE = ResourceLocation.withDefaultNamespace("textures/gui/sprites/widget/page_forward.png");
+    private static final Identifier SELECT_PALETTE = Identifier.withDefaultNamespace("textures/gui/sprites/widget/page_forward.png");
     private final Screen parent;
     private final List<ConfiguredTemplate> templateMap;
     private final RegistryAccess registryAccess;
@@ -101,12 +102,21 @@ public class CustomizeSkyblockScreen extends Screen {
     }
 
     @Override
-    public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        this.renderMenuBackground(guiGraphics);
-        this.list.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
+    public void extractRenderState(@Nonnull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+        this.extractMenuBackground(guiGraphics);
+        this.list.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.centeredText(this.font, this.title, this.width / 2, 8, Color.WHITE.getRGB());
         this.list.renderEntries(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    protected void extractBlurredBackground(@Nonnull GuiGraphicsExtractor graphics) {
+        if (Minecraft.getInstance().screen != this) {
+            return;
+        }
+
+        super.extractBlurredBackground(graphics);
     }
 
     class TemplateList extends ObjectSelectionList<TemplateList.TemplateEntry> {
@@ -140,11 +150,11 @@ public class CustomizeSkyblockScreen extends Screen {
         }
 
         @Override
-        public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        public void extractWidgetRenderState(@Nonnull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+            this.hovered = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
             boolean hasSelectedEntry = this.getSelected() != null;
-            this.renderListBackground(guiGraphics);
+            this.extractListBackground(guiGraphics);
             if (hasSelectedEntry || this.configuredStructureRenderer != null) {
-                RenderSystem.enableBlend();
                 TemplatePreviewRenderer renderer;
                 if (hasSelectedEntry) {
                     String templateName = this.getSelected().name.getString();
@@ -155,24 +165,22 @@ public class CustomizeSkyblockScreen extends Screen {
                     renderer = this.configuredStructureRenderer;
                 }
 
-                guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(0, 0, 1000);
+                guiGraphics.pose().pushMatrix();
                 renderer.render(guiGraphics);
-                guiGraphics.pose().popPose();
-                RenderSystem.disableBlend();
+                guiGraphics.pose().popMatrix();
             }
         }
 
         @Override
-        protected void renderListItems(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        protected void extractListItems(@Nonnull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
             // delayed to #renderEntries to call it later
         }
 
-        protected void renderEntries(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        protected void renderEntries(@Nonnull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
             this.enableScissor(guiGraphics);
-            super.renderListItems(guiGraphics, mouseX, mouseY, partialTick);
+            super.extractListItems(guiGraphics, mouseX, mouseY, partialTick);
             guiGraphics.disableScissor();
-            this.renderListSeparators(guiGraphics);
+            this.extractListSeparators(guiGraphics);
         }
 
         public void setConfiguredStructureRenderer(@Nullable TemplatePreviewRenderer templateRenderer) {
@@ -206,45 +214,48 @@ public class CustomizeSkyblockScreen extends Screen {
             }
 
             @Override
-            public void render(@Nonnull GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
-                guiGraphics.drawString(CustomizeSkyblockScreen.this.font, this.name, left + 5, top + 7, Color.WHITE.getRGB());
-                guiGraphics.drawString(CustomizeSkyblockScreen.this.font, this.desc, left + 5, top + 22, Color.GRAY.getRGB());
+            public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float a) {
+                int left = this.getX();
+                int top = this.getY();
+
+                guiGraphics.text(CustomizeSkyblockScreen.this.font, this.name, left + 5, top + 7, Color.WHITE.getRGB());
+                guiGraphics.text(CustomizeSkyblockScreen.this.font, this.desc, left + 5, top + 22, Color.GRAY.getRGB());
 
                 if (this.template.canSelectPalette()) {
-                    int textureX = left + width - 28;
-                    int textureY = top + 1;
+                    int textureX = this.getX() + this.getWidth() - 28;
+                    int textureY = top + 2;
 
-                    guiGraphics.blit(SELECT_PALETTE, textureX, textureY, 0, 0, 23, 13, 23, 13);
+                    guiGraphics.blit(RenderPipelines.GUI_TEXTURED, SELECT_PALETTE, textureX, textureY, 0, 0, 23, 13, 23, 13);
 
                     if (this.isMouseOverPaletteSelection(textureX, textureY, mouseX, mouseY)) {
-                        guiGraphics.renderTooltip(CustomizeSkyblockScreen.this.font, SkyComponents.SCREEN_SELECT_PALETTE, mouseX, mouseY);
+                        guiGraphics.setTooltipForNextFrame(SkyComponents.SCREEN_SELECT_PALETTE, mouseX, mouseY);
                     }
                 }
 
-                if (isMouseOver && this.tooLong) {
-                    guiGraphics.renderTooltip(CustomizeSkyblockScreen.this.font, this.template.getDescriptionComponent(), mouseX, mouseY);
+                if (hovered && this.tooLong) {
+                    guiGraphics.setTooltipForNextFrame(this.template.getDescriptionComponent(), mouseX, mouseY);
                 }
             }
 
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (button == 0) {
-                    if (this.template.canSelectPalette()
-                            && this.isMouseOverPaletteSelection(
-                            TemplateList.this.getRowLeft() + TemplateList.this.getRowWidth() - 28,
-                            TemplateList.this.getRowTop(this.index) + 1,
-                            mouseX, mouseY
-                    )) {
-                        Minecraft.getInstance().pushGuiLayer(
-                                new ChoosePaletteScreen(this.template, CustomizeSkyblockScreen.this.registryAccess, this::setPaletteIndex, this::resetPaletteIndex)
-                        );
-                    }
-
-                    TemplateList.this.setSelected(this);
-                    return true;
-                } else {
+            public boolean mouseClicked(@Nonnull MouseButtonEvent event, boolean doubleClick) {
+                if (event.button() != 0) {
                     return false;
                 }
+
+                if (this.template.canSelectPalette()
+                        && this.isMouseOverPaletteSelection(
+                        TemplateList.this.getRowLeft() + TemplateList.this.getRowWidth() - 28,
+                        TemplateList.this.getRowTop(this.index) + 1,
+                        event.x(), event.y()
+                )) {
+                    Minecraft.getInstance().pushGuiLayer(
+                            new ChoosePaletteScreen(this.template, CustomizeSkyblockScreen.this.registryAccess, this::setPaletteIndex, this::resetPaletteIndex)
+                    );
+                }
+
+                TemplateList.this.setSelected(this);
+                return true;
             }
 
             @Override

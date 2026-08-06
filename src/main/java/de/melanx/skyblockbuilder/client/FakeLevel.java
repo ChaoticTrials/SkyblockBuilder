@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.CommonListenerCookie;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.multiplayer.LevelLoadTracker;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.Connection;
@@ -24,20 +24,16 @@ import java.util.Map;
 
 public class FakeLevel extends ClientLevel {
 
-    private static final ResourceKey<Level> FAKE_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource("fake"));
+    private static final ResourceKey<Level> FAKE_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().id("fake"));
     private static FakeLevel instance;
 
     public FakeLevel(RegistryAccess registryAccess) {
         super(FakeLevel.fakeClientPacketListener(registryAccess),
                 new ClientLevelData(Difficulty.EASY, false, true),
                 FakeLevel.FAKE_LEVEL_KEY,
-                registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
-                0, 0, Minecraft.getInstance()::getProfiler,
-                new LevelRenderer(Minecraft.getInstance(),
-                        Minecraft.getInstance().getEntityRenderDispatcher(),
-                        Minecraft.getInstance().getBlockEntityRenderDispatcher(),
-                        Minecraft.getInstance().renderBuffers()),
-                false, 0);
+                registryAccess.lookupOrThrow(Registries.DIMENSION_TYPE).getOrThrow(BuiltinDimensionTypes.OVERWORLD),
+                0, 0, Minecraft.getInstance().levelRenderer,
+                false, 0, 63);
     }
 
     public static FakeLevel getInstance(RegistryAccess registryAccess) {
@@ -50,11 +46,12 @@ public class FakeLevel extends ClientLevel {
 
     private static CommonListenerCookie getFakeListenerCookie(RegistryAccess registryAccess) {
         return new CommonListenerCookie(
+                new LevelLoadTracker(),
                 Minecraft.getInstance().getGameProfile(),
                 Minecraft.getInstance().getTelemetryManager().createWorldSessionManager(false, null, null),
                 registryAccess.freeze(),
                 FeatureFlags.DEFAULT_FLAGS,
-                null, null, null, Map.of(), null, false, Map.of(), ServerLinks.EMPTY, ConnectionType.OTHER
+                null, null, null, Map.of(), null, Map.of(), ServerLinks.EMPTY, Map.of(), false, ConnectionType.OTHER
         );
     }
 

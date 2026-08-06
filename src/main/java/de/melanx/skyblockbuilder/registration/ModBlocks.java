@@ -9,5 +9,5 @@ import org.moddingx.libx.annotation.registration.RegisterClass;
 @RegisterClass(registry = "BLOCK")
 public class ModBlocks {
 
-    public static final Block spawnBlock = new SpawnBlock(SkyblockBuilder.getInstance(), BlockBehaviour.Properties.of().noCollission().instabreak());
+    public static final Block spawnBlock = new SpawnBlock(SkyblockBuilder.getInstance(), BlockBehaviour.Properties.of().noCollision().instabreak());
 }

@@ -12,8 +12,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.loading.FMLPaths;
@@ -26,7 +26,7 @@ import java.nio.file.Path;
 
 public class SaveStructureHandler extends PacketHandler<SaveStructureHandler.Message> {
 
-    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("save_structure"));
+    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().id("save_structure"));
 
     protected SaveStructureHandler() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -38,16 +38,15 @@ public class SaveStructureHandler extends PacketHandler<SaveStructureHandler.Mes
             return;
         }
 
-        if (!player.hasPermissions(2)) {
+        if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
             player.sendSystemMessage(SkyComponents.NOT_ALLOWED_GENERIC);
             SkyblockBuilder.getLogger().warn("Player {} tried to save a structure without permission", player.getGameProfile());
             return;
         }
 
-        ServerLevel level = (ServerLevel) player.level();
-        String name = ItemStructureSaver.saveSchematic(player, level, msg.stack, msg.settings);
+        String name = ItemStructureSaver.saveSchematic(player, player.level(), msg.stack, msg.settings);
         if (name == null) {
-            player.displayClientMessage(Component.literal("Failed to save, look at latest.log for more information").withStyle(ChatFormatting.RED), false);
+            player.sendSystemMessage(Component.literal("Failed to save, look at latest.log for more information").withStyle(ChatFormatting.RED), false);
             return;
         }
 
@@ -60,7 +59,7 @@ public class SaveStructureHandler extends PacketHandler<SaveStructureHandler.Mes
         Path savedPath = FMLPaths.GAMEDIR.get().relativize(fullPath);
         MutableComponent component = SkyComponents.SCHEMATIC_SAVED.apply(savedPath.toString().replace('\\', '/'));
         SkyblockBuilder.getLogger().info("Saved structure (and spawn points) to: {}", fullPath);
-        player.displayClientMessage(component, true);
+        player.sendSystemMessage(component, true);
     }
 
     public record Message(ItemStack stack, StructureSaverSettings settings) implements CustomPacketPayload {

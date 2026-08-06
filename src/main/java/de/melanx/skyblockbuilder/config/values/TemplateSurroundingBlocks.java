@@ -3,12 +3,10 @@ package de.melanx.skyblockbuilder.config.values;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.random.Weight;
-import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.random.Weighted;
 import net.minecraft.world.level.block.Block;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,12 +30,12 @@ public record TemplateSurroundingBlocks(int margin, List<WeightedBlock> blocks) 
                 }
 
                 String blockId = blocksObject.get("block").getAsString();
-                ResourceLocation blockLocation = ResourceLocation.tryParse(blockId);
+                Identifier blockLocation = Identifier.tryParse(blockId);
                 if (blockLocation == null) {
                     throw new IllegalArgumentException("Block id must be a valid resource location");
                 }
 
-                Block block = BuiltInRegistries.BLOCK.get(blockLocation);
+                Block block = BuiltInRegistries.BLOCK.getValue(blockLocation);
                 blocks.add(new WeightedBlock(block, weight));
             });
         }
@@ -56,8 +54,8 @@ public record TemplateSurroundingBlocks(int margin, List<WeightedBlock> blocks) 
             var blocksArray = new JsonArray();
             surroundingBlocks.blocks().forEach(weightedBlock -> {
                 JsonObject blockObject = new JsonObject();
-                blockObject.addProperty("block", BuiltInRegistries.BLOCK.getKey(weightedBlock.block).toString());
-                blockObject.addProperty("weight", weightedBlock.weight);
+                blockObject.addProperty("block", BuiltInRegistries.BLOCK.getKey(weightedBlock.block()).toString());
+                blockObject.addProperty("weight", weightedBlock.weight());
                 blocksArray.add(blockObject);
             });
             json.add("blocks", blocksArray);
@@ -66,12 +64,10 @@ public record TemplateSurroundingBlocks(int margin, List<WeightedBlock> blocks) 
         return json;
     }
 
-    public record WeightedBlock(Block block, int weight) implements WeightedEntry {
+    public record WeightedBlock(Block block, int weight) {
 
-        @Nonnull
-        @Override
-        public Weight getWeight() {
-            return Weight.of(this.weight);
+        public Weighted<Block> weighted() {
+            return new Weighted<>(this.block, this.weight);
         }
     }
 }

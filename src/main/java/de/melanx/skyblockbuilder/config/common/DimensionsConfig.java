@@ -1,6 +1,6 @@
 package de.melanx.skyblockbuilder.config.common;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
 
@@ -62,5 +62,5 @@ public class DimensionsConfig {
         public static boolean keepMainIsland = true;
     }
 
-    public record UnregisteredCenterBiome(ResourceLocation id, int radius) {}
+    public record UnregisteredCenterBiome(Identifier id, int radius) {}
 }

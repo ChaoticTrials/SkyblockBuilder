@@ -2,11 +2,10 @@ package de.melanx.skyblockbuilder.data;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.UUIDUtil;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -23,22 +22,45 @@ public class SkyMeta {
     private static final String LAST_SPAWN_TELEPORT = "last_spawn_teleport";
     private static final String LAST_VISIT_TELEPORT = "last_visit_teleport";
 
+    public static final Codec<SkyMeta> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            UUIDUtil.CODEC.fieldOf(OWNER_ID).forGetter(meta -> meta.owner),
+            UUIDUtil.CODEC.optionalFieldOf(TEAM_ID, SkyblockSavedData.SPAWN_ID).forGetter(meta -> meta.teamId),
+            UUIDUtil.CODEC.listOf().optionalFieldOf(PREVIOUS_TEAM_IDS, List.of()).forGetter(meta -> List.copyOf(meta.previousTeamIds)),
+            UUIDUtil.CODEC.listOf().optionalFieldOf(INVITATIONS, List.of()).forGetter(meta -> List.copyOf(meta.invites)),
+            Codec.LONG.optionalFieldOf(LAST_HOME_TELEPORT, 0L).forGetter(meta -> meta.lastHomeTeleport),
+            Codec.LONG.optionalFieldOf(LAST_SPAWN_TELEPORT, 0L).forGetter(meta -> meta.lastSpawnTeleport),
+            Codec.LONG.optionalFieldOf(LAST_VISIT_TELEPORT, 0L).forGetter(meta -> meta.lastVisitTeleport)
+    ).apply(instance, SkyMeta::new));
+
     private final Set<UUID> previousTeamIds = Sets.newHashSet();
     private final List<UUID> invites = Lists.newArrayList();
-    private final SkyblockSavedData data;
-    private UUID owner;
+    private final UUID owner;
+    private SkyblockSavedData data;
     private UUID teamId = SkyblockSavedData.SPAWN_ID;
     private long lastHomeTeleport;
     private long lastSpawnTeleport;
     private long lastVisitTeleport;
 
-    public static SkyMeta get(SkyblockSavedData data, @Nonnull CompoundTag nbt) {
-        return new SkyMeta(data, null).load(nbt);
-    }
-
     public SkyMeta(SkyblockSavedData data, UUID owner) {
         this.data = data;
         this.owner = owner;
+    }
+
+    private SkyMeta(UUID owner, UUID teamId, List<UUID> previousTeamIds, List<UUID> invites,
+            long lastHomeTeleport, long lastSpawnTeleport, long lastVisitTeleport) {
+        // decoded metas are unbound; SkyblockSavedData calls bindData once it exists
+        this.data = null;
+        this.owner = owner;
+        this.teamId = teamId;
+        this.previousTeamIds.addAll(previousTeamIds);
+        this.invites.addAll(invites);
+        this.lastHomeTeleport = lastHomeTeleport;
+        this.lastSpawnTeleport = lastSpawnTeleport;
+        this.lastVisitTeleport = lastVisitTeleport;
+    }
+
+    void bindData(SkyblockSavedData data) {
+        this.data = data;
     }
 
     @Nonnull
@@ -123,51 +145,6 @@ public class SkyMeta {
         };
 
         return (lastTeleport == 0 ? cooldown : gameTime) - lastTeleport >= cooldown;
-    }
-
-    public SkyMeta load(@Nonnull CompoundTag nbt) {
-        this.owner = nbt.getUUID(OWNER_ID);
-        this.teamId = nbt.getUUID(TEAM_ID);
-
-        this.previousTeamIds.clear();
-        for (Tag tag : nbt.getList(PREVIOUS_TEAM_IDS, Tag.TAG_INT_ARRAY)) {
-            this.previousTeamIds.add(NbtUtils.loadUUID(tag));
-        }
-
-        this.invites.clear();
-        for (Tag tag : nbt.getList(INVITATIONS, Tag.TAG_INT_ARRAY)) {
-            this.invites.add(NbtUtils.loadUUID(tag));
-        }
-
-        this.lastHomeTeleport = nbt.getLong(LAST_HOME_TELEPORT);
-        this.lastSpawnTeleport = nbt.getLong(LAST_SPAWN_TELEPORT);
-        this.lastVisitTeleport = nbt.getLong(LAST_VISIT_TELEPORT);
-
-        return this;
-    }
-
-    @Nonnull
-    public CompoundTag save() {
-        CompoundTag nbt = new CompoundTag();
-        nbt.putUUID(OWNER_ID, this.owner);
-        nbt.putUUID(TEAM_ID, this.teamId);
-
-        ListTag prevTeamIds = new ListTag();
-        for (UUID id : this.previousTeamIds) {
-            prevTeamIds.add(NbtUtils.createUUID(id));
-        }
-
-        ListTag invitationTeams = new ListTag();
-        for (UUID id : this.invites) {
-            invitationTeams.add(NbtUtils.createUUID(id));
-        }
-
-        nbt.put(PREVIOUS_TEAM_IDS, prevTeamIds);
-        nbt.put(INVITATIONS, invitationTeams);
-        nbt.putLong(LAST_HOME_TELEPORT, this.lastHomeTeleport);
-        nbt.putLong(LAST_SPAWN_TELEPORT, this.lastSpawnTeleport);
-        nbt.putLong(LAST_VISIT_TELEPORT, this.lastVisitTeleport);
-        return nbt;
     }
 
     public enum TeleportType {

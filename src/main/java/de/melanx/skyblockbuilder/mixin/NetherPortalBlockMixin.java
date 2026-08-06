@@ -7,31 +7,47 @@ import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.NetherPortalTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
-import net.minecraft.BlockUtil;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.BlockUtil;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(NetherPortalBlock.class)
 public abstract class NetherPortalBlockMixin {
+
+    @Redirect(
+            method = "getPortalDestination",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/MinecraftServer;getLevel(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/server/level/ServerLevel;"
+            )
+    )
+    private ServerLevel getPortalDestinationLevel(MinecraftServer server, ResourceKey<Level> destination, ServerLevel currentLevel, Entity entity, BlockPos portalEntryPos) {
+        return server.getLevel(WorldUtil.resolvePortalDestination(entity, currentLevel, destination));
+    }
 
     @Inject(
             method = "getExitPortal",
             at = @At("HEAD"),
             cancellable = true
     )
-    private void getExitPortal(ServerLevel destination, Entity entity, BlockPos pos, BlockPos exitPos, boolean isToNether, WorldBorder worldBorder, CallbackInfoReturnable<DimensionTransition> cir) {
+    private void getExitPortal(ServerLevel destination, Entity entity, BlockPos pos, BlockPos exitPos, boolean isToNether, WorldBorder worldBorder, CallbackInfoReturnable<TeleportTransition> cir) {
         if (!isToNether || TemplateLoader.getNetherPortalTemplate() == null) {
             return;
         }
@@ -48,7 +64,7 @@ public abstract class NetherPortalBlockMixin {
         BlockPos.MutableBlockPos startPos = exitPos.offset(netherPortalTemplate.getPortalOffset().rotate(rotation)).mutable();
 
         BlockPos.MutableBlockPos topPos = startPos.immutable().above(netherPortalTemplate.getStructure().size.getY()).mutable();
-        int logicalBuildHeight = destination.getMinBuildHeight() + destination.getLogicalHeight();
+        int logicalBuildHeight = destination.getMinY() + destination.getLogicalHeight();
         if (logicalBuildHeight < topPos.getY()) {
             topPos.setY(logicalBuildHeight);
             int i = 1;
@@ -59,8 +75,8 @@ public abstract class NetherPortalBlockMixin {
             startPos.setY(logicalBuildHeight - netherPortalTemplate.getStructure().size.getY() - i);
         }
 
-        if (destination.getMinBuildHeight() > startPos.getY()) {
-            startPos.setY(destination.getMinBuildHeight());
+        if (destination.getMinY() > startPos.getY()) {
+            startPos.setY(destination.getMinY());
             while (destination.getBlockState(startPos).is(Blocks.BEDROCK)) {
                 startPos.move(Direction.UP);
             }
@@ -68,7 +84,7 @@ public abstract class NetherPortalBlockMixin {
         netherPortalTemplate.getStructure().placeInWorld(destination,
                 startPos, startPos,
                 TemplateUtil.STRUCTURE_PLACE_SETTINGS.copy().setRotation(rotation),
-                destination.random,
+                destination.getRandom(),
                 Block.UPDATE_ALL);
 
         BlockPos portalBlockPos = startPos.offset(netherPortalTemplate.getPortalOffset().multiply(-1).rotate(rotation));
@@ -83,14 +99,16 @@ public abstract class NetherPortalBlockMixin {
                 }
             }
 
-            ConfiguredTemplate.placeNetherSpreads(TemplatesConfig.netherSpreads, destination, team, portalBlockPos, destination.random, Block.UPDATE_ALL);
+            ConfiguredTemplate.placeNetherSpreads(TemplatesConfig.netherSpreads, destination, team, portalBlockPos, destination.getRandom(), Block.UPDATE_ALL);
         }
 
         if (!worldBorder.isWithinBounds(startPos)) {
             cir.setReturnValue(null);
+            return;
         }
 
         BlockUtil.FoundRectangle rectangle = new BlockUtil.FoundRectangle(portalBlockPos, 2, 3);
-        cir.setReturnValue(NetherPortalBlock.getDimensionTransitionFromExit(entity, pos, rectangle, destination, DimensionTransition.PLAY_PORTAL_SOUND));
+        cir.setReturnValue(NetherPortalBlock.getDimensionTransitionFromExit(entity, pos, rectangle, destination,
+                TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET)));
     }
 }

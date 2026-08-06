@@ -6,7 +6,9 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -16,6 +18,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SkyblockHooks {
+
+    public static ResourceKey<Level> onChangeDimension(ServerPlayer player, ResourceKey<Level> dimension) {
+        SkyblockChangeDimensionEvent event = new SkyblockChangeDimensionEvent(player, dimension);
+        NeoForge.EVENT_BUS.post(event);
+        return event.getDimension();
+    }
 
     public static Pair<SkyblockManageTeamEvent.Result, Boolean> onToggleVisits(ServerPlayer player, Team team, boolean allowVisits) {
         SkyblockManageTeamEvent.ToggleVisits event = new SkyblockManageTeamEvent.ToggleVisits(player, team, allowVisits);

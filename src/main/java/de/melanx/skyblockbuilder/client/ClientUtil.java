@@ -2,11 +2,11 @@ package de.melanx.skyblockbuilder.client;
 
 import de.melanx.skyblockbuilder.client.screens.StructureSaverScreen;
 import de.melanx.skyblockbuilder.util.SkyComponents;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.loading.FMLPaths;
 import org.moddingx.libx.screen.text.ComponentLayout;
@@ -25,7 +25,7 @@ public class ClientUtil {
             Util.getPlatform().openUri(dir.toUri());
         } catch (IOException e) {
             //noinspection ConstantConditions
-            Minecraft.getInstance().player.displayClientMessage(SkyComponents.SCREEN_OPEN_FOLDER_ERROR.apply(dir.toString()), false);
+            Minecraft.getInstance().player.sendSystemMessage(SkyComponents.SCREEN_OPEN_FOLDER_ERROR.apply(dir.toString()));
         }
     }
 

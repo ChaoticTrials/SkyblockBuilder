@@ -67,9 +67,9 @@ public class GenerateCommand {
         }
 
         if (spreads) {
-            configuredTemplate.placeInWorld(level, pos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
+            configuredTemplate.placeInWorld(level, pos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, level.getRandom(), Block.UPDATE_CLIENTS);
         } else {
-            configuredTemplate.getTemplate().placeInWorld(level, pos, pos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
+            configuredTemplate.getTemplate().placeInWorld(level, pos, pos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, level.getRandom(), Block.UPDATE_CLIENTS);
         }
 
         if (border) {
@@ -95,10 +95,10 @@ public class GenerateCommand {
         }
 
         StructureTemplate template = new StructureTemplate();
-        template.load(BuiltInRegistries.BLOCK.asLookup(), nbt);
+        template.load(BuiltInRegistries.BLOCK, nbt);
 
         ServerLevel level = context.getSource().getLevel();
-        template.placeInWorld(level, pos, pos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, level.random, Block.UPDATE_CLIENTS);
+        template.placeInWorld(level, pos, pos, TemplateUtil.STRUCTURE_PLACE_SETTINGS, level.getRandom(), Block.UPDATE_CLIENTS);
         showLocationResult(context.getSource(), file, pos);
 
         return 1;

@@ -5,10 +5,10 @@ import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
@@ -26,6 +26,7 @@ import net.neoforged.neoforge.event.entity.player.BonemealEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.event.level.block.CropGrowEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -47,7 +48,7 @@ public class SpawnProtectionEvents {
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent.EntityInteract event) {
         Item mainHandItem = event.getEntity().getMainHandItem().getItem();
-        ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(mainHandItem);
+        Identifier itemKey = BuiltInRegistries.ITEM.getKey(mainHandItem);
         if (SpawnConfig.interactionItemsInSpawnProtection.test(itemKey)) {
             return;
         }
@@ -61,7 +62,7 @@ public class SpawnProtectionEvents {
 
             if (!SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
                 Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
-                ResourceLocation blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
+                Identifier blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
                 boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
 
                 event.setCanceled(!allowBlockInteraction);
@@ -96,14 +97,14 @@ public class SpawnProtectionEvents {
     }
 
     @SubscribeEvent
-    public void blockBreak(BlockEvent.BreakEvent event) {
+    public void blockBreak(BreakBlockEvent event) {
         if (SpawnProtectionEvents.ignore(Type.INTERACT_BLOCKS)) {
             return;
         }
 
         if (SpawnProtectionEvents.isOnSpawn(event.getPlayer()) && !PermissionManager.INSTANCE.mayBypassLimitation(event.getPlayer())) {
             Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
-            ResourceLocation blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
+            Identifier blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
             boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
 
             event.setCanceled(!allowBlockInteraction);
@@ -119,7 +120,7 @@ public class SpawnProtectionEvents {
         if (event.getLevel() instanceof Level level && SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
             if (!(event.getEntity() instanceof Player player) || !PermissionManager.INSTANCE.mayBypassLimitation(player)) {
                 Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
-                ResourceLocation blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
+                Identifier blockRegistryKey = BuiltInRegistries.BLOCK.getKey(block);
                 boolean allowBlockInteraction = SpawnConfig.interactionBlocksInSpawnProtection.test(blockRegistryKey);
 
                 event.setCanceled(!allowBlockInteraction);
@@ -179,8 +180,8 @@ public class SpawnProtectionEvents {
 
         Level level = event.getLevel().getLevel();
         if (SpawnProtectionEvents.isOnSpawn(level, event.getPos())) {
-            if (event.getSpawnType() != MobSpawnType.SPAWN_EGG && event.getSpawnType() != MobSpawnType.BUCKET
-                    && event.getSpawnType() != MobSpawnType.MOB_SUMMONED && event.getSpawnType() != MobSpawnType.COMMAND) {
+            if (event.getSpawnType() != EntitySpawnReason.SPAWN_ITEM_USE && event.getSpawnType() != EntitySpawnReason.BUCKET
+                    && event.getSpawnType() != EntitySpawnReason.MOB_SUMMONED && event.getSpawnType() != EntitySpawnReason.COMMAND) {
                 if (event instanceof ICancellableEvent cancellableEvent) {
                     cancellableEvent.setCanceled(true);
                 }
@@ -228,7 +229,7 @@ public class SpawnProtectionEvents {
         }
 
         Player player = event.getEntity();
-        if (!player.level().isClientSide && !player.isDeadOrDying() && player.tickCount % 20 == 0 && SpawnProtectionEvents.isOnSpawn(player)) {
+        if (!player.level().isClientSide() && !player.isDeadOrDying() && player.tickCount % 20 == 0 && SpawnProtectionEvents.isOnSpawn(player)) {
             player.setHealth(player.getMaxHealth());
             player.getFoodData().setFoodLevel(20);
             player.setAirSupply(player.getMaxAirSupply());
@@ -245,9 +246,10 @@ public class SpawnProtectionEvents {
     }
 
     private static boolean isOnSpawn(Level level, BlockPos blockPos) {
-        ChunkPos pos = new ChunkPos(blockPos);
+        ChunkPos pos = ChunkPos.containing(blockPos);
+
         return WorldUtil.isSkyblock(level) && WorldUtil.isSpawnDimension(level)
-                && Math.abs(pos.x) < SpawnConfig.spawnProtectionRadius && Math.abs(pos.z) < SpawnConfig.spawnProtectionRadius
+                && Math.abs(pos.x()) < SpawnConfig.spawnProtectionRadius && Math.abs(pos.z()) < SpawnConfig.spawnProtectionRadius
                 && !level.isOutsideBuildHeight(blockPos);
     }
 }

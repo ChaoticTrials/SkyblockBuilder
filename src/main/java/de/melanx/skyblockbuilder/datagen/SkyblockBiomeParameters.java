@@ -12,12 +12,12 @@ import org.moddingx.libx.datagen.provider.RegistryProviderBase;
 
 public class SkyblockBiomeParameters extends RegistryProviderBase {
 
-    public static final ResourceKey<MultiNoiseBiomeSourceParameterList> KEY = ResourceKey.create(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, SkyblockBuilder.getInstance().resource("filtered_overworld"));
+    public static final ResourceKey<MultiNoiseBiomeSourceParameterList> KEY = ResourceKey.create(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, SkyblockBuilder.getInstance().id("filtered_overworld"));
 
     public SkyblockBiomeParameters(DatagenContext ctx) {
         super(ctx, DatagenStage.REGISTRY_SETUP);
         this.registries.writableRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST).register(
-                KEY, new MultiNoiseBiomeSourceParameterList(BiomeParametersPreset.FILTERED_OVERWORLD, this.registries.registry(Registries.BIOME).asLookup()),
+                KEY, new MultiNoiseBiomeSourceParameterList(BiomeParametersPreset.FILTERED_OVERWORLD, this.registries.registry(Registries.BIOME)),
                 RegistrationInfo.BUILT_IN
         );
     }

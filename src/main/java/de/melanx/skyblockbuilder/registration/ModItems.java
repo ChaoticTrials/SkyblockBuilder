@@ -7,5 +7,5 @@ import org.moddingx.libx.annotation.registration.RegisterClass;
 @RegisterClass(registry = "ITEM")
 public class ModItems {
 
-    public static final Item structureSaver = new ItemStructureSaver();
+    public static final Item structureSaver = new ItemStructureSaver(new Item.Properties().stacksTo(1));
 }

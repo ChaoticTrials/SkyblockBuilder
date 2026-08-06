@@ -2,6 +2,8 @@ package de.melanx.skyblockbuilder.network;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.item.ItemStructureSaver;
+import de.melanx.skyblockbuilder.registration.ModItems;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,10 +17,10 @@ import javax.annotation.Nonnull;
 
 public class DeleteTagsHandler extends PacketHandler<DeleteTagsHandler.Message> {
 
-    public static final CustomPacketPayload.Type<DeleteTagsHandler.Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("delete_tags"));
+    public static final CustomPacketPayload.Type<DeleteTagsHandler.Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().id("delete_tags"));
 
     protected DeleteTagsHandler() {
-        super(TYPE, PacketFlow.SERVERBOUND, ItemStack.STREAM_CODEC.map(Message::new, Message::stack), HandlerThread.MAIN);
+        super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
     }
 
     @Override
@@ -27,11 +29,17 @@ public class DeleteTagsHandler extends PacketHandler<DeleteTagsHandler.Message> 
             return;
         }
 
-        ItemStack stack = ItemStructureSaver.removeComponents(msg.stack);
-        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+        ItemStack stack = player.getMainHandItem();
+        if (!stack.is(ModItems.structureSaver)) {
+            return;
+        }
+
+        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStructureSaver.removeComponents(stack));
     }
 
-    public record Message(ItemStack stack) implements CustomPacketPayload {
+    public record Message() implements CustomPacketPayload {
+
+        public static final StreamCodec<Object, DeleteTagsHandler.Message> CODEC = StreamCodec.unit(new Message());
 
         @Nonnull
         @Override

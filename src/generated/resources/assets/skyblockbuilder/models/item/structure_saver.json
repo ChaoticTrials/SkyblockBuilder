@@ -1,25 +1,5 @@
 {
   "parent": "minecraft:item/generated",
-  "overrides": [
-    {
-      "model": "skyblockbuilder:item/structure_saver",
-      "predicate": {
-        "skyblockbuilder:structure_saver_type": 0.0
-      }
-    },
-    {
-      "model": "skyblockbuilder:item/structure_saver_01",
-      "predicate": {
-        "skyblockbuilder:structure_saver_type": 1.0
-      }
-    },
-    {
-      "model": "skyblockbuilder:item/structure_saver_02",
-      "predicate": {
-        "skyblockbuilder:structure_saver_type": 2.0
-      }
-    }
-  ],
   "textures": {
     "layer0": "skyblockbuilder:item/structure_saver"
   }

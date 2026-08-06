@@ -1,18 +1,19 @@
 package de.melanx.skyblockbuilder.data;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
+import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyblockbuilder.world.IslandPos;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -24,8 +25,9 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModList;
+import org.moddingx.libx.annotation.api.Codecs;
+import org.moddingx.libx.annotation.codec.PrimaryConstructor;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,40 +44,69 @@ public class Team {
     private static final String CREATED_AT = "created_at";
     private static final String LAST_CHANGED = "last_changed";
     private static final String PLAYERS = "players";
-    private static final String PLAYER = "player";
     private static final String SPAWNS = "spawns";
     private static final String DEFAULT_SPAWNS = "default_spawns";
-    private static final String DIRECTION = "direction";
     private static final String JOIN_REQUESTS = "join_requests";
-    private static final String ID = "player_id";
     private static final String PLACED_SPREADS = "placed_spreads";
-    private static final String POS = "pos";
-    private static final String SIZE = "size";
 
     public static final int MAX_NAME_LENGTH = 64;
 
     // Spawn level if using Infiniverse
-    public static final ResourceKey<Level> SPAWN_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource("spawn"));
+    public static final ResourceKey<Level> SPAWN_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().id("spawn"));
 
-    private final SkyblockSavedData data;
+    public static final Codec<Team> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            UUIDUtil.CODEC.fieldOf(TEAM_ID).forGetter(team -> team.teamId),
+            IslandPos.CODEC.fieldOf(ISLAND).forGetter(team -> team.island),
+            Codec.STRING.optionalFieldOf(NAME, "").forGetter(team -> team.name),
+            Codec.BOOL.optionalFieldOf(VISITS, false).forGetter(team -> team.allowVisits),
+            Codec.BOOL.optionalFieldOf(ALLOW_JOIN_REQUESTS, false).forGetter(team -> team.allowJoinRequests),
+            Codec.BOOL.optionalFieldOf(NETHER_SPREADS_PLACED, false).forGetter(team -> team.netherSpreadsPlaced),
+            Codec.LONG.optionalFieldOf(CREATED_AT, 0L).forGetter(team -> team.createdAt),
+            Codec.LONG.optionalFieldOf(LAST_CHANGED, 0L).forGetter(team -> team.lastChanged),
+            UUIDUtil.CODEC.listOf().optionalFieldOf(PLAYERS, List.of()).forGetter(team -> List.copyOf(team.players)),
+            TemplatesConfig.Spawn.CODEC.listOf().optionalFieldOf(SPAWNS, List.of()).forGetter(team -> List.copyOf(team.possibleSpawns)),
+            TemplatesConfig.Spawn.CODEC.listOf().optionalFieldOf(DEFAULT_SPAWNS).forGetter(team -> Optional.of(List.copyOf(team.defaultPossibleSpawns))),
+            UUIDUtil.CODEC.listOf().optionalFieldOf(JOIN_REQUESTS, List.of()).forGetter(team -> List.copyOf(team.joinRequests)),
+            PlacedSpread.CODEC.listOf().optionalFieldOf(PLACED_SPREADS, List.of()).forGetter(team -> team.placedSpreads.values().stream().flatMap(Set::stream).toList())
+    ).apply(instance, Team::new));
+
     private final Set<UUID> players = new CopyOnWriteArraySet<>();
     private final Set<UUID> joinRequests = new CopyOnWriteArraySet<>();
     private final Set<TemplatesConfig.Spawn> possibleSpawns = new CopyOnWriteArraySet<>();
     private final Set<TemplatesConfig.Spawn> defaultPossibleSpawns = new CopyOnWriteArraySet<>();
     private final Map<String, Set<PlacedSpread>> placedSpreads = new ConcurrentHashMap<>();
+    private final UUID teamId;
+    private final long createdAt;
 
+    private SkyblockSavedData data;
     private ResourceKey<Level> teamLevelKey;
-    private UUID teamId;
     private IslandPos island;
     private String name;
     private boolean allowVisits;
     private boolean allowJoinRequests;
     private boolean netherSpreadsPlaced;
-    private long createdAt;
     private long lastChanged;
 
-    private Team(SkyblockSavedData data) {
-        this(data, null, null);
+    private Team(UUID teamId, IslandPos island, String name, boolean allowVisits, boolean allowJoinRequests,
+            boolean netherSpreadsPlaced, long createdAt, long lastChanged, List<UUID> players,
+            List<TemplatesConfig.Spawn> possibleSpawns, Optional<List<TemplatesConfig.Spawn>> defaultPossibleSpawns,
+            List<UUID> joinRequests, List<PlacedSpread> placedSpreads) {
+        this.data = null;
+        this.teamId = teamId;
+        this.island = island;
+        this.name = name;
+        this.allowVisits = allowVisits;
+        this.allowJoinRequests = allowJoinRequests;
+        this.netherSpreadsPlaced = netherSpreadsPlaced;
+        this.createdAt = createdAt;
+        this.lastChanged = lastChanged;
+        this.players.addAll(players);
+        this.possibleSpawns.addAll(possibleSpawns);
+        this.defaultPossibleSpawns.addAll(defaultPossibleSpawns.orElse(possibleSpawns));
+        this.joinRequests.addAll(joinRequests);
+        placedSpreads.forEach(spread -> this.placedSpreads
+                .computeIfAbsent(spread.name(), key -> ConcurrentHashMap.newKeySet())
+                .add(spread));
     }
 
     public Team(SkyblockSavedData data, IslandPos island) {
@@ -91,11 +122,8 @@ public class Team {
         this.lastChanged = System.currentTimeMillis();
     }
 
-    public static Team create(SkyblockSavedData data, CompoundTag tag) {
-        Team team = new Team(data);
-        team.deserializeNBT(tag);
-
-        return team;
+    void bindData(SkyblockSavedData data) {
+        this.data = data;
     }
 
     public boolean isSpawn() {
@@ -106,24 +134,53 @@ public class Team {
         return this.name;
     }
 
-    public UUID getId() {
+    public UUID id() {
         return this.teamId;
     }
 
     public ResourceKey<Level> getTeamLevelKey() {
         // need to do this in case id is null first
         if (this.teamLevelKey == null) {
-            this.teamLevelKey = this.isSpawn()
-                    ? Team.SPAWN_LEVEL_KEY
-                    : ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource(this.teamId.toString().replace("-", "") + "_overworld"));
+            this.teamLevelKey = this.resolveTeamLevelKey();
         }
 
         return this.teamLevelKey;
     }
 
+    // The island lives in the spawn dimension, so the team dimension holding it is named after it. This must only
+    // depend on the configured id, never on whether that dimension exists, otherwise the team would be moved to
+    // another dimension as soon as a missing spawn dimension gets added.
+    private ResourceKey<Level> resolveTeamLevelKey() {
+        if (this.isSpawn()) {
+            return Team.SPAWN_LEVEL_KEY;
+        }
+
+        if (SpawnConfig.spawnDimension == Level.OVERWORLD) {
+            return this.getTeamOverworldLevelKey();
+        }
+
+        if (SpawnConfig.spawnDimension == Level.NETHER) {
+            return this.getTeamNetherLevelKey();
+        }
+
+        return this.getTeamMainLevelKey();
+    }
+
+    public ResourceKey<Level> getTeamMainLevelKey() {
+        return this.getTeamLevelKey("main");
+    }
+
+    public ResourceKey<Level> getTeamOverworldLevelKey() {
+        return this.getTeamLevelKey("overworld");
+    }
+
     public ResourceKey<Level> getTeamNetherLevelKey() {
-        return ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource(
-                this.teamId.toString().replace("-", "") + "_nether"));
+        return this.getTeamLevelKey("nether");
+    }
+
+    private ResourceKey<Level> getTeamLevelKey(String suffix) {
+        return ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().id(
+                this.teamId.toString().replace("-", "") + "_" + suffix));
     }
 
     public void setName(String name) {
@@ -233,7 +290,7 @@ public class Team {
     }
 
     public boolean addPlayer(Player player) {
-        return this.addPlayer(player.getGameProfile().getId());
+        return this.addPlayer(player.getGameProfile().id());
     }
 
     public boolean addPlayers(Collection<UUID> players) {
@@ -253,7 +310,7 @@ public class Team {
     }
 
     public boolean removePlayer(Player player) {
-        return this.removePlayer(player.getGameProfile().getId());
+        return this.removePlayer(player.getGameProfile().id());
     }
 
     public boolean removePlayer(UUID player) {
@@ -294,7 +351,7 @@ public class Team {
     }
 
     public boolean hasPlayer(Player player) {
-        return this.hasPlayer(player.getGameProfile().getId());
+        return this.hasPlayer(player.getGameProfile().id());
     }
 
     public boolean isEmpty() {
@@ -323,7 +380,7 @@ public class Team {
     }
 
     public void addJoinRequest(Player player) {
-        this.addJoinRequest(player.getGameProfile().getId());
+        this.addJoinRequest(player.getGameProfile().id());
     }
 
     public void addJoinRequest(UUID id) {
@@ -332,7 +389,7 @@ public class Team {
     }
 
     public void removeJoinRequest(Player player) {
-        this.removeJoinRequest(player.getGameProfile().getId());
+        this.removeJoinRequest(player.getGameProfile().id());
     }
 
     public void removeJoinRequest(UUID id) {
@@ -376,11 +433,11 @@ public class Team {
     }
 
     public void sendJoinRequest(Player requestingPlayer) {
-        this.addJoinRequest(requestingPlayer.getGameProfile().getId());
+        this.addJoinRequest(requestingPlayer.getGameProfile().id());
         MutableComponent component = SkyComponents.EVENT_JOIN_REQUEST0.apply(requestingPlayer.getDisplayName());
         component.append(Component.literal("/skyblock team accept " + requestingPlayer.getDisplayName().getString()).setStyle(Style.EMPTY
                 .withHoverEvent(InviteCommand.COPY_TEXT)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock team accept " + requestingPlayer.getDisplayName().getString()))
+                .withClickEvent(new ClickEvent.SuggestCommand("/skyblock team accept " + requestingPlayer.getDisplayName().getString()))
                 .applyFormats(ChatFormatting.UNDERLINE, ChatFormatting.GOLD)));
         component.append(SkyComponents.EVENT_JOIN_REQUEST1);
         this.broadcast(component, Style.EMPTY.applyFormat(ChatFormatting.GOLD));
@@ -405,7 +462,7 @@ public class Team {
     }
 
     public void broadcast(MutableComponent msg, Style style) {
-        if (this.getLevel() == null || this.getLevel().isClientSide) {
+        if (this.getLevel() == null || this.getLevel().isClientSide()) {
             return;
         }
 
@@ -417,126 +474,6 @@ public class Team {
                 player.sendSystemMessage(component.append(msg.withStyle(style)));
             }
         });
-    }
-
-    @Nonnull
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = new CompoundTag();
-
-        nbt.putUUID(TEAM_ID, this.teamId);
-        nbt.put(ISLAND, this.island.toTag());
-        nbt.putString(NAME, this.name != null ? this.name : "");
-        nbt.putBoolean(VISITS, this.allowVisits);
-        nbt.putBoolean(ALLOW_JOIN_REQUESTS, this.allowJoinRequests);
-        nbt.putBoolean(NETHER_SPREADS_PLACED, this.netherSpreadsPlaced);
-        nbt.putLong(CREATED_AT, this.createdAt);
-        nbt.putLong(LAST_CHANGED, this.lastChanged);
-
-        ListTag players = new ListTag();
-        for (UUID player : this.players) {
-            CompoundTag playerTag = new CompoundTag();
-            playerTag.putUUID(PLAYER, player);
-            players.add(playerTag);
-        }
-
-        ListTag spawns = new ListTag();
-        for (TemplatesConfig.Spawn spawn : this.possibleSpawns) {
-            CompoundTag posTag = WorldUtil.blockPosToTag(spawn.pos());
-            posTag.putString(DIRECTION, spawn.direction().name());
-            spawns.add(posTag);
-        }
-
-        ListTag defaultSpawns = new ListTag();
-        for (TemplatesConfig.Spawn spawn : this.defaultPossibleSpawns) {
-            CompoundTag posTag = WorldUtil.blockPosToTag(spawn.pos());
-            posTag.putString(DIRECTION, spawn.direction().name());
-            defaultSpawns.add(posTag);
-        }
-
-        ListTag joinRequests = new ListTag();
-        for (UUID id : this.joinRequests) {
-            CompoundTag idTag = new CompoundTag();
-            idTag.putUUID(ID, id);
-            joinRequests.add(idTag);
-        }
-
-        CompoundTag placedSpreads = new CompoundTag();
-        for (Map.Entry<String, Set<PlacedSpread>> entry : this.placedSpreads.entrySet()) {
-            ListTag namedSpreads = new ListTag();
-            for (PlacedSpread placedSpread : entry.getValue()) {
-                CompoundTag tag = new CompoundTag();
-                tag.putString(NAME, placedSpread.name());
-                tag.put(POS, WorldUtil.blockPosToTag(placedSpread.pos()));
-                tag.put(SIZE, WorldUtil.blockPosToTag(placedSpread.size()));
-                namedSpreads.add(tag);
-            }
-            placedSpreads.put(entry.getKey(), namedSpreads);
-        }
-        nbt.put(PLACED_SPREADS, placedSpreads);
-
-        nbt.put(PLAYERS, players);
-        nbt.put(SPAWNS, spawns);
-        nbt.put(DEFAULT_SPAWNS, defaultSpawns);
-        nbt.put(JOIN_REQUESTS, joinRequests);
-        return nbt;
-    }
-
-    public void deserializeNBT(CompoundTag nbt) {
-        this.teamId = nbt.getUUID(TEAM_ID);
-        this.island = IslandPos.fromTag(nbt.getCompound(ISLAND));
-        this.name = nbt.getString(NAME);
-        this.allowVisits = nbt.getBoolean(VISITS);
-        this.allowJoinRequests = nbt.getBoolean(ALLOW_JOIN_REQUESTS);
-        this.netherSpreadsPlaced = nbt.getBoolean(NETHER_SPREADS_PLACED);
-        this.createdAt = nbt.getLong(CREATED_AT);
-        this.lastChanged = nbt.getLong(LAST_CHANGED);
-
-        ListTag players = nbt.getList(PLAYERS, Tag.TAG_COMPOUND);
-        this.players.clear();
-        for (Tag player : players) {
-            this.players.add(((CompoundTag) player).getUUID(PLAYER));
-        }
-
-        ListTag spawns = nbt.getList(SPAWNS, Tag.TAG_COMPOUND);
-        this.possibleSpawns.clear();
-        for (Tag tag : spawns) {
-            CompoundTag posTag = (CompoundTag) tag;
-            BlockPos pos = WorldUtil.blockPosFromTag(posTag);
-            WorldUtil.SpawnDirection direction = WorldUtil.SpawnDirection.valueOf(posTag.getString(DIRECTION));
-            this.possibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
-        }
-
-        ListTag defaultSpawns = nbt.getList(DEFAULT_SPAWNS, Tag.TAG_COMPOUND);
-        this.defaultPossibleSpawns.clear();
-        for (Tag tag : defaultSpawns) {
-            CompoundTag posTag = (CompoundTag) tag;
-            BlockPos pos = WorldUtil.blockPosFromTag(posTag);
-            WorldUtil.SpawnDirection direction = WorldUtil.SpawnDirection.valueOf(posTag.getString(DIRECTION));
-            this.defaultPossibleSpawns.add(new TemplatesConfig.Spawn(pos, direction));
-        }
-
-        ListTag joinRequests = nbt.getList(JOIN_REQUESTS, Tag.TAG_COMPOUND);
-        this.joinRequests.clear();
-        for (Tag id : joinRequests) {
-            this.joinRequests.add(((CompoundTag) id).getUUID(ID));
-        }
-
-        CompoundTag placedSpreads = nbt.getCompound(PLACED_SPREADS);
-        this.placedSpreads.clear();
-        for (String key : placedSpreads.getAllKeys()) {
-            ListTag list = placedSpreads.getList(key, Tag.TAG_COMPOUND);
-            Set<PlacedSpread> namedSpreads = new HashSet<>();
-            for (Tag tag : list) {
-                CompoundTag ctag = ((CompoundTag) tag);
-                String name = ctag.getString(NAME);
-                BlockPos pos = WorldUtil.blockPosFromTag(ctag.getCompound(POS));
-                BlockPos size = WorldUtil.blockPosFromTag(ctag.getCompound(SIZE));
-
-                PlacedSpread placedSpread = new PlacedSpread(name, pos, size);
-                namedSpreads.add(placedSpread);
-            }
-            this.placedSpreads.put(key, namedSpreads);
-        }
     }
 
     @Override
@@ -558,5 +495,9 @@ public class Team {
         return result;
     }
 
-    public record PlacedSpread(String name, BlockPos pos, BlockPos size) {}
+    @PrimaryConstructor
+    public record PlacedSpread(String name, BlockPos pos, BlockPos size) {
+
+        public static final Codec<PlacedSpread> CODEC = Codecs.get(SkyblockBuilder.class, PlacedSpread.class);
+    }
 }

@@ -1,7 +1,17 @@
 package de.melanx.skyblockbuilder.util;
 
+import com.mojang.serialization.Codec;
+import net.minecraft.util.Util;
+
+import java.util.stream.IntStream;
+
 // Adapted from https://stackoverflow.com/questions/398299/looping-in-a-spiral
 public class Spiral {
+
+    public static final Codec<Spiral> CODEC = Codec.INT_STREAM.comapFlatMap(
+            input -> Util.fixedSize(input, 4).map(ints -> new Spiral(ints[0], ints[1], ints[2], ints[3])),
+            spiral -> IntStream.of(spiral.x, spiral.y, spiral.dx, spiral.dy)
+    );
 
     private int x;
     private int y;
@@ -38,11 +48,4 @@ public class Spiral {
         return this.y;
     }
 
-    public int[] toIntArray() {
-        return new int[]{this.x, this.y, this.dx, this.dy};
-    }
-
-    public static Spiral fromArray(int[] ints) {
-        return new Spiral(ints[0], ints[1], ints[2], ints[3]);
-    }
 }

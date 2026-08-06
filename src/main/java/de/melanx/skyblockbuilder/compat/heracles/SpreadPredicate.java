@@ -55,7 +55,7 @@ public class SpreadPredicate {
             return true;
         }
 
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Team team = SkyblockSavedData.get(level).getTeamFromPlayer(player);
 
         for (String spread : this.spreads) {

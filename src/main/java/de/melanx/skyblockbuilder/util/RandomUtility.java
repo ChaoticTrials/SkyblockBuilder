@@ -12,8 +12,6 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.registration.ModBlocks;
 import net.minecraft.ChatFormatting;
-import net.minecraft.FileUtil;
-import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -24,6 +22,11 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.UserNameToIdResolver;
+import net.minecraft.util.FileUtil;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -33,6 +36,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.UsernameCache;
 
@@ -76,8 +80,8 @@ public class RandomUtility {
     public static Component getFormattedPos(BlockPos pos) {
         return ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pos.getX(), pos.getY(), pos.getZ()).withStyle(style -> style
                 .withColor(ChatFormatting.GREEN)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pos.getX() + " " + pos.getY() + " " + pos.getZ()))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))));
+                .withClickEvent(new ClickEvent.SuggestCommand("/tp @s " + pos.getX() + " " + pos.getY() + " " + pos.getZ()))
+                .withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.coordinates.tooltip")))));
     }
 
     public static String formattedCooldown(long ticks) {
@@ -90,30 +94,28 @@ public class RandomUtility {
 
     public static void deleteTeamIfEmpty(SkyblockSavedData data, Team team) {
         if (team.isEmpty() && CustomizationConfig.deleteTeamsAutomatically) {
-            data.deleteTeam(team.getId());
-            SkyblockBuilder.getLogger().info("Team {} ({}) was deleted. No player left.", team.getName(), team.getId());
+            data.deleteTeam(team.id());
+            SkyblockBuilder.getLogger().info("Team {} ({}) was deleted. No player left.", team.getName(), team.id());
         }
     }
 
     public static Set<GameProfile> getGameProfiles(ServerLevel level) {
         MinecraftServer server = level.getServer();
-        net.minecraft.server.players.GameProfileCache profileCache = server.getProfileCache();
+        UserNameToIdResolver nameToIdCache = server.services().nameToIdCache();
 
         Set<GameProfile> profiles = new HashSet<>();
         Set<UUID> cachedIds = new HashSet<>();
 
-        //noinspection DataFlowIssue
-        profileCache.load().forEach(info -> {
-            GameProfile gp = info.getProfile();
-            if (gp.getId().equals(Util.NIL_UUID)) {
+        UsernameCache.getMap().forEach((id, name) -> {
+            if (id.equals(Util.NIL_UUID)) {
                 return;
             }
 
-            profiles.add(gp);
-            cachedIds.add(gp.getId());
+            profiles.add(new GameProfile(id, name));
+            cachedIds.add(id);
         });
 
-        final int cachedProfilesAmount = cachedIds.size();
+        int cachedProfilesAmount = cachedIds.size();
         Set<UUID> usedCachedIds = new HashSet<>();
         int uncachedProfilesAmount = 0;
         int totalProfilesAmount = 0;
@@ -130,16 +132,9 @@ public class RandomUtility {
                     continue;
                 }
 
-                String lastKnownUsername = UsernameCache.getLastKnownUsername(id);
-                if (lastKnownUsername != null) {
-                    profiles.add(new GameProfile(id, lastKnownUsername));
-                    uncachedProfilesAmount++;
-                    continue;
-                }
-
-                Optional<GameProfile> cachedNow = profileCache.get(id);
+                Optional<NameAndId> cachedNow = nameToIdCache.get(id);
                 if (cachedNow.isPresent()) {
-                    profiles.add(cachedNow.get());
+                    profiles.add(new GameProfile(cachedNow.get().id(), cachedNow.get().name()));
                     uncachedProfilesAmount++;
                     continue;
                 }
@@ -148,8 +143,8 @@ public class RandomUtility {
 
                 boolean enforceProfileSecurity = CustomizationConfig.forceUnsecureProfileNames || server.enforceSecureProfile();
 
-                GameProfile fetched = fetchProfileOrUnknown(server, id, enforceProfileSecurity);
-                profileCache.add(fetched);
+                GameProfile fetched = RandomUtility.fetchProfileOrUnknown(server, id, enforceProfileSecurity);
+                nameToIdCache.add(new NameAndId(fetched));
                 profiles.add(fetched);
             }
         }
@@ -171,7 +166,7 @@ public class RandomUtility {
             boolean enforceSecure) {
         GameProfile unnamed = new GameProfile(id, "Unknown");
         try {
-            ProfileResult result = server.getSessionService().fetchProfile(id, enforceSecure);
+            ProfileResult result = server.services().sessionService().fetchProfile(id, enforceSecure);
             return result != null ? result.profile() : unnamed;
         } catch (IllegalArgumentException ex) {
             SkyblockBuilder.getLogger().error(
@@ -196,39 +191,44 @@ public class RandomUtility {
             BlockPos maxPos = new BlockPos(Math.max(pos.getX(), blockpos.getX()), Math.max(pos.getY(), blockpos.getY()), Math.max(pos.getZ(), blockpos.getZ()));
             template.size = box;
 
-            for (BlockPos actPos : BlockPos.betweenClosed(minPos, maxPos)) {
-                BlockPos relPos = actPos.subtract(minPos);
-                BlockState state = level.getBlockState(actPos);
-                if (toIgnore.isEmpty() || !toIgnore.contains(state.getBlock())) {
-                    if (state.is(ModBlocks.spawnBlock)) {
-                        WorldUtil.SpawnDirection direction = WorldUtil.SpawnDirection.fromDirection(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
-                        spawns.add(new TemplatesConfig.Spawn(relPos, direction));
-                        // prevent spawn block being replaced by solid block in a cave
-                        if (toIgnore.contains(Blocks.AIR)) {
-                            continue;
+
+            try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(SkyblockBuilder.getLogger())) {
+                for (BlockPos actPos : BlockPos.betweenClosed(minPos, maxPos)) {
+                    BlockPos relPos = actPos.subtract(minPos);
+                    BlockState state = level.getBlockState(actPos);
+                    if (toIgnore.isEmpty() || !toIgnore.contains(state.getBlock())) {
+                        if (state.is(ModBlocks.spawnBlock)) {
+                            WorldUtil.SpawnDirection direction = WorldUtil.SpawnDirection.fromDirection(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
+                            spawns.add(new TemplatesConfig.Spawn(relPos, direction));
+                            // prevent spawn block being replaced by solid block in a cave
+                            if (toIgnore.contains(Blocks.AIR)) {
+                                continue;
+                            }
+
+                            state = Blocks.AIR.defaultBlockState();
+                        }
+                        BlockEntity blockEntity = level.getBlockEntity(actPos);
+                        StructureTemplate.StructureBlockInfo blockInfo;
+                        if (blockEntity != null) {
+                            TagValueOutput output = TagValueOutput.createWithContext(reporter, level.registryAccess());
+                            blockEntity.saveWithId(output);
+                            blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, output.buildResult());
+                        } else {
+                            blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, null);
                         }
 
-                        state = Blocks.AIR.defaultBlockState();
+                        StructureTemplate.addToLists(blockInfo, specialBlocks, blocksWithTag, normalBlocks);
                     }
-                    BlockEntity blockEntity = level.getBlockEntity(actPos);
-                    StructureTemplate.StructureBlockInfo blockInfo;
-                    if (blockEntity != null) {
-                        blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, blockEntity.saveWithId(level.registryAccess()));
-                    } else {
-                        blockInfo = new StructureTemplate.StructureBlockInfo(relPos, state, null);
-                    }
-
-                    StructureTemplate.addToLists(blockInfo, specialBlocks, blocksWithTag, normalBlocks);
                 }
-            }
 
-            List<StructureTemplate.StructureBlockInfo> sortedBlocks = StructureTemplate.buildInfoList(specialBlocks, blocksWithTag, normalBlocks);
-            template.palettes.clear();
-            template.palettes.add(new StructureTemplate.Palette(sortedBlocks));
-            if (withEntities) {
-                template.fillEntityList(level, minPos, maxPos.offset(1, 1, 1));
-            } else {
-                template.entityInfoList.clear();
+                List<StructureTemplate.StructureBlockInfo> sortedBlocks = StructureTemplate.buildInfoList(specialBlocks, blocksWithTag, normalBlocks);
+                template.palettes.clear();
+                template.palettes.add(new StructureTemplate.Palette(sortedBlocks));
+                if (withEntities) {
+                    template.fillEntityList(level, minPos, maxPos.offset(1, 1, 1), reporter);
+                } else {
+                    template.entityInfoList.clear();
+                }
             }
         }
 

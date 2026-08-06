@@ -3,8 +3,8 @@ package de.melanx.skyblockbuilder.config.mapper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.correct.ConfigCorrection;
@@ -27,12 +27,12 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
 
         @Override
         public boolean canInputChar(char chr) {
-            return ResourceLocation.isAllowedInResourceLocation(chr);
+            return Identifier.isAllowedInIdentifier(chr);
         }
 
         @Override
         public boolean isValid(String str) {
-            return ResourceLocation.tryParse(str) != null;
+            return Identifier.tryParse(str) != null;
         }
 
         @Override
@@ -42,7 +42,7 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
 
         @Override
         public String toString(ResourceKey<Level> levelResourceKey) {
-            return levelResourceKey.location().toString();
+            return levelResourceKey.identifier().toString();
         }
     };
 
@@ -53,7 +53,7 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
 
     @Override
     public JsonPrimitive toJson(ResourceKey<Level> value) {
-        return new JsonPrimitive(value.location().toString());
+        return new JsonPrimitive(value.identifier().toString());
     }
 
     @Override
@@ -79,10 +79,10 @@ public class ResourceKeyMapper implements ValueMapper<ResourceKey<Level>, JsonPr
     }
 
     private static ResourceKey<Level> getResourceKey(String str) {
-        return ResourceKeyMapper.getResourceKey(ResourceLocation.tryParse(str));
+        return ResourceKeyMapper.getResourceKey(Identifier.tryParse(str));
     }
 
-    private static ResourceKey<Level> getResourceKey(ResourceLocation location) {
+    private static ResourceKey<Level> getResourceKey(Identifier location) {
         return ResourceKey.create(Registries.DIMENSION, location);
     }
 }

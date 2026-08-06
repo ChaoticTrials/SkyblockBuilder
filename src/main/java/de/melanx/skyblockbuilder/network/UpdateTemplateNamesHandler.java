@@ -16,7 +16,7 @@ import java.util.List;
 
 public class UpdateTemplateNamesHandler extends PacketHandler<UpdateTemplateNamesHandler.Message> {
 
-    public static final CustomPacketPayload.Type<UpdateTemplateNamesHandler.Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().resource("update_template_names"));
+    public static final CustomPacketPayload.Type<UpdateTemplateNamesHandler.Message> TYPE = new CustomPacketPayload.Type<>(SkyblockBuilder.getInstance().id("update_template_names"));
 
     protected UpdateTemplateNamesHandler() {
         super(TYPE, PacketFlow.CLIENTBOUND, Message.CODEC, HandlerThread.MAIN);

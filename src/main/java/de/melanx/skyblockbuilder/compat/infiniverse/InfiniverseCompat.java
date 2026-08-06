@@ -5,7 +5,6 @@ import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.world.presets.SkyblockPreset;
 import net.commoble.infiniverse.api.InfiniverseAPI;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -18,7 +17,6 @@ import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.neoforged.fml.ModList;
 
@@ -33,62 +31,68 @@ public class InfiniverseCompat {
     }
 
     public static ServerLevel getOrCreateLevel(final MinecraftServer server, final ResourceKey<Level> levelKey, RegistryAccess registryAccess) {
+        LevelStem spawnDimension = InfiniverseCompat.getSpawnDimension(registryAccess);
+
+        if (spawnDimension == null) {
+            SkyblockBuilder.getLogger().warn("Configured spawn dimension {} does not exist, using the overworld", SpawnConfig.spawnDimension.identifier());
+            return InfiniverseCompat.getOrCreateOverworldLevel(server, levelKey, registryAccess);
+        }
+
+        if (Level.OVERWORLD.equals(SpawnConfig.spawnDimension)) {
+            return InfiniverseCompat.getOrCreateOverworldLevel(server, levelKey, registryAccess);
+        }
+
+        if (Level.NETHER.equals(SpawnConfig.spawnDimension)) {
+            return InfiniverseCompat.getOrCreateNetherLevel(server, levelKey, registryAccess);
+        }
+
         return InfiniverseAPI.get().getOrCreateLevel(server, levelKey, () -> {
-            Registry<DimensionType> dimensionTypes = registryAccess.registryOrThrow(Registries.DIMENSION_TYPE);
-            Registry<MultiNoiseBiomeSourceParameterList> noises = registryAccess.registryOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-            Registry<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.registryOrThrow(Registries.NOISE_SETTINGS);
-            Registry<Biome> biomes = registryAccess.registryOrThrow(Registries.BIOME);
+            return new LevelStem(spawnDimension.type(), spawnDimension.generator());
+        });
+    }
 
-            // Team dimensions run on the dimension type of the spawn dimension, so the noise settings must come from there as well
-            LevelStem spawnDimension = InfiniverseCompat.getSpawnDimension(registryAccess);
-            Holder<DimensionType> dimensionType = InfiniverseCompat.getDimensionType(spawnDimension, dimensionTypes);
-            Holder<NoiseGeneratorSettings> settings = InfiniverseCompat.getNoiseGeneratorSettings(spawnDimension, noiseGeneratorSettings);
+    public static ServerLevel getOrCreateOverworldLevel(final MinecraftServer server, final ResourceKey<Level> levelKey, RegistryAccess registryAccess) {
+        return InfiniverseAPI.get().getOrCreateLevel(server, levelKey, () -> {
+            Registry<DimensionType> dimensionTypes = registryAccess.lookupOrThrow(Registries.DIMENSION_TYPE);
+            Registry<MultiNoiseBiomeSourceParameterList> noises = registryAccess.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+            Registry<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.lookupOrThrow(Registries.NOISE_SETTINGS);
+            Registry<Biome> biomes = registryAccess.lookupOrThrow(Registries.BIOME);
 
-            return new LevelStem(dimensionType, SkyblockPreset.configuredOverworldChunkGenerator(noises.asLookup(), biomes.asLookup(), settings));
+            return new LevelStem(
+                    dimensionTypes.getOrThrow(BuiltinDimensionTypes.OVERWORLD),
+                    SkyblockPreset.configuredOverworldChunkGenerator(
+                            noises,
+                            biomes,
+                            noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD)
+                    )
+            );
         });
     }
 
     public static ServerLevel getOrCreateNetherLevel(final MinecraftServer server, final ResourceKey<Level> levelKey, RegistryAccess registryAccess) {
         return InfiniverseAPI.get().getOrCreateLevel(server, levelKey, () -> {
-            Registry<DimensionType> dimensionTypes = registryAccess.registryOrThrow(Registries.DIMENSION_TYPE);
-            Registry<MultiNoiseBiomeSourceParameterList> noises = registryAccess.registryOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-            Registry<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.registryOrThrow(Registries.NOISE_SETTINGS);
-            Registry<Biome> biomes = registryAccess.registryOrThrow(Registries.BIOME);
+            Registry<DimensionType> dimensionTypes = registryAccess.lookupOrThrow(Registries.DIMENSION_TYPE);
+            Registry<MultiNoiseBiomeSourceParameterList> noises = registryAccess.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+            Registry<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.lookupOrThrow(Registries.NOISE_SETTINGS);
+            Registry<Biome> biomes = registryAccess.lookupOrThrow(Registries.BIOME);
 
             return new LevelStem(
-                    dimensionTypes.getHolderOrThrow(BuiltinDimensionTypes.NETHER),
-                    SkyblockPreset.netherChunkGenerator(noises.asLookup(), noiseGeneratorSettings.asLookup(), biomes.asLookup())
+                    dimensionTypes.getOrThrow(BuiltinDimensionTypes.NETHER),
+                    SkyblockPreset.netherChunkGenerator(noises, noiseGeneratorSettings, biomes)
             );
         });
-    }
-
-    private static Holder<DimensionType> getDimensionType(@Nullable LevelStem spawnDimension, Registry<DimensionType> dimensionTypes) {
-        if (spawnDimension == null) {
-            SkyblockBuilder.getLogger().warn("Configured spawn dimension {} does not exist, using the overworld dimension type", SpawnConfig.spawnDimension.location());
-            return dimensionTypes.getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD);
-        }
-
-        return spawnDimension.type();
-    }
-
-    private static Holder<NoiseGeneratorSettings> getNoiseGeneratorSettings(@Nullable LevelStem spawnDimension, Registry<NoiseGeneratorSettings> noiseGeneratorSettings) {
-        if (spawnDimension != null && spawnDimension.generator() instanceof NoiseBasedChunkGenerator generator) {
-            return generator.generatorSettings();
-        }
-
-        return noiseGeneratorSettings.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
     }
 
     @Nullable
     private static LevelStem getSpawnDimension(RegistryAccess registryAccess) {
         // Shares its id with Registries.DIMENSION, Infiniverse registers the dimensions it creates here as well
-        Registry<LevelStem> levelStems = registryAccess.registryOrThrow(Registries.LEVEL_STEM);
+        Registry<LevelStem> levelStems = registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
 
-        return levelStems.get(Registries.levelToLevelStem(SpawnConfig.spawnDimension));
+        return levelStems.getValue(Registries.levelToLevelStem(SpawnConfig.spawnDimension));
     }
 
     public static boolean useInfiniverse() {
-        if (!WorldConfig.dimensionPerTeam) {
+        if (!WorldConfig.DimensionPerTeam.enabled) {
             return false;
         }
 

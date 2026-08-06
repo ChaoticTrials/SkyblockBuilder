@@ -1,0 +1,171 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.check.outputs.should_publish }}
+      prev_commit: ${{ steps.prev.outputs.prev_commit }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Find last release tag
+        id: prev
+        run: |
+          prev_tag=$(git describe --tags --abbrev=0 --match '[0-9]*' "${{ github.sha }}" 2>/dev/null || echo "")
+          prev=""
+          [ -n "$prev_tag" ] && prev=$(git rev-parse -q --verify "$prev_tag^{commit}" 2>/dev/null || echo "")
+
+          # Fallbacks for the first run (no version tag yet)
+          if [ -z "$prev" ]; then
+            before='${{ github.event.before }}'
+            if [ -n "$before" ] && [ "$before" != "0000000000000000000000000000000000000000" ] && git cat-file -e "$before^{commit}" 2>/dev/null; then
+              prev="$before"
+            else
+              prev=$(git rev-parse HEAD~1 2>/dev/null || echo "")
+            fi
+          fi
+
+          echo "prev_commit=$prev" >> "$GITHUB_OUTPUT"
+          echo "Last release tag: ${prev_tag:-<none>} ($prev)"
+
+      - name: Check for non-meta commits
+        id: check
+        run: |
+          prev='${{ steps.prev.outputs.prev_commit }}'
+          if [ -z "$prev" ]; then
+            echo "No previous commit found - will publish."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          commits=$(git log "$prev..${{ github.sha }}" --pretty=format:'%s')
+          if [ -z "$commits" ]; then
+            echo "No commits in range."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Commits since last release:"
+          echo "$commits"
+          if echo "$commits" | grep -qv '^\[meta\]'; then
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Only [meta] commits, skipping."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    needs: check
+    if: needs.check.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: publish-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v6
+      - run: chmod +x gradlew
+
+      # Commit range for the changelog
+      - name: Set changelog range
+        if: needs.check.outputs.prev_commit != ''
+        run: |
+          {
+            echo "GIT_COMMIT=${{ github.sha }}"
+            echo "GIT_PREVIOUS_COMMIT=${{ needs.check.outputs.prev_commit }}"
+            echo "GIT_PREVIOUS_SUCCESSFUL_COMMIT=${{ needs.check.outputs.prev_commit }}"
+          } >> "$GITHUB_ENV"
+
+      # Hard gate: build + tests must pass before anything is published
+      - name: Build
+        run: ./gradlew build
+
+      # Resolve the version being released (Maven doesn't have it yet) so it's stable
+      # for the release tag. The publish step below resolves the same value.
+      - name: Resolve version
+        id: version
+        run: |
+          version=$(./gradlew -q --console=plain properties | awk -F': ' '$1=="version"{print $2}')
+          [ -n "$version" ] || { echo "::error::Could not resolve project version"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing version: $version"
+
+      # Maven publish + both store uploads in ONE gradle invocation: the version is
+      # resolved once, so Maven and the stores all use the same number (separate
+      # invocations would re-resolve to the next version). --continue lets a flaky
+      # store (e.g. CurseForge 500) fail without aborting the Maven publish.
+      - name: Publish & upload
+        id: publish
+        env:
+          ORG_GRADLE_PROJECT_melanxUsername: ${{ secrets.MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_melanxPassword: ${{ secrets.MAVEN_PASSWORD }}
+          MODRINTH_UPLOAD_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_UPLOAD_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+        run: |
+          set +e
+          ./gradlew publish modrinth uploadCurseforge --continue 2>&1 | tee gradle.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          # Maven is the source of version truth: if it didn't publish, release nothing.
+          if grep -qE "Task :publishMavenJavaPublicationToMelanxRepository FAILED" gradle.log \
+             || ! grep -qE "Task :publishMavenJavaPublicationToMelanxRepository\b" gradle.log; then
+            echo "::error::Maven publish did not succeed (gradle exit $status) - not tagging."
+            exit 1
+          fi
+
+          # Maven is good; record store outcomes but do not fail this step on them.
+          modrinth_failed=false; grep -qE "Task :modrinth FAILED" gradle.log && modrinth_failed=true
+          curse_failed=false;    grep -qE "Task :uploadCurseforge FAILED" gradle.log && curse_failed=true
+          echo "modrinth_failed=$modrinth_failed"   >> "$GITHUB_OUTPUT"
+          echo "curseforge_failed=$curse_failed"    >> "$GITHUB_OUTPUT"
+          echo "Maven OK. Modrinth failed=$modrinth_failed, CurseForge failed=$curse_failed"
+
+      # Tag the released commit with the version (only reached if Maven succeeded).
+      - name: Tag release
+        run: |
+          v="${{ steps.version.outputs.version }}"
+          if git rev-parse -q --verify "refs/tags/$v" >/dev/null; then
+            echo "Tag $v already exists, leaving it as is."
+          else
+            git tag "$v" "${{ github.sha }}"
+            git push origin "refs/tags/$v"
+          fi
+
+      # Always print the changelog so it's available for a manual upload if a store
+      # failed. Mirrors ModGradle's line format and my [meta] filter.
+      - name: Print changelog
+        if: always() && needs.check.outputs.prev_commit != ''
+        run: |
+          echo "## Changelog for ${{ steps.version.outputs.version }}"
+          git log "${{ needs.check.outputs.prev_commit }}..${{ github.sha }}" \
+            --pretty="tformat:- [%s](https://github.com/${{ github.repository }}/commit/%H) - %aN" \
+            | grep -v '^- \[\[meta\]' || true
+
+      - name: Fail if a store upload failed
+        if: steps.publish.outputs.modrinth_failed == 'true' || steps.publish.outputs.curseforge_failed == 'true'
+        run: |
+          echo "Modrinth failed:   ${{ steps.publish.outputs.modrinth_failed }}"
+          echo "CurseForge failed: ${{ steps.publish.outputs.curseforge_failed }}"
+          echo "::error::A store upload failed - upload that platform manually. Maven published and the release tag was created, so the next push won't re-publish."
+          exit 1

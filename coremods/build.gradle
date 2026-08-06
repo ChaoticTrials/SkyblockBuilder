@@ -16,12 +16,12 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
 
 dependencies {
-    compileOnly "net.neoforged.fancymodloader:loader:4.0.35"
+    compileOnly "net.neoforged.fancymodloader:loader:11.0.15"
 }
 
 base {

@@ -3,7 +3,7 @@ package de.melanx.skyblockbuilder.config.mapper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.moddingx.libx.annotation.config.RegisterMapper;
@@ -23,17 +23,17 @@ public class BlockMapper implements ValueMapper<Block, JsonElement> {
 
         @Override
         public Block valueOf(String str) {
-            return BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(str));
+            return BuiltInRegistries.BLOCK.getValue(Identifier.tryParse(str));
         }
 
         @Override
         public boolean canInputChar(char chr) {
-            return ResourceLocation.isAllowedInResourceLocation(chr);
+            return Identifier.isAllowedInIdentifier(chr);
         }
 
         @Override
         public boolean isValid(String str) {
-            ResourceLocation id = ResourceLocation.tryParse(str);
+            Identifier id = Identifier.tryParse(str);
             return id != null && BuiltInRegistries.BLOCK.containsKey(id);
         }
 
@@ -55,7 +55,7 @@ public class BlockMapper implements ValueMapper<Block, JsonElement> {
 
     @Override
     public Block fromJson(JsonElement json) {
-        return BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(json.getAsString()));
+        return BuiltInRegistries.BLOCK.getValue(Identifier.tryParse(json.getAsString()));
     }
 
     @Override

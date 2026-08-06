@@ -1,12 +1,13 @@
 package de.melanx.skyblockbuilder.world;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
@@ -16,9 +17,11 @@ import net.minecraft.world.level.Level;
 public final class IslandPos {
 
     public static final IslandPos CENTERED = new IslandPos(0, 0, BlockPos.ZERO);
-    public static final String ISLAND_X = "island_x";
-    public static final String ISLAND_Z = "island_z";
-    public static final String CENTER_POS = "center_pos";
+    public static final MapCodec<IslandPos> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.INT.fieldOf("island_x").forGetter(islandPos -> islandPos.x),
+            Codec.INT.fieldOf("island_z").forGetter(islandPos -> islandPos.z),
+            BlockPos.CODEC.fieldOf("center_pos").forGetter(islandPos -> islandPos.center)
+    ).apply(instance, IslandPos::new));
 
     private final int x;
     private final int z;
@@ -30,7 +33,7 @@ public final class IslandPos {
                         WorldUtil.calcSpawnHeight(level,
                                 IslandPos.calcX(x, template.getOffset()) + (template.getTemplate().getSize().getX() / 2),
                                 IslandPos.calcZ(z, template.getOffset()) + (template.getTemplate().getSize().getZ() / 2)
-                        ) + template.getOffset().getY(), level.getMinBuildHeight(), level.getMaxBuildHeight()),
+                        ) + template.getOffset().getY(), level.getMinY(), level.getMaxY()),
                 z, template.getOffset());
     }
 
@@ -64,23 +67,6 @@ public final class IslandPos {
 
     public void changeHeight(int y) {
         this.center = this.center.atY(y);
-    }
-
-    public static IslandPos fromTag(CompoundTag tag) {
-        //noinspection OptionalGetWithoutIsPresent
-        return new IslandPos(
-                tag.getInt(ISLAND_X),
-                tag.getInt(ISLAND_Z),
-                NbtUtils.readBlockPos(tag, CENTER_POS).get()
-        );
-    }
-
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt(ISLAND_X, this.x);
-        tag.putInt(ISLAND_Z, this.z);
-        tag.put(CENTER_POS, NbtUtils.writeBlockPos(this.center));
-        return tag;
     }
 
     @Override

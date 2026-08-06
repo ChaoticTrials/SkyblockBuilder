@@ -58,7 +58,7 @@ public class JoinRequestHandlingCommand {
         validationResult.data().addPlayerToTeam(validationResult.team(), player);
         validationResult.team().removeJoinRequest(player);
         WorldUtil.teleportToIsland(player, validationResult.team());
-        player.displayClientMessage(SkyComponents.SUCCESS_JOIN_REQUEST_ACCEPTED.apply(validationResult.team().getName()), false);
+        player.sendSystemMessage(SkyComponents.SUCCESS_JOIN_REQUEST_ACCEPTED.apply(validationResult.team().getName()), false);
         return 1;
     }
 
@@ -86,7 +86,7 @@ public class JoinRequestHandlingCommand {
 
         team.broadcast(SkyComponents.EVENT_DENY_JOIN_REQUEST.apply(validationResult.player().getDisplayName(), player.getDisplayName()), Style.EMPTY.applyFormat(ChatFormatting.GOLD));
         team.removeJoinRequest(player);
-        player.displayClientMessage(SkyComponents.SUCCESS_DENY_REQUEST_ACCEPTED.apply(team.getName()), false);
+        player.sendSystemMessage(SkyComponents.SUCCESS_DENY_REQUEST_ACCEPTED.apply(team.getName()), false);
 
         return 1;
     }

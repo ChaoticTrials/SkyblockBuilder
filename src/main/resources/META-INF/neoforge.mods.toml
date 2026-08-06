@@ -31,7 +31,7 @@ side = "BOTH"
 [[dependencies.${ mod.modid }]]
 modId = "libx"
 type = "required"
-versionRange = "[1.21.1-6.0.9,)"
+versionRange = "[26.1.2-7.0.2,)"
 ordering = "AFTER"
 side = "BOTH"
 
@@ -45,7 +45,7 @@ side = "BOTH"
 [[dependencies.${ mod.modid }]]
 modId = "skyguis"
 type = "optional"
-versionRange = "[21.1,)"
+versionRange = "[26.1.0,)"
 ordering = "NONE"
 side = "BOTH"
 

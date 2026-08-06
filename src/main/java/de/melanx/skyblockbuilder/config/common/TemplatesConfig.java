@@ -1,5 +1,7 @@
 package de.melanx.skyblockbuilder.config.common;
 
+import com.mojang.serialization.Codec;
+import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.values.TemplateSpawns;
 import de.melanx.skyblockbuilder.config.values.TemplateSpreads;
 import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
@@ -7,6 +9,8 @@ import de.melanx.skyblockbuilder.config.values.providers.SpawnsProvider;
 import de.melanx.skyblockbuilder.template.TemplateInfo;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.core.BlockPos;
+import org.moddingx.libx.annotation.api.Codecs;
+import org.moddingx.libx.annotation.codec.PrimaryConstructor;
 import org.moddingx.libx.annotation.config.RegisterConfig;
 import org.moddingx.libx.config.Config;
 
@@ -74,5 +78,9 @@ public class TemplatesConfig {
             "This applies on top of the \"offset\" defined in each template"})
     public static int defaultOffset = 0;
 
-    public record Spawn(BlockPos pos, WorldUtil.SpawnDirection direction) {}
+    @PrimaryConstructor
+    public record Spawn(BlockPos pos, WorldUtil.SpawnDirection direction) {
+
+        public static final Codec<Spawn> CODEC = Codecs.get(SkyblockBuilder.class, Spawn.class);
+    }
 }

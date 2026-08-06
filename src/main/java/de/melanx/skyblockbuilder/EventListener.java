@@ -22,7 +22,9 @@ import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
+import de.melanx.skyblockbuilder.events.SkyblockChangeDimensionEvent;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.registration.ModAttachmentTypes;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
@@ -30,18 +32,20 @@ import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -50,6 +54,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.moddingx.libx.event.ConfigLoadedEvent;
@@ -60,8 +65,6 @@ import java.util.Set;
 
 @EventBusSubscriber(modid = "skyblockbuilder")
 public class EventListener {
-
-    private static final String SPAWNED_TAG = "alreadySpawned";
 
     @SubscribeEvent
     public static void resourcesReload(OnDatapackSyncEvent event) {
@@ -128,7 +131,7 @@ public class EventListener {
             ServerLevel level = (ServerLevel) event.getLevel();
             BlockPos pos = new BlockPos((int) lightning.position().x, level.getSeaLevel(), (int) lightning.position().z);
             Optional<BlockPos> rodPos = level.findLightningRod(pos);
-            rodPos.ifPresent(blockPos -> lightning.moveTo(Vec3.atBottomCenterOf(blockPos)));
+            rodPos.ifPresent(blockPos -> lightning.moveOrInterpolateTo(Vec3.atBottomCenterOf(blockPos)));
         }
     }
 
@@ -144,11 +147,11 @@ public class EventListener {
             Team spawn = data.getSpawn();
             GameProfileCache.addProfiles(Set.of(player.getGameProfile()));
 
-            if (WorldConfig.dimensionPerTeam && !ModList.get().isLoaded(InfiniverseCompat.MODID) && player.hasPermissions(Commands.LEVEL_GAMEMASTERS)) {
+            if (WorldConfig.DimensionPerTeam.enabled && !ModList.get().isLoaded(InfiniverseCompat.MODID) && player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
                 player.sendSystemMessage(Component.translatable("infiniverse.skyblockbuilder.not_loaded").withStyle(ChatFormatting.RED));
             }
 
-            if (player.getPersistentData().getBoolean(SPAWNED_TAG)) {
+            if (player.getData(ModAttachmentTypes.spawnTag)) {
                 if (!data.hasPlayerTeam(player) && !spawn.hasPlayer(player)) {
                     if (InventoryConfig.dropItems) {
                         RandomUtility.dropInventories(player);
@@ -161,7 +164,7 @@ public class EventListener {
 
                 return;
             }
-            player.getPersistentData().putBoolean(SPAWNED_TAG, true);
+            player.setData(ModAttachmentTypes.spawnTag, true);
             data.getOrCreateMetaInfo(player);
 
             if (InventoryConfig.clearInitialInventory) {
@@ -171,15 +174,13 @@ public class EventListener {
             SkyblockBuilder.getLogger().info("First time {} joined. Putting into spawn team.", player.getDisplayName().getString());
             data.addPlayerToTeam(spawn, player);
             try {
-                // the world spawn is always in the spawn dimension, the island is in another dimension if teams have their own
-                if (!InfiniverseCompat.useInfiniverse()) {
-                    //noinspection OptionalGetWithoutIsPresent
-                    TemplatesConfig.Spawn spawnPos = !spawn.getDefaultPossibleSpawns().isEmpty() ?
-                            spawn.getDefaultPossibleSpawns().stream().findFirst().get() :
-                            spawn.getPossibleSpawns().stream().findFirst().get();
+                //noinspection OptionalGetWithoutIsPresent
+                TemplatesConfig.Spawn spawnPos = !spawn.getDefaultPossibleSpawns().isEmpty() ?
+                        spawn.getDefaultPossibleSpawns().stream().findFirst().get() :
+                        spawn.getPossibleSpawns().stream().findFirst().get();
 
-                    ((ServerLevel) level).setDefaultSpawnPos(spawnPos.pos(), spawnPos.direction().getYRot());
-                }
+                ResourceKey<Level> spawnDimension = InfiniverseCompat.useInfiniverse() ? spawn.getTeamLevelKey() : SpawnConfig.spawnDimension;
+                ((ServerLevel) level).getServer().setRespawnData(LevelData.RespawnData.of(spawnDimension, spawnPos.pos(), spawnPos.direction().getYRot(), 0));
             } catch (NoSuchElementException e) {
                 throw new IllegalStateException("No possible spawn point set for spawn", e);
             }
@@ -189,33 +190,62 @@ public class EventListener {
     }
 
     @SubscribeEvent
-    public static void clonePlayer(PlayerEvent.Clone event) {
-        Player newPlayer = event.getEntity();
-        CompoundTag newData = newPlayer.getPersistentData();
+    public static void onTravelToDimension(EntityTravelToDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            if (!InfiniverseCompat.useInfiniverse()) {
+                return;
+            }
 
-        Player oldPlayer = event.getOriginal();
-        CompoundTag oldData = oldPlayer.getPersistentData();
+            ResourceKey<Level> dimension = player.level().dimension();
 
-        newData.putBoolean(SPAWNED_TAG, oldData.getBoolean(SPAWNED_TAG));
+            ResourceKey<Level> originalDimension;
+            if (dimension == Team.SPAWN_LEVEL_KEY) {
+                originalDimension = SpawnConfig.spawnDimension;
+            } else if (!dimension.identifier().getNamespace().equals("skyblockbuilder")) {
+                originalDimension = dimension;
+            } else {
+                String dimensionPath = dimension.identifier().getPath();
+                String normalizedDimensionName = dimensionPath.replaceFirst("[0-9a-fA-F]{32}_", "");
+                originalDimension = switch(normalizedDimensionName) {
+                    case "main" -> SpawnConfig.spawnDimension;
+                    case "overworld" -> Level.OVERWORLD;
+                    case "nether" -> Level.NETHER;
+                    default -> dimension;
+                };
+            }
+
+            player.setData(ModAttachmentTypes.data, originalDimension);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onChangeDimension(SkyblockChangeDimensionEvent event) {
+        event.setDimension(WorldUtil.resolveTeamDimension(event.getPlayer(), event.getDimension()));
     }
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (!event.getEntity().level().isClientSide) {
-            ServerPlayer player = (ServerPlayer) event.getEntity();
-            BlockPos pos = player.getRespawnPosition();
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
 
-            ServerLevel level = (ServerLevel) player.level();
+        ServerPlayer.RespawnConfig respawnConfig = player.getRespawnConfig();
+        if (respawnConfig == null) {
+            return;
+        }
 
-            if (!WorldUtil.isSkyblock(level)) {
-                return;
-            }
+        BlockPos pos = respawnConfig.respawnData().pos();
 
-            if (pos == null || !level.getBlockState(pos).is(BlockTags.BEDS) && !level.getBlockState(pos).is(Blocks.RESPAWN_ANCHOR)) {
-                SkyblockSavedData data = SkyblockSavedData.get(level);
-                Team team = data.getTeamFromPlayer(player);
-                WorldUtil.teleportToIsland(player, team == null ? data.getSpawn() : team);
-            }
+        ServerLevel level = (ServerLevel) player.level();
+
+        if (!WorldUtil.isSkyblock(level)) {
+            return;
+        }
+
+        if (!level.getBlockState(pos).is(BlockTags.BEDS) && !level.getBlockState(pos).is(Blocks.RESPAWN_ANCHOR)) {
+            SkyblockSavedData data = SkyblockSavedData.get(level);
+            Team team = data.getTeamFromPlayer(player);
+            WorldUtil.teleportToIsland(player, team == null ? data.getSpawn() : team);
         }
     }
 

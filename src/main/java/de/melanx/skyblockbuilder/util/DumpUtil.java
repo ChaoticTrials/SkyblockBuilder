@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.fml.ModList;
@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +43,7 @@ import java.util.zip.ZipOutputStream;
 
 public class DumpUtil {
 
-    public static final int MANIFEST_VERSION = 2;
+    public static final int MANIFEST_VERSION = 3;
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-HHmmss");
     private static final Map<String, IModInfo> MOD_INFO_MAP = ModList.get().getMods().stream().collect(Collectors.toMap(IModInfo::getModId, info -> info));
     private static final Pattern IP_PATTERN = Pattern.compile("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b");
@@ -61,8 +62,8 @@ public class DumpUtil {
 
         return Component.literal(url).withStyle(Style.EMPTY
                 .applyFormats(ChatFormatting.BLUE, ChatFormatting.UNDERLINE)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url + "/new?template=dump_bug_report.yml"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommonComponents.GUI_OPEN_IN_BROWSER))
+                .withClickEvent(new ClickEvent.OpenUrl(URI.create(url + "/new?template=dump_bug_report.yml")))
+                .withHoverEvent(new HoverEvent.ShowText(CommonComponents.GUI_OPEN_IN_BROWSER))
         );
     }
 
@@ -76,7 +77,7 @@ public class DumpUtil {
             JsonObject settings = new JsonObject();
             settings.addProperty("configs", includeConfigs);
             settings.addProperty("templates", includeTemplates);
-            settings.addProperty("level_dat", includeLevelDat);
+            settings.addProperty("level|world_gen_settings", includeLevelDat);
             settings.addProperty("log", includeLog);
             settings.addProperty("crash_report", includeCrashReport);
             settings.addProperty("world_data", includeSkyblockBuilderWorldData);
@@ -115,9 +116,9 @@ public class DumpUtil {
             if (includeConfigs) {
                 DumpUtil.addDirToZip(filesArray, SkyPaths.MOD_CONFIG, zipStream, Paths.get("config"), false);
 
-                Map<ResourceLocation, String> diffs = DumpUtil.configDiffs();
-                for (Map.Entry<ResourceLocation, String> entry : diffs.entrySet()) {
-                    ResourceLocation key = entry.getKey();
+                Map<Identifier, String> diffs = DumpUtil.configDiffs();
+                for (Map.Entry<Identifier, String> entry : diffs.entrySet()) {
+                    Identifier key = entry.getKey();
                     String value = entry.getValue();
 
                     Path filePath = Paths.get("config", "changed_values", key.getPath() + ".diff");
@@ -136,6 +137,11 @@ public class DumpUtil {
                     Path levelDat = server.storageSource.getLevelPath(LevelResource.LEVEL_DATA_FILE);
                     if (levelDat.toFile().exists()) {
                         DumpUtil.addFileToZip(filesArray, zipStream, levelDat);
+                    }
+
+                    Path worldGenSettings = server.storageSource.getLevelPath(LevelResource.DATA).resolve("minecraft").resolve("world_gen_settings.dat");
+                    if (worldGenSettings.toFile().exists()) {
+                        DumpUtil.addFileToZip(filesArray, zipStream, worldGenSettings);
                     }
                 }
 
@@ -257,9 +263,9 @@ public class DumpUtil {
         }
     }
 
-    private static Map<ResourceLocation, String> configDiffs() {
-        Map<ResourceLocation, String> configDiffs = new HashMap<>();
-        for (ResourceLocation id : ConfigManager.configs()) {
+    private static Map<Identifier, String> configDiffs() {
+        Map<Identifier, String> configDiffs = new HashMap<>();
+        for (Identifier id : ConfigManager.configs()) {
             if (!id.getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
                 continue;
             }

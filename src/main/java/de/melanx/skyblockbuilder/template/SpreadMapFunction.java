@@ -7,7 +7,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
-import de.melanx.skyblockbuilder.registration.ModLootItemFunctions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -17,14 +16,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
@@ -69,18 +66,24 @@ public class SpreadMapFunction extends LootItemConditionalFunction {
 
     @Nonnull
     @Override
+    public MapCodec<? extends LootItemConditionalFunction> codec() {
+        return SpreadMapFunction.CODEC;
+    }
+
+    @Nonnull
+    @Override
     protected ItemStack run(@Nonnull ItemStack stack, @Nonnull LootContext context) {
         if (!stack.is(Items.MAP)) {
             return stack;
         }
 
-        Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
-        Vec3 pos = context.getParamOrNull(LootContextParams.ORIGIN);
+        Entity entity = context.getOptionalParameter(LootContextParams.THIS_ENTITY);
+        Vec3 pos = context.getOptionalParameter(LootContextParams.ORIGIN);
         if (!(entity instanceof ServerPlayer player) || pos == null) {
             return stack;
         }
 
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         SkyblockSavedData data = SkyblockSavedData.get(level);
         Team team = data.getTeamFromPlayer(player);
         if (team == null) {
@@ -132,7 +135,7 @@ public class SpreadMapFunction extends LootItemConditionalFunction {
     // We need to create our own MapItemSavedData since MapItem#create is off-centered when scale is 1 or higher
     // Sadly, the map will not stay fixed when resizing
     // Issue here: https://bugs.mojang.com/browse/MC-142694
-    private static ItemStack createFixedMap(Level level, int levelX, int levelZ, byte scale, boolean trackingPosition, boolean unlimitedTracking) {
+    private static ItemStack createFixedMap(ServerLevel level, int levelX, int levelZ, byte scale, boolean trackingPosition, boolean unlimitedTracking) {
         ItemStack map = Items.FILLED_MAP.getDefaultInstance();
         MapItemSavedData data = new MapItemSavedData(levelX, levelZ, scale, trackingPosition, unlimitedTracking, false, level.dimension());
         MapId freeMapId = level.getFreeMapId();
@@ -140,11 +143,5 @@ public class SpreadMapFunction extends LootItemConditionalFunction {
         map.set(DataComponents.MAP_ID, freeMapId);
 
         return map;
-    }
-
-    @Nonnull
-    @Override
-    public LootItemFunctionType<SpreadMapFunction> getType() {
-        return ModLootItemFunctions.spreadMap;
     }
 }
