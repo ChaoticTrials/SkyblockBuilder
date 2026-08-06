@@ -53,6 +53,7 @@ public class WorldUtil {
             level = server.getLevel(team.getTeamLevelKey());
             if (level == null) {
                 SkyblockBuilder.getLogger().error("Team dimension {} is unavailable", team.getTeamLevelKey().location());
+                return;
             }
         } else {
             level = WorldUtil.getConfiguredLevel(server);

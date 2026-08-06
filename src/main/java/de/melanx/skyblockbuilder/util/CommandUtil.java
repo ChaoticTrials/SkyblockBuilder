@@ -1,6 +1,7 @@
 package de.melanx.skyblockbuilder.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.melanx.skyblockbuilder.compat.infiniverse.InfiniverseCompat;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -19,7 +20,7 @@ public class CommandUtil {
             return true;
         }
 
-        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && player.level() != data.getLevel()) {
+        if (!InfiniverseCompat.useInfiniverse() && !PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_ACROSS_DIMENSIONS) && player.level() != data.getLevel()) {
             source.sendFailure(SkyComponents.ERROR_TELEPORT_ACROSS_DIMENSIONS);
             return true;
         }

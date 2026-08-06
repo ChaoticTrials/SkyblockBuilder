@@ -229,8 +229,11 @@ public class EventListener {
             Set<GameProfile> profiles = RandomUtility.getGameProfiles(server.overworld());
             GameProfileCache.addProfiles(profiles);
 
+            SkyblockSavedData data = SkyblockSavedData.get(server.overworld());
+            data.restoreInfiniverseDimensions(server);
+
             if (SkyblockBuilderAPI.isSpawnTeleportEnabled()) {
-                SkyblockSavedData.get(server.overworld()).getSpawn();
+                data.getSpawn();
             }
         }
     }

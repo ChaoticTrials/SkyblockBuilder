@@ -71,17 +71,23 @@ public abstract class SkyblockSavedData extends SavedData {
 
     protected abstract IslandPos nextSpawnPos(ConfiguredTemplate template);
 
+    protected abstract void onTeamCreated(Team team, ConfiguredTemplate template);
     protected abstract void onTeamDeleted(Team team);
 
     @Nullable
     public abstract ServerLevel getLevelFor(Team team);
+
+    public abstract void restoreInfiniverseDimensions(MinecraftServer server);
 
     public ServerLevel getLevel() {
         return this.getLevelFor(null);
     }
 
     public static SavedData.Factory<SkyblockSavedData> factory() {
-        return new SavedData.Factory<>(SingleWorldImpl::new, (nbt, provider) -> SingleWorldImpl.loadImpl(nbt));
+        return new SavedData.Factory<>(
+                () -> InfiniverseCompat.useInfiniverse() ? new MultiWorldImpl() : new SingleWorldImpl(),
+                (nbt, provider) -> nbt.getBoolean("MultiDimensional") ? MultiWorldImpl.loadImpl(nbt) : SingleWorldImpl.loadImpl(nbt)
+        );
     }
 
     public static SkyblockSavedData get(Level level) {
@@ -90,7 +96,11 @@ public abstract class SkyblockSavedData extends SavedData {
 
             DimensionDataStorage storage = server.overworld().getDataStorage();
             SkyblockSavedData data = storage.computeIfAbsent(SkyblockSavedData.factory(), NAME);
-            ((SingleWorldImpl) data).level = WorldUtil.getConfiguredLevel(server);
+            if (data instanceof MultiWorldImpl multi) {
+                multi.server = server;
+            } else if (data instanceof SingleWorldImpl single) {
+                single.level = WorldUtil.getConfiguredLevel(server);
+            }
             data.getOrCreateMetaInfo(Util.NIL_UUID);
             return data;
         } else {
@@ -102,8 +112,8 @@ public abstract class SkyblockSavedData extends SavedData {
         clientInstance = data;
     }
 
-    public static SkyblockSavedData load(CompoundTag nbt) {
-        return SingleWorldImpl.loadImpl(nbt);
+    public static SkyblockSavedData load(CompoundTag nbt, boolean multiDimensional) {
+        return multiDimensional ? MultiWorldImpl.loadImpl(nbt) : SingleWorldImpl.loadImpl(nbt);
     }
 
     public Team getSpawn() {
@@ -131,6 +141,7 @@ public abstract class SkyblockSavedData extends SavedData {
 
     public Pair<IslandPos, Team> create(String teamName, ConfiguredTemplate template) {
         Team team = this.createTeamInternally(teamName, template);
+        this.onTeamCreated(team, template);
         IslandPos islandPos = team.getIsland();
 
         Set<TemplatesConfig.Spawn> positions = initialPossibleSpawns(islandPos.getCenter(), template);
@@ -267,17 +278,9 @@ public abstract class SkyblockSavedData extends SavedData {
         List<TemplatesConfig.Spawn> possibleSpawns = new ArrayList<>(this.getPossibleSpawns(team.getIsland(), template));
         team.setPossibleSpawns(possibleSpawns);
 
-        ServerLevel level = this.getLevel();
         BlockPos center = team.getIsland().getCenter();
 
-        ServerLevel teamLevel = this.getLevel();
-
-        if (InfiniverseCompat.useInfiniverse()) {
-            teamLevel = InfiniverseCompat.getOrCreateLevel(level.getServer(), team.getTeamLevelKey(), level.registryAccess());
-            if (!team.isSpawn()) {
-                InfiniverseCompat.getOrCreateNetherLevel(level.getServer(), team.getTeamNetherLevelKey(), level.registryAccess());
-            }
-        }
+        ServerLevel teamLevel = this.getLevelFor(team);
 
         template.placeInWorld(teamLevel, team, TemplateUtil.STRUCTURE_PLACE_SETTINGS, RandomSource.create(), Block.UPDATE_CLIENTS);
         SkyblockSavedData.surround(teamLevel, center, template);
@@ -365,13 +368,6 @@ public abstract class SkyblockSavedData extends SavedData {
 
         this.registry.remove(teamId);
         this.onTeamDeleted(removedTeam);
-
-        if (InfiniverseCompat.useInfiniverse()) {
-            InfiniverseCompat.markDimensionForUnregistration(this.getLevel().getServer(), removedTeam.getTeamLevelKey());
-            if (!removedTeam.isSpawn()) {
-                InfiniverseCompat.markDimensionForUnregistration(this.getLevel().getServer(), removedTeam.getTeamNetherLevelKey());
-            }
-        }
 
         return true;
     }
@@ -604,6 +600,11 @@ public abstract class SkyblockSavedData extends SavedData {
         }
 
         @Override
+        protected void onTeamCreated(Team team, ConfiguredTemplate template) {
+            // Nothing extra needed in single-world mode
+        }
+
+        @Override
         protected void onTeamDeleted(Team team) {
             // Nothing extra needed in single-world mode
         }
@@ -612,6 +613,11 @@ public abstract class SkyblockSavedData extends SavedData {
         @Override
         public ServerLevel getLevelFor(Team team) {
             return this.level;
+        }
+
+        @Override
+        public void restoreInfiniverseDimensions(MinecraftServer server) {
+            // Nothing extra needed in single-world mode
         }
 
         @Nonnull
@@ -645,17 +651,94 @@ public abstract class SkyblockSavedData extends SavedData {
         }
     }
 
-    public void restoreInfiniverseDimensions(MinecraftServer server) {
-        if (!InfiniverseCompat.useInfiniverse()) {
-            return;
+    private static final class MultiWorldImpl extends SkyblockSavedData {
+
+        private MinecraftServer server;
+
+        @Override
+        protected IslandPos nextIslandPos(ConfiguredTemplate template) {
+            return IslandPos.CENTERED;
         }
 
-        RegistryAccess registryAccess = server.registryAccess();
-        for (Team team : this.registry.all()) {
-            InfiniverseCompat.getOrCreateLevel(server, team.getTeamLevelKey(), registryAccess);
-            if (!team.isSpawn()) {
-                InfiniverseCompat.getOrCreateNetherLevel(server, team.getTeamNetherLevelKey(), registryAccess);
+        @Override
+        protected IslandPos nextSpawnPos(ConfiguredTemplate template) {
+            return IslandPos.CENTERED;
+        }
+
+        @Override
+        protected void onTeamCreated(Team team, ConfiguredTemplate template) {
+            ServerLevel level = InfiniverseCompat.getOrCreateLevel(this.server, team.getTeamLevelKey(), this.server.registryAccess());
+
+            if (level == null) {
+                throw new IllegalStateException("Failed to create dimension " + team.getTeamLevelKey().location());
             }
+
+            if (!team.isSpawn()) {
+                InfiniverseCompat.getOrCreateNetherLevel(this.server, team.getTeamNetherLevelKey(), this.server.registryAccess());
+            }
+
+            team.setIsland(new IslandPos(this.getLevelFor(team), 0, 0, template));
+        }
+
+        @Override
+        protected void onTeamDeleted(Team team) {
+            InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamLevelKey());
+            if (!team.isSpawn()) {
+                InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamNetherLevelKey());
+            }
+        }
+
+        @Override
+        public ServerLevel getLevelFor(Team team) {
+            if (this.server == null) {
+                return null;
+            }
+
+            if (team == null) {
+                return WorldUtil.getConfiguredLevel(this.server);
+            }
+
+            return this.server.getLevel(team.getTeamLevelKey());
+        }
+
+        @Override
+        public void restoreInfiniverseDimensions(MinecraftServer server) {
+            RegistryAccess registryAccess = server.registryAccess();
+            for (Team team : this.registry.all()) {
+                InfiniverseCompat.getOrCreateLevel(server, team.getTeamLevelKey(), registryAccess);
+                if (!team.isSpawn()) {
+                    InfiniverseCompat.getOrCreateNetherLevel(server, team.getTeamNetherLevelKey(), registryAccess);
+                }
+            }
+        }
+
+        @Nonnull
+        @Override
+        public CompoundTag save(@Nonnull CompoundTag compound, @Nonnull HolderLookup.Provider registries) {
+            CompoundTag nbt = super.save(compound, registries);
+
+            nbt.putBoolean("MultiDimensional", true);
+
+            return nbt;
+        }
+
+        private static SkyblockSavedData loadImpl(CompoundTag nbt) {
+            MultiWorldImpl data = new MultiWorldImpl();
+            ConcurrentMap<UUID, SkyMeta> metaInfo = new ConcurrentHashMap<>();
+
+            data.registry.loadFromList(nbt.getList(ISLANDS, Tag.TAG_COMPOUND), data);
+
+            for (Tag inbt : nbt.getList(META_INFO, Tag.TAG_COMPOUND)) {
+                CompoundTag tag = (CompoundTag) inbt;
+
+                UUID player = tag.getUUID(PLAYER);
+                SkyMeta meta = SkyMeta.get(data, tag.getCompound(META));
+                metaInfo.put(player, meta);
+            }
+
+            data.metaInfo = metaInfo;
+
+            return data;
         }
     }
 }

@@ -35,7 +35,6 @@ public class SkyblockDataUpdateHandler extends PacketHandler<SkyblockDataUpdateH
 
         public static final StreamCodec<RegistryFriendlyByteBuf, Message> CODEC = StreamCodec.of(
                 (buffer, msg) -> {
-                    //noinspection DataFlowIssue
                     CompoundTag tag = msg.data.save(new CompoundTag(), msg.data.getLevel().registryAccess());
                     if (tag.contains("MetaInformation")) {
                         SkyMeta meta = null;
@@ -63,7 +62,12 @@ public class SkyblockDataUpdateHandler extends PacketHandler<SkyblockDataUpdateH
                 },
                 buffer -> {
                     Tag tag = buffer.readNbt(NbtAccounter.unlimitedHeap());
-                    SkyblockSavedData data = SkyblockSavedData.load((CompoundTag) tag);
+                    if (!(tag instanceof CompoundTag ctag)) {
+                        throw new IllegalStateException("There's something weird happening when updating Skyblock data: " + tag);
+                    }
+
+                    boolean multiDimensional = ctag.getBoolean("MultiDimensional");
+                    SkyblockSavedData data = SkyblockSavedData.load(ctag, multiDimensional);
                     return new SkyblockDataUpdateHandler.Message(data, buffer.readUUID());
                 }
         );
