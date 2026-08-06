@@ -152,7 +152,7 @@ public abstract class SkyblockSavedData extends SavedData {
             return new Team(this, this.nextSpawnPos(template), SPAWN_ID);
         }
 
-        return new Team(this, this.nextSpawnPos(template));
+        return new Team(this, this.nextIslandPos(template));
     }
 
     @Nonnull
