@@ -36,7 +36,7 @@ public class InfiniverseCompat {
             Registry<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.registryOrThrow(Registries.NOISE_SETTINGS);
             Registry<Biome> biomes = registryAccess.registryOrThrow(Registries.BIOME);
 
-            Holder<DimensionType> dimensionType = InfiniverseCompat.getDimensionType(registryAccess, dimensionTypes);
+            Holder<DimensionType> dimensionType = InfiniverseCompat.getDimensionType(server, registryAccess, dimensionTypes);
 
             return new LevelStem(dimensionType, SkyblockPreset.configuredOverworldChunkGenerator(noises.asLookup(), noiseGeneratorSettings.asLookup(), biomes.asLookup()));
         });
@@ -56,7 +56,7 @@ public class InfiniverseCompat {
         });
     }
 
-    private static Holder<DimensionType> getDimensionType(RegistryAccess registryAccess, Registry<DimensionType> dimensionTypes) {
+    private static Holder<DimensionType> getDimensionType(MinecraftServer server, RegistryAccess registryAccess, Registry<DimensionType> dimensionTypes) {
         ResourceKey<Level> spawnDimension = SpawnConfig.spawnDimension;
         if (spawnDimension == Level.OVERWORLD) {
             return dimensionTypes.getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD);
@@ -70,15 +70,19 @@ public class InfiniverseCompat {
             return dimensionTypes.getHolderOrThrow(BuiltinDimensionTypes.END);
         }
 
-        Registry<Level> levels = registryAccess.registryOrThrow(Registries.DIMENSION);
-        Holder.Reference<Level> holderOrThrow = levels.getHolderOrThrow(SpawnConfig.spawnDimension);
-
-        if (holderOrThrow.isBound()) {
-            Level value = holderOrThrow.value();
-
-            return value.dimensionTypeRegistration();
+        ServerLevel spawnLevel = server.getLevel(spawnDimension);
+        if (spawnLevel != null) {
+            return spawnLevel.dimensionTypeRegistration();
         }
 
+        Registry<LevelStem> levelStems = registryAccess.registryOrThrow(Registries.LEVEL_STEM);
+        LevelStem levelStem = levelStems.get(Registries.levelToLevelStem(spawnDimension));
+
+        if (levelStem != null) {
+            return levelStem.type();
+        }
+
+        SkyblockBuilder.getLogger().warn("Configured spawn dimension {} does not exist, using the overworld dimension type", spawnDimension.location());
         return dimensionTypes.getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD);
     }
 
