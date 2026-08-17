@@ -80,7 +80,7 @@ public class SkyblockPreset extends WorldPreset {
     ) {
         return Map.of(
                 LevelStem.OVERWORLD, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.OVERWORLD),
-                        SkyblockPreset.configuredOverworldChunkGenerator(noises, noiseGeneratorSettings, biomes)),
+                        SkyblockPreset.configuredOverworldChunkGenerator(noises, biomes, noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD))),
                 LevelStem.NETHER, new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.NETHER),
                         DimensionsConfig.Nether.isCustom
                                 ? SkyblockPreset.netherChunkGenerator(noises, noiseGeneratorSettings, biomes)
@@ -92,23 +92,23 @@ public class SkyblockPreset extends WorldPreset {
         );
     }
 
+    // The settings are passed in as team dimensions may run on the dimension type of another dimension
     public static ChunkGenerator configuredOverworldChunkGenerator(
             HolderGetter<MultiNoiseBiomeSourceParameterList> noises,
-            HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings,
-            HolderLookup<Biome> biomes
+            HolderLookup<Biome> biomes,
+            Holder<NoiseGeneratorSettings> settings
     ) {
         return DimensionsConfig.Overworld.isCustom
-                ? SkyblockPreset.overworldChunkGenerator(noises, noiseGeneratorSettings, biomes)
-                : new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD));
+                ? SkyblockPreset.overworldChunkGenerator(noises, biomes, settings)
+                : new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(noises.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)), settings);
     }
 
     public static ChunkGenerator overworldChunkGenerator(
             HolderGetter<MultiNoiseBiomeSourceParameterList> noises,
-            HolderGetter<NoiseGeneratorSettings> noiseGeneratorSettings,
-            HolderLookup<Biome> biomes
+            HolderLookup<Biome> biomes,
+            Holder<NoiseGeneratorSettings> settings
     ) {
         BiomeSource biomeSource = new CustomMultiNoiseBiomeSource(noises.getOrThrow(SkyblockBiomeParameters.KEY));
-        Holder<NoiseGeneratorSettings> settings = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
 
         biomeSource = SkyblockPreset.convertBiomeSource((MultiNoiseBiomeSource) biomeSource, biomes, DimensionsConfig.Overworld.centeredBiomes);
 
