@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.melanx.skyblockbuilder.commands.Suggestions;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
-import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -143,13 +142,15 @@ public class EditTeamSpawnsCommand {
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
-        if (level != source.getServer().getLevel(SpawnConfig.spawnDimension)) {
+        ServerPlayer player = source.getPlayerOrException();
+        Team team = data.getTeamFromPlayer(player);
+
+        // the spawns are relative to the island, so they can only be edited in the dimension the island is in
+        if (level != data.getLevelFor(team != null ? team : data.getSpawn())) {
             source.sendFailure(SkyComponents.ERROR_WRONG_POSITION);
             return null;
         }
 
-        ServerPlayer player = source.getPlayerOrException();
-        Team team = data.getTeamFromPlayer(player);
         return new ValidationResult(player, team);
     }
 
