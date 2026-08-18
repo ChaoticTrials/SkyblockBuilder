@@ -94,6 +94,13 @@ public class WorldUtil {
         return false;
     }
 
+    // Check for spawn level is using Infiniverse
+    public static boolean isSpawnDimension(Level level) {
+        ResourceKey<Level> dimension = level.dimension();
+
+        return dimension == SpawnConfig.spawnDimension || dimension == Team.SPAWN_LEVEL_KEY;
+    }
+
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {
         if (!isSkyblock(source.getServer().overworld())) {
             throw new SimpleCommandExceptionType(SkyComponents.NO_SKYBLOCK).create();

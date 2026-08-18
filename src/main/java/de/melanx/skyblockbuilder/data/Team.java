@@ -54,6 +54,9 @@ public class Team {
 
     public static final int MAX_NAME_LENGTH = 64;
 
+    // Spawn level if using Infiniverse
+    public static final ResourceKey<Level> SPAWN_LEVEL_KEY = ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource("spawn"));
+
     private final SkyblockSavedData data;
     private final Set<UUID> players = new CopyOnWriteArraySet<>();
     private final Set<UUID> joinRequests = new CopyOnWriteArraySet<>();
@@ -110,8 +113,9 @@ public class Team {
     public ResourceKey<Level> getTeamLevelKey() {
         // need to do this in case id is null first
         if (this.teamLevelKey == null) {
-            String path = this.isSpawn() ? "spawn" : this.teamId.toString().replace("-", "") + "_overworld";
-            this.teamLevelKey = ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource(path));
+            this.teamLevelKey = this.isSpawn()
+                    ? Team.SPAWN_LEVEL_KEY
+                    : ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource(this.teamId.toString().replace("-", "") + "_overworld"));
         }
 
         return this.teamLevelKey;
