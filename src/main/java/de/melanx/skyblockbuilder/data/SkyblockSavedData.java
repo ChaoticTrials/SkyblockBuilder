@@ -23,6 +23,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -667,24 +668,28 @@ public abstract class SkyblockSavedData extends SavedData {
 
         @Override
         protected void onTeamCreated(Team team, ConfiguredTemplate template) {
-            ServerLevel level = InfiniverseCompat.getOrCreateLevel(this.server, team.getTeamLevelKey(), this.server.registryAccess());
+            ServerLevel level = this.getOrCreateTeamDimensions(this.server, team, this.server.registryAccess());
+            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
 
             if (level == null) {
-                throw new IllegalStateException("Failed to create dimension " + team.getTeamLevelKey().location());
+                throw new IllegalStateException("Failed to create dimension " + teamLevelKey.location());
             }
 
-            if (!team.isSpawn()) {
-                InfiniverseCompat.getOrCreateNetherLevel(this.server, team.getTeamNetherLevelKey(), this.server.registryAccess());
-            }
-
-            team.setIsland(new IslandPos(this.getLevelFor(team), 0, 0, template));
+            team.setIsland(new IslandPos(level, 0, 0, template));
         }
 
         @Override
         protected void onTeamDeleted(Team team) {
-            InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamLevelKey());
+            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
+            InfiniverseCompat.markDimensionForUnregistration(this.server, teamLevelKey);
+
             if (!team.isSpawn()) {
-                InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamNetherLevelKey());
+                if (!teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
+                    InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamOverworldLevelKey());
+                }
+                if (!teamLevelKey.equals(team.getTeamNetherLevelKey())) {
+                    InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamNetherLevelKey());
+                }
             }
         }
 
@@ -705,11 +710,24 @@ public abstract class SkyblockSavedData extends SavedData {
         public void restoreInfiniverseDimensions(MinecraftServer server) {
             RegistryAccess registryAccess = server.registryAccess();
             for (Team team : this.registry.all()) {
-                InfiniverseCompat.getOrCreateLevel(server, team.getTeamLevelKey(), registryAccess);
-                if (!team.isSpawn()) {
+                this.getOrCreateTeamDimensions(server, team, registryAccess);
+            }
+        }
+
+        private ServerLevel getOrCreateTeamDimensions(MinecraftServer server, Team team, RegistryAccess registryAccess) {
+            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
+            ServerLevel level = InfiniverseCompat.getOrCreateLevel(server, teamLevelKey, registryAccess);
+
+            if (!team.isSpawn()) {
+                if (!teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
+                    InfiniverseCompat.getOrCreateOverworldLevel(server, team.getTeamOverworldLevelKey(), registryAccess);
+                }
+                if (!teamLevelKey.equals(team.getTeamNetherLevelKey())) {
                     InfiniverseCompat.getOrCreateNetherLevel(server, team.getTeamNetherLevelKey(), registryAccess);
                 }
             }
+
+            return level;
         }
 
         @Nonnull

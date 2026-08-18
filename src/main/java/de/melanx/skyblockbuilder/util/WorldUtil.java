@@ -50,9 +50,10 @@ public class WorldUtil {
         //noinspection ConstantConditions
         ServerLevel level;
         if (InfiniverseCompat.useInfiniverse()) {
-            level = server.getLevel(team.getTeamLevelKey());
+            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
+            level = server.getLevel(teamLevelKey);
             if (level == null) {
-                SkyblockBuilder.getLogger().error("Team dimension {} is unavailable", team.getTeamLevelKey().location());
+                SkyblockBuilder.getLogger().error("Team dimension {} is unavailable", teamLevelKey.location());
                 return;
             }
         } else {

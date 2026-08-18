@@ -33,18 +33,46 @@ public class InfiniverseCompat {
     }
 
     public static ServerLevel getOrCreateLevel(final MinecraftServer server, final ResourceKey<Level> levelKey, RegistryAccess registryAccess) {
+        LevelStem spawnDimension = InfiniverseCompat.getSpawnDimension(registryAccess);
+
+        if (spawnDimension == null) {
+            SkyblockBuilder.getLogger().warn("Configured spawn dimension {} does not exist, using the overworld", SpawnConfig.spawnDimension.location());
+            return InfiniverseCompat.getOrCreateOverworldLevel(server, levelKey, registryAccess);
+        }
+
+        if (Level.OVERWORLD.equals(SpawnConfig.spawnDimension)) {
+            return InfiniverseCompat.getOrCreateOverworldLevel(server, levelKey, registryAccess);
+        }
+
+        if (Level.NETHER.equals(SpawnConfig.spawnDimension)) {
+            return InfiniverseCompat.getOrCreateNetherLevel(server, levelKey, registryAccess);
+        }
+
+        return InfiniverseAPI.get().getOrCreateLevel(server, levelKey, () -> {
+            Registry<MultiNoiseBiomeSourceParameterList> noises = registryAccess.registryOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+            Registry<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.registryOrThrow(Registries.NOISE_SETTINGS);
+            Registry<Biome> biomes = registryAccess.registryOrThrow(Registries.BIOME);
+
+            Holder<NoiseGeneratorSettings> settings = InfiniverseCompat.getNoiseGeneratorSettings(spawnDimension, noiseGeneratorSettings);
+            return new LevelStem(spawnDimension.type(), SkyblockPreset.configuredOverworldChunkGenerator(noises.asLookup(), biomes.asLookup(), settings));
+        });
+    }
+
+    public static ServerLevel getOrCreateOverworldLevel(final MinecraftServer server, final ResourceKey<Level> levelKey, RegistryAccess registryAccess) {
         return InfiniverseAPI.get().getOrCreateLevel(server, levelKey, () -> {
             Registry<DimensionType> dimensionTypes = registryAccess.registryOrThrow(Registries.DIMENSION_TYPE);
             Registry<MultiNoiseBiomeSourceParameterList> noises = registryAccess.registryOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
             Registry<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.registryOrThrow(Registries.NOISE_SETTINGS);
             Registry<Biome> biomes = registryAccess.registryOrThrow(Registries.BIOME);
 
-            // Team dimensions run on the dimension type of the spawn dimension, so the noise settings must come from there as well
-            LevelStem spawnDimension = InfiniverseCompat.getSpawnDimension(registryAccess);
-            Holder<DimensionType> dimensionType = InfiniverseCompat.getDimensionType(spawnDimension, dimensionTypes);
-            Holder<NoiseGeneratorSettings> settings = InfiniverseCompat.getNoiseGeneratorSettings(spawnDimension, noiseGeneratorSettings);
-
-            return new LevelStem(dimensionType, SkyblockPreset.configuredOverworldChunkGenerator(noises.asLookup(), biomes.asLookup(), settings));
+            return new LevelStem(
+                    dimensionTypes.getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
+                    SkyblockPreset.configuredOverworldChunkGenerator(
+                            noises.asLookup(),
+                            biomes.asLookup(),
+                            noiseGeneratorSettings.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD)
+                    )
+            );
         });
     }
 
@@ -62,17 +90,8 @@ public class InfiniverseCompat {
         });
     }
 
-    private static Holder<DimensionType> getDimensionType(@Nullable LevelStem spawnDimension, Registry<DimensionType> dimensionTypes) {
-        if (spawnDimension == null) {
-            SkyblockBuilder.getLogger().warn("Configured spawn dimension {} does not exist, using the overworld dimension type", SpawnConfig.spawnDimension.location());
-            return dimensionTypes.getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD);
-        }
-
-        return spawnDimension.type();
-    }
-
-    private static Holder<NoiseGeneratorSettings> getNoiseGeneratorSettings(@Nullable LevelStem spawnDimension, Registry<NoiseGeneratorSettings> noiseGeneratorSettings) {
-        if (spawnDimension != null && spawnDimension.generator() instanceof NoiseBasedChunkGenerator generator) {
+    private static Holder<NoiseGeneratorSettings> getNoiseGeneratorSettings(LevelStem spawnDimension, Registry<NoiseGeneratorSettings> noiseGeneratorSettings) {
+        if (spawnDimension.generator() instanceof NoiseBasedChunkGenerator generator) {
             return generator.generatorSettings();
         }
 

@@ -3,6 +3,7 @@ package de.melanx.skyblockbuilder.data;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.commands.invitation.InviteCommand;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
+import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -113,17 +114,46 @@ public class Team {
     public ResourceKey<Level> getTeamLevelKey() {
         // need to do this in case id is null first
         if (this.teamLevelKey == null) {
-            this.teamLevelKey = this.isSpawn()
-                    ? Team.SPAWN_LEVEL_KEY
-                    : ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource(this.teamId.toString().replace("-", "") + "_overworld"));
+            this.teamLevelKey = this.resolveTeamLevelKey();
         }
 
         return this.teamLevelKey;
     }
 
+    // The island lives in the spawn dimension, so the team dimension holding it is named after it. This must only
+    // depend on the configured id, never on whether that dimension exists, otherwise the team would be moved to
+    // another dimension as soon as a missing spawn dimension gets added.
+    private ResourceKey<Level> resolveTeamLevelKey() {
+        if (this.isSpawn()) {
+            return Team.SPAWN_LEVEL_KEY;
+        }
+
+        if (SpawnConfig.spawnDimension == Level.OVERWORLD) {
+            return this.getTeamOverworldLevelKey();
+        }
+
+        if (SpawnConfig.spawnDimension == Level.NETHER) {
+            return this.getTeamNetherLevelKey();
+        }
+
+        return this.getTeamMainLevelKey();
+    }
+
+    public ResourceKey<Level> getTeamMainLevelKey() {
+        return this.getTeamLevelKey("main");
+    }
+
+    public ResourceKey<Level> getTeamOverworldLevelKey() {
+        return this.getTeamLevelKey("overworld");
+    }
+
     public ResourceKey<Level> getTeamNetherLevelKey() {
+        return this.getTeamLevelKey("nether");
+    }
+
+    private ResourceKey<Level> getTeamLevelKey(String suffix) {
         return ResourceKey.create(Registries.DIMENSION, SkyblockBuilder.getInstance().resource(
-                this.teamId.toString().replace("-", "") + "_nether"));
+                this.teamId.toString().replace("-", "") + "_" + suffix));
     }
 
     public void setName(String name) {
