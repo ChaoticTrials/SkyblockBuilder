@@ -171,11 +171,15 @@ public class EventListener {
             SkyblockBuilder.getLogger().info("First time {} joined. Putting into spawn team.", player.getDisplayName().getString());
             data.addPlayerToTeam(spawn, player);
             try {
-                //noinspection OptionalGetWithoutIsPresent
-                TemplatesConfig.Spawn spawnPos = !spawn.getDefaultPossibleSpawns().isEmpty() ?
-                        spawn.getDefaultPossibleSpawns().stream().findFirst().get() :
-                        spawn.getPossibleSpawns().stream().findFirst().get();
-                ((ServerLevel) level).setDefaultSpawnPos(spawnPos.pos(), spawnPos.direction().getYRot());
+                // the world spawn is always in the spawn dimension, the island is in another dimension if teams have their own
+                if (!InfiniverseCompat.useInfiniverse()) {
+                    //noinspection OptionalGetWithoutIsPresent
+                    TemplatesConfig.Spawn spawnPos = !spawn.getDefaultPossibleSpawns().isEmpty() ?
+                            spawn.getDefaultPossibleSpawns().stream().findFirst().get() :
+                            spawn.getPossibleSpawns().stream().findFirst().get();
+
+                    ((ServerLevel) level).setDefaultSpawnPos(spawnPos.pos(), spawnPos.direction().getYRot());
+                }
             } catch (NoSuchElementException e) {
                 throw new IllegalStateException("No possible spawn point set for spawn", e);
             }
