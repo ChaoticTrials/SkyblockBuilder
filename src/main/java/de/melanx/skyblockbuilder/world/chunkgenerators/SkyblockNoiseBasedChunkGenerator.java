@@ -30,6 +30,8 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
+import org.moddingx.libx.util.data.ResourceList;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
@@ -175,7 +177,7 @@ public class SkyblockNoiseBasedChunkGenerator extends NoiseBasedChunkGenerator {
                 int l = 0;
                 for (Holder<ConfiguredWorldCarver<?>> holder : biomeGenerationSettings.getCarvers(step)) {
                     // my change
-                    if (holder.unwrapKey().isPresent() && !WorldConfig.carvers.get(this.dimension.location().toString()).test(holder.unwrapKey().get().location())) {
+                    if (holder.unwrapKey().isPresent() && !WorldConfig.carvers.getOrDefault(this.dimension.location().toString(), ResourceList.ALLOW_LIST).test(holder.unwrapKey().get().location())) {
                         continue;
                     }
 
