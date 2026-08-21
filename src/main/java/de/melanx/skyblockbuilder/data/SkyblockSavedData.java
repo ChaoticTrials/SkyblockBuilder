@@ -9,6 +9,7 @@ import de.melanx.skyblockbuilder.compat.infiniverse.InfiniverseCompat;
 import de.melanx.skyblockbuilder.config.common.InventoryConfig;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
+import de.melanx.skyblockbuilder.config.common.WorldConfig;
 import de.melanx.skyblockbuilder.config.values.TemplateSurroundingBlocks;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.util.*;
@@ -684,10 +685,10 @@ public abstract class SkyblockSavedData extends SavedData {
             InfiniverseCompat.markDimensionForUnregistration(this.server, teamLevelKey);
 
             if (!team.isSpawn()) {
-                if (!teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
+                if (WorldConfig.DimensionPerTeam.overworld && !teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
                     InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamOverworldLevelKey());
                 }
-                if (!teamLevelKey.equals(team.getTeamNetherLevelKey())) {
+                if (WorldConfig.DimensionPerTeam.nether && !teamLevelKey.equals(team.getTeamNetherLevelKey())) {
                     InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamNetherLevelKey());
                 }
             }
@@ -718,11 +719,12 @@ public abstract class SkyblockSavedData extends SavedData {
             ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
             ServerLevel level = InfiniverseCompat.getOrCreateLevel(server, teamLevelKey, registryAccess);
 
+            // the dimension holding the island is always per team, the others only if they are not shared
             if (!team.isSpawn()) {
-                if (!teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
+                if (WorldConfig.DimensionPerTeam.overworld && !teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
                     InfiniverseCompat.getOrCreateOverworldLevel(server, team.getTeamOverworldLevelKey(), registryAccess);
                 }
-                if (!teamLevelKey.equals(team.getTeamNetherLevelKey())) {
+                if (WorldConfig.DimensionPerTeam.nether && !teamLevelKey.equals(team.getTeamNetherLevelKey())) {
                     InfiniverseCompat.getOrCreateNetherLevel(server, team.getTeamNetherLevelKey(), registryAccess);
                 }
             }

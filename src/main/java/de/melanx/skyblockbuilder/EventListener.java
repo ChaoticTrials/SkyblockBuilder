@@ -144,7 +144,7 @@ public class EventListener {
             Team spawn = data.getSpawn();
             GameProfileCache.addProfiles(Set.of(player.getGameProfile()));
 
-            if (WorldConfig.dimensionPerTeam && !ModList.get().isLoaded(InfiniverseCompat.MODID) && player.hasPermissions(Commands.LEVEL_GAMEMASTERS)) {
+            if (WorldConfig.DimensionPerTeam.enabled && !ModList.get().isLoaded(InfiniverseCompat.MODID) && player.hasPermissions(Commands.LEVEL_GAMEMASTERS)) {
                 player.sendSystemMessage(Component.translatable("infiniverse.skyblockbuilder.not_loaded").withStyle(ChatFormatting.RED));
             }
 

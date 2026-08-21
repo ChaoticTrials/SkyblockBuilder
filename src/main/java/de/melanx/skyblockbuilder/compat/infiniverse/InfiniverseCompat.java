@@ -49,12 +49,7 @@ public class InfiniverseCompat {
         }
 
         return InfiniverseAPI.get().getOrCreateLevel(server, levelKey, () -> {
-            Registry<MultiNoiseBiomeSourceParameterList> noises = registryAccess.registryOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-            Registry<NoiseGeneratorSettings> noiseGeneratorSettings = registryAccess.registryOrThrow(Registries.NOISE_SETTINGS);
-            Registry<Biome> biomes = registryAccess.registryOrThrow(Registries.BIOME);
-
-            Holder<NoiseGeneratorSettings> settings = InfiniverseCompat.getNoiseGeneratorSettings(spawnDimension, noiseGeneratorSettings);
-            return new LevelStem(spawnDimension.type(), SkyblockPreset.configuredOverworldChunkGenerator(noises.asLookup(), biomes.asLookup(), settings));
+            return new LevelStem(spawnDimension.type(), spawnDimension.generator());
         });
     }
 
@@ -107,7 +102,7 @@ public class InfiniverseCompat {
     }
 
     public static boolean useInfiniverse() {
-        if (!WorldConfig.dimensionPerTeam) {
+        if (!WorldConfig.DimensionPerTeam.enabled) {
             return false;
         }
 
