@@ -7,11 +7,15 @@ import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.NetherPortalTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.TemplateUtil;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NetherPortalBlock;
@@ -21,10 +25,22 @@ import net.minecraft.world.level.portal.DimensionTransition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(NetherPortalBlock.class)
 public abstract class NetherPortalBlockMixin {
+
+    @Redirect(
+            method = "getPortalDestination",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/MinecraftServer;getLevel(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/server/level/ServerLevel;"
+            )
+    )
+    private ServerLevel getPortalDestinationLevel(MinecraftServer server, ResourceKey<Level> destination, ServerLevel currentLevel, Entity entity, BlockPos portalEntryPos) {
+        return server.getLevel(WorldUtil.resolvePortalDestination(entity, currentLevel, destination));
+    }
 
     @Inject(
             method = "getExitPortal",

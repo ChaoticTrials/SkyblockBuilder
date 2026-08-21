@@ -23,6 +23,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
@@ -100,6 +101,80 @@ public class WorldUtil {
         ResourceKey<Level> dimension = level.dimension();
 
         return dimension == SpawnConfig.spawnDimension || dimension == Team.SPAWN_LEVEL_KEY;
+    }
+
+    // Vanilla only allows portals in the overworld and the nether. A team dimension is never one of them, so the
+    // dimensions replacing them for a team have to be allowed as well. Dimensions based on a custom spawn dimension
+    // are not, as the dimension they are a copy of would not allow portals either.
+    public static boolean isTeamPortalDimension(Level level) {
+        if (!InfiniverseCompat.useInfiniverse()) {
+            return false;
+        }
+
+        ResourceLocation dimension = level.dimension().location();
+        if (!dimension.getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
+            return false;
+        }
+
+        if (dimension.getPath().endsWith("_overworld") || dimension.getPath().endsWith("_nether")) {
+            return true;
+        }
+
+        // the spawn island is a copy of the configured spawn dimension
+        return level.dimension() == Team.SPAWN_LEVEL_KEY
+                && (SpawnConfig.spawnDimension == Level.OVERWORLD || SpawnConfig.spawnDimension == Level.NETHER);
+    }
+
+    public static boolean isNetherDimension(Level level) {
+        if (level.dimension() == Level.NETHER) {
+            return true;
+        }
+
+        ResourceLocation dimension = level.dimension().location();
+
+        return dimension.getNamespace().equals(SkyblockBuilder.getInstance().modid) && dimension.getPath().endsWith("_nether");
+    }
+
+    // Portals always lead to the vanilla dimensions. If the player belongs to a team, they have to lead to the
+    // dimensions of that team instead. Dimensions a team does not have are left shared with everyone.
+    public static ResourceKey<Level> resolvePortalDestination(Entity entity, Level currentLevel, ResourceKey<Level> destination) {
+        if (!InfiniverseCompat.useInfiniverse() || (destination != Level.OVERWORLD && destination != Level.NETHER)) {
+            return destination;
+        }
+
+        if (!(entity.level() instanceof ServerLevel serverLevel)) {
+            return destination;
+        }
+
+        MinecraftServer server = serverLevel.getServer();
+        SkyblockSavedData data = SkyblockSavedData.get(server.overworld());
+        Team team = data.getTeamFromPlayer(entity.getUUID());
+        if (team == null) {
+            Team spawn = data.getSpawn();
+            if (!spawn.getPlayers().contains(entity.getUUID())) {
+                return destination;
+            }
+
+            team = spawn;
+        }
+
+        // vanilla decides where to go by comparing the current dimension with the nether, which never matches a
+        // dimension of a team, so the way where to go has to be found again
+        boolean fromNether = WorldUtil.isNetherDimension(currentLevel);
+        ResourceKey<Level> teamLevelKey = fromNether
+                ? team.getTeamOverworldLevelKey()
+                : team.getTeamNetherLevelKey();
+
+        if (server.getLevel(teamLevelKey) != null) {
+            return teamLevelKey;
+        }
+
+        // the spawn team has no own overworld, so the island itself is the way back
+        if (fromNether && server.getLevel(team.getTeamLevelKey()) != null) {
+            return team.getTeamLevelKey();
+        }
+
+        return fromNether ? Level.OVERWORLD : Level.NETHER;
     }
 
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {
