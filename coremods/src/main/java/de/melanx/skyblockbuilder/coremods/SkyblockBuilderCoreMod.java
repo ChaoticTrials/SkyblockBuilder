@@ -9,6 +9,6 @@ public class SkyblockBuilderCoreMod implements ICoreMod {
 
     @Override
     public Iterable<? extends ITransformer<?>> getTransformers() {
-        return List.of(new WorldPresetCodec());
+        return List.of(new WorldPresetCodec(), new TeleportCakesCompat());
     }
 }

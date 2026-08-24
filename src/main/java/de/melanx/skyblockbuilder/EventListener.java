@@ -22,7 +22,9 @@ import de.melanx.skyblockbuilder.config.common.*;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
+import de.melanx.skyblockbuilder.events.SkyblockChangeDimensionEvent;
 import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.registration.ModAttachmentTypes;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyblockbuilder.util.SkyPaths;
@@ -34,6 +36,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,6 +53,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.moddingx.libx.event.ConfigLoadedEvent;
@@ -197,6 +201,61 @@ public class EventListener {
         CompoundTag oldData = oldPlayer.getPersistentData();
 
         newData.putBoolean(SPAWNED_TAG, oldData.getBoolean(SPAWNED_TAG));
+    }
+
+    @SubscribeEvent
+    public static void onTravelToDimension(EntityTravelToDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            if (!InfiniverseCompat.useInfiniverse()) {
+                return;
+            }
+
+            ResourceKey<Level> dimension = player.level().dimension();
+
+            ResourceKey<Level> originalDimension;
+            if (dimension == Team.SPAWN_LEVEL_KEY) {
+                originalDimension = SpawnConfig.spawnDimension;
+            } else if (!dimension.location().getNamespace().equals("skyblockbuilder")) {
+                originalDimension = dimension;
+            } else {
+                String dimensionPath = dimension.location().getPath();
+                String normalizedDimensionName = dimensionPath.replaceFirst("[0-9a-fA-F]{32}_", "");
+                originalDimension = switch(normalizedDimensionName) {
+                    case "main" -> SpawnConfig.spawnDimension;
+                    case "overworld" -> Level.OVERWORLD;
+                    case "nether" -> Level.NETHER;
+                    default -> dimension;
+                };
+            }
+
+            player.setData(ModAttachmentTypes.data, originalDimension);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onChangeDimension(SkyblockChangeDimensionEvent event) {
+        if (!InfiniverseCompat.useInfiniverse()) {
+            return;
+        }
+
+        ServerPlayer player = event.getPlayer();
+        Team team = SkyblockSavedData.get(player.level()).getTeamFromPlayer(player);
+        if (team == null) {
+            return;
+        }
+
+        ResourceKey<Level> teamDimension;
+        if (event.getDimension() == Level.OVERWORLD) {
+            teamDimension = team.getTeamLevelKey();
+        } else if (event.getDimension() == Level.NETHER) {
+            teamDimension = team.getTeamNetherLevelKey();
+        } else {
+            return;
+        }
+
+        if (player.level().getServer().getLevel(teamDimension) != null) {
+            event.setDimension(teamDimension);
+        }
     }
 
     @SubscribeEvent
