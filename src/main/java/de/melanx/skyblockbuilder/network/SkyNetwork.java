@@ -59,8 +59,8 @@ public class SkyNetwork extends NetworkX {
         }
     }
 
-    public void deleteTags(ItemStack stack) {
-        PacketDistributor.sendToServer(new DeleteTagsHandler.Message(stack));
+    public void deleteTags() {
+        PacketDistributor.sendToServer(new DeleteTagsHandler.Message());
     }
 
     public void createSkyblockDump(boolean includeConfigs, boolean includeTemplates, boolean includeLevelDat, boolean includeLog, boolean includeCrashReport, boolean includeSkyblockBuilderWorldData) {

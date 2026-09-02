@@ -98,7 +98,7 @@ public class StructureSaverScreen extends BaseScreen {
                 .size(60, 20)
                 .build());
         this.addRenderableWidget(Button.builder(SkyComponents.SCREEN_BUTTON_DELETE, button -> {
-                    SkyblockBuilder.getNetwork().deleteTags(this.stack);
+                    SkyblockBuilder.getNetwork().deleteTags();
                     this.onClose();
                 })
                 .pos(this.x(77), this.y(50))
