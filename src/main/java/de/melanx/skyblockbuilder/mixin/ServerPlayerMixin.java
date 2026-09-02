@@ -27,7 +27,7 @@ public class ServerPlayerMixin {
         ServerPlayer player = (ServerPlayer) (Object) this;
         ResourceKey<Level> dimension = transition.newLevel().dimension();
 
-        ResourceKey<Level> resolvedDimension = WorldUtil.resolvePortalDestination(player, player.level(), dimension);
+        ResourceKey<Level> resolvedDimension = WorldUtil.resolveTeamDimension(player, dimension);
 
         if (dimension == resolvedDimension) {
             return transition;

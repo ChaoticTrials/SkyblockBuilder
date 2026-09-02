@@ -142,6 +142,17 @@ public class WorldUtil {
             return destination;
         }
 
+        ResourceKey<Level> requestedDestination = WorldUtil.isNetherDimension(currentLevel) ? Level.OVERWORLD : Level.NETHER;
+
+        return WorldUtil.resolveTeamDimension(entity, requestedDestination);
+    }
+
+    // Use this whenever the requested destination can be trusted, resolvePortalDestination has to find it out first
+    public static ResourceKey<Level> resolveTeamDimension(Entity entity, ResourceKey<Level> destination) {
+        if (!InfiniverseCompat.useInfiniverse() || (destination != Level.OVERWORLD && destination != Level.NETHER)) {
+            return destination;
+        }
+
         if (!(entity.level() instanceof ServerLevel serverLevel)) {
             return destination;
         }
@@ -158,10 +169,8 @@ public class WorldUtil {
             team = spawn;
         }
 
-        // vanilla decides where to go by comparing the current dimension with the nether, which never matches a
-        // dimension of a team, so the way where to go has to be found again
-        boolean fromNether = WorldUtil.isNetherDimension(currentLevel);
-        ResourceKey<Level> teamLevelKey = fromNether
+        boolean toOverworld = destination == Level.OVERWORLD;
+        ResourceKey<Level> teamLevelKey = toOverworld
                 ? team.getTeamOverworldLevelKey()
                 : team.getTeamNetherLevelKey();
 
@@ -170,11 +179,11 @@ public class WorldUtil {
         }
 
         // the spawn team has no own overworld, so the island itself is the way back
-        if (fromNether && server.getLevel(team.getTeamLevelKey()) != null) {
+        if (toOverworld && server.getLevel(team.getTeamLevelKey()) != null) {
             return team.getTeamLevelKey();
         }
 
-        return fromNether ? Level.OVERWORLD : Level.NETHER;
+        return destination;
     }
 
     public static void checkSkyblock(CommandSourceStack source) throws CommandSyntaxException {

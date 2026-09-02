@@ -234,28 +234,7 @@ public class EventListener {
 
     @SubscribeEvent
     public static void onChangeDimension(SkyblockChangeDimensionEvent event) {
-        if (!InfiniverseCompat.useInfiniverse()) {
-            return;
-        }
-
-        ServerPlayer player = event.getPlayer();
-        Team team = SkyblockSavedData.get(player.level()).getTeamFromPlayer(player);
-        if (team == null) {
-            return;
-        }
-
-        ResourceKey<Level> teamDimension;
-        if (event.getDimension() == Level.OVERWORLD) {
-            teamDimension = team.getTeamLevelKey();
-        } else if (event.getDimension() == Level.NETHER) {
-            teamDimension = team.getTeamNetherLevelKey();
-        } else {
-            return;
-        }
-
-        if (player.level().getServer().getLevel(teamDimension) != null) {
-            event.setDimension(teamDimension);
-        }
+        event.setDimension(WorldUtil.resolveTeamDimension(event.getPlayer(), event.getDimension()));
     }
 
     @SubscribeEvent
