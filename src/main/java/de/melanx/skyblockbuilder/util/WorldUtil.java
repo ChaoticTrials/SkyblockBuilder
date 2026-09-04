@@ -103,6 +103,35 @@ public class WorldUtil {
         return dimension == SpawnConfig.spawnDimension || dimension == Team.SPAWN_LEVEL_KEY;
     }
 
+    // The dimension a team dimension is a copy of, every other dimension is its own original.
+    public static ResourceKey<Level> resolveOriginalDimension(ResourceKey<Level> dimension) {
+        ResourceLocation location = dimension.location();
+        if (!location.getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
+            return dimension;
+        }
+
+        // the spawn island is a copy of the configured spawn dimension, just like the main dimension of a team
+        if (dimension == Team.SPAWN_LEVEL_KEY) {
+            return SpawnConfig.spawnDimension;
+        }
+
+        String path = location.getPath();
+
+        if (path.endsWith("_overworld")) {
+            return Level.OVERWORLD;
+        }
+
+        if (path.endsWith("_nether")) {
+            return Level.NETHER;
+        }
+
+        if (path.endsWith("_main")) {
+            return SpawnConfig.spawnDimension;
+        }
+
+        return dimension;
+    }
+
     // Vanilla only allows portals in the overworld and the nether. A team dimension is never one of them, so the
     // dimensions replacing them for a team have to be allowed as well. Dimensions based on a custom spawn dimension
     // are not, as the dimension they are a copy of would not allow portals either.
@@ -111,28 +140,17 @@ public class WorldUtil {
             return false;
         }
 
-        ResourceLocation dimension = level.dimension().location();
-        if (!dimension.getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
+        if (!level.dimension().location().getNamespace().equals(SkyblockBuilder.getInstance().modid)) {
             return false;
         }
 
-        if (dimension.getPath().endsWith("_overworld") || dimension.getPath().endsWith("_nether")) {
-            return true;
-        }
+        ResourceKey<Level> original = WorldUtil.resolveOriginalDimension(level.dimension());
 
-        // the spawn island is a copy of the configured spawn dimension
-        return level.dimension() == Team.SPAWN_LEVEL_KEY
-                && (SpawnConfig.spawnDimension == Level.OVERWORLD || SpawnConfig.spawnDimension == Level.NETHER);
+        return original == Level.OVERWORLD || original == Level.NETHER;
     }
 
     public static boolean isNetherDimension(Level level) {
-        if (level.dimension() == Level.NETHER) {
-            return true;
-        }
-
-        ResourceLocation dimension = level.dimension().location();
-
-        return dimension.getNamespace().equals(SkyblockBuilder.getInstance().modid) && dimension.getPath().endsWith("_nether");
+        return WorldUtil.resolveOriginalDimension(level.dimension()) == Level.NETHER;
     }
 
     // Portals always lead to the vanilla dimensions. If the player belongs to a team, they have to lead to the

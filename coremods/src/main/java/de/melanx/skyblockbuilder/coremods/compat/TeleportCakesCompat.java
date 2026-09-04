@@ -1,4 +1,4 @@
-package de.melanx.skyblockbuilder.coremods;
+package de.melanx.skyblockbuilder.coremods.compat;
 
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;

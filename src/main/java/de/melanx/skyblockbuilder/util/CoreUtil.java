@@ -22,8 +22,21 @@ import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import org.moddingx.libx.codec.MoreCodecs;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class CoreUtil {
+
+    // Recipes restricted to a dimension only know the dimensions that exist without teams, so a team dimension has to
+    // count as the dimension it is a copy of.
+    public static boolean isDimensionValid(List<ResourceKey<Level>> dimensions, ResourceKey<Level> dimension) {
+        if (dimensions.contains(dimension)) {
+            return true;
+        }
+
+        ResourceKey<Level> original = WorldUtil.resolveOriginalDimension(dimension);
+
+        return original != dimension && dimensions.contains(original);
+    }
 
     @Nullable
     public static ServerLevel resolveLevel(MinecraftServer server, ResourceKey<Level> dimension, ServerPlayer player) {
