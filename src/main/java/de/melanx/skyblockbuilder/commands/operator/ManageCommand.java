@@ -83,20 +83,21 @@ public class ManageCommand {
         ServerLevel level = source.getLevel();
         SkyblockSavedData data = SkyblockSavedData.get(level);
 
-        int i = 0;
-        Iterator<Team> itr = data.getTeams().iterator();
-        while (itr.hasNext()) {
-            Team team = itr.next();
+        List<UUID> toDelete = new ArrayList<>();
+        for (Team team : data.getTeams()) {
+            if (!team.isEmpty()) {
+                continue;
+            }
+
             if (!SkyblockHooks.onManageDeleteTeam(source, team)) {
-                if (team.isEmpty()) {
-                    itr.remove();
-                    i++;
-                }
+                toDelete.add(team.id());
             }
         }
+
+        toDelete.forEach(data::deleteTeam);
         data.setDirty();
 
-        int teamsAmount = i;
+        int teamsAmount = toDelete.size();
         source.sendSuccess(() -> SkyComponents.SUCCESS_DELETE_MULTIPLE_TEAMS.apply(teamsAmount), true);
         return 1;
     }
