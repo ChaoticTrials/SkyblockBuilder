@@ -387,6 +387,10 @@ public abstract class SkyblockSavedData extends SavedData {
             return false;
         }
 
+        if (removedTeam.isSpawn()) {
+            return false;
+        }
+
         Team spawn = this.registry.getById(SPAWN_ID);
         if (spawn != null) {
             spawn.addPlayers(removedTeam.getPlayers());
