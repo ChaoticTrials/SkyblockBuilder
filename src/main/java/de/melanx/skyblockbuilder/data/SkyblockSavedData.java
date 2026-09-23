@@ -77,6 +77,8 @@ public abstract class SkyblockSavedData extends SavedData {
 
     public abstract void restoreInfiniverseDimensions(MinecraftServer server);
 
+    public abstract void unloadIdleDimensions();
+
     public ServerLevel getLevel() {
         return this.getLevelFor(null);
     }
@@ -647,6 +649,10 @@ public abstract class SkyblockSavedData extends SavedData {
             // Nothing extra needed in single-world mode
         }
 
+        @Override
+        public void unloadIdleDimensions() {
+            // Nothing extra needed in single-world mode
+        }
     }
 
     private static final class MultiWorldImpl extends SkyblockSavedData {
@@ -686,17 +692,11 @@ public abstract class SkyblockSavedData extends SavedData {
 
         @Override
         protected void onTeamDeleted(Team team) {
-            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
-            InfiniverseCompat.markDimensionForUnregistration(this.server, teamLevelKey);
+            List<ResourceKey<Level>> teamLevelKeys = this.getTeamLevelKeys(team);
 
-            if (!team.isSpawn()) {
-                if (WorldConfig.DimensionPerTeam.overworld && !teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
-                    InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamOverworldLevelKey());
-                }
-                if (WorldConfig.DimensionPerTeam.nether && !teamLevelKey.equals(team.getTeamNetherLevelKey())) {
-                    InfiniverseCompat.markDimensionForUnregistration(this.server, team.getTeamNetherLevelKey());
-                }
-            }
+            teamLevelKeys.forEach(key -> {
+                InfiniverseCompat.markDimensionForDeletion(this.server, key);
+            });
         }
 
         @Override
@@ -720,6 +720,31 @@ public abstract class SkyblockSavedData extends SavedData {
             }
         }
 
+        @Override
+        public void unloadIdleDimensions() {
+            long now = this.server.overworld().getGameTime();
+            for (Team team : this.registry.all()) {
+                if (team.isSpawn()) {
+                    continue;
+                }
+
+                boolean memberOnline = team.getPlayers().stream().anyMatch(id -> this.server.getPlayerList().getPlayer(id) != null);
+                if (memberOnline) {
+                    continue;
+                }
+
+                if (now - team.getLastSeen() < WorldConfig.DimensionPerTeam.idleTimeout) {
+                    continue;
+                }
+
+                for (ResourceKey<Level> key : this.getTeamLevelKeys(team)) {
+                    if (this.server.getLevel(key) != null) {
+                        InfiniverseCompat.markDimensionForUnregistration(this.server, key);
+                    }
+                }
+            }
+        }
+
         private ServerLevel getOrCreateTeamDimensions(MinecraftServer server, Team team, RegistryAccess registryAccess) {
             ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
             ServerLevel level = InfiniverseCompat.getOrCreateLevel(server, teamLevelKey, registryAccess);
@@ -735,6 +760,26 @@ public abstract class SkyblockSavedData extends SavedData {
             }
 
             return level;
+        }
+
+        private List<ResourceKey<Level>> getTeamLevelKeys(Team team) {
+            List<ResourceKey<Level>> keys = new ArrayList<>();
+            ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
+            keys.add(teamLevelKey);
+
+            if (team.isSpawn()) {
+                return keys;
+            }
+
+            if (WorldConfig.DimensionPerTeam.overworld && !teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
+                keys.add(team.getTeamOverworldLevelKey());
+            }
+
+            if (WorldConfig.DimensionPerTeam.nether && !teamLevelKey.equals(team.getTeamNetherLevelKey())) {
+                keys.add(team.getTeamNetherLevelKey());
+            }
+
+            return keys;
         }
     }
 }

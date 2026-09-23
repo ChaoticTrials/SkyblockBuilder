@@ -1,5 +1,6 @@
 package de.melanx.skyblockbuilder.compat.infiniverse;
 
+import com.google.common.collect.ImmutableSet;
 import de.melanx.skyblockbuilder.SkyblockBuilder;
 import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.config.common.WorldConfig;
@@ -21,10 +22,18 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.neoforged.fml.ModList;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 public class InfiniverseCompat {
 
     public static final String MODID = "infiniverse";
+    private static final Set<ResourceKey<Level>> LEVELS_TO_PROCESS_AFTER_DELETION = new HashSet<>();
+
+    public static void markDimensionForDeletion(MinecraftServer server, ResourceKey<Level> level) {
+        InfiniverseCompat.markDimensionForUnregistration(server, level);
+        InfiniverseCompat.LEVELS_TO_PROCESS_AFTER_DELETION.add(level);
+    }
 
     public static void markDimensionForUnregistration(final MinecraftServer server, final ResourceKey<Level> levelToRemove) {
         InfiniverseAPI.get().markDimensionForUnregistration(server, levelToRemove);
@@ -102,5 +111,17 @@ public class InfiniverseCompat {
         }
 
         return true;
+    }
+
+    public static ImmutableSet<ResourceKey<Level>> getLevelsToProcessAfterDeletion() {
+        return ImmutableSet.copyOf(LEVELS_TO_PROCESS_AFTER_DELETION);
+    }
+
+    public static void levelProcessed(ResourceKey<Level> level) {
+        if (!LEVELS_TO_PROCESS_AFTER_DELETION.contains(level)) {
+            throw new IllegalStateException("Level " + level + " should not have been processed");
+        }
+
+        LEVELS_TO_PROCESS_AFTER_DELETION.remove(level);
     }
 }

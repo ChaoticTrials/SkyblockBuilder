@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.Strictness;
 import de.melanx.skyblockbuilder.client.ClientEventListener;
 import de.melanx.skyblockbuilder.compat.heracles.HeraclesCompat;
+import de.melanx.skyblockbuilder.compat.infiniverse.InfiniverseCompat;
+import de.melanx.skyblockbuilder.compat.infiniverse.InfiniverseEventListener;
 import de.melanx.skyblockbuilder.compat.minemention.MineMentionCompat;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.datagen.*;
@@ -47,6 +49,10 @@ public final class SkyblockBuilder extends ModXRegistration {
 
         SkyPaths.createDirectories();
         NeoForge.EVENT_BUS.register(new SpawnProtectionEvents());
+
+        if (ModList.get().isLoaded(InfiniverseCompat.MODID)) {
+            NeoForge.EVENT_BUS.register(new InfiniverseEventListener());
+        }
 
         if (dist == Dist.CLIENT) {
             bus.register(new ClientEventListener());

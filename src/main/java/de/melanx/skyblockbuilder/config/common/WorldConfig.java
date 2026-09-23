@@ -71,5 +71,25 @@ public class WorldConfig {
         @Config({"Should each team get its own nether? If disabled, the vanilla nether is shared with everyone.",
                 "Always enabled if the spawn dimension is minecraft:the_nether."})
         public static boolean nether = true;
+
+        @Config({"Time in ticks the dimensions of a team may idle without members online before being unloaded [default: 72000 = 1h]",
+                "WARNING: This effects chunk loading"})
+        public static int idleTimeout = 72000;
+
+        @Config("Interval for checking idle teams dimensions to unload [default: 6000 = 5min]")
+        @IntRange(min = 20)
+        public static int unloadCheckInterval = 6000;
+
+        @Config({"What shall happen with stale dimension folders on team deletion:",
+                "   keep   = leave folders in place",
+                "   move   = move folders to 'deleted_dimensions' directory, next to vanilla 'dimensions' directory",
+                "   delete = permanently delete folders immediately"})
+        public static DeletedDimensionHandling deletedDimensionHandling = DeletedDimensionHandling.KEEP;
+
+        public enum DeletedDimensionHandling {
+            KEEP,
+            MOVE,
+            DELETE
+        }
     }
 }

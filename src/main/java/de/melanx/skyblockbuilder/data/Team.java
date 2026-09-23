@@ -43,6 +43,7 @@ public class Team {
     private static final String NETHER_SPREADS_PLACED = "nether_spreads_placed";
     private static final String CREATED_AT = "created_at";
     private static final String LAST_CHANGED = "last_changed";
+    private static final String LAST_SEEN = "last_seen";
     private static final String PLAYERS = "players";
     private static final String SPAWNS = "spawns";
     private static final String DEFAULT_SPAWNS = "default_spawns";
@@ -63,6 +64,7 @@ public class Team {
             Codec.BOOL.optionalFieldOf(NETHER_SPREADS_PLACED, false).forGetter(team -> team.netherSpreadsPlaced),
             Codec.LONG.optionalFieldOf(CREATED_AT, 0L).forGetter(team -> team.createdAt),
             Codec.LONG.optionalFieldOf(LAST_CHANGED, 0L).forGetter(team -> team.lastChanged),
+            Codec.LONG.optionalFieldOf(LAST_SEEN, 0L).forGetter(team -> team.lastSeen),
             UUIDUtil.CODEC.listOf().optionalFieldOf(PLAYERS, List.of()).forGetter(team -> List.copyOf(team.players)),
             TemplatesConfig.Spawn.CODEC.listOf().optionalFieldOf(SPAWNS, List.of()).forGetter(team -> List.copyOf(team.possibleSpawns)),
             TemplatesConfig.Spawn.CODEC.listOf().optionalFieldOf(DEFAULT_SPAWNS).forGetter(team -> Optional.of(List.copyOf(team.defaultPossibleSpawns))),
@@ -86,9 +88,10 @@ public class Team {
     private boolean allowJoinRequests;
     private boolean netherSpreadsPlaced;
     private long lastChanged;
+    private long lastSeen;
 
     private Team(UUID teamId, IslandPos island, String name, boolean allowVisits, boolean allowJoinRequests,
-            boolean netherSpreadsPlaced, long createdAt, long lastChanged, List<UUID> players,
+            boolean netherSpreadsPlaced, long createdAt, long lastChanged, long lastSeen, List<UUID> players,
             List<TemplatesConfig.Spawn> possibleSpawns, Optional<List<TemplatesConfig.Spawn>> defaultPossibleSpawns,
             List<UUID> joinRequests, List<PlacedSpread> placedSpreads) {
         this.data = null;
@@ -100,6 +103,7 @@ public class Team {
         this.netherSpreadsPlaced = netherSpreadsPlaced;
         this.createdAt = createdAt;
         this.lastChanged = lastChanged;
+        this.lastSeen = lastSeen;
         this.players.addAll(players);
         this.possibleSpawns.addAll(possibleSpawns);
         this.defaultPossibleSpawns.addAll(defaultPossibleSpawns.orElse(possibleSpawns));
@@ -454,6 +458,15 @@ public class Team {
     public void updateLastChanged() {
         this.lastChanged = System.currentTimeMillis();
         this.data.setDirty();
+    }
+
+    public long getLastSeen() {
+        return this.lastSeen;
+    }
+
+    public void setLastSeen(long lastSeen) {
+        this.lastSeen = lastSeen;
+        this.data.setDirtySilently();
     }
 
     @Nullable
