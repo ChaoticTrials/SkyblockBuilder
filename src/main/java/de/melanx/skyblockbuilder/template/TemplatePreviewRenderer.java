@@ -60,7 +60,7 @@ public class TemplatePreviewRenderer {
     private final TemplatePreview preview;
     private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
     private final transient Map<StructureTemplate.StructureEntityInfo, Entity> entityCache = new HashMap<>();
-    private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
+    private final transient Set<BlockPos> erroredTilesAt = Collections.newSetFromMap(new WeakHashMap<>());
     private final transient Set<UUID> erroredEntities = Collections.newSetFromMap(new WeakHashMap<>());
     private final transient Set<StructureTemplate.StructureEntityInfo> loadFailedEntities = Collections.newSetFromMap(new WeakHashMap<>());
     private final transient Set<StructureTemplate.StructureEntityInfo> erroredEntityInfos = Collections.newSetFromMap(new WeakHashMap<>());
@@ -179,7 +179,7 @@ public class TemplatePreviewRenderer {
             this.renderIcon(guiGraphics);
         } else {
             this.renderTemplate(guiGraphics);
-            if (!this.erroredTiles.isEmpty() || !this.erroredEntities.isEmpty() || !this.erroredEntityInfos.isEmpty() || !this.loadFailedEntities.isEmpty()) {
+            if (!this.erroredTilesAt.isEmpty() || !this.erroredEntities.isEmpty() || !this.erroredEntityInfos.isEmpty() || !this.loadFailedEntities.isEmpty()) {
                 guiGraphics.drawWordWrap(Minecraft.getInstance().font, SkyComponents.SCREEN_ERROR_LOAD_TEMPLATE, 5, this.area.minY, this.area.maxX - 10, 0xFFFFFF);
             }
         }
@@ -234,31 +234,35 @@ public class TemplatePreviewRenderer {
             BlockPos pos = blockInfo.pos();
             BlockState state = blockInfo.state();
 
-            BlockEntity te = null;
-            if (state.getBlock() instanceof EntityBlock) {
-                te = this.teCache.computeIfAbsent(pos.immutable(), p -> ((EntityBlock) state.getBlock()).newBlockEntity(pos, state));
+            if (this.erroredTilesAt.contains(pos)) {
+                return;
             }
 
-            if (te != null && !this.erroredTiles.contains(te)) {
-                te.setLevel(this.clientLevel);
-
-                // fake cached state in case the renderer checks it as we don't want to query the actual world
-                //noinspection deprecation
-                te.setBlockState(state);
-
+            try {
                 guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(pos.getX(), pos.getY(), pos.getZ());
-                try {
+                BlockEntity te = null;
+                if (state.getBlock() instanceof EntityBlock) {
+                    te = this.teCache.putIfAbsent(pos.immutable(), ((EntityBlock) state.getBlock()).newBlockEntity(pos, state));
+                }
+
+                if (te != null) {
+                    te.setLevel(this.clientLevel);
+
+                    // fake cached state in case the renderer checks it as we don't want to query the actual world
+                    //noinspection deprecation
+                    te.setBlockState(state);
+
+                    guiGraphics.pose().translate(pos.getX(), pos.getY(), pos.getZ());
                     BlockEntityRenderer<BlockEntity> renderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(te);
                     if (renderer != null) {
                         renderer.render(te, 0, guiGraphics.pose(), buffers, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY);
                     }
-                } catch (Exception e) {
-                    this.erroredTiles.add(te);
-                    SkyblockBuilder.getLogger().error("An exception occurred rendering tile entity", e);
-                } finally {
-                    guiGraphics.pose().popPose();
                 }
+            } catch (Exception e) {
+                this.erroredTilesAt.add(pos.immutable());
+                SkyblockBuilder.getLogger().error("An exception occurred rendering tile entity", e);
+            } finally {
+                guiGraphics.pose().popPose();
             }
         }
     }
