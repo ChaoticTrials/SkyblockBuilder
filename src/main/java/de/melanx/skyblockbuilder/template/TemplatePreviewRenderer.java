@@ -74,7 +74,7 @@ public class TemplatePreviewRenderer {
     private final TemplatePreview preview;
     private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
     private final transient Map<StructureTemplate.StructureEntityInfo, Entity> entityCache = new HashMap<>();
-    private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
+    private final transient Set<BlockPos> erroredTilesAt = Collections.newSetFromMap(new WeakHashMap<>());
     private final transient Set<UUID> erroredEntities = Collections.newSetFromMap(new WeakHashMap<>());
     private final transient Set<StructureTemplate.StructureEntityInfo> loadFailedEntities = Collections.newSetFromMap(new WeakHashMap<>());
     private final transient Set<StructureTemplate.StructureEntityInfo> erroredEntityInfos = Collections.newSetFromMap(new WeakHashMap<>());
@@ -187,7 +187,7 @@ public class TemplatePreviewRenderer {
             ));
 
             this.tickPalette();
-            if (!this.erroredTiles.isEmpty() || !this.erroredEntities.isEmpty() || !this.erroredEntityInfos.isEmpty() || !this.loadFailedEntities.isEmpty()) {
+            if (!this.erroredTilesAt.isEmpty() || !this.erroredEntities.isEmpty() || !this.erroredEntityInfos.isEmpty() || !this.loadFailedEntities.isEmpty()) {
                 guiGraphics.textWithWordWrap(Minecraft.getInstance().font, SkyComponents.SCREEN_ERROR_LOAD_TEMPLATE, 5, this.area.minY, this.area.maxX - 10, 0xFFFFFF);
             }
         }
@@ -262,27 +262,31 @@ public class TemplatePreviewRenderer {
             BlockPos pos = blockInfo.pos();
             BlockState state = blockInfo.state();
 
-            BlockEntity te = null;
-            if (state.getBlock() instanceof EntityBlock entityBlock) {
-                te = this.teCache.computeIfAbsent(pos.immutable(), p -> entityBlock.newBlockEntity(pos, state));
+            if (this.erroredTilesAt.contains(pos)) {
+                return;
             }
 
-            if (te == null || this.erroredTiles.contains(te)) {
-                continue;
-            }
-
-            te.setLevel(this.clientLevel);
-
-            // fake cached state in case the renderer checks it as we don't want to query the actual world
-            //noinspection deprecation
-            te.setBlockState(state);
-
-            poseStack.pushPose();
-            poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
             try {
+                poseStack.pushPose();
+                BlockEntity te = null;
+                if (state.getBlock() instanceof EntityBlock entityBlock) {
+                    te = this.teCache.computeIfAbsent(pos.immutable(), p -> entityBlock.newBlockEntity(pos, state));
+                }
+
+                if (te == null) {
+                    continue;
+                }
+
+                te.setLevel(this.clientLevel);
+
+                // fake cached state in case the renderer checks it as we don't want to query the actual world
+                //noinspection deprecation
+                te.setBlockState(state);
+
+                poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
                 this.submitBlockEntity(dispatcher, te, poseStack, submitNodeCollector, camera);
             } catch (Exception e) {
-                this.erroredTiles.add(te);
+                this.erroredTilesAt.add(pos.immutable());
                 SkyblockBuilder.getLogger().error("An exception occurred rendering tile entity", e);
             } finally {
                 poseStack.popPose();
