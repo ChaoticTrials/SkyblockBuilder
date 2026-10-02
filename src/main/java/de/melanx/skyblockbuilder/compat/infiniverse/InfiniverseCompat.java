@@ -31,11 +31,13 @@ public class InfiniverseCompat {
     private static final Set<ResourceKey<Level>> LEVELS_TO_PROCESS_AFTER_DELETION = new HashSet<>();
 
     public static void markDimensionForDeletion(MinecraftServer server, ResourceKey<Level> level) {
+        SkyblockBuilder.getLogger().info("Marking dimension \"{}\"for deletion", level.identifier());
         InfiniverseCompat.markDimensionForUnregistration(server, level);
         InfiniverseCompat.LEVELS_TO_PROCESS_AFTER_DELETION.add(level);
     }
 
     public static void markDimensionForUnregistration(final MinecraftServer server, final ResourceKey<Level> levelToRemove) {
+        SkyblockBuilder.getLogger().info("Unloading dimension \"{}\"", levelToRemove.identifier());
         InfiniverseAPI.get().markDimensionForUnregistration(server, levelToRemove);
     }
 
@@ -43,7 +45,7 @@ public class InfiniverseCompat {
         LevelStem spawnDimension = InfiniverseCompat.getSpawnDimension(registryAccess);
 
         if (spawnDimension == null) {
-            SkyblockBuilder.getLogger().warn("Configured spawn dimension {} does not exist, using the overworld", SpawnConfig.spawnDimension.identifier());
+            SkyblockBuilder.getLogger().warn("Configured spawn dimension \"{}\" does not exist, using the overworld", SpawnConfig.spawnDimension.identifier());
             return InfiniverseCompat.getOrCreateOverworldLevel(server, levelKey, registryAccess);
         }
 

@@ -119,6 +119,15 @@ public abstract class SkyblockSavedData extends SavedData {
                 flag -> flag ? multi : single);
     }
 
+    public static void restoreTeamDimensions(SkyblockSavedData data, Team team) {
+        if (!(data instanceof MultiWorldImpl multiData)) {
+            return;
+        }
+
+        SkyblockBuilder.getLogger().info("Restoring team dimensions for {}", team.getName());
+        multiData.getOrCreateTeamDimensions(team);
+    }
+
     protected List<Team> teams() {
         return List.copyOf(this.registry.all());
     }
@@ -680,7 +689,7 @@ public abstract class SkyblockSavedData extends SavedData {
 
         @Override
         protected void onTeamCreated(Team team, ConfiguredTemplate template) {
-            ServerLevel level = this.getOrCreateTeamDimensions(this.server, team, this.server.registryAccess());
+            ServerLevel level = this.getOrCreateTeamDimensions(team);
             ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
 
             if (level == null) {
@@ -714,9 +723,8 @@ public abstract class SkyblockSavedData extends SavedData {
 
         @Override
         public void restoreInfiniverseDimensions(MinecraftServer server) {
-            RegistryAccess registryAccess = server.registryAccess();
             for (Team team : this.registry.all()) {
-                this.getOrCreateTeamDimensions(server, team, registryAccess);
+                this.getOrCreateTeamDimensions(team);
             }
         }
 
@@ -745,17 +753,18 @@ public abstract class SkyblockSavedData extends SavedData {
             }
         }
 
-        private ServerLevel getOrCreateTeamDimensions(MinecraftServer server, Team team, RegistryAccess registryAccess) {
+        private ServerLevel getOrCreateTeamDimensions(Team team) {
+            RegistryAccess registryAccess = this.server.registryAccess();
             ResourceKey<Level> teamLevelKey = team.getTeamLevelKey();
-            ServerLevel level = InfiniverseCompat.getOrCreateLevel(server, teamLevelKey, registryAccess);
+            ServerLevel level = InfiniverseCompat.getOrCreateLevel(this.server, teamLevelKey, registryAccess);
 
             // the dimension holding the island is always per team, the others only if they are not shared
             if (!team.isSpawn()) {
                 if (WorldConfig.DimensionPerTeam.overworld && !teamLevelKey.equals(team.getTeamOverworldLevelKey())) {
-                    InfiniverseCompat.getOrCreateOverworldLevel(server, team.getTeamOverworldLevelKey(), registryAccess);
+                    InfiniverseCompat.getOrCreateOverworldLevel(this.server, team.getTeamOverworldLevelKey(), registryAccess);
                 }
                 if (WorldConfig.DimensionPerTeam.nether && !teamLevelKey.equals(team.getTeamNetherLevelKey())) {
-                    InfiniverseCompat.getOrCreateNetherLevel(server, team.getTeamNetherLevelKey(), registryAccess);
+                    InfiniverseCompat.getOrCreateNetherLevel(this.server, team.getTeamNetherLevelKey(), registryAccess);
                 }
             }
 
