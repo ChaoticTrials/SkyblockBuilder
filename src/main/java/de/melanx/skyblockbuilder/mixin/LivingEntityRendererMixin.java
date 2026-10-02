@@ -16,7 +16,7 @@ public class LivingEntityRendererMixin {
             at = @At(value = "HEAD"),
             cancellable = true
     )
-    private void shouldShowName(Entity entity, double distanceToCameraSq, CallbackInfoReturnable<Boolean> cir) {
+    private void skyblockbuilder$shouldShowName(Entity entity, double distanceToCameraSq, CallbackInfoReturnable<Boolean> cir) {
         if (Minecraft.getInstance().player == null) {
             cir.setReturnValue(false);
         }

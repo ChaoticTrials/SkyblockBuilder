@@ -23,7 +23,7 @@ public class PrepareSpawnTaskMixin {
     @Shadow @Final private MinecraftServer server;
 
     @Inject(method = "start", at = @At("HEAD"))
-    private void start(CallbackInfo ci) {
+    private void skyblockbuilder$start(CallbackInfo ci) {
         ServerLevel overworld = this.server.overworld();
         if (!InfiniverseCompat.useInfiniverse() || !WorldUtil.isSkyblock(overworld)) {
             return;

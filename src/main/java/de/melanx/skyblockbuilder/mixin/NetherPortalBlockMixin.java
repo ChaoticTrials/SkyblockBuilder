@@ -38,7 +38,7 @@ public abstract class NetherPortalBlockMixin {
                     target = "Lnet/minecraft/server/MinecraftServer;getLevel(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/server/level/ServerLevel;"
             )
     )
-    private ServerLevel getPortalDestinationLevel(MinecraftServer server, ResourceKey<Level> destination, ServerLevel currentLevel, Entity entity, BlockPos portalEntryPos) {
+    private ServerLevel skyblockbuilder$getPortalDestinationLevel(MinecraftServer server, ResourceKey<Level> destination, ServerLevel currentLevel, Entity entity, BlockPos portalEntryPos) {
         return server.getLevel(WorldUtil.resolvePortalDestination(entity, currentLevel, destination));
     }
 
@@ -47,7 +47,7 @@ public abstract class NetherPortalBlockMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void getExitPortal(ServerLevel destination, Entity entity, BlockPos pos, BlockPos exitPos, boolean isToNether, WorldBorder worldBorder, CallbackInfoReturnable<TeleportTransition> cir) {
+    private void skyblockbuilder$getExitPortal(ServerLevel destination, Entity entity, BlockPos pos, BlockPos exitPos, boolean isToNether, WorldBorder worldBorder, CallbackInfoReturnable<TeleportTransition> cir) {
         if (!isToNether || TemplateLoader.getNetherPortalTemplate() == null) {
             return;
         }

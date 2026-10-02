@@ -14,7 +14,7 @@ public abstract class CreateWorldScreenMixin {
             at = @At(value = "STORE", ordinal = 0),
             ordinal = 0
     )
-    private boolean modifyFlag(boolean original) {
+    private boolean skyblockbuilder$modifyFlag(boolean original) {
         return original || ClientConfig.disableExperimentalWarning;
     }
 }

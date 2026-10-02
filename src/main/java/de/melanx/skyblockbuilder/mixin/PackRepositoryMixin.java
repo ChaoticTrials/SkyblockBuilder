@@ -17,7 +17,7 @@ import java.util.Optional;
 public class PackRepositoryMixin {
 
     @Inject(method = "rebuildSelected", at = @At(value = "RETURN"), cancellable = true)
-    private void reorderIds(Collection<String> ids, CallbackInfoReturnable<List<Pack>> cir) {
+    private void skyblockbuilder$reorderIds(Collection<String> ids, CallbackInfoReturnable<List<Pack>> cir) {
         List<Pack> list = new ArrayList<>(cir.getReturnValue());
         Optional<Pack> vanilla = list.stream().filter(entry -> entry.getId().equals("vanilla")).findAny();
         SkyblockBuilder.getLogger().info("Sorting datapack list to load data correctly.");

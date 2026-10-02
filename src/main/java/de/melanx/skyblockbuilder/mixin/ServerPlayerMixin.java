@@ -19,7 +19,7 @@ public class ServerPlayerMixin {
             at = @At("HEAD"),
             argsOnly = true
     )
-    private TeleportTransition teleport(TeleportTransition transition) {
+    private TeleportTransition skyblockbuilder$teleport(TeleportTransition transition) {
         if (!InfiniverseCompat.useInfiniverse()) {
             return transition;
         }

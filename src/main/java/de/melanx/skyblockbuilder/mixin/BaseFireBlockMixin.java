@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BaseFireBlockMixin {
 
     @Inject(method = "inPortalDimension", at = @At(value = "RETURN"), cancellable = true)
-    private static void inPortalDimension(Level level, CallbackInfoReturnable<Boolean> cir) {
+    private static void skyblockbuilder$inPortalDimension(Level level, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValueZ() && WorldUtil.isTeamPortalDimension(level)) {
             cir.setReturnValue(true);
         }
