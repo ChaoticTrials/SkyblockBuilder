@@ -288,6 +288,7 @@ public class Team {
                 this.data.getSpawn().removePlayer(player);
             }
             this.data.getOrCreateMetaInfo(player).setTeamId(this.teamId);
+            this.lastSeen = this.data.getLevel().getServer().overworld().getGameTime();
             this.updateLastChanged();
         }
         return added;

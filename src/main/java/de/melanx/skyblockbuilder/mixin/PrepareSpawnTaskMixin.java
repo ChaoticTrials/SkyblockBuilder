@@ -40,5 +40,6 @@ public class PrepareSpawnTaskMixin {
         }
 
         SkyblockSavedData.restoreTeamDimensions(data, team);
+        team.setLastSeen(overworld.getGameTime());
     }
 }
